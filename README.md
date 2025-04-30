@@ -11,3 +11,6 @@ DW steht für „Data Warehouse“, was es sofort als technisches System kenntli
 Der Name klingt modern, tech-orientiert und ist leicht zu merken.
 
 https://lucide.dev/icons/box
+
+go run main.go --local => mit localhost
+go run main.go => mit railway db

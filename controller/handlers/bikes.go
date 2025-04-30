@@ -1,30 +1,60 @@
 package handlers
 
 import (
-	"go-bike-api/db"
-	"go-bike-api/models"
+	"controller/db"
+	"encoding/json"
+	"log"
 	"net/http"
-
-	"github.com/gin-gonic/gin"
 )
 
-func GetBikes(c *gin.Context) {
-	rows, err := db.DB.Query("SELECT id, model_id, serial_number, production_date, warehouse_location FROM bikes")
+// Bike repräsentiert die Datenstruktur eines Fahrrads
+type Bike struct {
+	ID                int    `json:"id"`
+	ModelID           int    `json:"model_id"`
+	SerialNumber      string `json:"serial_number"`
+	ProductionDate    string `json:"production_date"` // als String für JSON
+	WarehouseLocation string `json:"warehouse_location"`
+}
+
+func GetBikes(w http.ResponseWriter, r *http.Request) {
+	// Verbindung zur Datenbank herstellen
+	db, err := db.Connect()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		http.Error(w, "Datenbankverbindung fehlgeschlagen", http.StatusInternalServerError)
+		log.Println("Fehler beim Öffnen der Datenbank:", err)
+		return
+	}
+	defer db.Close()
+
+	// Abfrage der Bikes aus der Datenbank
+	rows, err := db.Query("SELECT id, model_id, serial_number, production_date, warehouse_location FROM bikes")
+	if err != nil {
+		http.Error(w, "Fehler beim Abrufen der Fahrräder", http.StatusInternalServerError)
+		log.Println("Fehler bei der Abfrage der Fahrräder:", err)
 		return
 	}
 	defer rows.Close()
 
-	var bikes []models.Bike
+	// Fahrräder in ein Slice packen
+	var bikes []Bike
 	for rows.Next() {
-		var b models.Bike
-		if err := rows.Scan(&b.ID, &b.ModelID, &b.SerialNumber, &b.ProductionDate, &b.WarehouseLocation); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		var bike Bike
+		if err := rows.Scan(&bike.ID, &bike.ModelID, &bike.SerialNumber, &bike.ProductionDate, &bike.WarehouseLocation); err != nil {
+			http.Error(w, "Fehler beim Scannen der Daten", http.StatusInternalServerError)
 			return
 		}
-		bikes = append(bikes, b)
+		bikes = append(bikes, bike)
 	}
 
-	c.JSON(http.StatusOK, bikes)
+	// Fehlerbehandlung für den Fall, dass keine Zeilen abgerufen wurden
+	if err := rows.Err(); err != nil {
+		http.Error(w, "Fehler bei der Datenbankabfrage", http.StatusInternalServerError)
+		return
+	}
+
+	// Antwort als JSON zurückgeben
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(bikes); err != nil {
+		http.Error(w, "Fehler beim Codieren der Antwort", http.StatusInternalServerError)
+	}
 }

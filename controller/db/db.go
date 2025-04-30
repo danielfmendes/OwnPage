@@ -2,22 +2,23 @@ package db
 
 import (
 	"database/sql"
-	_ "github.com/lib/pq"
 	"log"
+	"os"
+
+	_ "github.com/lib/pq"
 )
 
-var DB *sql.DB
+func Connect() (*sql.DB, error) {
+	connStr := os.Getenv("DATABASE_PUBLIC_URL")
+	if connStr == "" {
+		log.Println("Database Public URL nicht gesetzt, verwende Standardverbindung")
+		connStr = "host=localhost port=5433 user=fahrrad_user password=geheim dbname=fahrrad_db sslmode=disable"
+	}
 
-func Connect() {
-	var err error
-	DB, err = sql.Open("postgres", "host=localhost port=5433 user=fahrrad_user password=geheim dbname=fahrrad_db sslmode=disable")
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatal("DB-Verbindung fehlgeschlagen: ", err)
+		return nil, err
 	}
 
-	if err = DB.Ping(); err != nil {
-		log.Fatal("DB nicht erreichbar: ", err)
-	}
-
-	log.Println("DB-Verbindung erfolgreich")
+	return db, nil
 }

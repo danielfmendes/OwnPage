@@ -1,38 +1,66 @@
 package main
 
 import (
-	"flag"
-	"go-bike-api/db"
-	"go-bike-api/handlers"
-	"time"
-
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
+	"controller/handlers"
+	"log"
+	"net/http"
+	"os"
 )
 
+// getAllowedOrigins bestimmt die erlaubten CORS-Ursprünge basierend auf der Umgebung
+func getAllowedOrigins() []string {
+	connStr := os.Getenv("DATABASE_PUBLIC_URL")
+	if connStr == "" {
+		return []string{"http://localhost:5173"}
+	}
+	return []string{"https://www.danielfreiremendes.com"}
+}
+
+// corsMiddleware erzeugt den CORS-Handler
+func corsMiddleware(allowedOrigins []string, h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
+		allowed := false
+
+		for _, o := range allowedOrigins {
+			if origin == o {
+				allowed = true
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+				w.Header().Set("Vary", "Origin")
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+				w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+				break
+			}
+		}
+
+		if !allowed && origin != "" {
+			log.Printf("Verbindung von nicht erlaubtem Origin blockiert: %s", origin)
+		}
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		h.ServeHTTP(w, r)
+	})
+}
+
+// setupRoutes registriert alle HTTP-Routen
+func setupRoutes() http.Handler {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/bikes", handlers.GetBikes)
+	return mux
+}
+
 func main() {
-	local := flag.Bool("local", false, "run in local development mode")
-	flag.Parse()
+	allowedOrigins := getAllowedOrigins()
+	handler := corsMiddleware(allowedOrigins, setupRoutes())
 
-	db.Connect()
-	r := gin.Default()
-
-	var allowedOrigins []string
-	if *local {
-		allowedOrigins = []string{"http://localhost:5173"}
-	} else {
-		allowedOrigins = []string{"https://danielfreiremendes.com"}
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
 	}
 
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     allowedOrigins,
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
-
-	r.GET("/bikes", handlers.GetBikes)
-	r.Run(":8080")
+	log.Println("Server läuft auf Port", port)
+	log.Fatal(http.ListenAndServe(":"+port, handler))
 }

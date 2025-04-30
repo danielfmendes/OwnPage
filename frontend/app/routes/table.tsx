@@ -1,4 +1,5 @@
 import * as React from "react"
+import apiUrl from "~/config"
 import {
     type ColumnDef,
     type ColumnFiltersState,
@@ -135,7 +136,7 @@ export default function BikeTable() {
     const [rowSelection, setRowSelection] = React.useState({})
 
     React.useEffect(() => {
-        fetch("http://localhost:8080/bikes")
+        fetch(`${apiUrl}/bikes`)
             .then((res) => res.json())
             .then((bikes: Bike[]) => {
                 setData(bikes)
