@@ -1,0 +1,19 @@
+Befehle zum Starten des Backends
+
+cd backend/
+docker-compose up -d
+
+docker-compose down -v
+
+docker stop fahrrad-postgres
+docker rm fahrrad-postgres
+
+
+
+GO:
+go mod init go-bike-api
+go get github.com/lib/pq           # PostgreSQL-Treiber
+go get github.com/gin-gonic/gin    # Web-Framework
+go run main.go
+
+http://localhost:8080/bikes

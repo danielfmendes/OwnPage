@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: fahrrad-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: fahrrad_db
+      POSTGRES_USER: fahrrad_user
+      POSTGRES_PASSWORD: geheim
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
