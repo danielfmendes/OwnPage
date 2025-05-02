@@ -27,7 +27,7 @@ func corsMiddleware(allowedOrigins []string, h http.Handler) http.Handler {
 				allowed = true
 				w.Header().Set("Access-Control-Allow-Origin", origin)
 				w.Header().Set("Vary", "Origin")
-				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
 				w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 				break
 			}
@@ -47,9 +47,21 @@ func corsMiddleware(allowedOrigins []string, h http.Handler) http.Handler {
 
 // setupRoutes registriert alle HTTP-Routen
 func setupRoutes() http.Handler {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/bikes", handlers.GetBikes)
-	return mux
+	r := http.NewServeMux()
+
+	r.HandleFunc("/bikemodels", handlers.GetBikeModels)
+	r.HandleFunc("/bikes", handlers.GetBikes)
+	r.HandleFunc("/customers", handlers.GetCustomers)
+	r.HandleFunc("/forks", handlers.GetForks)
+	r.HandleFunc("/frames", handlers.GetFrames)
+	r.HandleFunc("/orderitems", handlers.GetOrderItems)
+	r.HandleFunc("/orders", handlers.GetOrders)
+	r.HandleFunc("/partcosts", handlers.GetPartCosts)
+	r.HandleFunc("/users", handlers.GetUsers)
+	r.HandleFunc("/saddles", handlers.GetSaddles)
+	r.HandleFunc("/warehouseparts", handlers.WarehousePartHandler)
+
+	return r
 }
 
 func main() {
