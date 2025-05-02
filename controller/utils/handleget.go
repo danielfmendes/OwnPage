@@ -1,9 +1,7 @@
 package utils
 
 import (
-	"controller/db"
 	"encoding/json"
-	"log"
 	"net/http"
 )
 
@@ -12,18 +10,14 @@ type Scanner interface {
 }
 
 func HandleGet(w http.ResponseWriter, query string, scanFunc func(Scanner) (any, error)) {
-	conn, err := db.Connect()
+	conn, err := ConnectToDB(w)
 	if err != nil {
-		http.Error(w, "Datenbankverbindung fehlgeschlagen", http.StatusInternalServerError)
-		log.Println("DB Connect Fehler:", err)
 		return
 	}
-	defer conn.Close()
 
 	rows, err := conn.Query(query)
 	if err != nil {
-		http.Error(w, "Fehler bei der Datenbankabfrage", http.StatusInternalServerError)
-		log.Println("Query Fehler:", err)
+		HandleError(w, err, "Fehler bei der Datenbankabfrage")
 		return
 	}
 	defer rows.Close()
@@ -32,15 +26,14 @@ func HandleGet(w http.ResponseWriter, query string, scanFunc func(Scanner) (any,
 	for rows.Next() {
 		item, err := scanFunc(rows)
 		if err != nil {
-			http.Error(w, "Fehler beim Scannen der Daten", http.StatusInternalServerError)
-			log.Println("Scan Fehler:", err)
+			HandleError(w, err, "Fehler beim Scannen der Daten")
 			return
 		}
 		results = append(results, item)
 	}
 
 	if err := rows.Err(); err != nil {
-		http.Error(w, "Fehler beim Lesen der Zeilen", http.StatusInternalServerError)
+		HandleError(w, err, "Fehler beim Lesen der Zeilen")
 		return
 	}
 
