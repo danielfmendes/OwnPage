@@ -1,5 +1,5 @@
 import * as React from "react"
-import apiUrl from "@/app/config"
+import {Dialog} from "@/components/ui/dialog"
 import {
     type ColumnDef,
     type ColumnFiltersState,
@@ -12,19 +12,8 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
-
+import {Plus} from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import {
-    DropdownMenu,
-    DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import {
     Table,
@@ -35,117 +24,37 @@ import {
     TableRow,
 } from "@/components/ui/table"
 
-export type Bike = {
-    id: number
-    model_id: number
-    serial_number: string
-    production_date: string
-    warehouse_location: string
+interface DataTableProps {
+    title: string;
+    columns: ColumnDef<any>[];
+    data: any[];
+    isLoading: boolean;
+    filterColumn: string;
+    onRefresh: () => void;
+    rowDialogContent?: (row: any, onClose: () => void) => React.ReactNode;
+    addDialogContent?: (onClose: () => void) => React.ReactNode;
 }
 
-export const columns: ColumnDef<Bike>[] = [
-    {
-        id: "select",
-        header: ({ table }) => (
-            <Checkbox
-                checked={
-                    table.getIsAllPageRowsSelected() ||
-                    (table.getIsSomePageRowsSelected() && "indeterminate")
-                }
-                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                aria-label="Select all"
-            />
-        ),
-        cell: ({ row }) => (
-            <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(value) => row.toggleSelected(!!value)}
-                aria-label="Select row"
-            />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-    },
-    {
-        accessorKey: "id",
-        header: "ID",
-    },
-    {
-        accessorKey: "model_id",
-        header: "Model ID",
-    },
-    {
-        accessorKey: "serial_number",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Serial Number <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-    },
-    {
-        accessorKey: "production_date",
-        header: "Production Date",
-        cell: ({ row }) => {
-            const date = new Date(row.getValue("production_date"))
-            return date.toLocaleDateString()
-        },
-    },
-    {
-        accessorKey: "warehouse_location",
-        header: "Warehouse",
-    },
-    {
-        id: "actions",
-        enableHiding: false,
-        cell: ({ row }) => {
-            const bike = row.original
-
-            return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                            onClick={() => navigator.clipboard.writeText(bike.serial_number)}
-                        >
-                            Copy Serial Number
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>View details</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            )
-        },
-    },
-]
-
-export default function BikeTable() {
-    const [data, setData] = React.useState<Bike[]>([])
-    const [loading, setLoading] = React.useState(true)
+export default function DataTable({title, columns, data, isLoading, filterColumn, onRefresh, rowDialogContent, addDialogContent}: DataTableProps) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
+    const [isRowDialogOpen, setIsRowDialogOpen] = React.useState(false);
+    const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false);
+    const [selectedRow, setSelectedRow] = React.useState<any>(null);
+
+    const handleRowClick = (row: any) => {
+        setSelectedRow(row);
+        setIsRowDialogOpen(true);
+    };
+
+    const handleAddClick = () => {
+        setIsAddDialogOpen(true);
+    };
 
     React.useEffect(() => {
-        fetch(`${apiUrl}/bikes`)
-            .then((res) => res.json())
-            .then((bikes: Bike[]) => {
-                setData(bikes)
-                setLoading(false)
-            })
-            .catch((err) => {
-                console.error("Error loading bikes:", err)
-                setLoading(false)
-            })
+        onRefresh();
     }, [])
 
     const table = useReactTable({
@@ -167,50 +76,35 @@ export default function BikeTable() {
         },
     })
 
-    if (loading) return <div className="p-4 text-muted">Loading bikes…</div>
+    if (isLoading) return <div className="p-4 text-muted">Loading bikes…</div>
 
+    // @ts-ignore
     return (
-        <div className="mt-2 w-full p-4 border rounded-lg border-grey dark:border-white">
-        Teilelager
+        <div className="mt-2 w-full p-4 border rounded-lg  border-zinc-900 dark:border-zinc-50">
+            {title}
             <div className="flex items-center py-4">
                 <Input
-                    placeholder="Filter serial numbers..."
-                    value={(table.getColumn("serial_number")?.getFilterValue() as string) ?? ""}
+                    placeholder={`Filter ${filterColumn.replace(/_/g, ' ')} ...`}
+                    value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ""}
                     onChange={(event) =>
-                        table.getColumn("serial_number")?.setFilterValue(event.target.value)
+                        table.getColumn(filterColumn)?.setFilterValue(event.target.value)
                     }
-                    className="max-w-sm"
+                    className="max-w-sm border-zinc-900 dark:border-zinc-50"
                 />
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="ml-auto">
-                            Columns <ChevronDown />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        {table
-                            .getAllColumns()
-                            .filter((column) => column.getCanHide())
-                            .map((column) => (
-                                <DropdownMenuCheckboxItem
-                                    key={column.id}
-                                    className="capitalize"
-                                    checked={column.getIsVisible()}
-                                    onCheckedChange={(value) =>
-                                        column.toggleVisibility(!!value)
-                                    }
-                                >
-                                    {column.id}
-                                </DropdownMenuCheckboxItem>
-                            ))}
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <Button
+                    onClick={handleAddClick}
+                    className="ml-auto bg-zinc-300 dark:bg-zinc-800 hover:bg-zinc-400 dark:hover:bg-zinc-600 text-zinc-800 dark:text-white"
+                >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add
+                </Button>
+
             </div>
-            <div className="rounded-md border">
+            <div className="rounded-md border border-zinc-900 dark:border-zinc-500">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id}>
+                            <TableRow key={headerGroup.id} className="border-zinc-900 dark:border-zinc-500">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead key={header.id}>
                                         {header.isPlaceholder
@@ -227,9 +121,11 @@ export default function BikeTable() {
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
+                                    onClick={() => handleRowClick(row)}
+                                    className="cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 border-zinc-900 dark:border-zinc-500"
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
+                                        <TableCell key={cell.id} >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
@@ -246,10 +142,12 @@ export default function BikeTable() {
                 </Table>
             </div>
             <div className="flex items-center justify-end space-x-2 py-4">
-                <div className="flex-1 text-sm text-muted-foreground">
-                    {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                    {table.getFilteredRowModel().rows.length} row(s) selected.
-                </div>
+                {table.getAllColumns().some(col => col.id === 'select') && (
+                    <div className="flex-1 text-sm text-muted-foreground">
+                        {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                        {table.getFilteredRowModel().rows.length} row(s) selected.
+                    </div>
+                )}
                 <div className="space-x-2">
                     <Button
                         variant="outline"
@@ -269,6 +167,12 @@ export default function BikeTable() {
                     </Button>
                 </div>
             </div>
+            <Dialog open={isRowDialogOpen} onOpenChange={setIsRowDialogOpen}>
+                {selectedRow && rowDialogContent && rowDialogContent(selectedRow.original, () => setIsRowDialogOpen(false))}
+            </Dialog>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                { addDialogContent && addDialogContent(() => setIsAddDialogOpen(false))}
+            </Dialog>
         </div>
     )
 }
