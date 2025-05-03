@@ -44,7 +44,7 @@ export default function Home() {
             </div>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <Link href="/dwh/dashboard">
+            <Link href="/dwh/dashboard" >
               <Button
                   size="lg"
                   className="w-full group transition-all"
@@ -53,11 +53,25 @@ export default function Home() {
                     <span className="group-hover:translate-x-1 transition-transform">
                         Data Warehouse Projekt ansehen
                     </span>
-                <span className="group-hover:translate-x-1 transition-transform">
+                    <span className="group-hover:translate-x-1 transition-transform">
                     <ChevronRightIcon/>
                     </span>
 
               </Button>
+            </Link>
+            <Link href={"/login/dwh"}>
+                <Button
+                    size="lg"
+                    className="w-full group transition-all"
+                    variant="outline"
+                >
+                    <span className="group-hover:translate-x-1 transition-transform">
+                        Login
+                    </span>
+                    <span className="group-hover:translate-x-1 transition-transform">
+                    <ChevronRightIcon/>
+                    </span>
+                </Button>
             </Link>
           </CardContent>
         </Card>

@@ -1,34 +1,16 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Lock } from "lucide-react";
 import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import apiUrl from "@/app/config";
 import {WarehousePart} from "@/types/datatables";
+import InputField from "@/components/admin-panel/InputField";
 
 interface Props {
     rowData?: any;
     onClose: () => void;
     onRefresh: () => void;
 }
-
-const ReadOnlyInput = ({ label, value }: { label: string; value: string | number }) => (
-    <div className="space-y-1">
-        <label className="block text-sm font-medium">{label}</label>
-        <div className="relative">
-            <Input value={value} readOnly className="pr-10" />
-            <Lock className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground" />
-        </div>
-    </div>
-);
-
-const EditableInput = ({ label, value, onChange }: { label: string; value: string | number; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
-    <div className="space-y-1">
-        <label className="block text-sm font-medium">{label}</label>
-        <Input value={value} onChange={onChange} />
-    </div>
-);
 
 export default function WarehousePartEditDialogContent({ rowData, onClose, onRefresh }: Props) {
     const isEditMode = !!rowData;
@@ -89,9 +71,9 @@ export default function WarehousePartEditDialogContent({ rowData, onClose, onRef
 
             {isEditMode ? (
                 <>
-                    <ReadOnlyInput label="ID" value={rowData.id} />
-                    <ReadOnlyInput label="Part Type" value={rowData.part_type} />
-                    <ReadOnlyInput label="Part ID" value={rowData.part_id} />
+                    <InputField label="ID" value={rowData.id} />
+                    <InputField label="Part Type" value={rowData.part_type} />
+                    <InputField label="Part ID" value={rowData.part_id} />
                 </>
             ) : (
                 <>
@@ -127,8 +109,8 @@ export default function WarehousePartEditDialogContent({ rowData, onClose, onRef
             )}
 
             <div className="space-y-1">
-                <EditableInput label="Quantity" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
-                <EditableInput label="Warehouse Position" value={storageLocation} onChange={(e) => setStorageLocation(e.target.value)} />
+                <InputField label="Quantity" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
+                <InputField label="Warehouse Position" value={storageLocation} onChange={(e) => setStorageLocation(e.target.value)} />
             </div>
 
             <Button onClick={isEditMode ? handleUpdate : handleSave} className="w-full mt-4">

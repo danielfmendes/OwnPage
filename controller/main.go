@@ -49,6 +49,9 @@ func corsMiddleware(allowedOrigins []string, h http.Handler) http.Handler {
 func setupRoutes() http.Handler {
 	r := http.NewServeMux()
 
+	r.HandleFunc("/auth/register", handlers.HandleRegister)
+	r.HandleFunc("/auth/login", handlers.HandleLogin)
+
 	r.HandleFunc("/bikemodels", handlers.GetBikeModels)
 	r.HandleFunc("/bikes", handlers.GetBikes)
 	r.HandleFunc("/customers", handlers.GetCustomers)

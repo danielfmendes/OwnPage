@@ -1,9 +1,10 @@
 CREATE TABLE users
 (
-    id            SERIAL PRIMARY KEY,
-    username      TEXT UNIQUE NOT NULL,
-    password_hash TEXT        NOT NULL,
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id       SERIAL PRIMARY KEY,
+    username TEXT UNIQUE NOT NULL,
+    dob      TIMESTAMP,
+    email    TEXT UNIQUE NOT NULL,
+    password TEXT        NOT NULL
 );
 
 CREATE TABLE customers
