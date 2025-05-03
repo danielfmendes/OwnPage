@@ -10,13 +10,14 @@ import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown, Trash2} from "lucide-react";
 import * as React from "react";
-import apiUrl, {fetchWithToken} from "@/app/config";
+import apiUrl, {fetchWithToken} from "@/utils/url";
 import WarehousePartEditDialogContent from "@/app/dwh/partsstorage/content-dialog";
 import {WarehousePartWithName} from "@/types/custom";
+import AuthToken from "@/utils/authtoken";
 
 
 export default function PartsStoragePage() {
-    const token = localStorage.getItem("authToken");
+    const token = AuthToken.getAuthToken();
     const [data, setData] = React.useState<WarehousePartWithName[]>([]);
     const [loading, setLoading] = React.useState(true);
 

@@ -6,7 +6,8 @@ import {Button} from '@/components/ui/button';
 import InputField from '@/components/admin-panel/InputField';
 import {ArrowRight, Box} from 'lucide-react';
 import {useRouter} from 'next/navigation';
-import apiUrl from "@/app/config";
+import apiUrl from "@/utils/url";
+import AuthToken from "@/utils/authtoken";
 
 export default function LoginCard() {
     const [email, setEmail] = useState('');
@@ -39,7 +40,7 @@ export default function LoginCard() {
                 return res.json();
             })
             .then(data => {
-                localStorage.setItem("authToken", data.token);
+                AuthToken.setAuthToken(data.token);
                 if (redirect) window.location.href = '/dwh/dashboard';
             })
             .catch(() => {

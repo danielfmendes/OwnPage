@@ -44,7 +44,7 @@ export default function Home() {
             </div>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <Link href="/dwh/dashboard" >
+            <Link href="/login/dwh" >
               <Button
                   size="lg"
                   className="w-full group transition-all"
@@ -58,20 +58,6 @@ export default function Home() {
                     </span>
 
               </Button>
-            </Link>
-            <Link href={"/login/dwh"}>
-                <Button
-                    size="lg"
-                    className="w-full group transition-all"
-                    variant="outline"
-                >
-                    <span className="group-hover:translate-x-1 transition-transform">
-                        Login
-                    </span>
-                    <span className="group-hover:translate-x-1 transition-transform">
-                    <ChevronRightIcon/>
-                    </span>
-                </Button>
             </Link>
           </CardContent>
         </Card>

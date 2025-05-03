@@ -24,14 +24,15 @@ import {MoonIcon, SunIcon} from "@radix-ui/react-icons";
 import * as React from "react";
 import { jwtDecode } from 'jwt-decode';
 import {useEffect} from "react";
-import {fetchWithToken} from "@/app/config";
+import {fetchWithToken} from "@/utils/url";
 import {User} from "@/types/datatables";
+import AuthToken from "@/utils/authtoken";
 
 export function UserNav() {
   const { setTheme, theme } = useTheme();
   const [ email, setEmail ] = React.useState<string>("");
   const [ user, setUser ] = React.useState<User>();
-  const token = localStorage.getItem("authToken");
+  const token = AuthToken.getAuthToken();
 
   useEffect(() => {
     if (token) {
@@ -51,7 +52,7 @@ export function UserNav() {
         console.error("Ungültiges oder abgelaufenes Token:", error);
       }
     } else {
-      console.log("Kein Token im localStorage gefunden.");
+      console.log("Kein Token im auth token gefunden.");
     }
   }, []);
 

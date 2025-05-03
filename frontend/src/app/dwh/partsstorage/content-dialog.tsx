@@ -2,9 +2,10 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import apiUrl, {fetchWithToken} from "@/app/config";
+import apiUrl, {fetchWithToken} from "@/utils/url";
 import {WarehousePart} from "@/types/datatables";
 import InputField from "@/components/admin-panel/InputField";
+import AuthToken from "@/utils/authtoken";
 
 interface Props {
     rowData?: WarehousePart;
@@ -13,7 +14,7 @@ interface Props {
 }
 
 export default function WarehousePartEditDialogContent({ rowData, onClose, onRefresh }: Props) {
-    const token = localStorage.getItem("authToken");
+    const token = AuthToken.getAuthToken();
     const isEditMode = !!rowData;
     const [partId, setPartId] = React.useState<number | null>((rowData?.part_id || null));
     const [projectId, setProjectId] = React.useState<number | null>((rowData?.project_id || null));

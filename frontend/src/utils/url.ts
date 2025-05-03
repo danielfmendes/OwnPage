@@ -1,4 +1,5 @@
-const token = localStorage.getItem("authToken");
+import AuthToken from "./authtoken";
+const token = AuthToken.getAuthToken();
 let apiUrl: string;
 
 if (process.env.NODE_ENV === "production") {

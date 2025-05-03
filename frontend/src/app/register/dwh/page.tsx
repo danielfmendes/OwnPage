@@ -7,7 +7,7 @@ import InputField from '@/components/admin-panel/InputField';
 import { Box } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import DatePicker from "@/components/admin-panel/DatePicker";
-import apiUrl from "@/app/config";
+import apiUrl from "@/utils/url";
 
 export default function RegisterCard() {
     const router = useRouter();

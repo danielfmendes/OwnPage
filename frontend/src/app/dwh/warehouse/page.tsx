@@ -18,7 +18,7 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import * as React from "react";
-import {fetchWithToken} from "@/app/config";
+import {fetchWithToken} from "@/utils/url";
 import {Bike} from "@/types/datatables";
 
 const columns: ColumnDef<Bike>[] = [
