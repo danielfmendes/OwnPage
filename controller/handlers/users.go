@@ -9,12 +9,30 @@ import (
 	"time"
 )
 
-func GetUsers(w http.ResponseWriter, _ *http.Request) {
-	utils.HandleGet(w, "SELECT * FROM users", func(scanner utils.Scanner) (any, error) {
-		var b models.User
-		err := scanner.Scan(&b.ID, &b.Username, &b.Dob, &b.Email, &b.Password)
-		return b, err
+func GetUsers(w http.ResponseWriter, r *http.Request) {
+	utils.HandleGet(w, r, "SELECT * FROM users", func(scanner utils.Scanner) (any, error) {
+		var user models.User
+		err := scanner.Scan(&user.Username, &user.Dob, &user.Email, &user.Password)
+		return user, err
 	})
+}
+
+func GetUser(w http.ResponseWriter, r *http.Request) {
+	email := r.URL.Query().Get("email")
+	if email == "" {
+		http.Error(w, "Email fehlt", http.StatusBadRequest)
+		return
+	}
+
+	// SQL-Abfrage zum Abrufen des Benutzers basierend auf der E-Mail-Adresse
+	query := `SELECT username, dob, email, password FROM users WHERE email = $1`
+
+	// Die HandleGet-Funktion wird verwendet, um die Abfrage auszuführen und den Benutzer abzurufen
+	utils.HandleGet(w, r, query, func(scanner utils.Scanner) (any, error) {
+		var user models.User
+		err := scanner.Scan(&user.Username, &user.Dob, &user.Email, &user.Password)
+		return user, err
+	}, email)
 }
 
 func HandleRegister(w http.ResponseWriter, r *http.Request) {
@@ -83,8 +101,8 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 
 	var user models.User
-	query := `SELECT id, username, dob, email, password FROM users WHERE email = $1`
-	err = conn.QueryRow(query, req.Email).Scan(&user.ID, &user.Username, &user.Dob, &user.Email, &user.Password)
+	query := `SELECT username, dob, email, password FROM users WHERE email = $1`
+	err = conn.QueryRow(query, req.Email).Scan(&user.Username, &user.Dob, &user.Email, &user.Password)
 	if err != nil {
 		http.Error(w, "Benutzer nicht gefunden oder Fehler beim Abruf", http.StatusUnauthorized)
 		return
@@ -97,8 +115,16 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	tokenString, err := utils.CreateJWT(user.Email)
+	if err != nil {
+		http.Error(w, "Fehler beim Erstellen des Tokens", http.StatusInternalServerError)
+		return
+	}
+
+	// Token zurückgeben
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Login erfolgreich",
+		"token":   tokenString,
 	})
 }

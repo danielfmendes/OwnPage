@@ -18,7 +18,7 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import * as React from "react";
-import apiUrl from "@/app/config";
+import {fetchWithToken} from "@/app/config";
 import {Bike} from "@/types/datatables";
 
 const columns: ColumnDef<Bike>[] = [
@@ -113,7 +113,7 @@ export default function PartsStoragePage() {
 
     const fetchData = () => {
         setLoading(true);
-        fetch(`${apiUrl}/bikes`)
+        fetchWithToken(`/bikes`)
             .then((res) => res.json())
             .then((bikes: Bike[]) => {
                 setData(bikes);

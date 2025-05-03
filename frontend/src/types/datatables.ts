@@ -1,23 +1,30 @@
-export interface User {
+export interface Project {
     id: number;
+    name: string;
+}
+
+export interface User {
+    email: string;
+    password: string;
     username: string;
-    password_hash: string;
-    created_at: string;
+    dob: string;
+}
+
+export interface RoleManagement {
+    user_email: string;
+    project_id: number;
+    role: string;
 }
 
 export interface Customer {
     id: number;
-    name: string;
     email: string;
+    password: string;
+    first_name: string;
+    name: string;
+    dob: string;
     location: string;
-}
-
-export interface Bike {
-    id: number;
-    model_id: number;
-    serial_number: string;
-    production_date: string;
-    warehouse_location: string;
+    project_id: number;
 }
 
 export interface Saddle {
@@ -43,12 +50,22 @@ export interface BikeModel {
     fork_id: number;
 }
 
+export interface Bike {
+    id: number;
+    model_id: number;
+    serial_number: string;
+    production_date: string;
+    warehouse_location: string;
+    project_id: number;
+}
+
 export interface WarehousePart {
     id: number;
     part_type: string;
     part_id: number;
     quantity: number;
     storage_location: string;
+    project_id: number;
 }
 
 export interface Order {
@@ -56,6 +73,7 @@ export interface Order {
     customer_id: number;
     order_date: string;
     total_price: number;
+    project_id: number;
 }
 
 export interface OrderItem {
@@ -69,4 +87,5 @@ export interface PartCost {
     part_type: string;
     part_id: number;
     cost: number;
+    project_id: number;
 }

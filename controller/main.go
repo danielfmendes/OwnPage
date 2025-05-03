@@ -28,7 +28,7 @@ func corsMiddleware(allowedOrigins []string, h http.Handler) http.Handler {
 				w.Header().Set("Access-Control-Allow-Origin", origin)
 				w.Header().Set("Vary", "Origin")
 				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
-				w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+				w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 				break
 			}
 		}
@@ -55,13 +55,15 @@ func setupRoutes() http.Handler {
 	r.HandleFunc("/bikemodels", handlers.GetBikeModels)
 	r.HandleFunc("/bikes", handlers.GetBikes)
 	r.HandleFunc("/customers", handlers.GetCustomers)
-	r.HandleFunc("/forks", handlers.GetForks)
 	r.HandleFunc("/frames", handlers.GetFrames)
-	r.HandleFunc("/orderitems", handlers.GetOrderItems)
+	r.HandleFunc("/forks", handlers.GetForks)
 	r.HandleFunc("/orders", handlers.GetOrders)
+	r.HandleFunc("/orderitems", handlers.GetOrderItems)
 	r.HandleFunc("/partcosts", handlers.GetPartCosts)
-	r.HandleFunc("/users", handlers.GetUsers)
+	r.HandleFunc("/projects", handlers.GetProjectsForUserByRole)
 	r.HandleFunc("/saddles", handlers.GetSaddles)
+	r.HandleFunc("/user", handlers.GetUser)
+	r.HandleFunc("/users", handlers.GetUsers)
 	r.HandleFunc("/warehouseparts", handlers.WarehousePartHandler)
 
 	return r

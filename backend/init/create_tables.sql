@@ -1,20 +1,42 @@
+-- Neue Basistabelle für Projekte
+CREATE TABLE projects
+(
+    id   INT PRIMARY KEY,
+    name TEXT NOT NULL
+);
+
+-- Users
 CREATE TABLE users
 (
-    id       SERIAL PRIMARY KEY,
-    username TEXT UNIQUE NOT NULL,
-    dob      TIMESTAMP,
-    email    TEXT UNIQUE NOT NULL,
-    password TEXT        NOT NULL
+    email    TEXT PRIMARY KEY,
+    password TEXT NOT NULL,
+    username TEXT NOT NULL,
+    dob      TIMESTAMP
 );
 
+-- Rollenzuordnung
+CREATE TABLE role_management
+(
+    useremail TEXT REFERENCES users (email),
+    projectid INT REFERENCES projects (id),
+    role      TEXT CHECK (role IN ('admin', 'user')),
+    PRIMARY KEY (useremail, projectid)
+);
+
+-- Kunden
 CREATE TABLE customers
 (
-    id       SERIAL PRIMARY KEY,
-    name     TEXT NOT NULL,
-    email    TEXT UNIQUE,
-    location TEXT
+    id         SERIAL PRIMARY KEY,
+    email      TEXT UNIQUE NOT NULL,
+    password   TEXT        NOT NULL,
+    first_name TEXT        NOT NULL,
+    name       TEXT        NOT NULL,
+    dob        TIMESTAMP,
+    location   TEXT,
+    project_id INT REFERENCES projects (id)
 );
 
+-- Teile
 CREATE TABLE saddles
 (
     id   SERIAL PRIMARY KEY,
@@ -33,6 +55,7 @@ CREATE TABLE forks
     name TEXT UNIQUE
 );
 
+-- Fahrradmodelle
 CREATE TABLE bike_models
 (
     id        SERIAL PRIMARY KEY,
@@ -42,32 +65,39 @@ CREATE TABLE bike_models
     fork_id   INT REFERENCES forks (id)
 );
 
+-- Fahrräder
 CREATE TABLE bikes
 (
     id                 SERIAL PRIMARY KEY,
     model_id           INT REFERENCES bike_models (id),
     serial_number      TEXT UNIQUE,
     production_date    DATE,
-    warehouse_location TEXT
+    warehouse_location TEXT,
+    project_id         INT REFERENCES projects (id)
 );
 
+-- Lagerbestand
 CREATE TABLE warehouse_parts
 (
     id               SERIAL PRIMARY KEY,
     part_type        TEXT CHECK (part_type IN ('saddle', 'frame', 'fork')),
     part_id          INT NOT NULL,
     quantity         INT NOT NULL,
-    storage_location TEXT
+    storage_location TEXT,
+    project_id       INT REFERENCES projects (id)
 );
 
+-- Bestellungen
 CREATE TABLE orders
 (
     id          SERIAL PRIMARY KEY,
     customer_id INT REFERENCES customers (id),
     order_date  DATE DEFAULT CURRENT_DATE,
-    total_price NUMERIC
+    total_price NUMERIC,
+    project_id  INT REFERENCES projects (id)
 );
 
+-- Bestellpositionen
 CREATE TABLE order_items
 (
     id       SERIAL PRIMARY KEY,
@@ -76,10 +106,11 @@ CREATE TABLE order_items
     price    NUMERIC NOT NULL
 );
 
-
+-- Teilekosten
 CREATE TABLE part_costs
 (
-    part_type TEXT CHECK (part_type IN ('saddle', 'frame', 'fork')),
-    part_id   INT,
-    cost      NUMERIC
+    part_type  TEXT CHECK (part_type IN ('saddle', 'frame', 'fork')),
+    part_id    INT,
+    cost       NUMERIC,
+    project_id INT REFERENCES projects (id)
 );

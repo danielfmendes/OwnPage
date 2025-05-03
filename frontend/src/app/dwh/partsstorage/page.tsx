@@ -10,18 +10,19 @@ import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown, Trash2} from "lucide-react";
 import * as React from "react";
-import apiUrl from "@/app/config";
+import apiUrl, {fetchWithToken} from "@/app/config";
 import WarehousePartEditDialogContent from "@/app/dwh/partsstorage/content-dialog";
 import {WarehousePartWithName} from "@/types/custom";
 
 
 export default function PartsStoragePage() {
+    const token = localStorage.getItem("authToken");
     const [data, setData] = React.useState<WarehousePartWithName[]>([]);
     const [loading, setLoading] = React.useState(true);
 
     const fetchData = () => {
         setLoading(true);
-        fetch(`${apiUrl}/warehouseparts`)
+        fetchWithToken(`/warehouseparts`)
             .then((res) => res.json())
             .then((warehouseparts: WarehousePartWithName[]) => {
                 setData(warehouseparts);
@@ -35,7 +36,13 @@ export default function PartsStoragePage() {
 
     const handleDelete = (event: React.MouseEvent, id: number) => {
         event.stopPropagation();
-        fetch(`${apiUrl}/warehouseparts?id=${id}`, { method: 'DELETE' })
+        fetch(`${apiUrl}/warehouseparts?id=${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        })
             .then(res => {
                 if (!res.ok) throw new Error("Fehler beim Löschen");
                 fetchData();

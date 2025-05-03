@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Ellipsis, LogOut } from "lucide-react";
-import { usePathname } from "next/navigation";
+import {usePathname, useRouter} from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { getMenuList } from "@/lib/menu-list";
@@ -23,6 +23,12 @@ interface MenuProps {
 export function Menu({ isOpen }: MenuProps) {
   const pathname = usePathname();
   const menuList = getMenuList(pathname);
+  const router = useRouter();
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    router.push("/login/dwh");
+  };
+
 
   return (
     <ScrollArea className="[&>div>div[style]]:!block">
@@ -117,25 +123,23 @@ export function Menu({ isOpen }: MenuProps) {
             <TooltipProvider disableHoverableContent>
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
-                  <Link href="/">
-                    <Button
-                      onClick={() => {}}
-                      variant="outline"
-                      className="w-full justify-center h-10 mt-5"
+                  <Button
+                    onClick={handleLogout}
+                    variant="outline"
+                    className="w-full justify-center h-10 mt-5"
+                  >
+                    <span className={cn(isOpen === false ? "" : "mr-4")}>
+                      <LogOut size={18} />
+                    </span>
+                    <p
+                      className={cn(
+                        "whitespace-nowrap",
+                        isOpen === false ? "opacity-0 hidden" : "opacity-100"
+                      )}
                     >
-                      <span className={cn(isOpen === false ? "" : "mr-4")}>
-                        <LogOut size={18} />
-                      </span>
-                      <p
-                        className={cn(
-                          "whitespace-nowrap",
-                          isOpen === false ? "opacity-0 hidden" : "opacity-100"
-                        )}
-                      >
-                        Sign out
-                      </p>
-                    </Button>
-                  </Link>
+                      Sign out
+                    </p>
+                  </Button>
                 </TooltipTrigger>
                 {isOpen === false && (
                   <TooltipContent side="right">Sign out</TooltipContent>

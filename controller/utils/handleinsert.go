@@ -4,7 +4,12 @@ import (
 	"net/http"
 )
 
-func HandleInsert(w http.ResponseWriter, query string, args ...interface{}) error {
+func HandleInsert(w http.ResponseWriter, r *http.Request, query string, args ...interface{}) error {
+	_, err := ValidateToken(w, r)
+	if err != nil {
+		return err
+	}
+
 	conn, err := ConnectToDB(w)
 	if err != nil {
 		return err

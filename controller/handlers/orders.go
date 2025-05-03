@@ -6,10 +6,10 @@ import (
 	"net/http"
 )
 
-func GetOrders(w http.ResponseWriter, _ *http.Request) {
-	utils.HandleGet(w, "SELECT * FROM orders", func(scanner utils.Scanner) (any, error) {
+func GetOrders(w http.ResponseWriter, r *http.Request) {
+	utils.HandleGetWithProjectIDs(w, r, "SELECT * FROM orders", func(scanner utils.Scanner) (any, error) {
 		var b models.Order
-		err := scanner.Scan(&b.ID, &b.CustomerID, &b.OrderDate, &b.TotalPrice)
+		err := scanner.Scan(&b.ID, &b.CustomerID, &b.OrderDate, &b.TotalPrice, &b.ProjectID)
 		return b, err
 	})
 }
