@@ -53,7 +53,7 @@ func setupRoutes() http.Handler {
 	r.HandleFunc("/auth/login", handlers.HandleLogin)
 
 	r.HandleFunc("/bikemodels", handlers.GetBikeModels)
-	r.HandleFunc("/bikes", handlers.GetBikes)
+	r.HandleFunc("/bikes", handlers.BikeHandler)
 	r.HandleFunc("/customers", handlers.GetCustomers)
 	r.HandleFunc("/frames", handlers.GetFrames)
 	r.HandleFunc("/forks", handlers.GetForks)

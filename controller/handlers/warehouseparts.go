@@ -60,7 +60,7 @@ func DeleteWarehousePart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.HandleDelete(w, r, "DELETE FROM warehouse_parts WHERE id = $1", id)
+	utils.HandleDelete(w, r, "DELETE FROM warehouse_parts WHERE id = $1", []string{}, id)
 }
 
 func UpdateWarehousePart(w http.ResponseWriter, r *http.Request) {
@@ -78,8 +78,8 @@ func UpdateWarehousePart(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Verwende die HandleUpdate-Funktion, um das Update in der DB auszuführen
-	query := `UPDATE warehouse_parts SET part_type = $1, part_id = $2, quantity = $3, storage_location = $4 WHERE id = $5`
-	err = utils.HandleUpdate(w, r, query, part.PartType, part.PartID, part.Quantity, part.StorageLocation, part.ID)
+	query := `UPDATE warehouse_parts SET part_type = $1, part_id = $2, quantity = $3, storage_location = $4, project_id = $5 WHERE id = $5`
+	err = utils.HandleUpdate(w, r, query, part.PartType, part.PartID, part.Quantity, part.StorageLocation, part.ProjectID, part.ID)
 }
 
 func InsertWarehousePart(w http.ResponseWriter, r *http.Request) {

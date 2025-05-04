@@ -2,15 +2,15 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Loader2 } from "lucide-react"
 
 type PartSelectProps = {
-    partId: number | null
-    setPartId: (id: number) => void
+    id: number | null
+    setId: (id: number) => void
     partIdOptions: { id: number; name: string }[]
     isLoadingParts: boolean
 }
 
-export function SelectLoading({partId, setPartId, partIdOptions, isLoadingParts}: PartSelectProps) {
+export function SelectLoading({id, setId, partIdOptions, isLoadingParts}: PartSelectProps) {
     return (
-        <Select value={partId !== null ? String(partId) : undefined} onValueChange={(val) => setPartId(Number(val))}>
+        <Select value={id !== null ? String(id) : undefined} onValueChange={(val) => setId(Number(val))}>
             <SelectTrigger className="w-full p-2 border rounded">
                 <SelectValue placeholder="Select part" />
             </SelectTrigger>

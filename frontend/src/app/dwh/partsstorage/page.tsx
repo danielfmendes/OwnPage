@@ -11,7 +11,7 @@ import {Button} from "@/components/ui/button";
 import {ArrowUpDown, Trash2} from "lucide-react";
 import * as React from "react";
 import apiUrl, {fetchWithToken} from "@/utils/url";
-import WarehousePartEditDialogContent from "@/app/dwh/partsstorage/content-dialog";
+import WarehousePartDialogContent from "@/app/dwh/partsstorage/content-dialog";
 import {WarehousePartWithName} from "@/types/custom";
 import AuthToken from "@/utils/authtoken";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
@@ -32,7 +32,7 @@ export default function PartsStoragePage() {
             .then((warehouseparts: WarehousePartWithName[]) => {
                 setData(warehouseparts);
             })
-            .catch(err => addNotification(`Error isLoading bikes: ${err}`, "error"))
+            .catch(err => addNotification(`Error isLoading warehouseparts: ${err}`, "error"))
             .finally(() => setIsLoadingData(false));
     };
 
@@ -88,7 +88,6 @@ export default function PartsStoragePage() {
             enableHiding: false,
             cell: ({ row }) => {
                 const warehousePart:WarehousePartWithName = row.original
-                warehousePart.id
                 return (
                     <ButtonLoading
                         onClick={(event) => handleDelete(event, warehousePart.id)}
@@ -103,7 +102,6 @@ export default function PartsStoragePage() {
     ]
 
     const sidebar = useStore(useSidebar, (x) => x);
-
     if (!sidebar) return null;
 
     return (
@@ -119,14 +117,14 @@ export default function PartsStoragePage() {
                         fetchData()
                     }}
                     rowDialogContent={(rowData, onClose) => (
-                        <WarehousePartEditDialogContent
+                        <WarehousePartDialogContent
                             rowData={rowData}
                             onClose={onClose}
                             onRefresh={fetchData}
                         />
                     )}
                     addDialogContent={(onClose) => (
-                        <WarehousePartEditDialogContent
+                        <WarehousePartDialogContent
                             onClose={onClose}
                             onRefresh={fetchData}
                         />

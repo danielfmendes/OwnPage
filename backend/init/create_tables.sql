@@ -72,6 +72,7 @@ CREATE TABLE bikes
     model_id           INT REFERENCES bike_models (id),
     serial_number      TEXT UNIQUE,
     production_date    DATE,
+    quantity           INT NOT NULL,
     warehouse_location TEXT,
     project_id         INT REFERENCES projects (id)
 );

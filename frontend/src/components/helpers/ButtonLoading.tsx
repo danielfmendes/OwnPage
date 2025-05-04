@@ -5,15 +5,17 @@ import type { ButtonHTMLAttributes, ReactNode } from "react"
 type ButtonLoadingProps = {
     isLoading: boolean
     onClick: ((event: React.MouseEvent<HTMLButtonElement>) => void) | (() => void)
-    children: ReactNode
+    variant?: "default" | "outline" | "destructive";
+    children?: ReactNode
     loadingText?: string
 } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'>
 
-export function ButtonLoading({ isLoading, onClick, children, loadingText, ...props }: ButtonLoadingProps) {
+export function ButtonLoading({ isLoading, onClick, variant, loadingText, children, ...props }: ButtonLoadingProps) {
     return (
         <Button
             onClick={onClick}
             disabled={isLoading || props.disabled}
+            variant={variant}
             {...props}
         >
             {isLoading ? (

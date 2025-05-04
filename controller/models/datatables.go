@@ -59,6 +59,7 @@ type Bike struct {
 	ModelID           int       `json:"model_id"`
 	SerialNumber      string    `json:"serial_number"`
 	ProductionDate    time.Time `json:"production_date"`
+	Quantity          int       `json:"quantity"`
 	WarehouseLocation string    `json:"warehouse_location"`
 	ProjectID         int       `json:"project_id"`
 }

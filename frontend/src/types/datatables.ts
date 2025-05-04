@@ -55,6 +55,7 @@ export interface Bike {
     model_id: number;
     serial_number: string;
     production_date: string;
+    quantity: number;
     warehouse_location: string;
     project_id: number;
 }

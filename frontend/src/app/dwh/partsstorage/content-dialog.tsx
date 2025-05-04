@@ -1,5 +1,4 @@
 import React from "react";
-import {Button} from "@/components/ui/button";
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import apiUrl, {fetchWithToken} from "@/utils/url";
@@ -9,19 +8,20 @@ import AuthToken from "@/utils/authtoken";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {SelectLoading} from "@/components/helpers/SelectLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
+import {WarehousePartWithName} from "@/types/custom";
 
 interface Props {
-    rowData?: WarehousePart;
+    rowData?: WarehousePartWithName;
     onClose: () => void;
     onRefresh: () => void;
 }
 
-export default function WarehousePartEditDialogContent({rowData, onClose, onRefresh}: Props) {
+export default function WarehousePartDialogContent({rowData, onClose, onRefresh}: Props) {
     const {addNotification} = useNotification();
     const token = AuthToken.getAuthToken();
     const isEditMode = !!rowData;
-    const [partId, setPartId] = React.useState<number | null>((rowData?.part_id || null));
-    const [projectId, setProjectId] = React.useState<number | null>((rowData?.project_id || null));
+    const [partId, setPartId] = React.useState<number | null>(rowData?.part_id || null);
+    const [projectId, setProjectId] = React.useState<number | null>(rowData?.project_id || null);
     const [partType, setPartType] = React.useState(rowData?.part_type || '');
     const [quantity, setQuantity] = React.useState(rowData?.quantity || 0);
     const [storageLocation, setStorageLocation] = React.useState(rowData?.storage_location || '');
@@ -51,6 +51,15 @@ export default function WarehousePartEditDialogContent({rowData, onClose, onRefr
         }
     }, [partType]);
 
+    const resetForm = () => {
+        setProjectId(null);
+        setPartId(null);
+        setProjectId(null);
+        setPartType('');
+        setQuantity(0);
+        setStorageLocation('');
+    };
+
     const handleSave = () => {
         const newData = {
             project_id: projectId,
@@ -71,6 +80,7 @@ export default function WarehousePartEditDialogContent({rowData, onClose, onRefr
             .then(res => {
                 if (!res.ok) throw new Error("Fehler beim Speichern");
                 addNotification("Neuer Datensatz erfolgreich gespeichert", "success");
+                resetForm();
                 onClose();
                 onRefresh();
             })
@@ -117,15 +127,15 @@ export default function WarehousePartEditDialogContent({rowData, onClose, onRefr
                     <InputField label="Project" value={rowData.project_id}/>
                     <InputField label="ID" value={rowData.id}/>
                     <InputField label="Part Type" value={rowData.part_type}/>
-                    <InputField label="Part ID" value={rowData.part_id}/>
+                    <InputField label="Part Name" value={rowData?.part_name}/>
                 </>
             ) : (
                 <>
                     <div className="space-y-1">
                         <label className="block text-sm font-medium">Project</label>
                         <SelectLoading
-                            partId={projectId}
-                            setPartId={setProjectId}
+                            id={projectId}
+                            setId={setProjectId}
                             partIdOptions={projectIdOptions}
                             isLoadingParts={isLoadingProjects}
                         />
@@ -146,8 +156,8 @@ export default function WarehousePartEditDialogContent({rowData, onClose, onRefr
                     <div className="space-y-1">
                         <label className="block text-sm font-medium">Part Name</label>
                         <SelectLoading
-                            partId={partId}
-                            setPartId={setPartId}
+                            id={partId}
+                            setId={setPartId}
                             partIdOptions={partIdOptions}
                             isLoadingParts={isLoadingParts}
                         />

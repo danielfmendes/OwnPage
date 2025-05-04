@@ -19,10 +19,6 @@ export default function RegisterCard() {
     const [password, setPassword] = useState<string>('');
     const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined);
 
-    const handleDateSelect = (date: Date | undefined) => {
-        setSelectedDate(date);
-    };
-
     const handleSubmit = () => {
         fetch(`${apiUrl}/auth/register`, {
             method: 'POST',
@@ -70,7 +66,7 @@ export default function RegisterCard() {
                     <div className="space-y-1">
                         <label className="block text-sm font-medium">Geburtstag</label>
                         <div className="relative">
-                            <DatePicker date={selectedDate} onSelect={handleDateSelect} />
+                            <DatePicker date={selectedDate} onSelect={(date)=> setSelectedDate(date)} />
                         </div>
                     </div>
                     <InputField

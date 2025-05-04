@@ -25,28 +25,17 @@ VALUES
     ('anna@example.com', 'pass123', 'Anna', 'Fischer', NULL, 'Leipzig', 1),
     ('lukas@example.com', 'pass123', 'Lukas', 'Wolf', NULL, 'Stuttgart', 1);
 
--- Beispielteile einfügen (du solltest diese vorher definieren)
-INSERT INTO saddles (name) VALUES ('Sattel A'), ('Sattel B');
-INSERT INTO frames (name)  VALUES ('Rahmen A'), ('Rahmen B');
-INSERT INTO forks (name)   VALUES ('Gabel A'), ('Gabel B');
-
--- Fahrradmodelle
-INSERT INTO bike_models (name, saddle_id, frame_id, fork_id)
-VALUES
-    ('Modell 1', 1, 1, 1),
-    ('Modell 2', 2, 2, 2);
-
 -- Fahrräder
-INSERT INTO bikes (model_id, serial_number, production_date, warehouse_location, project_id)
+INSERT INTO bikes (model_id, serial_number, production_date, quantity, warehouse_location, project_id)
 VALUES
-    (1, 'SN1001', '2023-01-15', 'WH-A1', 1),
-    (2, 'SN1002', '2023-02-10', 'WH-A2', 1),
-    (1, 'SN1003', '2023-03-12', 'WH-A3', 1),
-    (2, 'SN1004', '2023-04-01', 'WH-B1', 1),
-    (1, 'SN1005', '2023-05-20', 'WH-B2', 1),
-    (2, 'SN1006', '2023-06-18', 'WH-B3', 1),
-    (1, 'SN1007', '2023-07-11', 'WH-C1', 1),
-    (2, 'SN1008', '2023-08-23', 'WH-C2', 1);
+    (1, 'SN1001', '2024-01-15',1, 'WH-A1', 1),
+    (2, 'SN1002', '2024-02-10',2, 'WH-A2', 1),
+    (1, 'SN1003', '2024-03-12',3, 'WH-A3', 1),
+    (2, 'SN1004', '2024-04-01',4, 'WH-B1', 1),
+    (1, 'SN1005', '2024-05-20',5, 'WH-B2', 1),
+    (2, 'SN1006', '2024-06-18',6, 'WH-B3', 1),
+    (1, 'SN1007', '2024-07-11',7, 'WH-C1', 1),
+    (2, 'SN1008', '2024-08-23',8, 'WH-C2', 1);
 
 -- Lagerteile
 INSERT INTO warehouse_parts (part_type, part_id, quantity, storage_location, project_id)
@@ -67,11 +56,11 @@ SELECT 'fork', id, 149.99 + id * 30, 1 FROM forks;
 -- Bestellungen (angenommen Kunden-IDs sind 1 bis 5)
 INSERT INTO orders (customer_id, order_date, total_price, project_id)
 VALUES
-    (1, '2023-09-01', 899.99, 1),
-    (2, '2023-09-05', 1099.00, 1),
-    (3, '2023-09-10', 1199.50, 1),
-    (4, '2023-09-15', 1349.75, 1),
-    (5, '2023-09-18', 989.99, 1);
+    (1, '2024-09-01', 899.99, 1),
+    (2, '2024-09-05', 1099.00, 1),
+    (3, '2024-09-10', 1199.50, 1),
+    (4, '2024-09-15', 1349.75, 1),
+    (5, '2024-09-18', 989.99, 1);
 
 -- Bestellpositionen
 INSERT INTO order_items (order_id, bike_id, price)

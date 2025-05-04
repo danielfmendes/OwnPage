@@ -8,9 +8,10 @@ type InputFieldProps = {
     onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
     type?: string;
     errorMessage?: string;
+    placeholder?: string;
 };
 
-export default function InputField({ label, value, onChange, type, errorMessage }: InputFieldProps) {
+export default function InputField({ label, value, onChange, type, errorMessage, placeholder }: InputFieldProps) {
     const isReadOnly = !onChange;
 
     return (
@@ -21,6 +22,7 @@ export default function InputField({ label, value, onChange, type, errorMessage 
                     value={value}
                     onChange={onChange}
                     readOnly={isReadOnly}
+                    placeholder={placeholder}
                     className={`${
                         errorMessage ? "border-red-500" : ""
                     } ${isReadOnly ? "pr-10" : ""}`}
