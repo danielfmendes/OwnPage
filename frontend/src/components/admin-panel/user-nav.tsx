@@ -27,12 +27,19 @@ import {useEffect} from "react";
 import {fetchWithToken} from "@/utils/url";
 import {User} from "@/types/datatables";
 import AuthToken from "@/utils/authtoken";
+import {useRouter} from "next/navigation";
 
 export function UserNav() {
   const { setTheme, theme } = useTheme();
   const [ email, setEmail ] = React.useState<string>("");
   const [ user, setUser ] = React.useState<User>();
   const token = AuthToken.getAuthToken();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    AuthToken.removeAuthToken();
+    router.push("/login/dwh");
+  };
 
   useEffect(() => {
     if (token) {
@@ -113,12 +120,10 @@ export function UserNav() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <Link href="/">
-          <DropdownMenuItem className="hover:cursor-pointer">
+          <DropdownMenuItem onClick={handleLogout} className="hover:cursor-pointer">
               <LogOut className="w-4 h-4 mr-3 text-muted-foreground" />
               Sign out
           </DropdownMenuItem>
-        </Link>
       </DropdownMenuContent>
     </DropdownMenu>
   );
