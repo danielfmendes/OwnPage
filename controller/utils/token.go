@@ -1,13 +1,12 @@
 package utils
 
 import (
+	"controller/secrets"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"net/http"
 	"time"
 )
-
-var jwtSecret = []byte("REMOVED_JWT_SECRET")
 
 func CreateJWT(useremail string) (string, error) {
 	expirationTime := time.Now().Add(30 * time.Minute) // Ablaufzeit auf 30 Minuten setzen
@@ -19,7 +18,7 @@ func CreateJWT(useremail string) (string, error) {
 
 	// JWT erstellen
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(jwtSecret)
+	tokenString, err := token.SignedString(secrets.JwtSecret)
 	if err != nil {
 		return "", err
 	}
@@ -42,7 +41,7 @@ func ValidateToken(w http.ResponseWriter, r *http.Request) (string, error) {
 	}
 
 	token, err := jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return jwtSecret, nil
+		return secrets.JwtSecret, nil
 	})
 	if err != nil {
 		http.Error(w, "Ungültiges Token", http.StatusUnauthorized)
