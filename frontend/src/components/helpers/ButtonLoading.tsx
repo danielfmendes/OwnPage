@@ -16,11 +16,12 @@ export function ButtonLoading({ isLoading, onClick, variant, loadingText, childr
             onClick={onClick}
             disabled={isLoading || props.disabled}
             variant={variant}
+            className={!loadingText? "min-w-[40px] h-[40px]" : ""}
             {...props}
         >
             {isLoading ? (
                 <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-5 w-5 animate-spin" />
                     {loadingText ? <div className="ml-2">{loadingText}</div>: null}
                 </>
             ) : (

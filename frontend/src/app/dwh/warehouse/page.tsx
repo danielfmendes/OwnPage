@@ -23,7 +23,7 @@ export default function PartsStoragePage() {
     const token = AuthToken.getAuthToken();
     const [data, setData] = React.useState<BikeWithModelName[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(true);
-    const [isLoadingDelete, setIsLoadingDelete] = React.useState(false);
+    const [loadingDeleteId, setLoadingDeleteId] = React.useState<number | null>(null);
     const [isLoadingDeleteCascade, setIsLoadingDeleteCascade] = React.useState(false);
     const [showCascadeDialog, setShowCascadeDialog] = React.useState(false);
     const [deleteId, setDeleteId] = React.useState<number | null>(null);
@@ -41,7 +41,7 @@ export default function PartsStoragePage() {
         if (cascade) {
             setIsLoadingDeleteCascade(true);
         } else {
-            setIsLoadingDelete(true);
+            setLoadingDeleteId(id);
         }
 
         fetch(`${apiUrl}/bikes?id=${id}${cascade ? "&cascade=true" : ""}`, {
@@ -67,7 +67,7 @@ export default function PartsStoragePage() {
                 if (cascade) {
                     setIsLoadingDeleteCascade(false);
                 } else {
-                    setIsLoadingDelete(false);
+                    setLoadingDeleteId(null);
                 }
             });
     };
@@ -131,7 +131,7 @@ export default function PartsStoragePage() {
                 return (
                     <ButtonLoading
                         onClick={(event) => handleDelete(event, bike.id)}
-                        isLoading={isLoadingDelete}
+                        isLoading={loadingDeleteId === bike.id}
                         className="text-black dark:text-white p-2 rounded"
                         variant="destructive"
                     >

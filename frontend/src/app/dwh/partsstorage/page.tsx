@@ -23,7 +23,7 @@ export default function PartsStoragePage() {
     const token = AuthToken.getAuthToken();
     const [data, setData] = React.useState<WarehousePartWithName[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(true);
-    const [isLoadingDelete, setIsLoadingDelete] = React.useState(false);
+    const [loadingDeleteId, setLoadingDeleteId] = React.useState<number | null>(null);
 
     const fetchData = () => {
         setIsLoadingData(true);
@@ -38,7 +38,7 @@ export default function PartsStoragePage() {
 
     const handleDelete = (event: React.MouseEvent, id: number) => {
         event.stopPropagation();
-        setIsLoadingDelete(true);
+        setLoadingDeleteId(id);
         fetch(`${apiUrl}/warehouseparts?id=${id}`, {
             method: 'DELETE',
             headers: {
@@ -52,7 +52,7 @@ export default function PartsStoragePage() {
                 fetchData();
             })
             .catch(err => addNotification(`Löschfehler: ${err}`, "error"))
-            .finally(() => setIsLoadingDelete(false));
+            .finally(() => setLoadingDeleteId(null));
     };
 
     const columns: ColumnDef<WarehousePartWithName>[] = [
@@ -91,7 +91,7 @@ export default function PartsStoragePage() {
                 return (
                     <ButtonLoading
                         onClick={(event) => handleDelete(event, warehousePart.id)}
-                        isLoading={isLoadingDelete}
+                        isLoading={loadingDeleteId === warehousePart.id}
                         className="text-black dark:text-white p-2 rounded"
                         variant="destructive"
                     >
