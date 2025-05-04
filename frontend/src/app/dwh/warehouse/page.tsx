@@ -20,6 +20,7 @@ import {
 import * as React from "react";
 import {fetchWithToken} from "@/utils/url";
 import {Bike} from "@/types/datatables";
+import {useNotification} from "@/components/helpers/NotificationProvider";
 
 const columns: ColumnDef<Bike>[] = [
     {
@@ -106,6 +107,7 @@ const columns: ColumnDef<Bike>[] = [
 ]
 
 export default function PartsStoragePage() {
+    const {addNotification} = useNotification();
     const sidebar = useStore(useSidebar, (x) => x);
 
     const [data, setData] = React.useState<Bike[]>([]);
@@ -120,7 +122,7 @@ export default function PartsStoragePage() {
                 setLoading(false);
             })
             .catch((err) => {
-                console.error("Error loading bikes:", err);
+                addNotification(`Error loading bikes: ${err}`, "error")
                 setLoading(false);
             });
     };

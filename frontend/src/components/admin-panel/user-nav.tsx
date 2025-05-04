@@ -27,8 +27,10 @@ import { User } from "@/types/datatables";
 import AuthToken from "@/utils/authtoken";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { useNotification } from "@/components/helpers/NotificationProvider";
 
 export function UserNav() {
+  const { addNotification } = useNotification();
   const { setTheme, theme } = useTheme();
   const [email, setEmail] = React.useState<string>("");
   const [user, setUser] = React.useState<User>();
@@ -43,7 +45,7 @@ export function UserNav() {
 
   useEffect(() => {
     if (!token) {
-      console.log("No token found.");
+      addNotification("No token found.","warning")
       setIsLoading(false);
       return;
     }
@@ -55,11 +57,11 @@ export function UserNav() {
         fetchWithToken(`/user?email=${decoded.sub}`)
             .then((res) => res.json())
             .then((data) => setUser(data[0]))
-            .catch((err) => console.error("Error fetching user data:", err))
+            .catch(err => addNotification(`Error fetching user data: ${err}`, "error"))
             .finally(() => setIsLoading(false));
       }
-    } catch (error) {
-      console.error("Invalid or expired token:", error);
+    } catch (err) {
+      addNotification(`Invalid or expired token: ${err}`, "error")
       setIsLoading(false);
     }
   }, [token]);

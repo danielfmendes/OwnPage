@@ -15,9 +15,11 @@ import WarehousePartEditDialogContent from "@/app/dwh/partsstorage/content-dialo
 import {WarehousePartWithName} from "@/types/custom";
 import AuthToken from "@/utils/authtoken";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import {useNotification} from "@/components/helpers/NotificationProvider";
 
 
 export default function PartsStoragePage() {
+    const {addNotification} = useNotification();
     const token = AuthToken.getAuthToken();
     const [data, setData] = React.useState<WarehousePartWithName[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(true);
@@ -30,9 +32,7 @@ export default function PartsStoragePage() {
             .then((warehouseparts: WarehousePartWithName[]) => {
                 setData(warehouseparts);
             })
-            .catch((err) => {
-                console.error("Error isLoading bikes:", err);
-            })
+            .catch(err => addNotification(`Error isLoading bikes: ${err}`, "error"))
             .finally(() => setIsLoadingData(false));
     };
 
@@ -48,9 +48,10 @@ export default function PartsStoragePage() {
         })
             .then(res => {
                 if (!res.ok) throw new Error("Fehler beim Löschen");
+                addNotification(`Teilelager mit id ${id} erfolgreich gelöscht`, "success");
                 fetchData();
             })
-            .catch(err => console.error("Löschfehler:", err))
+            .catch(err => addNotification(`Löschfehler: ${err}`, "error"))
             .finally(() => setIsLoadingDelete(false));
     };
 

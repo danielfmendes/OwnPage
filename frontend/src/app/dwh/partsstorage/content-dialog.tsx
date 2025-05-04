@@ -1,6 +1,6 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {Button} from "@/components/ui/button";
+import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import apiUrl, {fetchWithToken} from "@/utils/url";
 import {WarehousePart} from "@/types/datatables";
@@ -8,6 +8,7 @@ import InputField from "@/components/helpers/InputField";
 import AuthToken from "@/utils/authtoken";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {SelectLoading} from "@/components/helpers/SelectLoading";
+import {useNotification} from "@/components/helpers/NotificationProvider";
 
 interface Props {
     rowData?: WarehousePart;
@@ -15,7 +16,8 @@ interface Props {
     onRefresh: () => void;
 }
 
-export default function WarehousePartEditDialogContent({ rowData, onClose, onRefresh }: Props) {
+export default function WarehousePartEditDialogContent({rowData, onClose, onRefresh}: Props) {
+    const {addNotification} = useNotification();
     const token = AuthToken.getAuthToken();
     const isEditMode = !!rowData;
     const [partId, setPartId] = React.useState<number | null>((rowData?.part_id || null));
@@ -34,7 +36,7 @@ export default function WarehousePartEditDialogContent({ rowData, onClose, onRef
         fetchWithToken(`/projects?requiredRole=admin`)
             .then(res => res.json())
             .then(data => setProjectIdOptions(data))
-            .catch(err => console.error("Fehler beim Laden der Service-ID-Optionen:", err))
+            .catch(err => addNotification(`Fehler beim Laden der Service-ID-Optionen: ${err}`, "error"))
             .finally(() => setIsLoadingProjects(false));
     }, []);
 
@@ -44,13 +46,19 @@ export default function WarehousePartEditDialogContent({ rowData, onClose, onRef
             fetchWithToken(`/${partType}s`)
                 .then(res => res.json())
                 .then(data => setPartIdOptions(data))
-                .catch(err => console.error("Fehler beim Laden der Part-ID-Optionen:", err))
+                .catch(err => addNotification(`Fehler beim Laden der Part-ID-Optionen: ${err}`, "error"))
                 .finally(() => setIsLoadingParts(false));
         }
     }, [partType]);
 
     const handleSave = () => {
-        const newData = { project_id: projectId, part_type: partType, part_id: partId, quantity, storage_location: storageLocation };
+        const newData = {
+            project_id: projectId,
+            part_type: partType,
+            part_id: partId,
+            quantity,
+            storage_location: storageLocation
+        };
         setIsLoading(true)
         fetch(`${apiUrl}/warehouseparts`, {
             method: "POST",
@@ -62,11 +70,11 @@ export default function WarehousePartEditDialogContent({ rowData, onClose, onRef
         })
             .then(res => {
                 if (!res.ok) throw new Error("Fehler beim Speichern");
-                console.log("Neuer Datensatz gespeichert");
+                addNotification("Neuer Datensatz erfolgreich gespeichert", "success");
                 onClose();
                 onRefresh();
             })
-            .catch(err => console.error("Fehler beim Speichern:", err))
+            .catch(err => addNotification(`Fehler beim Speichern: ${err}`, "error"))
             .finally(() => setIsLoading(false));
     };
 
@@ -90,11 +98,11 @@ export default function WarehousePartEditDialogContent({ rowData, onClose, onRef
         })
             .then(res => {
                 if (!res.ok) throw new Error("Fehler beim Aktualisieren");
-                console.log("Datensatz aktualisiert");
+                addNotification("Datensatz erfolgreich aktualisiert", "success");
                 onClose();
                 onRefresh();
             })
-            .catch(err => console.error("Fehler beim Aktualisieren:", err))
+            .catch(err => addNotification(`Fehler beim Aktualisieren: ${err}`, "error"))
             .finally(() => setIsLoading(false));
     };
 
@@ -106,10 +114,10 @@ export default function WarehousePartEditDialogContent({ rowData, onClose, onRef
             </DialogHeader>
             {isEditMode ? (
                 <>
-                    <InputField label="Project" value={rowData.project_id} />
-                    <InputField label="ID" value={rowData.id} />
-                    <InputField label="Part Type" value={rowData.part_type} />
-                    <InputField label="Part ID" value={rowData.part_id} />
+                    <InputField label="Project" value={rowData.project_id}/>
+                    <InputField label="ID" value={rowData.id}/>
+                    <InputField label="Part Type" value={rowData.part_type}/>
+                    <InputField label="Part ID" value={rowData.part_id}/>
                 </>
             ) : (
                 <>
@@ -126,7 +134,7 @@ export default function WarehousePartEditDialogContent({ rowData, onClose, onRef
                         <label className="block text-sm font-medium">Part Type</label>
                         <Select value={partType} onValueChange={setPartType}>
                             <SelectTrigger className="w-full p-2 border rounded">
-                                <SelectValue placeholder="Select part type" />
+                                <SelectValue placeholder="Select part type"/>
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="saddle">Saddle</SelectItem>
@@ -148,8 +156,9 @@ export default function WarehousePartEditDialogContent({ rowData, onClose, onRef
             )}
 
             <div className="space-y-1">
-                <InputField label="Quantity" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
-                <InputField label="Warehouse Position" value={storageLocation} onChange={(e) => setStorageLocation(e.target.value)} />
+                <InputField label="Quantity" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))}/>
+                <InputField label="Warehouse Position" value={storageLocation}
+                            onChange={(e) => setStorageLocation(e.target.value)}/>
             </div>
 
             <ButtonLoading
