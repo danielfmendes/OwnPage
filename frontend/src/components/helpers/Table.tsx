@@ -23,6 +23,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import {Skeleton} from "@/components/ui/skeleton";
 
 interface DataTableProps {
     title: string;
@@ -76,8 +77,6 @@ export default function DataTable({title, columns, data, isLoading, filterColumn
         },
     })
 
-    if (isLoading) return <div className="p-4 text-muted">Loading bikes…</div>
-
     // @ts-ignore
     return (
         <div className="mt-2 w-full p-4 border rounded-lg  border-zinc-900 dark:border-zinc-50">
@@ -116,7 +115,17 @@ export default function DataTable({title, columns, data, isLoading, filterColumn
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                        {isLoading ? (
+                            Array.from({ length: 10 }).map((_, index) => (
+                                <TableRow key={index} className="cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 border-zinc-900 dark:border-zinc-500">
+                                    {columns.map((_, colIndex) => (
+                                        <TableCell key={colIndex}>
+                                            <Skeleton className="h-6 w-full" />
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}

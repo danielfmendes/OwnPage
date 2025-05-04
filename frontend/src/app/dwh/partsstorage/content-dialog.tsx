@@ -4,8 +4,10 @@ import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import apiUrl, {fetchWithToken} from "@/utils/url";
 import {WarehousePart} from "@/types/datatables";
-import InputField from "@/components/admin-panel/InputField";
+import InputField from "@/components/helpers/InputField";
 import AuthToken from "@/utils/authtoken";
+import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import {SelectLoading} from "@/components/helpers/SelectLoading";
 
 interface Props {
     rowData?: WarehousePart;
@@ -23,25 +25,33 @@ export default function WarehousePartEditDialogContent({ rowData, onClose, onRef
     const [storageLocation, setStorageLocation] = React.useState(rowData?.storage_location || '');
     const [partIdOptions, setPartIdOptions] = React.useState<{ id: number, name: string }[]>([]);
     const [projectIdOptions, setProjectIdOptions] = React.useState<{ id: number, name: string }[]>([]);
+    const [isLoading, setIsLoading] = React.useState<boolean>(false);
+    const [isLoadingParts, setIsLoadingParts] = React.useState<boolean>(false);
+    const [isLoadingProjects, setIsLoadingProjects] = React.useState<boolean>(false);
 
     React.useEffect(() => {
+        setIsLoadingProjects(true)
         fetchWithToken(`/projects?requiredRole=admin`)
             .then(res => res.json())
             .then(data => setProjectIdOptions(data))
-            .catch(err => console.error("Fehler beim Laden der Service-ID-Optionen:", err));
+            .catch(err => console.error("Fehler beim Laden der Service-ID-Optionen:", err))
+            .finally(() => setIsLoadingProjects(false));
     }, []);
 
     React.useEffect(() => {
         if (!isEditMode && partType) {
+            setIsLoadingParts(true)
             fetchWithToken(`/${partType}s`)
                 .then(res => res.json())
                 .then(data => setPartIdOptions(data))
-                .catch(err => console.error("Fehler beim Laden der Part-ID-Optionen:", err));
+                .catch(err => console.error("Fehler beim Laden der Part-ID-Optionen:", err))
+                .finally(() => setIsLoadingParts(false));
         }
     }, [partType]);
 
     const handleSave = () => {
         const newData = { project_id: projectId, part_type: partType, part_id: partId, quantity, storage_location: storageLocation };
+        setIsLoading(true)
         fetch(`${apiUrl}/warehouseparts`, {
             method: "POST",
             headers: {
@@ -53,9 +63,11 @@ export default function WarehousePartEditDialogContent({ rowData, onClose, onRef
             .then(res => {
                 if (!res.ok) throw new Error("Fehler beim Speichern");
                 console.log("Neuer Datensatz gespeichert");
-                onClose(); onRefresh();
+                onClose();
+                onRefresh();
             })
-            .catch(err => console.error("Fehler beim Speichern:", err));
+            .catch(err => console.error("Fehler beim Speichern:", err))
+            .finally(() => setIsLoading(false));
     };
 
     const handleUpdate = () => {
@@ -67,6 +79,7 @@ export default function WarehousePartEditDialogContent({ rowData, onClose, onRef
             storage_location: storageLocation,
             project_id: projectId ?? 0,
         }
+        setIsLoading(true)
         fetch(`${apiUrl}/warehouseparts`, {
             method: "PUT",
             headers: {
@@ -78,9 +91,11 @@ export default function WarehousePartEditDialogContent({ rowData, onClose, onRef
             .then(res => {
                 if (!res.ok) throw new Error("Fehler beim Aktualisieren");
                 console.log("Datensatz aktualisiert");
-                onClose(); onRefresh();
+                onClose();
+                onRefresh();
             })
-            .catch(err => console.error("Fehler beim Aktualisieren:", err));
+            .catch(err => console.error("Fehler beim Aktualisieren:", err))
+            .finally(() => setIsLoading(false));
     };
 
 
@@ -100,18 +115,12 @@ export default function WarehousePartEditDialogContent({ rowData, onClose, onRef
                 <>
                     <div className="space-y-1">
                         <label className="block text-sm font-medium">Project</label>
-                        <Select value={projectId !== null ? String(projectId) : undefined} onValueChange={(val) => setProjectId(Number(val))}>
-                            <SelectTrigger className="w-full p-2 border rounded">
-                                <SelectValue placeholder="Select project" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {projectIdOptions.map((option) => (
-                                    <SelectItem key={option.id} value={String(option.id)}>
-                                        {option.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <SelectLoading
+                            partId={projectId}
+                            setPartId={setProjectId}
+                            partIdOptions={projectIdOptions}
+                            isLoadingParts={isLoadingProjects}
+                        />
                     </div>
                     <div className="space-y-1">
                         <label className="block text-sm font-medium">Part Type</label>
@@ -128,18 +137,12 @@ export default function WarehousePartEditDialogContent({ rowData, onClose, onRef
                     </div>
                     <div className="space-y-1">
                         <label className="block text-sm font-medium">Part Name</label>
-                        <Select value={partId !== null ? String(partId) : undefined} onValueChange={(val) => setPartId(Number(val))}>
-                        <SelectTrigger className="w-full p-2 border rounded">
-                                <SelectValue placeholder="Select part" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {partIdOptions.map((option) => (
-                                    <SelectItem key={option.id} value={String(option.id)}>
-                                        {option.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <SelectLoading
+                            partId={partId}
+                            setPartId={setPartId}
+                            partIdOptions={partIdOptions}
+                            isLoadingParts={isLoadingParts}
+                        />
                     </div>
                 </>
             )}
@@ -149,9 +152,15 @@ export default function WarehousePartEditDialogContent({ rowData, onClose, onRef
                 <InputField label="Warehouse Position" value={storageLocation} onChange={(e) => setStorageLocation(e.target.value)} />
             </div>
 
-            <Button onClick={isEditMode ? handleUpdate : handleSave} className="w-full mt-4">
+            <ButtonLoading
+                isLoading={isLoading}
+                onClick={isEditMode ? handleUpdate : handleSave}
+                className="w-full mt-4"
+                loadingText={"Please wait"}
+            >
                 {isEditMode ? 'Update' : 'Save'}
-            </Button>
+            </ButtonLoading>
+
         </DialogContent>
     );
 }

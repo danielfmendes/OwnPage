@@ -3,7 +3,7 @@
 import React, {useState, ChangeEvent, FormEvent} from 'react';
 import {Card, CardContent, CardHeader} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
-import InputField from '@/components/admin-panel/InputField';
+import InputField from '@/components/helpers/InputField';
 import {ArrowRight, Box} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import apiUrl from "@/utils/url";

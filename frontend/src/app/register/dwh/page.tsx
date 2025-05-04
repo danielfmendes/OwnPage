@@ -3,10 +3,10 @@
 import React, { useState, ChangeEvent } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import InputField from '@/components/admin-panel/InputField';
+import InputField from '@/components/helpers/InputField';
 import { Box } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import DatePicker from "@/components/admin-panel/DatePicker";
+import DatePicker from "@/components/helpers/DatePicker";
 import apiUrl from "@/utils/url";
 
 export default function RegisterCard() {

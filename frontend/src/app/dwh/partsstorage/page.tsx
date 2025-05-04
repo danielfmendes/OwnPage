@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { useStore } from "@/hooks/use-store";
-import DataTable from "@/components/admin-panel/table";
+import DataTable from "@/components/helpers/Table";
 import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown, Trash2} from "lucide-react";
@@ -14,29 +14,31 @@ import apiUrl, {fetchWithToken} from "@/utils/url";
 import WarehousePartEditDialogContent from "@/app/dwh/partsstorage/content-dialog";
 import {WarehousePartWithName} from "@/types/custom";
 import AuthToken from "@/utils/authtoken";
+import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 
 
 export default function PartsStoragePage() {
     const token = AuthToken.getAuthToken();
     const [data, setData] = React.useState<WarehousePartWithName[]>([]);
-    const [loading, setLoading] = React.useState(true);
+    const [isLoadingData, setIsLoadingData] = React.useState(true);
+    const [isLoadingDelete, setIsLoadingDelete] = React.useState(false);
 
     const fetchData = () => {
-        setLoading(true);
+        setIsLoadingData(true);
         fetchWithToken(`/warehouseparts`)
             .then((res) => res.json())
             .then((warehouseparts: WarehousePartWithName[]) => {
                 setData(warehouseparts);
-                setLoading(false);
             })
             .catch((err) => {
-                console.error("Error loading bikes:", err);
-                setLoading(false);
-            });
+                console.error("Error isLoading bikes:", err);
+            })
+            .finally(() => setIsLoadingData(false));
     };
 
     const handleDelete = (event: React.MouseEvent, id: number) => {
         event.stopPropagation();
+        setIsLoadingDelete(true);
         fetch(`${apiUrl}/warehouseparts?id=${id}`, {
             method: 'DELETE',
             headers: {
@@ -48,7 +50,8 @@ export default function PartsStoragePage() {
                 if (!res.ok) throw new Error("Fehler beim Löschen");
                 fetchData();
             })
-            .catch(err => console.error("Löschfehler:", err));
+            .catch(err => console.error("Löschfehler:", err))
+            .finally(() => setIsLoadingDelete(false));
     };
 
     const columns: ColumnDef<WarehousePartWithName>[] = [
@@ -86,12 +89,13 @@ export default function PartsStoragePage() {
                 const warehousePart:WarehousePartWithName = row.original
                 warehousePart.id
                 return (
-                    <Button
+                    <ButtonLoading
                         onClick={(event) => handleDelete(event, warehousePart.id)}
+                        isLoading={isLoadingDelete}
                         className="bg-red-400 text-black dark:text-white p-2 rounded"
                     >
                         <Trash2 className="w-5 h-5" />
-                    </Button>
+                    </ButtonLoading>
                 )
             },
         },
@@ -108,7 +112,7 @@ export default function PartsStoragePage() {
                     title="Teilelager"
                     columns={columns}
                     data={data}
-                    isLoading={loading}
+                    isLoading={isLoadingData}
                     filterColumn={"storage_location"}
                     onRefresh={() => {
                         fetchData()
