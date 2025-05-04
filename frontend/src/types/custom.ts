@@ -1,4 +1,4 @@
-import {Bike, WarehousePart} from "@/types/datatables";
+import {Bike, RoleManagement, WarehousePart} from "@/types/datatables";
 
 export type WarehousePartWithName = WarehousePart & {
     part_name: string;
@@ -6,4 +6,8 @@ export type WarehousePartWithName = WarehousePart & {
 
 export type BikeWithModelName = Bike & {
     model_name: string;
+};
+
+export type RoleManagementWithName = RoleManagement & {
+    project_name: string;
 };

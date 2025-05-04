@@ -108,9 +108,9 @@ export function UserNav() {
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem className="hover:cursor-pointer" asChild>
-              <Link href="/account" className="flex items-center">
+              <Link href="/dwh/rolemanagement" className="flex items-center">
                 <UserIcon className="w-4 h-4 mr-3 text-muted-foreground" />
-                Account
+                Role Management
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem className="hover:cursor-pointer" asChild>

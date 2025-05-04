@@ -4,15 +4,26 @@ import (
 	"controller/models"
 	"controller/utils"
 	"github.com/lib/pq"
+	"log"
 	"net/http"
 )
 
+func RoleManagementHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		requiredRole := r.URL.Query().Get("requiredRole")
+		if requiredRole != "" {
+			GetProjectsForUserByRole(w, r)
+		} else {
+			GetRoleManagement(w, r)
+		}
+	default:
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+	}
+}
+
 func GetProjectsForUserByRole(w http.ResponseWriter, r *http.Request) {
 	requiredRole := r.URL.Query().Get("requiredRole")
-	if requiredRole == "" {
-		http.Error(w, "Required Role fehlt", http.StatusBadRequest)
-		return
-	}
 
 	// Token validieren und E-Mail extrahieren
 	userEmail, err := utils.ValidateToken(w, r)
@@ -52,4 +63,24 @@ func GetProjectsForUserByRole(w http.ResponseWriter, r *http.Request) {
 		err := scanner.Scan(&p.ID, &p.Name)
 		return p, err
 	}, pq.Array(projectIDs))
+}
+
+func GetRoleManagement(w http.ResponseWriter, r *http.Request) {
+	userEmail, err := utils.ValidateToken(w, r)
+	if err != nil {
+		return
+	}
+
+	log.Printf("→ GetRoleManagement: Daten werden geladen für Benutzer %s\n", userEmail)
+
+	utils.HandleGet(w, r, `
+		SELECT useremail, projectid, role, name
+		FROM role_management
+		JOIN public.projects p ON p.id = role_management.projectid
+		WHERE role_management.useremail = $1
+	`, func(scanner utils.Scanner) (any, error) {
+		var p models.RoleManagementWithName
+		err := scanner.Scan(&p.UserEmail, &p.ProjectID, &p.Role, &p.ProjectName)
+		return p, err
+	}, userEmail)
 }

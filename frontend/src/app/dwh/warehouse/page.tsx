@@ -132,7 +132,8 @@ export default function PartsStoragePage() {
                     <ButtonLoading
                         onClick={(event) => handleDelete(event, bike.id)}
                         isLoading={isLoadingDelete}
-                        className="bg-red-400 text-black dark:text-white p-2 rounded"
+                        className="text-black dark:text-white p-2 rounded"
+                        variant="destructive"
                     >
                         <Trash2 className="w-5 h-5" />
                     </ButtonLoading>
