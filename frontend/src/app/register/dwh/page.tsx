@@ -8,8 +8,11 @@ import { Box } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import DatePicker from "@/components/helpers/DatePicker";
 import apiUrl from "@/utils/url";
+import AuthToken from "@/utils/authtoken";
+import {useNotification} from "@/components/helpers/NotificationProvider";
 
 export default function RegisterCard() {
+    const {addNotification} = useNotification();
     const router = useRouter();
     const [name, setName] = useState<string>('');
     const [email, setEmail] = useState<string>('');
@@ -31,7 +34,15 @@ export default function RegisterCard() {
                 dob: selectedDate,
             }),
         })
-            .then(res => res.ok ? router.push('/dwh/dashboard') : res.json().then(err => Promise.reject(err)))
+            .then(res => {
+                if (!res.ok) throw new Error();
+                return res.json();
+            })
+            .then(data => {
+                AuthToken.setAuthToken(data.token);
+                window.location.href = '/dwh/dashboard';
+            })
+            .catch(err => addNotification(`Fehler beim Registrieren: ${err}`, "error"))
     };
 
 

@@ -74,8 +74,20 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// JWT-Token erstellen
+	tokenString, err := utils.CreateJWT(user.Email)
+	if err != nil {
+		http.Error(w, "Fehler beim Erstellen des Tokens", http.StatusInternalServerError)
+		return
+	}
+
+	// Antwort mit Token zurückgeben
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(`{"message": "Registrierung erfolgreich"}`))
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Registrierung erfolgreich",
+		"token":   tokenString,
+	})
 }
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
@@ -115,6 +127,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// JWT-Token erstellen
 	tokenString, err := utils.CreateJWT(user.Email)
 	if err != nil {
 		http.Error(w, "Fehler beim Erstellen des Tokens", http.StatusInternalServerError)
