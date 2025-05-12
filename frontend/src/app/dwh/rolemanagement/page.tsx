@@ -1,5 +1,4 @@
 "use client";
-import BikeDialogContent from "@/app/dwh/warehouse/content-dialog";
 import DataTable from "@/components/helpers/Table";
 import * as React from "react";
 import type {ColumnDef} from "@tanstack/react-table";
@@ -10,21 +9,27 @@ import {ContentLayout} from "@/components/admin-panel/content-layout";
 import {Button} from "@/components/ui/button";
 import RoleManagementDialogContent from "@/app/dwh/rolemanagement/content-dialog";
 import {Dialog} from "@/components/ui/dialog";
+import {useRoleStore} from "@/utils/rolemananagemetstate";
 
 export default function RoleManagement() {
     const {addNotification} = useNotification();
-    const [data, setData] = React.useState<RoleManagementWithName[]>([]);
-    const [isLoadingData, setIsLoadingData] = React.useState(true);
+    const data = useRoleStore((state) => state.roles);
+    const setData = useRoleStore((state) => state.setRoles);
+    const isLoadingData = useRoleStore((state) => state.isLoading);
+    const setIsLoadingData = useRoleStore((state) => state.setIsLoading);
     const [showDialog, setShowDialog] = React.useState(false);
 
     const fetchData = React.useCallback(() => {
+        // TODO: only temporary solution
+        if(!data){
         setIsLoadingData(true);
         fetchWithToken(`/projects`)
             .then((res) => res.json())
             .then((roles: RoleManagementWithName[]) => setData(roles))
             .catch(err => addNotification(`Error loading bikes: ${err}`, "error"))
             .finally(() => setIsLoadingData(false));
-    }, [addNotification]);
+        }
+    }, []);
 
     const columns: ColumnDef<RoleManagementWithName>[] = [
         {

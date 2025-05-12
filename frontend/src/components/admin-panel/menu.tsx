@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Ellipsis, LogOut } from "lucide-react";
 import {usePathname, useRouter} from "next/navigation";
-import AuthToken from "@/utils/authtoken";
 import { cn } from "@/lib/utils";
 import { getMenuList } from "@/lib/menu-list";
 import { Button } from "@/components/ui/button";
@@ -15,18 +14,19 @@ import {
   TooltipContent,
   TooltipProvider
 } from "@/components/ui/tooltip";
+import {handleLogOut} from "@/utils/helpers";
 
 interface MenuProps {
   isOpen: boolean | undefined;
 }
 
 export function Menu({ isOpen }: MenuProps) {
+  const router = useRouter();
   const pathname = usePathname();
   const menuList = getMenuList(pathname);
-  const router = useRouter();
+
   const handleLogout = () => {
-    AuthToken.removeAuthToken();
-    router.push("/login/dwh");
+    handleLogOut(router)
   };
 
 

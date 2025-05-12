@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { LogOut, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,50 +20,20 @@ import {
 import { useTheme } from "next-themes";
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import * as React from "react";
-import { jwtDecode } from "jwt-decode";
-import { fetchWithToken } from "@/utils/url";
-import { User } from "@/types/datatables";
-import AuthToken from "@/utils/authtoken";
-import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { useNotification } from "@/components/helpers/NotificationProvider";
+import { useUserStore } from "@/utils/userstate";
+import {handleLogOut} from "@/utils/helpers";
+import {useRouter} from "next/navigation";
 
 export function UserNav() {
-  const { addNotification } = useNotification();
   const { setTheme, theme } = useTheme();
-  const [email, setEmail] = React.useState<string>("");
-  const [user, setUser] = React.useState<User>();
-  const [isLoading, setIsLoading] = useState(true);
-  const token = AuthToken.getAuthToken();
   const router = useRouter();
+  const user = useUserStore((state) => state.user);
+  const isLoading = useUserStore((state) => state.isLoading);
 
   const handleLogout = () => {
-    AuthToken.removeAuthToken();
-    router.push("/login/dwh");
+    handleLogOut(router);
   };
-
-  useEffect(() => {
-    if (!token) {
-      addNotification("No token found.","warning")
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const decoded = jwtDecode(token);
-      if (decoded.sub) {
-        setEmail(decoded.sub);
-        fetchWithToken(`/user?email=${decoded.sub}`)
-            .then((res) => res.json())
-            .then((data) => setUser(data[0]))
-            .catch(err => addNotification(`Error fetching user data: ${err}`, "error"))
-            .finally(() => setIsLoading(false));
-      }
-    } catch (err) {
-      addNotification(`Invalid or expired token: ${err}`, "error")
-      setIsLoading(false);
-    }
-  }, [token]);
 
   return (
       <DropdownMenu>
@@ -102,7 +71,7 @@ export function UserNav() {
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">{user?.username}</p>
-              <p className="text-xs leading-none text-muted-foreground">{email}</p>
+              <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
