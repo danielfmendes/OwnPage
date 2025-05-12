@@ -1,18 +1,15 @@
 "use client";
-import { ContentLayout } from "@/components/admin-panel/content-layout";
-import {
-    TooltipProvider,
-} from "@/components/ui/tooltip";
-import { useSidebar } from "@/hooks/use-sidebar";
-import { useStore } from "@/hooks/use-store";
+import {ContentLayout} from "@/components/admin-panel/content-layout";
+import {useSidebar} from "@/hooks/use-sidebar";
+import {useStore} from "@/hooks/use-store";
 import DataTable from "@/components/helpers/Table";
-import type { ColumnDef } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
-import { ArrowUpDown, Trash2 } from "lucide-react";
+import type {ColumnDef} from "@tanstack/react-table";
+import {Button} from "@/components/ui/button";
+import {ArrowUpDown, Trash2} from "lucide-react";
 import * as React from "react";
-import apiUrl, { fetchWithToken } from "@/utils/url";
-import { useNotification } from "@/components/helpers/NotificationProvider";
-import { ButtonLoading } from "@/components/helpers/ButtonLoading";
+import apiUrl, {fetchWithToken} from "@/utils/url";
+import {useNotification} from "@/components/helpers/NotificationProvider";
+import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import AuthToken from "@/utils/authtoken";
 import BikeDialogContent from "@/app/dwh/warehouse/content-dialog";
 import {BikeWithModelName, RoleManagementWithName} from "@/types/custom";
@@ -20,7 +17,7 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 
 export default function PartsStoragePage() {
-    const { addNotification } = useNotification();
+    const {addNotification} = useNotification();
     const token = AuthToken.getAuthToken();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const [data, setData] = React.useState<BikeWithModelName[]>([]);
@@ -100,19 +97,19 @@ export default function PartsStoragePage() {
         },
         {
             accessorKey: "serial_number",
-            header: ({ column }) => (
+            header: ({column}) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Serial Number <ArrowUpDown className="ml-2 h-4 w-4" />
+                    Serial Number <ArrowUpDown className="ml-2 h-4 w-4"/>
                 </Button>
             ),
         },
         {
             accessorKey: "production_date",
             header: "Production Date",
-            cell: ({ row }) => {
+            cell: ({row}) => {
                 const date = new Date(row.getValue("production_date"))
                 return date.toLocaleDateString()
             },
@@ -128,7 +125,7 @@ export default function PartsStoragePage() {
         {
             id: "actions",
             enableHiding: false,
-            cell: ({ row }) => {
+            cell: ({row}) => {
                 const bike: BikeWithModelName = row.original
                 const roleForProject = roles.find(role => role.project_id === bike.project_id);
                 const isDisabled = roleForProject?.role === "user";
@@ -141,7 +138,7 @@ export default function PartsStoragePage() {
                         variant="destructive"
                         disabled={isDisabled}
                     >
-                        <Trash2 className="w-5 h-5" />
+                        <Trash2 className="w-5 h-5"/>
                     </ButtonLoading>
                 )
             },
@@ -153,31 +150,29 @@ export default function PartsStoragePage() {
 
     return (
         <ContentLayout title="Warenlager">
-            <TooltipProvider>
-                <DataTable
-                    title="Warenlager"
-                    columns={columns}
-                    data={data}
-                    isLoading={isLoadingData}
-                    filterColumn={"serial_number"}
-                    onRefresh={() => {
-                        fetchData()
-                    }}
-                    rowDialogContent={(rowData, onClose) => (
-                        <BikeDialogContent
-                            rowData={rowData}
-                            onClose={onClose}
-                            onRefresh={fetchData}
-                        />
-                    )}
-                    addDialogContent={(onClose) => (
-                        <BikeDialogContent
-                            onClose={onClose}
-                            onRefresh={fetchData}
-                        />
-                    )}
-                />
-            </TooltipProvider>
+            <DataTable
+                title="Warenlager"
+                columns={columns}
+                data={data}
+                isLoading={isLoadingData}
+                filterColumn={"serial_number"}
+                onRefresh={() => {
+                    fetchData()
+                }}
+                rowDialogContent={(rowData, onClose) => (
+                    <BikeDialogContent
+                        rowData={rowData}
+                        onClose={onClose}
+                        onRefresh={fetchData}
+                    />
+                )}
+                addDialogContent={(onClose) => (
+                    <BikeDialogContent
+                        onClose={onClose}
+                        onRefresh={fetchData}
+                    />
+                )}
+            />
             {showCascadeDialog && (
                 <Dialog open={showCascadeDialog} onOpenChange={() => setShowCascadeDialog(false)}>
                     <DialogContent className="sm:max-w-[500px]">

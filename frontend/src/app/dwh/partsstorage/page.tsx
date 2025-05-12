@@ -1,10 +1,7 @@
 "use client";
-import { ContentLayout } from "@/components/admin-panel/content-layout";
-import {
-    TooltipProvider,
-} from "@/components/ui/tooltip";
-import { useSidebar } from "@/hooks/use-sidebar";
-import { useStore } from "@/hooks/use-store";
+import {ContentLayout} from "@/components/admin-panel/content-layout";
+import {useSidebar} from "@/hooks/use-sidebar";
+import {useStore} from "@/hooks/use-store";
 import DataTable from "@/components/helpers/Table";
 import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
@@ -64,12 +61,12 @@ export default function PartsStoragePage() {
         },
         {
             accessorKey: "part_type",
-            header: ({ column }) => (
+            header: ({column}) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Part Type<ArrowUpDown className="ml-2 h-4 w-4" />
+                    Part Type<ArrowUpDown className="ml-2 h-4 w-4"/>
                 </Button>
             ),
         },
@@ -88,11 +85,11 @@ export default function PartsStoragePage() {
         {
             id: "actions",
             enableHiding: false,
-            cell: ({ row }) => {
-                const warehousePart:WarehousePartWithName = row.original
+            cell: ({row}) => {
+                const warehousePart: WarehousePartWithName = row.original
                 const roleForProject = roles.find(role => role.project_id === warehousePart.project_id);
                 const isDisabled = roleForProject?.role === "user";
-                
+
                 return (
                     <ButtonLoading
                         onClick={(event) => handleDelete(event, warehousePart.id)}
@@ -101,7 +98,7 @@ export default function PartsStoragePage() {
                         variant="destructive"
                         disabled={isDisabled}
                     >
-                        <Trash2 className="w-5 h-5" />
+                        <Trash2 className="w-5 h-5"/>
                     </ButtonLoading>
                 )
             },
@@ -113,31 +110,29 @@ export default function PartsStoragePage() {
 
     return (
         <ContentLayout title="Teilelager">
-            <TooltipProvider>
-                <DataTable
-                    title="Teilelager"
-                    columns={columns}
-                    data={data}
-                    isLoading={isLoadingData}
-                    filterColumn={"storage_location"}
-                    onRefresh={() => {
-                        fetchData()
-                    }}
-                    rowDialogContent={(rowData, onClose) => (
-                        <WarehousePartDialogContent
-                            rowData={rowData}
-                            onClose={onClose}
-                            onRefresh={fetchData}
-                        />
-                    )}
-                    addDialogContent={(onClose) => (
-                        <WarehousePartDialogContent
-                            onClose={onClose}
-                            onRefresh={fetchData}
-                        />
+            <DataTable
+                title="Teilelager"
+                columns={columns}
+                data={data}
+                isLoading={isLoadingData}
+                filterColumn={"storage_location"}
+                onRefresh={() => {
+                    fetchData()
+                }}
+                rowDialogContent={(rowData, onClose) => (
+                    <WarehousePartDialogContent
+                        rowData={rowData}
+                        onClose={onClose}
+                        onRefresh={fetchData}
+                    />
                 )}
-                />
-            </TooltipProvider>
+                addDialogContent={(onClose) => (
+                    <WarehousePartDialogContent
+                        onClose={onClose}
+                        onRefresh={fetchData}
+                    />
+                )}
+            />
         </ContentLayout>
     );
 }
