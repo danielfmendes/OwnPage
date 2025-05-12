@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -24,6 +25,7 @@ import {
     CartesianGrid
 } from "recharts";
 import { useTheme } from "next-themes";
+import { useState } from "react";
 
 const yearlySales = [
     { year: "2021", sales: 4000 },
@@ -45,6 +47,7 @@ const topProducts = [
 
 export default function DashboardPage() {
     const sidebar = useStore(useSidebar, (x) => x);
+    const [timeRange, setTimeRange] = useState("1m");
     const { theme } = useTheme();
 
     const isDark = theme === "dark";
@@ -58,19 +61,33 @@ export default function DashboardPage() {
 
     return (
         <ContentLayout title="Dashboard">
-            <Breadcrumb>
-                <BreadcrumbList>
-                    <BreadcrumbItem>
-                        <BreadcrumbLink asChild>
-                            <Link href="/">Home</Link>
-                        </BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                        <BreadcrumbPage>Dashboard</BreadcrumbPage>
-                    </BreadcrumbItem>
-                </BreadcrumbList>
-            </Breadcrumb>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                <Breadcrumb>
+                    <BreadcrumbList>
+                        <BreadcrumbItem>
+                            <BreadcrumbLink asChild>
+                                <Link href="/">Home</Link>
+                            </BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                            <BreadcrumbPage>Dashboard</BreadcrumbPage>
+                        </BreadcrumbItem>
+                    </BreadcrumbList>
+                </Breadcrumb>
+
+                <div className="w-full md:w-auto">
+                    <Tabs value={timeRange} onValueChange={setTimeRange} className="w-full md:w-auto">
+                        <TabsList className="flex flex-wrap justify-start md:justify-end gap-1">
+                            {["1d", "1w", "1m", "1y", "mtd", "ytd", "since"].map((value) => (
+                                <TabsTrigger key={value} value={value}>
+                                    {value.toUpperCase()}
+                                </TabsTrigger>
+                            ))}
+                        </TabsList>
+                    </Tabs>
+                </div>
+            </div>
 
             <TooltipProvider>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
