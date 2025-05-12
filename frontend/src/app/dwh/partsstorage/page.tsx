@@ -12,15 +12,17 @@ import {ArrowUpDown, Trash2} from "lucide-react";
 import * as React from "react";
 import apiUrl, {fetchWithToken} from "@/utils/url";
 import WarehousePartDialogContent from "@/app/dwh/partsstorage/content-dialog";
-import {WarehousePartWithName} from "@/types/custom";
+import {RoleManagementWithName, WarehousePartWithName} from "@/types/custom";
 import AuthToken from "@/utils/authtoken";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
+import {useRoleStore} from "@/utils/rolemananagemetstate";
 
 
 export default function PartsStoragePage() {
     const {addNotification} = useNotification();
     const token = AuthToken.getAuthToken();
+    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const [data, setData] = React.useState<WarehousePartWithName[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(true);
     const [loadingDeleteId, setLoadingDeleteId] = React.useState<number | null>(null);
@@ -88,12 +90,15 @@ export default function PartsStoragePage() {
             enableHiding: false,
             cell: ({ row }) => {
                 const warehousePart:WarehousePartWithName = row.original
+                const roleForProject = roles.find(role => role.project_id === warehousePart.project_id);
+                const isDisabled = roleForProject?.role !== "admin";
                 return (
                     <ButtonLoading
                         onClick={(event) => handleDelete(event, warehousePart.id)}
                         isLoading={loadingDeleteId === warehousePart.id}
                         className="text-black dark:text-white p-2 rounded"
                         variant="destructive"
+                        disabled={isDisabled}
                     >
                         <Trash2 className="w-5 h-5" />
                     </ButtonLoading>
