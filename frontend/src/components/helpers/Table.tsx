@@ -5,7 +5,6 @@ import {
     type ColumnFiltersState,
     type SortingState,
     type VisibilityState,
-    flexRender,
     getCoreRowModel,
     getFilteredRowModel,
     getPaginationRowModel,
@@ -13,30 +12,23 @@ import {
     useReactTable,
 } from "@tanstack/react-table"
 import {Plus} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
-import {Skeleton} from "@/components/ui/skeleton";
+import {Button} from "@/components/ui/button"
+import {Input} from "@/components/ui/input"
+import {SimpleTable} from "@/components/helpers/SimpleTable";
 
 interface DataTableProps {
-    title: string;
+    title?: string;
     columns: ColumnDef<any>[];
     data: any[];
     isLoading: boolean;
     filterColumn: string;
     onRefresh: () => void;
+    noHeaders?: boolean;
     rowDialogContent?: (row: any, onClose: () => void) => React.ReactNode;
     addDialogContent?: (onClose: () => void) => React.ReactNode;
 }
 
-export default function DataTable({title, columns, data, isLoading, filterColumn, onRefresh, rowDialogContent, addDialogContent}: DataTableProps) {
+export default function DataTable({title, columns, data, isLoading, filterColumn, onRefresh, noHeaders, rowDialogContent, addDialogContent}: DataTableProps) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -46,12 +38,16 @@ export default function DataTable({title, columns, data, isLoading, filterColumn
     const [selectedRow, setSelectedRow] = React.useState<any>(null);
 
     const handleRowClick = (row: any) => {
-        setSelectedRow(row);
-        setIsRowDialogOpen(true);
+        if (rowDialogContent) {
+            setSelectedRow(row);
+            setIsRowDialogOpen(true);
+        }
     };
 
     const handleAddClick = () => {
-        setIsAddDialogOpen(true);
+        if (addDialogContent) {
+            setIsAddDialogOpen(true);
+        }
     };
 
     React.useEffect(() => {
@@ -94,61 +90,13 @@ export default function DataTable({title, columns, data, isLoading, filterColumn
                     onClick={handleAddClick}
                     className="ml-auto bg-zinc-300 dark:bg-zinc-800 hover:bg-zinc-400 dark:hover:bg-zinc-600 text-zinc-800 dark:text-white"
                 >
-                    <Plus className="mr-2 h-4 w-4" />
+                    <Plus className="mr-2 h-4 w-4"/>
                     Add
                 </Button>
 
             </div>
             <div className="rounded-md border border-zinc-900 dark:border-zinc-500">
-                <Table>
-                    <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-zinc-900 dark:border-zinc-500">
-                                {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(header.column.columnDef.header, header.getContext())}
-                                    </TableHead>
-                                ))}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {isLoading ? (
-                            Array.from({ length: 10 }).map((_, index) => (
-                                <TableRow key={index} className="cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 border-zinc-900 dark:border-zinc-500">
-                                    {columns.map((_, colIndex) => (
-                                        <TableCell key={colIndex}>
-                                            <Skeleton className="h-6 w-full" />
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))
-                        ) : table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={row.getIsSelected() && "selected"}
-                                    onClick={() => handleRowClick(row)}
-                                    className="cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 border-zinc-900 dark:border-zinc-500"
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} >
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    No results.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                <SimpleTable table={table} data={data} isLoading={isLoading} columns={columns} onRowClick={handleRowClick} noHeaders={noHeaders}/>
             </div>
             <div className="flex items-center justify-end space-x-2 py-4">
                 {table.getAllColumns().some(col => col.id === 'select') && (
@@ -180,8 +128,8 @@ export default function DataTable({title, columns, data, isLoading, filterColumn
                 {selectedRow && rowDialogContent && rowDialogContent(selectedRow.original, () => setIsRowDialogOpen(false))}
             </Dialog>
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                { addDialogContent && addDialogContent(() => setIsAddDialogOpen(false))}
+                {addDialogContent && addDialogContent(() => setIsAddDialogOpen(false))}
             </Dialog>
         </div>
-    )
+)
 }
