@@ -58,7 +58,6 @@ func setupRoutes() http.Handler {
 	r.HandleFunc("/frames", handlers.GetFrames)
 	r.HandleFunc("/forks", handlers.GetForks)
 	r.HandleFunc("/orders", handlers.GetOrders)
-	r.HandleFunc("/orderitems", handlers.GetOrderItems)
 	r.HandleFunc("/partcosts", handlers.GetPartCosts)
 	r.HandleFunc("/projects/", handlers.GetRoleManagementByID)
 	r.HandleFunc("/projects", handlers.RoleManagementHandler)

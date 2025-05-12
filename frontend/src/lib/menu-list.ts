@@ -1,4 +1,4 @@
-import { Gauge, PersonStanding, ArchiveIcon, BoxIcon, LucideIcon } from "lucide-react";
+import {Gauge, PersonStanding, ArchiveIcon, BoxIcon, PackageCheck, LucideIcon} from "lucide-react";
 
 type Submenu = {
     href: string;
@@ -32,6 +32,11 @@ export function getMenuList(pathname: string): Group[] {
                     href: `/dwh/dashboard${currentQuery}`,
                     label: "Dashboard",
                     icon: Gauge,
+                },
+                {
+                    href: `/dwh/orders${currentQuery}`,
+                    label: "Orders",
+                    icon: PackageCheck,
                 },
                 {
                     href: `/dwh/customer${currentQuery}`,

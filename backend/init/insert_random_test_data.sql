@@ -5,9 +5,9 @@ VALUES ('Standardprojekt');
 -- Benutzer einfügen
 INSERT INTO users (email, username, password, dob)
 VALUES
-    ('testcreator@example.com', 'TestCreator', '$2a$10$bV6Y1MkhtHazexatXn.aAe9JApKjWUlgY7qKBl7gnqRAOS1DUj30q', '2025-05-07 00:00:00.000000'),
-    ('testadmin@example.com', 'TestAdmin', '$2a$10$bV6Y1MkhtHazexatXn.aAe9JApKjWUlgY7qKBl7gnqRAOS1DUj30q', '2025-05-07 00:00:00.000000'),
-    ('testuser@example.com', 'TestUser', '$2a$10$bV6Y1MkhtHazexatXn.aAe9JApKjWUlgY7qKBl7gnqRAOS1DUj30q', '2025-05-07 00:00:00.000000');
+    ('testcreator@example.com', 'TestCreator', '$2a$10$bV6Y1MkhtHazexatXn.aAe9JApKjWUlgY7qKBl7gnqRAOS1DUj30q', '1970-01-01 00:00:00.000000'),
+    ('testadmin@example.com', 'TestAdmin', '$2a$10$bV6Y1MkhtHazexatXn.aAe9JApKjWUlgY7qKBl7gnqRAOS1DUj30q', '1970-01-01 00:00:00.000000'),
+    ('testuser@example.com', 'TestUser', '$2a$10$bV6Y1MkhtHazexatXn.aAe9JApKjWUlgY7qKBl7gnqRAOS1DUj30q', '1970-01-01 00:00:00.000000');
 
 -- Rollenzuweisung
 INSERT INTO role_management (useremail, projectid, role)
@@ -19,13 +19,13 @@ VALUES
 -- Kunden einfügen
 INSERT INTO customers (email, password, first_name, name, dob, location, project_id)
 VALUES
-    ('max@example.com', 'pass123', 'Max', 'Mustermann', NULL, 'Berlin', 1),
-    ('erika@example.com', 'pass123', 'Erika', 'Musterfrau', NULL, 'München', 1),
-    ('hans@example.com', 'pass123', 'Hans', 'Meier', NULL, 'Hamburg', 1),
-    ('julia@example.com', 'pass123', 'Julia', 'Schulz', NULL, 'Köln', 1),
-    ('tom@example.com', 'pass123', 'Tom', 'Becker', NULL, 'Frankfurt', 1),
-    ('anna@example.com', 'pass123', 'Anna', 'Fischer', NULL, 'Leipzig', 1),
-    ('lukas@example.com', 'pass123', 'Lukas', 'Wolf', NULL, 'Stuttgart', 1);
+    ('max@example.com', 'pass123', 'Max', 'Mustermann', '1970-01-01 00:00:00.000000', 'Berlin', 1),
+    ('erika@example.com', 'pass123', 'Erika', 'Musterfrau', '1970-01-01 00:00:00.000000', 'München', 1),
+    ('hans@example.com', 'pass123', 'Hans', 'Meier', '1970-01-01 00:00:00.000000', 'Hamburg', 1),
+    ('julia@example.com', 'pass123', 'Julia', 'Schulz', '1970-01-01 00:00:00.000000', 'Köln', 1),
+    ('tom@example.com', 'pass123', 'Tom', 'Becker', '1970-01-01 00:00:00.000000', 'Frankfurt', 1),
+    ('anna@example.com', 'pass123', 'Anna', 'Fischer', '1970-01-01 00:00:00.000000', 'Leipzig', 1),
+    ('lukas@example.com', 'pass123', 'Lukas', 'Wolf', '1970-01-01 00:00:00.000000', 'Stuttgart', 1);
 
 -- Fahrräder
 INSERT INTO bikes (model_id, serial_number, production_date, quantity, warehouse_location, project_id)
@@ -56,19 +56,19 @@ INSERT INTO part_costs (part_type, part_id, cost, project_id)
 SELECT 'fork', id, 149.99 + id * 30, 1 FROM forks;
 
 -- Bestellungen (angenommen Kunden-IDs sind 1 bis 5)
-INSERT INTO orders (customer_id, order_date, total_price, project_id)
+INSERT INTO orders (customer_id, order_date, project_id)
 VALUES
-    (1, '2024-09-01', 899.99, 1),
-    (2, '2024-09-05', 1099.00, 1),
-    (3, '2024-09-10', 1199.50, 1),
-    (4, '2024-09-15', 1349.75, 1),
-    (5, '2024-09-18', 989.99, 1);
+    (1, '2024-09-01',1),
+    (2, '2024-09-05',1),
+    (3, '2024-09-10',1),
+    (4, '2024-09-15',1),
+    (5, '2024-09-18',1);
 
 -- Bestellpositionen
-INSERT INTO order_items (order_id, bike_id, price)
+INSERT INTO order_items (order_id, bike_id, number, price)
 VALUES
-    (1, 1, 899.99),
-    (2, 2, 1099.00),
-    (3, 3, 1199.50),
-    (4, 4, 1349.75),
-    (5, 5, 989.99);
+    (1, 1,1, 899.99),
+    (2, 2,2, 1099.00),
+    (3, 3,3, 1199.50),
+    (4, 4,4, 1349.75),
+    (5, 5,5, 989.99);

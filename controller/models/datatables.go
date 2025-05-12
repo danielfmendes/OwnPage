@@ -77,7 +77,6 @@ type Order struct {
 	ID         int       `json:"id"`
 	CustomerID int       `json:"customer_id"`
 	OrderDate  time.Time `json:"order_date"`
-	TotalPrice float64   `json:"total_price"`
 	ProjectID  int       `json:"project_id"`
 }
 
@@ -85,6 +84,7 @@ type OrderItem struct {
 	ID      int     `json:"id"`
 	OrderID int     `json:"order_id"`
 	BikeID  int     `json:"bike_id"`
+	Number  float64 `json:"number"`
 	Price   float64 `json:"price"`
 }
 

@@ -16,7 +16,7 @@ import {BikeWithModelName, RoleManagementWithName} from "@/types/custom";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 
-export default function PartsStoragePage() {
+export default function WareHousePage() {
     const {addNotification} = useNotification();
     const token = AuthToken.getAuthToken();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);

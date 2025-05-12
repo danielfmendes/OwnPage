@@ -11,3 +11,14 @@ export type BikeWithModelName = Bike & {
 export type RoleManagementWithName = RoleManagement & {
     project_name: string;
 };
+
+export interface OrderOverview {
+    order_id: number;
+    orderitem_id: number;
+    project_id: number;
+    customer_name: string;
+    order_date: string;
+    bike_model_name: string;
+    number: number;
+    price: number;
+}

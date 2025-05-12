@@ -28,9 +28,9 @@ CREATE TABLE customers
 (
     id         SERIAL PRIMARY KEY,
     email      TEXT NOT NULL,
-    password   TEXT        NOT NULL,
-    first_name TEXT        NOT NULL,
-    name       TEXT        NOT NULL,
+    password   TEXT NOT NULL,
+    first_name TEXT NOT NULL,
+    name       TEXT NOT NULL,
     dob        TIMESTAMP,
     location   TEXT,
     project_id INT REFERENCES projects (id)
@@ -94,7 +94,6 @@ CREATE TABLE orders
     id          SERIAL PRIMARY KEY,
     customer_id INT REFERENCES customers (id),
     order_date  DATE DEFAULT CURRENT_DATE,
-    total_price NUMERIC,
     project_id  INT REFERENCES projects (id)
 );
 
@@ -104,6 +103,7 @@ CREATE TABLE order_items
     id       SERIAL PRIMARY KEY,
     order_id INT REFERENCES orders (id),
     bike_id  INT REFERENCES bikes (id),
+    number   NUMERIC NOT NULL,
     price    NUMERIC NOT NULL
 );
 

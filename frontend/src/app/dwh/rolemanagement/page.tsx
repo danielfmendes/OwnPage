@@ -12,7 +12,7 @@ import {Dialog} from "@/components/ui/dialog";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 import AddProjektDialogContent from "@/app/dwh/rolemanagement/add-project-dialog";
 
-export default function RoleManagement() {
+export default function RoleManagementPage() {
     const {addNotification} = useNotification();
     const data = useRoleStore((state) => state.roles);
     const setData = useRoleStore((state) => state.setRoles);

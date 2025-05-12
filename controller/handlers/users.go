@@ -25,12 +25,12 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// SQL-Abfrage zum Abrufen des Benutzers basierend auf der E-Mail-Adresse
-	query := `SELECT username, dob, email, password FROM users WHERE email = $1`
+	query := `SELECT username, dob, email FROM users WHERE email = $1`
 
 	// Die HandleGet-Funktion wird verwendet, um die Abfrage auszuführen und den Benutzer abzurufen
 	utils.HandleGet(w, r, query, func(scanner utils.Scanner) (any, error) {
 		var user models.User
-		err := scanner.Scan(&user.Username, &user.Dob, &user.Email, &user.Password)
+		err := scanner.Scan(&user.Username, &user.Dob, &user.Email)
 		return user, err
 	}, email)
 }

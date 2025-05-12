@@ -73,7 +73,6 @@ export interface Order {
     id: number;
     customer_id: number;
     order_date: string;
-    total_price: number;
     project_id: number;
 }
 
@@ -81,6 +80,7 @@ export interface OrderItem {
     id: number;
     order_id: number;
     bike_id: number;
+    number: number;
     price: number;
 }
 
