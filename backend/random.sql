@@ -22,3 +22,18 @@ DELETE FROM bikes where id = 2;
 SELECT * FROM bikes;
 SELECT * FROM order_items;
 SELECT * FROM orders;
+
+-- Neue Projekte hinzufügen für testuser
+INSERT INTO projects (id, name)
+VALUES (2, 'Standardprojekt 2');
+INSERT INTO projects (id, name)
+VALUES (3, 'Standardprojekt 3');
+INSERT INTO projects (id, name)
+VALUES (4, 'Standardprojekt 4');
+
+
+INSERT INTO role_management (useremail, projectid, role)
+VALUES
+    ('testuser@example.com', 2, 'user'),
+    ('testuser@example.com', 3, 'user'),
+    ('testuser@example.com', 4, 'admin');

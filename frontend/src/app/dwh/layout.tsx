@@ -14,11 +14,13 @@ import {useRouter} from "next/navigation";
 export default function DemoLayout({children}: { children: React.ReactNode }) {
     const {addNotification} = useNotification();
     const token = AuthToken.getAuthToken();
-    const router = useRouter()
+    const router = useRouter();
     const setUser = useUserStore((state) => state.setUser);
     const setIsLoadingUser = useUserStore((state) => state.setIsLoading);
     const setRoles = useRoleStore((state) => state.setRoles);
     const setIsLoadingRole = useRoleStore((state) => state.setIsLoading);
+    const setSelectedRoles = useRoleStore((state) => state.setSelectedRoles);
+    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
 
     useEffect(() => {
         if (!token) {
@@ -40,7 +42,7 @@ export default function DemoLayout({children}: { children: React.ReactNode }) {
             fetchWithToken(`/projects`)
                 .then((res) => res.json())
                 .then((roles: RoleManagementWithName[]) => setRoles(roles))
-                .catch(err => addNotification(`Error loading role management: ${err}`, "error"))
+                .catch((err) => addNotification(`Error loading role management: ${err}`, "error"))
                 .finally(() => setIsLoadingRole(false));
         } catch (err) {
             addNotification(`Invalid or expired token: ${err}`, "error");
@@ -48,6 +50,21 @@ export default function DemoLayout({children}: { children: React.ReactNode }) {
             setIsLoadingRole(false);
         }
     }, [token, setUser]);
+
+    // Hier wird die URL-Logik für die Auswahl von Projekten hinzugefügt
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectIdsFromUrl = urlParams.get("project_id");
+
+        if (projectIdsFromUrl) {
+            const selectedIds = projectIdsFromUrl.split("|").map((id) => parseInt(id, 10));
+
+            const selectedProjects = roles.filter((project) =>
+                selectedIds.includes(project.project_id)
+            );
+            setSelectedRoles(selectedProjects);
+        }
+    }, [roles, setSelectedRoles]);
 
     return <AdminPanelLayout>{children}</AdminPanelLayout>;
 }

@@ -28,6 +28,8 @@ import {useRouter} from "next/navigation";
 export function UserNav() {
   const { setTheme, theme } = useTheme();
   const router = useRouter();
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentQuery = urlParams.get('project_id') ? `?project_id=${urlParams.get('project_id')}` : "";
   const user = useUserStore((state) => state.user);
   const isLoading = useUserStore((state) => state.isLoading);
 
@@ -77,7 +79,7 @@ export function UserNav() {
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem className="hover:cursor-pointer" asChild>
-              <Link href="/dwh/rolemanagement" className="flex items-center">
+              <Link href={`/dwh/rolemanagement${currentQuery}`} className="flex items-center">
                 <UserIcon className="w-4 h-4 mr-3 text-muted-foreground" />
                 Role Management
               </Link>
