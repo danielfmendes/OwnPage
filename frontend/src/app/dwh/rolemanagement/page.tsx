@@ -19,6 +19,7 @@ export default function RoleManagement() {
     const isLoadingData = useRoleStore((state) => state.isLoading);
     const setIsLoadingData = useRoleStore((state) => state.setIsLoading);
     const [showDialog, setShowDialog] = React.useState(false);
+    const [manageId, setManageId] = React.useState<number | null>(null);
 
     const fetchData = React.useCallback((isLoading?: boolean) => {
         if (!data || isLoading) {
@@ -47,7 +48,10 @@ export default function RoleManagement() {
                 const roleman: RoleManagementWithName = row.original
                 return roleman.role !== "user" ? (
                     <Button
-                        onClick={() => setShowDialog(true)}
+                        onClick={() => {
+                            setManageId(roleman.project_id)
+                            setShowDialog(true)
+                        }}
                         className="text-white dark:text-black p-2 rounded"
                     >
                         Manage
@@ -84,7 +88,7 @@ export default function RoleManagement() {
             />
             <Dialog open={showDialog} onOpenChange={setShowDialog}>
                 <RoleManagementDialogContent
-                    title={"Rechte bearbeiten"}
+                    manageId={manageId}
                 />
             </Dialog>
         </ContentLayout>

@@ -6,8 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/lib/pq"
-	"log"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 func RoleManagementHandler(w http.ResponseWriter, r *http.Request) {
@@ -69,13 +70,34 @@ func GetProjectsForUserByRole(w http.ResponseWriter, r *http.Request) {
 	}, pq.Array(projectIDs))
 }
 
+func GetRoleManagementByID(w http.ResponseWriter, r *http.Request) {
+	// Beispiel: /projects/3 → wir wollen nur die "3"
+	path := strings.TrimPrefix(r.URL.Path, "/projects/")
+	if path == "" || strings.Contains(path, "/") {
+		http.Error(w, "ID fehlt oder ungültig", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.Atoi(path)
+	if err != nil {
+		http.Error(w, "Ungültige ID", http.StatusBadRequest)
+		return
+	}
+
+	query := `SELECT * FROM role_management WHERE projectid = $1`
+
+	utils.HandleGet(w, r, query, func(scanner utils.Scanner) (any, error) {
+		var roles models.RoleManagement
+		err := scanner.Scan(&roles.UserEmail, &roles.ProjectID, &roles.Role)
+		return roles, err
+	}, id)
+}
+
 func GetRoleManagement(w http.ResponseWriter, r *http.Request) {
 	userEmail, err := utils.ValidateToken(w, r)
 	if err != nil {
 		return
 	}
-
-	log.Printf("→ GetRoleManagement: Daten werden geladen für Benutzer %s\n", userEmail)
 
 	utils.HandleGet(w, r, `
 		SELECT useremail, projectid, role, name
