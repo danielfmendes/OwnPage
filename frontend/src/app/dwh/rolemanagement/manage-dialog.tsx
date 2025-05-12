@@ -1,11 +1,11 @@
 import React from "react";
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 
-interface RoleManagemenProps {
+interface ManageProps {
     title: string;
 }
 
-export default function RoleManagementDialogContent({title}: RoleManagemenProps) {
+export default function ManageDialogContent({title}: ManageProps) {
     return (
         <DialogContent>
             <DialogHeader>

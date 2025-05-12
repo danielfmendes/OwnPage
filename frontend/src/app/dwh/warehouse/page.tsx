@@ -131,7 +131,7 @@ export default function PartsStoragePage() {
             cell: ({ row }) => {
                 const bike: BikeWithModelName = row.original
                 const roleForProject = roles.find(role => role.project_id === bike.project_id);
-                const isDisabled = roleForProject?.role !== "admin";
+                const isDisabled = roleForProject?.role === "user";
 
                 return (
                     <ButtonLoading

@@ -1,16 +1,18 @@
 -- Projekte einfügen
-INSERT INTO projects (id, name)
-VALUES (1, 'Standardprojekt');
+INSERT INTO projects (name)
+VALUES ('Standardprojekt');
 
 -- Benutzer einfügen
 INSERT INTO users (email, username, password, dob)
 VALUES
+    ('testcreator@example.com', 'TestCreator', '$2a$10$bV6Y1MkhtHazexatXn.aAe9JApKjWUlgY7qKBl7gnqRAOS1DUj30q', '2025-05-07 00:00:00.000000'),
     ('testadmin@example.com', 'TestAdmin', '$2a$10$bV6Y1MkhtHazexatXn.aAe9JApKjWUlgY7qKBl7gnqRAOS1DUj30q', '2025-05-07 00:00:00.000000'),
     ('testuser@example.com', 'TestUser', '$2a$10$bV6Y1MkhtHazexatXn.aAe9JApKjWUlgY7qKBl7gnqRAOS1DUj30q', '2025-05-07 00:00:00.000000');
 
 -- Rollenzuweisung
 INSERT INTO role_management (useremail, projectid, role)
 VALUES
+    ('testcreator@example.com', 1, 'creator'),
     ('testadmin@example.com', 1, 'admin'),
     ('testuser@example.com', 1, 'user');
 

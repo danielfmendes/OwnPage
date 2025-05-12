@@ -7,9 +7,10 @@ import {RoleManagementWithName} from "@/types/custom";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {ContentLayout} from "@/components/admin-panel/content-layout";
 import {Button} from "@/components/ui/button";
-import RoleManagementDialogContent from "@/app/dwh/rolemanagement/content-dialog";
+import RoleManagementDialogContent from "@/app/dwh/rolemanagement/manage-dialog";
 import {Dialog} from "@/components/ui/dialog";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
+import AddProjektDialogContent from "@/app/dwh/rolemanagement/add-project-dialog";
 
 export default function RoleManagement() {
     const {addNotification} = useNotification();
@@ -19,37 +20,32 @@ export default function RoleManagement() {
     const setIsLoadingData = useRoleStore((state) => state.setIsLoading);
     const [showDialog, setShowDialog] = React.useState(false);
 
-    const fetchData = React.useCallback(() => {
-        // TODO: only temporary solution
-        if(!data){
-        setIsLoadingData(true);
+    const fetchData = React.useCallback((isLoading?: boolean) => {
+        if (!data || isLoading) {
+            setIsLoadingData(true);
+        }
         fetchWithToken(`/projects`)
             .then((res) => res.json())
             .then((roles: RoleManagementWithName[]) => setData(roles))
             .catch(err => addNotification(`Error loading bikes: ${err}`, "error"))
             .finally(() => setIsLoadingData(false));
-        }
     }, []);
 
     const columns: ColumnDef<RoleManagementWithName>[] = [
-        {
-            accessorKey: "project_id",
-            header: "Projekt Name",
-        },
         {
             accessorKey: "project_name",
             header: "Projekt Name",
         },
         {
             accessorKey: "role",
-            header: "Projekt Name",
+            header: "Role",
         },
         {
             id: "actions",
             enableHiding: false,
-            cell: ({ row }) => {
+            cell: ({row}) => {
                 const roleman: RoleManagementWithName = row.original
-                return roleman.role === "admin" ? (
+                return roleman.role !== "user" ? (
                     <Button
                         onClick={() => setShowDialog(true)}
                         className="text-white dark:text-black p-2 rounded"
@@ -79,6 +75,12 @@ export default function RoleManagement() {
                 onRefresh={() => {
                     fetchData()
                 }}
+                addDialogContent={(onClose) => (
+                    <AddProjektDialogContent
+                        onClose={onClose}
+                        onRefresh={() => fetchData(true)}
+                    />
+                )}
             />
             <Dialog open={showDialog} onOpenChange={setShowDialog}>
                 <RoleManagementDialogContent

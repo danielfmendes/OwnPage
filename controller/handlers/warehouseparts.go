@@ -78,7 +78,7 @@ func UpdateWarehousePart(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Verwende die HandleUpdate-Funktion, um das Update in der DB auszuführen
-	query := `UPDATE warehouse_parts SET part_type = $1, part_id = $2, quantity = $3, storage_location = $4, project_id = $5 WHERE id = $5`
+	query := `UPDATE warehouse_parts SET part_type = $1, part_id = $2, quantity = $3, storage_location = $4, project_id = $5 WHERE id = $6`
 	err = utils.HandleUpdate(w, r, query, part.PartType, part.PartID, part.Quantity, part.StorageLocation, part.ProjectID, part.ID)
 }
 

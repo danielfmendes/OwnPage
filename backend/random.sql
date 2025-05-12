@@ -24,13 +24,12 @@ SELECT * FROM order_items;
 SELECT * FROM orders;
 
 -- Neue Projekte hinzufügen für testuser
-INSERT INTO projects (id, name)
-VALUES (2, 'Standardprojekt 2');
-INSERT INTO projects (id, name)
-VALUES (3, 'Standardprojekt 3');
-INSERT INTO projects (id, name)
-VALUES (4, 'Standardprojekt 4');
-
+INSERT INTO projects (name)
+VALUES ('Standardprojekt 2');
+INSERT INTO projects (name)
+VALUES ('Standardprojekt 3');
+INSERT INTO projects (name)
+VALUES ('Standardprojekt 4');
 
 INSERT INTO role_management (useremail, projectid, role)
 VALUES

@@ -42,3 +42,12 @@ func extractTableFromUpdateQuery(query string) (string, error) {
 	}
 	return matches[1], nil
 }
+
+func extractTableFromInsertQuery(query string) (string, error) {
+	re := regexp.MustCompile(`(?i)^INSERT\s+INTO\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(`)
+	matches := re.FindStringSubmatch(query)
+	if len(matches) != 2 {
+		return "", fmt.Errorf("Tabelle konnte nicht aus INSERT-Query extrahiert werden")
+	}
+	return matches[1], nil
+}

@@ -2,13 +2,14 @@ import React from "react";
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import apiUrl, {fetchWithToken} from "@/utils/url";
-import {WarehousePart} from "@/types/datatables";
+import {Project, WarehousePart} from "@/types/datatables";
 import InputField from "@/components/helpers/InputField";
 import AuthToken from "@/utils/authtoken";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {SelectLoading} from "@/components/helpers/SelectLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import {WarehousePartWithName} from "@/types/custom";
+import {RoleManagementWithName, WarehousePartWithName} from "@/types/custom";
+import {useRoleStore} from "@/utils/rolemananagemetstate";
 
 interface Props {
     rowData?: WarehousePartWithName;
@@ -21,24 +22,29 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
     const token = AuthToken.getAuthToken();
     const isEditMode = !!rowData;
     const [partId, setPartId] = React.useState<number | null>(rowData?.part_id || null);
-    const [projectId, setProjectId] = React.useState<number | null>(rowData?.project_id || null);
+    const [projectId, setProjectId] = React.useState<string>(rowData?.project_id?.toString() || "");
     const [partType, setPartType] = React.useState(rowData?.part_type || '');
     const [quantity, setQuantity] = React.useState(rowData?.quantity || 0);
     const [storageLocation, setStorageLocation] = React.useState(rowData?.storage_location || '');
     const [partIdOptions, setPartIdOptions] = React.useState<{ id: number, name: string }[]>([]);
-    const [projectIdOptions, setProjectIdOptions] = React.useState<{ id: number, name: string }[]>([]);
+    const [projectIdOptions, setProjectIdOptions] = React.useState<Project[]>([]);
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [isLoadingParts, setIsLoadingParts] = React.useState<boolean>(false);
-    const [isLoadingProjects, setIsLoadingProjects] = React.useState<boolean>(false);
+    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
 
     React.useEffect(() => {
-        setIsLoadingProjects(true)
-        fetchWithToken(`/projects?requiredRole=admin`)
-            .then(res => res.json())
-            .then(data => setProjectIdOptions(data))
-            .catch(err => addNotification(`Fehler beim Laden der Service-ID-Optionen: ${err}`, "error"))
-            .finally(() => setIsLoadingProjects(false));
-    }, []);
+        // Filter roles to find != "user" and then map to project_id and project_name
+        if (roles.length != 0) {
+            const adminRoles: Project[] = roles
+                .filter((role) => role.role !== "user")
+                .map((role) => ({
+                    id: role.project_id,
+                    name: role.project_name
+                }));
+
+            setProjectIdOptions(adminRoles);
+        }
+    }, [roles]);
 
     React.useEffect(() => {
         if (!isEditMode && partType) {
@@ -52,9 +58,8 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
     }, [partType]);
 
     const resetForm = () => {
-        setProjectId(null);
+        setProjectId("");
         setPartId(null);
-        setProjectId(null);
         setPartType('');
         setQuantity(0);
         setStorageLocation('');
@@ -62,7 +67,7 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
 
     const handleSave = () => {
         const newData = {
-            project_id: projectId,
+            project_id: parseInt(projectId),
             part_type: partType,
             part_id: partId,
             quantity,
@@ -95,7 +100,7 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
             part_id: partId ?? 0,
             quantity,
             storage_location: storageLocation,
-            project_id: projectId ?? 0,
+            project_id: parseInt(projectId) ?? 0,
         }
         setIsLoading(true)
         fetch(`${apiUrl}/warehouseparts`, {
@@ -116,7 +121,6 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
             .finally(() => setIsLoading(false));
     };
 
-
     return (
         <DialogContent>
             <DialogHeader>
@@ -133,12 +137,18 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
                 <>
                     <div className="space-y-1">
                         <label className="block text-sm font-medium">Project</label>
-                        <SelectLoading
-                            id={projectId}
-                            setId={setProjectId}
-                            partIdOptions={projectIdOptions}
-                            isLoadingParts={isLoadingProjects}
-                        />
+                        <Select value={projectId} onValueChange={(value) => setProjectId(value)}>
+                            <SelectTrigger className="w-full p-2 border rounded">
+                                <SelectValue placeholder="Select a project"/>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {projectIdOptions.map((option, index) => (
+                                    <SelectItem key={index} value={option.id.toString()}>
+                                        {option.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="space-y-1">
                         <label className="block text-sm font-medium">Part Type</label>

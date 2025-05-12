@@ -123,6 +123,6 @@ func InsertBike(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Verwende die HandleInsert-Funktion, um das Insert in der DB auszuführen
-	query := `INSERT INTO bikes (model_id ,serial_number ,production_date, quantity ,warehouse_location ,project_id) VALUES ($1, $2, $3, $4, $5, $6)`
-	err = utils.HandleInsert(w, r, query, part.ModelID, part.SerialNumber, part.ProductionDate, part.Quantity, part.WarehouseLocation, part.ProjectID)
+	query := `INSERT INTO bikes (project_id, model_id ,serial_number ,production_date, quantity ,warehouse_location) VALUES ($1, $2, $3, $4, $5, $6)`
+	err = utils.HandleInsert(w, r, query, part.ProjectID, part.ModelID, part.SerialNumber, part.ProductionDate, part.Quantity, part.WarehouseLocation)
 }

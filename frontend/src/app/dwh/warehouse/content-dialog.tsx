@@ -1,14 +1,16 @@
 import React from "react";
 import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import apiUrl, { fetchWithToken } from "@/utils/url";
-import { Bike } from "@/types/datatables";
+import {Bike, Project} from "@/types/datatables";
 import InputField from "@/components/helpers/InputField";
 import AuthToken from "@/utils/authtoken";
 import { ButtonLoading } from "@/components/helpers/ButtonLoading";
 import { SelectLoading } from "@/components/helpers/SelectLoading";
 import { useNotification } from "@/components/helpers/NotificationProvider";
-import { BikeWithModelName } from "@/types/custom";
+import {BikeWithModelName, RoleManagementWithName} from "@/types/custom";
 import DatePicker from "@/components/helpers/DatePicker";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {useRoleStore} from "@/utils/rolemananagemetstate";
 
 interface Props {
     rowData?: BikeWithModelName;
@@ -21,26 +23,31 @@ export default function BikeDialogContent({ rowData, onClose, onRefresh }: Props
     const token = AuthToken.getAuthToken();
     const isEditMode = !!rowData;
 
-    const [projectId, setProjectId] = React.useState<number | null>(rowData?.project_id ?? null);
+    const [projectId, setProjectId] = React.useState<string>(rowData?.project_id?.toString() || "");
     const [modelId, setModelId] = React.useState<number | null>(rowData?.model_id ?? null);
     const [serialNumber, setSerialNumber] = React.useState<string>(rowData?.serial_number ?? '');
     const [productionDate, setProductionDate] = React.useState<Date | undefined>();
     const [quantity, setQuantity] = React.useState<number>(rowData?.quantity ?? 0);
     const [warehouseLocation, setWarehouseLocation] = React.useState<string>(rowData?.warehouse_location ?? '');
     const [modelIdOptions, setModelIdOptions] = React.useState<{ id: number, name: string }[]>([]);
-    const [projectIdOptions, setProjectIdOptions] = React.useState<{ id: number, name: string }[]>([]);
+    const [projectIdOptions, setProjectIdOptions] = React.useState<Project[]>([]);
     const [isLoading, setIsLoading] = React.useState(false);
     const [isLoadingModels, setIsLoadingModels] = React.useState(false);
-    const [isLoadingProjects, setIsLoadingProjects] = React.useState(false);
+    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
 
     React.useEffect(() => {
-        setIsLoadingProjects(true);
-        fetchWithToken(`/projects?requiredRole=admin`)
-            .then(res => res.json())
-            .then(setProjectIdOptions)
-            .catch(err => addNotification(`Failed to load project options: ${err}`, "error"))
-            .finally(() => setIsLoadingProjects(false));
-    }, []);
+        // Filter roles to find != "user" and then map to project_id and project_name
+        if (roles.length != 0) {
+            const adminRoles: Project[] = roles
+                .filter((role) => role.role !== "user")
+                .map((role) => ({
+                    id: role.project_id,
+                    name: role.project_name
+                }));
+
+            setProjectIdOptions(adminRoles);
+        }
+    }, [roles]);
 
     React.useEffect(() => {
         setIsLoadingModels(true);
@@ -52,7 +59,7 @@ export default function BikeDialogContent({ rowData, onClose, onRefresh }: Props
     }, []);
 
     const resetForm = () => {
-        setProjectId(null);
+        setProjectId("");
         setModelId(null);
         setSerialNumber('');
         setProductionDate(undefined);
@@ -62,7 +69,7 @@ export default function BikeDialogContent({ rowData, onClose, onRefresh }: Props
 
     const handleSave = () => {
         const newData = {
-            project_id: projectId,
+            project_id: parseInt(projectId),
             model_id: modelId,
             serial_number: serialNumber,
             production_date: productionDate ? productionDate.toISOString() : '',
@@ -98,7 +105,7 @@ export default function BikeDialogContent({ rowData, onClose, onRefresh }: Props
             production_date: rowData?.production_date || '',
             quantity,
             warehouse_location: warehouseLocation,
-            project_id: rowData?.project_id || 0,
+            project_id: parseInt(projectId) ?? 0,
         };
 
         setIsLoading(true);
@@ -136,12 +143,18 @@ export default function BikeDialogContent({ rowData, onClose, onRefresh }: Props
                 <>
                     <div className="space-y-1">
                         <label className="block text-sm font-medium">Project</label>
-                        <SelectLoading
-                            id={projectId}
-                            setId={setProjectId}
-                            partIdOptions={projectIdOptions}
-                            isLoadingParts={isLoadingProjects}
-                        />
+                        <Select value={projectId} onValueChange={(value) => setProjectId(value)}>
+                            <SelectTrigger className="w-full p-2 border rounded">
+                                <SelectValue placeholder="Select a project"/>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {projectIdOptions.map((option, index) => (
+                                    <SelectItem key={index} value={option.id.toString()}>
+                                        {option.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="space-y-1">
                         <label className="block text-sm font-medium">Model Name</label>

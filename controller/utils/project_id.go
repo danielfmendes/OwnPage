@@ -3,8 +3,17 @@ package utils
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 )
 
+// Rollen-Hierarchie: creator > admin > user
+var rolePriority = map[string]int{
+	"user":    1,
+	"admin":   2,
+	"creator": 3,
+}
+
+// Gibt true zurück, wenn der Nutzer mindestens die geforderte Rolle hat
 func GetProjectIDForUser(conn *sql.DB, email string, projectID int, requiredRole string) (bool, error) {
 	var userRole string
 	err := conn.QueryRow(`
@@ -15,42 +24,31 @@ func GetProjectIDForUser(conn *sql.DB, email string, projectID int, requiredRole
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return false, nil // Keine Rolle → kein Zugriff
+			return false, nil
 		}
-		return false, err // Anderer Fehler
+		return false, err
 	}
 
-	// "admin" hat immer Zugriff, auch wenn "user" verlangt wird
-	if userRole == "admin" || userRole == requiredRole {
+	if hasSufficientRole(userRole, requiredRole) {
 		return true, nil
 	}
-
 	return false, nil
 }
 
+// Gibt alle Projekt-IDs zurück, bei denen der Nutzer mindestens die geforderte Rolle hat
 func GetAllProjectsIDsForUser(conn *sql.DB, email string, requiredRole string) ([]int, error) {
-	var rows *sql.Rows
-	var err error
-
-	switch requiredRole {
-	case "admin":
-		// Nur Projekte, wo der Nutzer admin ist
-		rows, err = conn.Query(`
-			SELECT projectid
-			FROM role_management
-			WHERE useremail = $1 AND role = 'admin'
-		`, email)
-	case "user":
-		// Alle Projekte, wo der Nutzer user oder admin ist
-		rows, err = conn.Query(`
-			SELECT projectid
-			FROM role_management
-			WHERE useremail = $1 AND role IN ('user', 'admin')
-		`, email)
-	default:
-		return nil, fmt.Errorf("Ungültige Rolle: %s", requiredRole)
+	allowedRoles, err := getAllowedRoles(requiredRole)
+	if err != nil {
+		return nil, err
 	}
 
+	query := fmt.Sprintf(`
+		SELECT projectid
+		FROM role_management
+		WHERE useremail = $1 AND role IN (%s)
+	`, strings.Join(allowedRoles, ","))
+
+	rows, err := conn.Query(query, email)
 	if err != nil {
 		return nil, err
 	}
@@ -64,10 +62,26 @@ func GetAllProjectsIDsForUser(conn *sql.DB, email string, requiredRole string) (
 		}
 		projectIDs = append(projectIDs, pid)
 	}
+	return projectIDs, rows.Err()
+}
 
-	if err := rows.Err(); err != nil {
-		return nil, err
+// Gibt true zurück, wenn die aktuelle Rolle >= benötigte Rolle ist
+func hasSufficientRole(current, required string) bool {
+	return rolePriority[current] >= rolePriority[required]
+}
+
+// Gibt Liste erlaubter Rollen für eine geforderte Rolle zurück
+func getAllowedRoles(requiredRole string) ([]string, error) {
+	requiredLevel, ok := rolePriority[requiredRole]
+	if !ok {
+		return nil, fmt.Errorf("Ungültige Rolle: %s", requiredRole)
 	}
 
-	return projectIDs, nil
+	var roles []string
+	for role, level := range rolePriority {
+		if level >= requiredLevel {
+			roles = append(roles, fmt.Sprintf("'%s'", role))
+		}
+	}
+	return roles, nil
 }

@@ -1,7 +1,7 @@
 -- Neue Basistabelle für Projekte
 CREATE TABLE projects
 (
-    id   INT PRIMARY KEY,
+    id   SERIAL PRIMARY KEY,
     name TEXT NOT NULL
 );
 
@@ -19,7 +19,7 @@ CREATE TABLE role_management
 (
     useremail TEXT REFERENCES users (email),
     projectid INT REFERENCES projects (id),
-    role      TEXT CHECK (role IN ('admin', 'user')),
+    role      TEXT CHECK (role IN ('creator', 'admin', 'user')),
     PRIMARY KEY (useremail, projectid)
 );
 
@@ -27,7 +27,7 @@ CREATE TABLE role_management
 CREATE TABLE customers
 (
     id         SERIAL PRIMARY KEY,
-    email      TEXT UNIQUE NOT NULL,
+    email      TEXT NOT NULL,
     password   TEXT        NOT NULL,
     first_name TEXT        NOT NULL,
     name       TEXT        NOT NULL,
@@ -40,26 +40,26 @@ CREATE TABLE customers
 CREATE TABLE saddles
 (
     id   SERIAL PRIMARY KEY,
-    name TEXT UNIQUE
+    name TEXT
 );
 
 CREATE TABLE frames
 (
     id   SERIAL PRIMARY KEY,
-    name TEXT UNIQUE
+    name TEXT
 );
 
 CREATE TABLE forks
 (
     id   SERIAL PRIMARY KEY,
-    name TEXT UNIQUE
+    name TEXT
 );
 
 -- Fahrradmodelle
 CREATE TABLE bike_models
 (
     id        SERIAL PRIMARY KEY,
-    name      TEXT UNIQUE NOT NULL,
+    name      TEXT NOT NULL,
     saddle_id INT REFERENCES saddles (id),
     frame_id  INT REFERENCES frames (id),
     fork_id   INT REFERENCES forks (id)
@@ -70,7 +70,7 @@ CREATE TABLE bikes
 (
     id                 SERIAL PRIMARY KEY,
     model_id           INT REFERENCES bike_models (id),
-    serial_number      TEXT UNIQUE,
+    serial_number      TEXT,
     production_date    DATE,
     quantity           INT NOT NULL,
     warehouse_location TEXT,

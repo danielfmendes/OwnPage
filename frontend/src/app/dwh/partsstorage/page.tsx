@@ -91,7 +91,8 @@ export default function PartsStoragePage() {
             cell: ({ row }) => {
                 const warehousePart:WarehousePartWithName = row.original
                 const roleForProject = roles.find(role => role.project_id === warehousePart.project_id);
-                const isDisabled = roleForProject?.role !== "admin";
+                const isDisabled = roleForProject?.role === "user";
+                
                 return (
                     <ButtonLoading
                         onClick={(event) => handleDelete(event, warehousePart.id)}
