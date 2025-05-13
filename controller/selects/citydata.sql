@@ -28,6 +28,7 @@ WITH time_ranges AS (
                   JOIN orders o ON oi.order_id = o.id
                   JOIN customers c ON o.customer_id = c.id
                   JOIN time_ranges tr ON o.order_date >= tr.start_current AND o.order_date < tr.today
+         WHERE o.project_id = ANY($2)
          GROUP BY c.city
      ),
      previous_period AS (
@@ -38,6 +39,7 @@ WITH time_ranges AS (
                   JOIN orders o ON oi.order_id = o.id
                   JOIN customers c ON o.customer_id = c.id
                   JOIN time_ranges tr ON o.order_date >= tr.start_previous AND o.order_date < tr.end_previous
+         WHERE o.project_id = ANY($2)
          GROUP BY c.city
      )
 SELECT

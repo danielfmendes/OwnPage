@@ -27,6 +27,7 @@ WITH time_range AS (
                   JOIN bikes b ON oi.bike_id = b.id
                   JOIN bike_models bm ON b.model_id = bm.id
                   JOIN time_range tr ON o.order_date BETWEEN tr.start_date AND tr.today
+         WHERE o.project_id = ANY($2)
          GROUP BY o.order_date
      ),
      all_combinations AS (

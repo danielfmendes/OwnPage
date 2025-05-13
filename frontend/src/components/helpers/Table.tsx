@@ -110,7 +110,7 @@ export default function DataTable({title, columns, data, isLoading, filterColumn
                         variant="outline"
                         size="sm"
                         onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
+                        disabled={(data?.length ?? 0) === 0 || !table.getCanPreviousPage()}
                     >
                         Previous
                     </Button>
@@ -118,7 +118,7 @@ export default function DataTable({title, columns, data, isLoading, filterColumn
                         variant="outline"
                         size="sm"
                         onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
+                        disabled={(data?.length ?? 0) === 0 || !table.getCanNextPage()}
                     >
                         Next
                     </Button>

@@ -27,6 +27,7 @@ WITH time_ranges AS (
          FROM order_items oi
                   JOIN orders o ON oi.order_id = o.id
                   JOIN time_ranges tr ON o.order_date >= tr.start_current AND o.order_date < tr.today
+         WHERE o.project_id = ANY($2)
      ),
      previous_period AS (
          SELECT
@@ -35,6 +36,7 @@ WITH time_ranges AS (
          FROM order_items oi
                   JOIN orders o ON oi.order_id = o.id
                   JOIN time_ranges tr ON o.order_date >= tr.start_previous AND o.order_date < tr.end_previous
+         WHERE o.project_id = ANY($2)
      )
 SELECT
     COALESCE(cp.revenue, 0) AS current_revenue,

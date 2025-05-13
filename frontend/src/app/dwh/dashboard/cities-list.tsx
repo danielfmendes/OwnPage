@@ -55,9 +55,18 @@ export default function CitiesList({ citiesData, isLoading }: Props) {
 
                             const formattedPercentage = percentageChange.toFixed(1);
 
+                            let avatarClass = '';
+                            if (index === 0) {
+                                avatarClass = 'border-4 border-yellow-500';
+                            } else if (index === 1) {
+                                avatarClass = 'border-4 border-gray-400';
+                            } else if (index === 2) {
+                                avatarClass = 'border-4 border-orange-500';
+                            }
+
                             return (
                                 <div key={index} className="flex items-center">
-                                    <Avatar className="w-10 h-10">
+                                    <Avatar className={`w-10 h-10 ${avatarClass}`}>
                                         <AvatarFallback>
                                             <Building2 size={20} />
                                         </AvatarFallback>

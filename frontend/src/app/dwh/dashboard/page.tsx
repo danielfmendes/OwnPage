@@ -69,10 +69,7 @@ export default function DashboardPage() {
         setIsLoadingGraphDataData(true);
         fetchWithToken(`/dashboard/graphdata?range=${timeRange}`)
             .then((res) => res.json())
-            .then((data: GraphData[]) => {
-                console.log("Graph data:", data);
-                setGraphDataData(data)
-            })
+            .then((data: GraphData[]) => setGraphDataData(data))
             .catch((err) => addNotification(`Error loading graph data: ${err}`, "error"))
             .finally(() => setIsLoadingGraphDataData(false));
     };

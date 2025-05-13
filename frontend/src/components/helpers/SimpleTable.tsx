@@ -60,7 +60,7 @@ export function SimpleTable<TData>({ data, columns, onRowClick, isLoading = fals
                                 ))}
                             </TableRow>
                         ))
-                    ) : tableReact.getRowModel().rows?.length ? (
+                    ) : data?.length ? (
                         tableReact.getRowModel().rows.map((row: any) => (
                             <TableRow
                                 key={row.id}

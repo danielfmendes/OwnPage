@@ -32,14 +32,14 @@ export default function DemoLayout({children}: { children: React.ReactNode }) {
             const decoded = jwtDecode(token);
             if (decoded.sub) {
                 setIsLoadingUser(true);
-                fetchWithToken(`/user?email=${decoded.sub}`)
+                fetchWithToken(`/user?email=${decoded.sub}`, true)
                     .then((res) => res.json())
                     .then((data) => setUser(data[0]))
                     .catch((err) => addNotification(`Error fetching user data: ${err}`, "error"))
                     .finally(() => setIsLoadingUser(false));
             }
             setIsLoadingRole(true);
-            fetchWithToken(`/projects`)
+            fetchWithToken(`/projects`, true)
                 .then((res) => res.json())
                 .then((roles: RoleManagementWithName[]) => setRoles(roles))
                 .catch((err) => addNotification(`Error loading role management: ${err}`, "error"))
