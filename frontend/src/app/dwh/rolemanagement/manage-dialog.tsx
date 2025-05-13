@@ -1,17 +1,38 @@
-import React from "react";
+import React, {useState} from "react";
 import {
     DialogContent,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import {fetchWithToken} from "@/utils/url";
+import apiUrl, {fetchWithToken} from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {RoleManagement} from "@/types/datatables";
-import {Button} from "@/components/ui/button";
 import {Select, SelectTrigger, SelectValue, SelectContent, SelectItem} from "@/components/ui/select";
-import {Check, Trash} from "lucide-react";
+import {Check, Trash2} from "lucide-react";
+import {Input} from "@/components/ui/input";
 import type {ColumnDef} from "@tanstack/react-table";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
+import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import AuthToken from "@/utils/authtoken";
+
+interface RoleSelectProps {
+    value: string;
+    onValueChange: (value: string) => void;
+    hasRoleError?: boolean;
+}
+
+const RoleSelect = ({value, onValueChange, hasRoleError = false}: RoleSelectProps) => (
+    <Select value={value} onValueChange={onValueChange}>
+        <SelectTrigger className={`w-[120px] ${hasRoleError ? "border-red-500" : ""}`}>
+            <SelectValue placeholder="Select Role"/>
+        </SelectTrigger>
+        <SelectContent>
+            <SelectItem value="creator">Creator</SelectItem>
+            <SelectItem value="admin">Admin</SelectItem>
+            <SelectItem value="user">User</SelectItem>
+        </SelectContent>
+    </Select>
+);
 
 interface ManageProps {
     manageId: number | null;
@@ -19,14 +40,23 @@ interface ManageProps {
 
 export default function ManageDialogContent({manageId}: ManageProps) {
     const {addNotification} = useNotification();
+    const token = AuthToken.getAuthToken();
     const [data, setData] = React.useState<RoleManagement[]>([]);
     const [originalData, setOriginalData] = React.useState<Record<string, string>>({});
     const [isLoadingData, setIsLoadingData] = React.useState(true);
+    const [isLoadingAdd, setIsLoadingAdd] = React.useState(false);
+    const [loadingDeleteEmail, setLoadingDeleteEmail] = React.useState<string | null>(null);
+    const [loadingEditEmail, setLoadingEditEmail] = React.useState<string | null>(null);
+    const [newEmail, setNewEmail] = useState<string>("");
+    const [newRole, setNewRole] = useState<string>("");
+
+    const [hasEmailError, setHasEmailError] = useState(false);
+    const [hasRoleError, setHasRoleError] = useState(false);
 
     const fetchData = () => {
         if (manageId) {
             setIsLoadingData(true);
-            fetchWithToken(`/projects/${manageId}`)
+            fetchWithToken(`/rolemanagements/${manageId}`)
                 .then((res) => res.json())
                 .then((roles: RoleManagement[]) => {
                     setData(roles);
@@ -50,17 +80,80 @@ export default function ManageDialogContent({manageId}: ManageProps) {
     const handleRoleChange = (email: string, newRole: string) => {
         setData((prev) =>
             prev.map((r) =>
-                r.user_email === email ? { ...r, role: newRole } : r
+                r.user_email === email ? {...r, role: newRole} : r
             )
         );
     };
 
-    const handleSave = (email: string) => {
-        //todo: implement save
+    const handleSaveRole = (email: string, currentRole: string) => {
+        const updatedData: RoleManagement = {
+            user_email: email,
+            project_id: manageId ?? 0,
+            role: currentRole,
+        }
+        setLoadingEditEmail(email);
+        fetch(`${apiUrl}/rolemanagements`, {
+            method: "PUT",
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedData),
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("Update failed");
+                addNotification("User Role updated successfully", "success");
+                fetchData();
+            })
+            .catch(err => addNotification(`Update error: ${err}`, "error"))
+            .finally(() => setLoadingEditEmail(null));
     };
 
     const handleDelete = (email: string) => {
-        //todo: implement delete
+        setLoadingDeleteEmail(email);
+        fetch(`${apiUrl}/rolemanagements?email=${email}&project_id=${manageId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("Fehler beim Löschen");
+                addNotification(`Email ${email} aus Projekt mit id ${manageId} erfolgreich gelöscht`, "success");
+                fetchData();
+            })
+            .catch(err => addNotification(`Löschfehler: ${err}`, "error"))
+            .finally(() => setLoadingDeleteEmail(null));
+    };
+
+    const handleAddUser = () => {
+        const isEmailValid = newEmail.trim() !== "";
+        const isRoleValid = newRole !== "";
+
+        setHasEmailError(!isEmailValid);
+        setHasRoleError(!isRoleValid);
+        if (newEmail && newRole) {
+            const newRoleManagement: RoleManagement = {user_email: newEmail, project_id: manageId ?? 0, role: newRole};
+            setIsLoadingAdd(true);
+            fetch(`${apiUrl}/rolemanagements`, {
+                method: "POST",
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newRoleManagement),
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("Save failed");
+                    addNotification("New role saved successfully", "success");
+                    setNewEmail("");
+                    setNewRole("");
+                    fetchData();
+                })
+                .catch(err => addNotification(`Save error: ${err}`, "error"))
+                .finally(() => setIsLoadingAdd(false));
+        }
     };
 
     const columns: ColumnDef<RoleManagement>[] = [
@@ -75,19 +168,7 @@ export default function ManageDialogContent({manageId}: ManageProps) {
                 const email = row.original.user_email;
                 const value = row.original.role;
                 return (
-                    <Select
-                        value={value}
-                        onValueChange={(newRole) => handleRoleChange(email, newRole)}
-                    >
-                        <SelectTrigger className="w-[120px]">
-                            <SelectValue/>
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="creator">Creator</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="user">User</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <RoleSelect value={value} onValueChange={(newRole) => handleRoleChange(email, newRole)}/>
                 );
             },
         },
@@ -102,21 +183,23 @@ export default function ManageDialogContent({manageId}: ManageProps) {
 
                 return (
                     <div className="flex gap-2">
-                        <Button
-                            variant={hasChanged ? "default" : "outline"}
-                            size="icon"
+                        <ButtonLoading
+                            onClick={() => handleSaveRole(email, currentRole)}
+                            variant={hasChanged ? "secondary" : "outline"}
+                            isLoading={loadingEditEmail === email}
+                            className="text-black dark:text-white p-2 rounded"
                             disabled={!hasChanged}
-                            onClick={() => handleSave(email)}
                         >
                             <Check className="w-4 h-4"/>
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            size="icon"
+                        </ButtonLoading>
+                        <ButtonLoading
                             onClick={() => handleDelete(email)}
+                            isLoading={loadingDeleteEmail === email}
+                            className="text-black dark:text-white p-2 rounded"
+                            variant="destructive"
                         >
-                            <Trash className="w-4 h-4"/>
-                        </Button>
+                            <Trash2 className="w-5 h-5"/>
+                        </ButtonLoading>
                     </div>
                 );
             },
@@ -128,7 +211,22 @@ export default function ManageDialogContent({manageId}: ManageProps) {
             <DialogHeader>
                 <DialogTitle>Rechte bearbeiten</DialogTitle>
             </DialogHeader>
-            <SimpleTable data={data} columns={columns} isLoading={isLoadingData} />
+
+            <div className="mb-4 flex gap-4 items-center">
+                <Input
+                    type="email"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    placeholder="Add user email"
+                    className={`${hasEmailError ? "border-red-500" : ""}`}
+                />
+                <RoleSelect value={newRole} onValueChange={setNewRole} hasRoleError={hasRoleError}/>
+                <ButtonLoading isLoading={isLoadingAdd} onClick={handleAddUser} className="w-1/6">
+                    Add User
+                </ButtonLoading>
+            </div>
+
+            <SimpleTable data={data} columns={columns} isLoading={isLoadingData}/>
         </DialogContent>
     );
 }

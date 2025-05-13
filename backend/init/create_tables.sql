@@ -18,9 +18,9 @@ CREATE TABLE users
 CREATE TABLE role_management
 (
     useremail TEXT REFERENCES users (email),
-    projectid INT REFERENCES projects (id),
+    project_id INT REFERENCES projects (id),
     role      TEXT CHECK (role IN ('creator', 'admin', 'user')),
-    PRIMARY KEY (useremail, projectid)
+    PRIMARY KEY (useremail, project_id)
 );
 
 -- Kunden

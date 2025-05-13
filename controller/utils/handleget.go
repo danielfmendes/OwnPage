@@ -118,7 +118,7 @@ func HandleGetWithProjectIDs(w http.ResponseWriter, r *http.Request, baseQuery s
 	finalArgs := args
 
 	// Regex: prüft, ob "project_id" im WHERE-Teil steht
-	projectIDRegex := regexp.MustCompile(`where\s+[^;]*\bproject_id\b`)
+	projectIDRegex := regexp.MustCompile(`(?i)where\s+.*\bproject[_]?id\b`)
 
 	if !projectIDRegex.MatchString(lowerQuery) {
 		projectIDParamPos := len(args) + 1

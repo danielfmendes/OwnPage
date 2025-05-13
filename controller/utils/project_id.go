@@ -19,7 +19,7 @@ func GetProjectIDForUser(conn *sql.DB, email string, projectID int, requiredRole
 	err := conn.QueryRow(`
 		SELECT role
 		FROM role_management
-		WHERE useremail = $1 AND projectid = $2
+		WHERE useremail = $1 AND project_id = $2
 	`, email, projectID).Scan(&userRole)
 
 	if err != nil {
@@ -43,7 +43,7 @@ func GetAllProjectsIDsForUser(conn *sql.DB, email string, requiredRole string) (
 	}
 
 	query := fmt.Sprintf(`
-		SELECT projectid
+		SELECT project_id
 		FROM role_management
 		WHERE useremail = $1 AND role IN (%s)
 	`, strings.Join(allowedRoles, ","))

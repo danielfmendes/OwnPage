@@ -1,4 +1,4 @@
-INSERT INTO role_management (useremail, projectid, role)
+INSERT INTO role_management (useremail, project_id, role)
 VALUES ('testuser@email.com', 1, 'admin');
 
 UPDATE role_management
@@ -31,7 +31,7 @@ VALUES ('Standardprojekt 3');
 INSERT INTO projects (name)
 VALUES ('Standardprojekt 4');
 
-INSERT INTO role_management (useremail, projectid, role)
+INSERT INTO role_management (useremail, project_id, role)
 VALUES
     ('testuser@example.com', 2, 'user'),
     ('testuser@example.com', 3, 'user'),

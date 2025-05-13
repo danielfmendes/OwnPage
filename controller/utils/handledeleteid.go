@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/lib/pq"
 	"net/http"
+	"regexp"
 	"strings"
 )
 
@@ -27,28 +28,34 @@ func HandleDelete(w http.ResponseWriter, r *http.Request, mainQuery string, preQ
 	}
 	defer conn.Close()
 
+	// Regex: prüft, ob "project_id" im WHERE-Teil steht
+	lowerQuery := strings.ToLower(mainQuery)
+	projectIDRegex := regexp.MustCompile(`(?i)where\s+.*\bproject[_]?id\b`)
+
 	// Projekt-ID ermitteln
 	var projectID int
-	queryProject := fmt.Sprintf("SELECT project_id FROM %s WHERE id = $1", table)
-	err = conn.QueryRow(queryProject, args[0]).Scan(&projectID)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			http.Error(w, "Eintrag nicht gefunden", http.StatusNotFound)
-		} else {
-			HandleError(w, err, "Fehler beim Abrufen der Projekt-ID")
+	if !projectIDRegex.MatchString(lowerQuery) {
+		queryProject := fmt.Sprintf("SELECT project_id FROM %s WHERE id = $1", table)
+		err = conn.QueryRow(queryProject, args[0]).Scan(&projectID)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				http.Error(w, "Eintrag nicht gefunden", http.StatusNotFound)
+			} else {
+				HandleError(w, err, "Fehler beim Abrufen der Projekt-ID")
+			}
+			return
 		}
-		return
-	}
 
-	// Admin-Rechte prüfen
-	hasAccess, err := GetProjectIDForUser(conn, userEmail, projectID, "admin")
-	if err != nil {
-		HandleError(w, err, "Fehler bei der Rechteprüfung")
-		return
-	}
-	if !hasAccess {
-		http.Error(w, "Keine Adminrechte für dieses Projekt", http.StatusForbidden)
-		return
+		// Admin-Rechte prüfen
+		hasAccess, err := GetProjectIDForUser(conn, userEmail, projectID, "admin")
+		if err != nil {
+			HandleError(w, err, "Fehler bei der Rechteprüfung")
+			return
+		}
+		if !hasAccess {
+			http.Error(w, "Keine Adminrechte für dieses Projekt", http.StatusForbidden)
+			return
+		}
 	}
 
 	// Pre-Queries ausführen

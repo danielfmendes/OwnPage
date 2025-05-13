@@ -39,7 +39,7 @@ export default function DemoLayout({children}: { children: React.ReactNode }) {
                     .finally(() => setIsLoadingUser(false));
             }
             setIsLoadingRole(true);
-            fetchWithToken(`/projects`, true)
+            fetchWithToken(`/rolemanagements`, true)
                 .then((res) => res.json())
                 .then((roles: RoleManagementWithName[]) => setRoles(roles))
                 .catch((err) => addNotification(`Error loading role management: ${err}`, "error"))

@@ -10,7 +10,7 @@ VALUES
     ('testuser@example.com', 'TestUser', '$2a$10$bV6Y1MkhtHazexatXn.aAe9JApKjWUlgY7qKBl7gnqRAOS1DUj30q', '1970-01-01 00:00:00.000000');
 
 -- Rollenzuweisung
-INSERT INTO role_management (useremail, projectid, role)
+INSERT INTO role_management (useremail, project_id, role)
 VALUES
     ('testcreator@example.com', 1, 'creator'),
     ('testadmin@example.com', 1, 'admin'),
