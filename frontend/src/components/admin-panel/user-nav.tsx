@@ -24,9 +24,11 @@ import { Loader2 } from "lucide-react";
 import { useUserStore } from "@/utils/userstate";
 import {handleLogOut} from "@/utils/helpers";
 import {useRouter} from "next/navigation";
+import {useNotification} from "@/components/helpers/NotificationProvider";
 
 export function UserNav() {
   const { setTheme, theme } = useTheme();
+  const { addNotification } = useNotification();
   const router = useRouter();
   const urlParams = new URLSearchParams(window.location.search);
   const currentQuery = urlParams.get('project_id') ? `?project_id=${urlParams.get('project_id')}` : "";
@@ -34,7 +36,7 @@ export function UserNav() {
   const isLoading = useUserStore((state) => state.isLoading);
 
   const handleLogout = () => {
-    handleLogOut(router);
+    handleLogOut(router, addNotification);
   };
 
   return (

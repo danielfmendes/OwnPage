@@ -15,6 +15,7 @@ import {
   TooltipProvider
 } from "@/components/ui/tooltip";
 import {handleLogOut} from "@/utils/helpers";
+import {useNotification} from "@/components/helpers/NotificationProvider";
 
 interface MenuProps {
   isOpen: boolean | undefined;
@@ -22,11 +23,12 @@ interface MenuProps {
 
 export function Menu({ isOpen }: MenuProps) {
   const router = useRouter();
+  const {addNotification} = useNotification();
   const pathname = usePathname();
   const menuList = getMenuList(pathname);
 
   const handleLogout = () => {
-    handleLogOut(router)
+    handleLogOut(router, addNotification);
   };
 
 

@@ -24,7 +24,7 @@ export default function DemoLayout({children}: { children: React.ReactNode }) {
 
     useEffect(() => {
         if (!token) {
-            handleLogOut(router);
+            handleLogOut(router, addNotification);
             return;
         }
 
