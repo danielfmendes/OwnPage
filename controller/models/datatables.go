@@ -27,7 +27,7 @@ type Customer struct {
 	FirstName string    `json:"first_name"`
 	Name      string    `json:"name"`
 	Dob       time.Time `json:"dob"`
-	Location  string    `json:"location"`
+	City      string    `json:"city"`
 	ProjectID int       `json:"project_id"`
 }
 

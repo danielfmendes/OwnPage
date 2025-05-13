@@ -1,67 +1,120 @@
 "use client";
 import Link from "next/link";
-import { ContentLayout } from "@/components/admin-panel/content-layout";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {ContentLayout} from "@/components/admin-panel/content-layout";
+import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {
     Breadcrumb,
     BreadcrumbItem,
     BreadcrumbLink,
     BreadcrumbList,
     BreadcrumbPage,
-    BreadcrumbSeparator
+    BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { useSidebar } from "@/hooks/use-sidebar";
-import { useStore } from "@/hooks/use-store";
-import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    Tooltip,
-    ResponsiveContainer,
-    LineChart,
-    Line,
-    CartesianGrid
-} from "recharts";
-import { useTheme } from "next-themes";
-import { useState } from "react";
-
-const yearlySales = [
-    { year: "2021", sales: 4000 },
-    { year: "2022", sales: 8000 },
-    { year: "2023", sales: 12000 },
-];
-
-const stockTrend = [
-    { month: "Jan", stock: 100 },
-    { month: "Feb", stock: 90 },
-    { month: "Mar", stock: 120 },
-];
-
-const topProducts = [
-    { name: "Produkt A", sales: 300 },
-    { name: "Produkt B", sales: 250 },
-    { name: "Produkt C", sales: 200 },
-];
+import {useSidebar} from "@/hooks/use-sidebar";
+import {useStore} from "@/hooks/use-store";
+import {useEffect, useState} from "react";
+import {BikeModels} from "@/app/dwh/dashboard/time-graph";
+import {MetricStats} from "@/app/dwh/dashboard/revenue-graph";
+import CitiesList from "@/app/dwh/dashboard/cities-list";
+import * as React from "react";
+import {fetchWithToken} from "@/utils/url";
+import {useNotification} from "@/components/helpers/NotificationProvider";
+import {BikeSales, CityData, GraphData, GraphMeta} from "@/types/custom";
 
 export default function DashboardPage() {
+    const {addNotification} = useNotification();
     const sidebar = useStore(useSidebar, (x) => x);
     const [timeRange, setTimeRange] = useState("1m");
-    const { theme } = useTheme();
+    const [graphMetaData, setGraphMetaData] = useState<GraphMeta | null>(null);
+    const [graphDataData, setGraphDataData] = useState<GraphData[]>([]);
+    const [citiesData, setCitiesData] = useState<CityData[]>([]);
+    const [bikeData, setBikeData] = useState<BikeSales[]>([]);
+    const [isLoadingGraphMetaData, setIsLoadingGraphMetaData] = useState(false);
+    const [isLoadingGraphDataData, setIsLoadingGraphDataData] = useState(false);
+    const [isLoadingCitiesData, setIsLoadingCitiesData] = useState(false);
+    const [isLoadingBikeData, setIsLoadingBikeData] = useState(false);
+    let revenueChangePct = 100;
+    let salesChangePct = 100;
 
-    const isDark = theme === "dark";
+    // Fetch graph meta data and calculate revenue and sales change percentage
+    const fetchGraphMetaData = () => {
+        setIsLoadingGraphMetaData(true);
+        fetchWithToken(`/dashboard/graphmeta?range=${timeRange}`)
+            .then((res) => res.json())
+            .then((data: GraphMeta[]) => {
+                const graphMeta = data[0];
+                setGraphMetaData(graphMeta);
 
-    const chartTextColor = isDark ? "#ffffff" : "#000000";
-    const chartGridColor = isDark ? "#444" : "#ccc";
-    const chartBarColor = isDark ? "#60a5fa" : "#3b82f6";
-    const chartLineColor = isDark ? "#34d399" : "#10b981";
+                // Calculate revenue change percentage and sales change percentage only if previous values are available
+                if (graphMeta?.previous_revenue && graphMeta?.previous_revenue > 0) {
+                    revenueChangePct =
+                        ((graphMeta?.current_revenue - graphMeta?.previous_revenue) /
+                            graphMeta?.previous_revenue) *
+                        100;
+                }
+
+                if (graphMeta?.previous_sales && graphMeta?.previous_sales > 0) {
+                    salesChangePct =
+                        ((graphMeta?.current_sales - graphMeta?.previous_sales) /
+                            graphMeta?.previous_sales) *
+                        100;
+                }
+            })
+            .catch((err) => addNotification(`Error loading graph meta: ${err}`, "error"))
+            .finally(() => setIsLoadingGraphMetaData(false));
+    };
+
+    // Fetch graph data
+    const fetchGraphData = () => {
+        setIsLoadingGraphDataData(true);
+        fetchWithToken(`/dashboard/graphdata?range=${timeRange}`)
+            .then((res) => res.json())
+            .then((data: GraphData[]) => {
+                console.log("Graph data:", data);
+                setGraphDataData(data)
+            })
+            .catch((err) => addNotification(`Error loading graph data: ${err}`, "error"))
+            .finally(() => setIsLoadingGraphDataData(false));
+    };
+
+    // Fetch city data
+    const fetchCityData = () => {
+        setIsLoadingCitiesData(true);
+        fetchWithToken(`/dashboard/citydata?range=${timeRange}`)
+            .then((res) => res.json())
+            .then((data: CityData[]) => {
+                if (data) {
+                    setCitiesData(data)
+                } else {
+                    setCitiesData([]);
+                }
+            })
+            .catch((err) => addNotification(`Error loading city data: ${err}`, "error"))
+            .finally(() => setIsLoadingCitiesData(false));
+    };
+
+    // Fetch bike data
+    const fetchBikeData = () => {
+        setIsLoadingBikeData(true);
+        fetchWithToken(`/dashboard/bikemodels?range=${timeRange}`)
+            .then((res) => res.json())
+            .then((data: BikeSales[]) => setBikeData(data))
+            .catch((err) => addNotification(`Error loading bike data: ${err}`, "error"))
+            .finally(() => setIsLoadingBikeData(false));
+    };
+
+    useEffect(() => {
+        fetchGraphMetaData();
+        fetchGraphData();
+        fetchCityData();
+        fetchBikeData();
+    }, [timeRange]);
 
     if (!sidebar) return null;
 
     return (
         <ContentLayout title="Dashboard">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <div className="flex flex-row items-center justify-between gap-4 mb-4">
                 <Breadcrumb>
                     <BreadcrumbList>
                         <BreadcrumbItem>
@@ -69,96 +122,46 @@ export default function DashboardPage() {
                                 <Link href="/">Home</Link>
                             </BreadcrumbLink>
                         </BreadcrumbItem>
-                        <BreadcrumbSeparator />
+                        <BreadcrumbSeparator/>
                         <BreadcrumbItem>
                             <BreadcrumbPage>Dashboard</BreadcrumbPage>
                         </BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>
 
-                <div className="w-full md:w-auto">
-                    <Tabs value={timeRange} onValueChange={setTimeRange} className="w-full md:w-auto">
-                        <TabsList className="flex flex-wrap justify-start md:justify-end gap-1">
-                            {["1d", "1w", "1m", "1y", "mtd", "ytd", "since"].map((value) => (
-                                <TabsTrigger key={value} value={value}>
-                                    {value.toUpperCase()}
-                                </TabsTrigger>
-                            ))}
-                        </TabsList>
-                    </Tabs>
+                <Tabs value={timeRange} onValueChange={setTimeRange}>
+                    <TabsList className="gap-1">
+                        {["1d", "1w", "1m", "1y", "max"].map((value) => (
+                            <TabsTrigger key={value} value={value}>
+                                {value.toUpperCase()}
+                            </TabsTrigger>
+                        ))}
+                    </TabsList>
+                </Tabs>
+            </div>
+            <div className="grid gap-4">
+                <MetricStats
+                    graphData={graphDataData}
+                    graphMeta={{
+                        currentRevenue: graphMetaData?.current_revenue ?? 0,
+                        revenueChangePct: revenueChangePct,
+                        currentSales: graphMetaData?.current_sales ?? 0,
+                        salesChangePct: salesChangePct,
+                    }}
+                    timeRange={timeRange}
+                    isLoadingGraphMetaData={isLoadingGraphMetaData}
+                    isLoadingGraphDataData={isLoadingGraphDataData}
+                />
+
+                <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-10">
+                    <div className="sm:col-span-1 md:col-span-5 lg:col-span-6 xl:col-span-7">
+                        <BikeModels bikeData={bikeData} isLoading={isLoadingBikeData}/>
+                    </div>
+                    <div className="sm:col-span-1 md:col-span-5 lg:col-span-4 xl:col-span-3">
+                        <CitiesList citiesData={citiesData} isLoading={isLoadingCitiesData}/>
+                    </div>
                 </div>
             </div>
-
-            <TooltipProvider>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                    {/* Umsatz pro Jahr */}
-                    <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl shadow">
-                        <h2 className="text-lg font-semibold mb-2 text-zinc-800 dark:text-white">Umsatz pro Jahr</h2>
-                        <ResponsiveContainer width="100%" height={200}>
-                            <BarChart data={yearlySales}>
-                                <XAxis dataKey="year" stroke={chartTextColor} />
-                                <YAxis stroke={chartTextColor} />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: isDark ? "#1f2937" : "#fff",
-                                        color: chartTextColor,
-                                    }}
-                                />
-                                <Bar dataKey="sales" fill={chartBarColor} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-
-                    {/* Umsatz pro Land */}
-                    <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl shadow">
-                        <h2 className="text-lg font-semibold mb-2 text-zinc-800 dark:text-white">Umsatz pro Land</h2>
-                        <div className="w-full h-[200px] flex items-center justify-center text-gray-500 dark:text-gray-300">
-                            {/* Platzhalter für Weltkarte */}
-                            <span>Kartenkomponente hier einfügen</span>
-                        </div>
-                    </div>
-
-                    {/* Lagerbestandsentwicklung */}
-                    <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl shadow">
-                        <h2 className="text-lg font-semibold mb-2 text-zinc-800 dark:text-white">Lagerbestandsentwicklung</h2>
-                        <ResponsiveContainer width="100%" height={200}>
-                            <LineChart data={stockTrend}>
-                                <XAxis dataKey="month" stroke={chartTextColor} />
-                                <YAxis stroke={chartTextColor} />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: isDark ? "#1f2937" : "#fff",
-                                        color: chartTextColor,
-                                    }}
-                                />
-                                <CartesianGrid stroke={chartGridColor} />
-                                <Line type="monotone" dataKey="stock" stroke={chartLineColor} />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </div>
-
-                    {/* Meistverkaufte Produkte */}
-                    <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl shadow">
-                        <h2 className="text-lg font-semibold mb-2 text-zinc-800 dark:text-white">Meistverkaufte Produkte</h2>
-                        <table className="w-full text-sm text-left text-zinc-800 dark:text-white">
-                            <thead className="border-b border-zinc-300 dark:border-zinc-600">
-                            <tr>
-                                <th className="py-2">Produkt</th>
-                                <th className="py-2">Verkäufe</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {topProducts.map((product, idx) => (
-                                <tr key={idx} className="border-b border-zinc-200 dark:border-zinc-700">
-                                    <td className="py-2">{product.name}</td>
-                                    <td className="py-2">{product.sales}</td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </TooltipProvider>
         </ContentLayout>
     );
 }

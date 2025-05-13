@@ -23,7 +23,7 @@ export interface Customer {
     first_name: string;
     name: string;
     dob: string;
-    location: string;
+    city: string;
     project_id: number;
 }
 

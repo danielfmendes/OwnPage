@@ -32,7 +32,7 @@ CREATE TABLE customers
     first_name TEXT NOT NULL,
     name       TEXT NOT NULL,
     dob        TIMESTAMP,
-    location   TEXT,
+    city   TEXT,
     project_id INT REFERENCES projects (id)
 );
 

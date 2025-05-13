@@ -117,8 +117,8 @@ export default function CustomerPage() {
             },
         },
         {
-            accessorKey: "location",
-            header: "Location",
+            accessorKey: "city",
+            header: "City",
         },
         {
             id: "actions",

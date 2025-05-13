@@ -17,7 +17,7 @@ VALUES
     ('testuser@example.com', 1, 'user');
 
 -- Kunden einfügen
-INSERT INTO customers (email, password, first_name, name, dob, location, project_id)
+INSERT INTO customers (email, password, first_name, name, dob, city, project_id)
 VALUES
     ('max@example.com', 'pass123', 'Max', 'Mustermann', '1970-01-01 00:00:00.000000', 'Berlin', 1),
     ('erika@example.com', 'pass123', 'Erika', 'Musterfrau', '1970-01-01 00:00:00.000000', 'München', 1),

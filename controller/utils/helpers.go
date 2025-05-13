@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"regexp"
 )
 
@@ -50,4 +52,20 @@ func extractTableFromInsertQuery(query string) (string, error) {
 		return "", fmt.Errorf("Tabelle konnte nicht aus INSERT-Query extrahiert werden")
 	}
 	return matches[1], nil
+}
+
+func MustReadSQLFile(relPath string) string {
+	basePath, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("failed to get working directory: %v", err)
+	}
+
+	fullPath := filepath.Join(basePath, relPath)
+
+	content, err := os.ReadFile(fullPath)
+	if err != nil {
+		log.Fatalf("failed to read SQL file %s: %v", fullPath, err)
+	}
+
+	return string(content)
 }

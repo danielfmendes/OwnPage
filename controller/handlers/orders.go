@@ -7,24 +7,9 @@ import (
 )
 
 func GetOrders(w http.ResponseWriter, r *http.Request) {
-	utils.HandleGetWithProjectIDs(w, r, `
-		SELECT * FROM (
-		  SELECT
-			  o.id AS order_id,
-			  oi.id AS orderitem_id,
-			  o.project_id AS project_id,
-			  CONCAT(c.first_name, ' ', c.name) AS customer_name,
-			  o.order_date,
-			  bm.name AS bike_model_name,
-			  oi.number,
-			  oi.price
-		  FROM orders o
-				   JOIN customers c ON o.customer_id = c.id
-				   JOIN order_items oi ON oi.order_id = o.id
-				   JOIN bikes b ON oi.bike_id = b.id
-				   JOIN bike_models bm ON b.model_id = bm.id
-		) AS sub
-	`, func(scanner utils.Scanner) (any, error) {
+	query := utils.MustReadSQLFile("selects/orderselect.sql")
+
+	utils.HandleGetWithProjectIDs(w, r, query, func(scanner utils.Scanner) (any, error) {
 		var order models.OrderOverview
 		err := scanner.Scan(&order.OrderID, &order.OrderItemID, &order.ProjectID, &order.CustomerName, &order.OrderDate, &order.BikeModel, &order.Number, &order.Price)
 		return order, err

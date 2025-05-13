@@ -24,21 +24,9 @@ func WarehousePartHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetWareHouseParts(w http.ResponseWriter, r *http.Request) {
-	utils.HandleGetWithProjectIDs(w, r, `
-		SELECT 
-			wp.id, wp.part_type, wp.part_id,
-			CASE 
-				WHEN wp.part_type = 'saddle' THEN s.name
-				WHEN wp.part_type = 'frame' THEN f.name
-				WHEN wp.part_type = 'fork' THEN fk.name
-				ELSE NULL
-			END AS part_name,
-			wp.quantity, wp.storage_location, wp.project_id
-		FROM warehouse_parts wp
-		LEFT JOIN saddles s ON wp.part_type = 'saddle' AND wp.part_id = s.id
-		LEFT JOIN frames f ON wp.part_type = 'frame' AND wp.part_id = f.id
-		LEFT JOIN forks fk ON wp.part_type = 'fork' AND wp.part_id = fk.id
-	`, func(scanner utils.Scanner) (any, error) {
+	query := utils.MustReadSQLFile("selects/warehousepartsselect.sql")
+
+	utils.HandleGetWithProjectIDs(w, r, query, func(scanner utils.Scanner) (any, error) {
 		var p models.WarehousePartWithName
 		err := scanner.Scan(&p.ID, &p.PartType, &p.PartID, &p.PartName, &p.Quantity, &p.StorageLocation, &p.ProjectID)
 		return p, err
