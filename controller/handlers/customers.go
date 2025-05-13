@@ -3,8 +3,29 @@ package handlers
 import (
 	"controller/models"
 	"controller/utils"
+	"encoding/json"
 	"net/http"
+	"strconv"
 )
+
+func CustomerHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		GetCustomers(w, r)
+	case http.MethodDelete:
+		if r.URL.Query().Get("cascade") == "true" {
+			DeleteCascadeCustomer(w, r)
+		} else {
+			DeleteCustomer(w, r)
+		}
+	case http.MethodPut:
+		UpdateCustomer(w, r)
+	case http.MethodPost:
+		InsertCustomer(w, r)
+	default:
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+	}
+}
 
 func GetCustomers(w http.ResponseWriter, r *http.Request) {
 	utils.HandleGetWithProjectIDs(w, r, "SELECT * FROM customers", func(scanner utils.Scanner) (any, error) {
@@ -12,4 +33,85 @@ func GetCustomers(w http.ResponseWriter, r *http.Request) {
 		err := scanner.Scan(&b.ID, &b.Email, &b.Password, &b.FirstName, &b.Name, &b.Dob, &b.City, &b.ProjectID)
 		return b, err
 	})
+}
+
+func DeleteCustomer(w http.ResponseWriter, r *http.Request) {
+	// ID aus der URL oder Anfrage extrahieren
+	idStr := r.URL.Query().Get("id")
+	if idStr == "" {
+		http.Error(w, "ID fehlt", http.StatusBadRequest)
+		return
+	}
+
+	// Convert string ID to integer
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Ungültige ID", http.StatusBadRequest)
+		return
+	}
+	utils.HandleDelete(w, r, "DELETE FROM customers WHERE id = $1", []string{}, id)
+}
+
+func DeleteCascadeCustomer(w http.ResponseWriter, r *http.Request) {
+	// ID aus der URL oder Anfrage extrahieren
+	idStr := r.URL.Query().Get("id")
+	if idStr == "" {
+		http.Error(w, "ID fehlt", http.StatusBadRequest)
+		return
+	}
+
+	// Convert string ID to integer
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Ungültige ID", http.StatusBadRequest)
+		return
+	}
+
+	// Zuerst die `order_items` für das betroffene `bike` löschen
+	utils.HandleDelete(w, r,
+		"DELETE FROM customers WHERE id = $1",
+		[]string{
+			"DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE customer_id = $1)",
+			"DELETE FROM orders WHERE customer_id = $1",
+		},
+		id,
+	)
+}
+
+func UpdateCustomer(w http.ResponseWriter, r *http.Request) {
+	// Extrahiere die neuen Werte aus dem Request Body, inklusive der ID
+	var cust models.Customer
+	err := json.NewDecoder(r.Body).Decode(&cust)
+	if err != nil {
+		http.Error(w, "Fehler beim Verarbeiten der Anfrage", http.StatusBadRequest)
+		return
+	}
+
+	if cust.ID == 0 {
+		http.Error(w, "ID fehlt", http.StatusBadRequest)
+		return
+	}
+
+	// Verwende die HandleUpdate-Funktion, um das Update in der DB auszuführen
+	query := `UPDATE customers SET email = $1, password = $2, first_name = $3, name = $4, dob = $5, city = $6, project_id = $7 WHERE id = $8`
+	err = utils.HandleUpdate(w, r, query, cust.Email, cust.Password, cust.FirstName, cust.Name, cust.Dob, cust.City, cust.ProjectID, cust.ID)
+}
+
+func InsertCustomer(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Nur POST erlaubt", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Extrahiere die neuen Werte aus dem Request Body
+	var cust models.Customer
+	err := json.NewDecoder(r.Body).Decode(&cust)
+	if err != nil {
+		http.Error(w, "Fehler beim Verarbeiten der Anfrage", http.StatusBadRequest)
+		return
+	}
+
+	// Verwende die HandleInsert-Funktion, um das Insert in der DB auszuführen
+	query := `INSERT INTO customers (project_id, email, password, first_name, name, dob, city) VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	err = utils.HandleInsert(w, r, query, cust.ProjectID, cust.Email, cust.Password, cust.FirstName, cust.Name, cust.Dob, cust.City)
 }

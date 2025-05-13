@@ -59,7 +59,7 @@ export default function CustomerPage() {
                     return;
                 }
                 if (!res.ok) throw new Error("Fehler beim Löschen");
-                addNotification(`Teilelager mit id ${id}${cascade ? " und referenzierten Werten" : ""} erfolgreich gelöscht`, "success");
+                addNotification(`Customer with id ${id}${cascade ? " and related data" : ""} deleted successfully`, "success");
                 fetchData();
                 if (cascade) setShowCascadeDialog(false);
             })
@@ -161,6 +161,7 @@ export default function CustomerPage() {
                     <CustomerDetailContent
                         rowData={rowData}
                         onClose={onClose}
+                        onRefresh={fetchData}
                     />
                 )}
                 addDialogContent={(onClose) => (
@@ -175,7 +176,7 @@ export default function CustomerPage() {
                     <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
                             <DialogTitle className="text-center">
-                                Willst du auch die referenzierten Werte löschen?
+                                Do you want to delete orders for the user?
                             </DialogTitle>
                         </DialogHeader>
                         <div className="grid">

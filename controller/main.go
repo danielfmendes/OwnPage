@@ -54,11 +54,11 @@ func setupRoutes() http.Handler {
 
 	r.HandleFunc("/bikemodels", handlers.GetBikeModels)
 	r.HandleFunc("/bikes", handlers.BikeHandler)
-	r.HandleFunc("/customers", handlers.GetCustomers)
+	r.HandleFunc("/customers", handlers.CustomerHandler)
 	r.HandleFunc("/dashboard/", handlers.DashBoardHandler)
 	r.HandleFunc("/frames", handlers.GetFrames)
 	r.HandleFunc("/forks", handlers.GetForks)
-	r.HandleFunc("/orders", handlers.GetOrders)
+	r.HandleFunc("/orders", handlers.OrderHandler)
 	r.HandleFunc("/partcosts", handlers.GetPartCosts)
 	r.HandleFunc("/rolemanagements/", handlers.GetRoleManagementByID)
 	r.HandleFunc("/rolemanagements", handlers.RoleManagementHandler)

@@ -17,9 +17,9 @@ CREATE TABLE users
 -- Rollenzuordnung
 CREATE TABLE role_management
 (
-    useremail TEXT REFERENCES users (email),
+    useremail  TEXT REFERENCES users (email),
     project_id INT REFERENCES projects (id),
-    role      TEXT CHECK (role IN ('creator', 'admin', 'user')),
+    role       TEXT CHECK (role IN ('creator', 'admin', 'user')),
     PRIMARY KEY (useremail, project_id)
 );
 
@@ -32,7 +32,7 @@ CREATE TABLE customers
     first_name TEXT NOT NULL,
     name       TEXT NOT NULL,
     dob        TIMESTAMP,
-    city   TEXT,
+    city       TEXT,
     project_id INT REFERENCES projects (id)
 );
 

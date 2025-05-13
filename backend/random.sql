@@ -36,3 +36,18 @@ VALUES
     ('testuser@example.com', 2, 'user'),
     ('testuser@example.com', 3, 'user'),
     ('testuser@example.com', 4, 'admin');
+
+-- Reihenfolge des Löschens von Benutzern
+DELETE FROM order_items
+WHERE order_id IN (
+    SELECT id FROM orders WHERE customer_id = 1
+);
+DELETE FROM orders WHERE customer_id = 1;
+DELETE FROM customers WHERE id = 1;
+
+-- 2. Befehl löscht alle orders, die jetzt keine order_items mehr haben
+DELETE from order_items WHERE id = 2;
+DELETE FROM orders
+WHERE id NOT IN (
+    SELECT DISTINCT order_id FROM order_items
+);

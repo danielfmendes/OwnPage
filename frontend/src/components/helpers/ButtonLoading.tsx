@@ -6,16 +6,18 @@ type ButtonLoadingProps = {
     isLoading: boolean
     onClick: ((event: React.MouseEvent<HTMLButtonElement>) => void) | (() => void)
     variant?: "default" | "outline" | "secondary" | "destructive";
+    size?: "default" | "sm" | "lg"
     children?: ReactNode
     loadingText?: string
 } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'>
 
-export function ButtonLoading({ isLoading, onClick, variant, loadingText, children, ...props }: ButtonLoadingProps) {
+export function ButtonLoading({ isLoading, onClick, variant, size, children, loadingText, ...props }: ButtonLoadingProps) {
     return (
         <Button
             onClick={onClick}
             disabled={isLoading || props.disabled}
             variant={variant}
+            size={size}
             className={!loadingText? "min-w-[40px] h-[40px]" : ""}
             {...props}
         >
