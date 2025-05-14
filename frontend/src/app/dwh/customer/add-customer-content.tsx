@@ -19,8 +19,9 @@ interface Props {
 export default function AddCustomerContent({onClose, onRefresh}: Props) {
     const { addNotification } = useNotification();
     const token = AuthToken.getAuthToken();
-
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
+    const selectedRoles: RoleManagementWithName[] = useRoleStore((state) => state.selectedRoles);
+
     const [firstName, setFirstName] = React.useState<string>('');
     const [name, setName] = React.useState<string>('');
     const [email, setEmail] = React.useState<string>('');
@@ -32,16 +33,19 @@ export default function AddCustomerContent({onClose, onRefresh}: Props) {
 
     React.useEffect(() => {
         // Filter roles to find != "user" and then map to project_id and project_name
-        if (roles.length != 0) {
-            const adminRoles: Project[] = roles
+        const sourceRoles = selectedRoles.length > 0 ? selectedRoles : roles;
+
+        if (sourceRoles.length !== 0) {
+            const adminRoles: Project[] = sourceRoles
                 .filter((role) => role.role !== "user")
                 .map((role) => ({
                     id: role.project_id,
                     name: role.project_name
                 }));
+
             setProjectIdOptions(adminRoles);
         }
-    }, [roles]);
+    }, [roles, selectedRoles]);
 
     const resetForm = () => {
         setProjectId("");

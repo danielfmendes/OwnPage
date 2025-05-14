@@ -19,9 +19,11 @@ interface Props {
 }
 
 export default function BikeDialogContent({ rowData, onClose, onRefresh }: Props) {
+    const isEditMode = !!rowData;
     const { addNotification } = useNotification();
     const token = AuthToken.getAuthToken();
-    const isEditMode = !!rowData;
+    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
+    const selectedRoles: RoleManagementWithName[] = useRoleStore((state) => state.selectedRoles);
 
     const [projectId, setProjectId] = React.useState<string>(rowData?.project_id?.toString() || "");
     const [modelId, setModelId] = React.useState<number | null>(rowData?.model_id ?? null);
@@ -33,12 +35,13 @@ export default function BikeDialogContent({ rowData, onClose, onRefresh }: Props
     const [projectIdOptions, setProjectIdOptions] = React.useState<Project[]>([]);
     const [isLoading, setIsLoading] = React.useState(false);
     const [isLoadingModels, setIsLoadingModels] = React.useState(false);
-    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
 
     React.useEffect(() => {
         // Filter roles to find != "user" and then map to project_id and project_name
-        if (roles.length != 0) {
-            const adminRoles: Project[] = roles
+        const sourceRoles = selectedRoles.length > 0 ? selectedRoles : roles;
+
+        if (sourceRoles.length !== 0) {
+            const adminRoles: Project[] = sourceRoles
                 .filter((role) => role.role !== "user")
                 .map((role) => ({
                     id: role.project_id,
@@ -47,7 +50,7 @@ export default function BikeDialogContent({ rowData, onClose, onRefresh }: Props
 
             setProjectIdOptions(adminRoles);
         }
-    }, [roles]);
+    }, [roles, selectedRoles]);
 
     React.useEffect(() => {
         setIsLoadingModels(true);

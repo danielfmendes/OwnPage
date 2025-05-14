@@ -18,9 +18,12 @@ interface Props {
 }
 
 export default function WarehousePartDialogContent({rowData, onClose, onRefresh}: Props) {
+    const isEditMode = !!rowData;
     const {addNotification} = useNotification();
     const token = AuthToken.getAuthToken();
-    const isEditMode = !!rowData;
+    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
+    const selectedRoles: RoleManagementWithName[] = useRoleStore((state) => state.selectedRoles);
+
     const [partId, setPartId] = React.useState<number | null>(rowData?.part_id || null);
     const [projectId, setProjectId] = React.useState<string>(rowData?.project_id?.toString() || "");
     const [partType, setPartType] = React.useState(rowData?.part_type || '');
@@ -30,12 +33,13 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
     const [projectIdOptions, setProjectIdOptions] = React.useState<Project[]>([]);
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [isLoadingParts, setIsLoadingParts] = React.useState<boolean>(false);
-    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
 
     React.useEffect(() => {
         // Filter roles to find != "user" and then map to project_id and project_name
-        if (roles.length != 0) {
-            const adminRoles: Project[] = roles
+        const sourceRoles = selectedRoles.length > 0 ? selectedRoles : roles;
+
+        if (sourceRoles.length !== 0) {
+            const adminRoles: Project[] = sourceRoles
                 .filter((role) => role.role !== "user")
                 .map((role) => ({
                     id: role.project_id,
@@ -44,7 +48,7 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
 
             setProjectIdOptions(adminRoles);
         }
-    }, [roles]);
+    }, [roles, selectedRoles]);
 
     React.useEffect(() => {
         if (!isEditMode && partType) {
