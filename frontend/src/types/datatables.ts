@@ -8,6 +8,9 @@ export interface User {
     password: string;
     username: string;
     dob: string;
+    is_verified: boolean;
+    verification_expires: string;
+    verification_token: string;
 }
 
 export interface RoleManagement {

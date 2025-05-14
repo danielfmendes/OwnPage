@@ -8,10 +8,13 @@ type Project struct {
 }
 
 type User struct {
-	Email    string    `json:"email"`
-	Password string    `json:"password"`
-	Username string    `json:"username"`
-	Dob      time.Time `json:"dob"`
+	Email               string     `json:"email"`
+	Password            string     `json:"password"`
+	Username            string     `json:"username"`
+	Dob                 time.Time  `json:"dob"`
+	IsVerified          bool       `json:"is_verified"`
+	VerificationExpires *time.Time `json:"verification_expires"`
+	VerificationToken   string     `json:"verification_token"`
 }
 
 type RoleManagement struct {

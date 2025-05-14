@@ -8,10 +8,13 @@ CREATE TABLE projects
 -- Users
 CREATE TABLE users
 (
-    email    TEXT PRIMARY KEY,
-    password TEXT NOT NULL,
-    username TEXT NOT NULL,
-    dob      TIMESTAMP
+    email                TEXT PRIMARY KEY,
+    password             TEXT NOT NULL,
+    username             TEXT NOT NULL,
+    dob                  TIMESTAMP,
+    is_verified          BOOLEAN,
+    verification_expires TIMESTAMP,
+    verification_token   TEXT
 );
 
 -- Rollenzuordnung

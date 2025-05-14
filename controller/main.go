@@ -2,19 +2,11 @@ package main
 
 import (
 	"controller/handlers"
+	"controller/utils"
 	"log"
 	"net/http"
 	"os"
 )
-
-// getAllowedOrigins bestimmt die erlaubten CORS-Ursprünge basierend auf der Umgebung
-func getAllowedOrigins() []string {
-	connStr := os.Getenv("DATABASE_PUBLIC_URL")
-	if connStr == "" {
-		return []string{"http://localhost:3000"}
-	}
-	return []string{"https://www.danielfreiremendes.com"}
-}
 
 // corsMiddleware erzeugt den CORS-Handler
 func corsMiddleware(allowedOrigins []string, h http.Handler) http.Handler {
@@ -49,8 +41,7 @@ func corsMiddleware(allowedOrigins []string, h http.Handler) http.Handler {
 func setupRoutes() http.Handler {
 	r := http.NewServeMux()
 
-	r.HandleFunc("/auth/register", handlers.HandleRegister)
-	r.HandleFunc("/auth/login", handlers.HandleLogin)
+	r.HandleFunc("/auth/", handlers.AuthHandler)
 
 	r.HandleFunc("/bikemodels", handlers.GetBikeModels)
 	r.HandleFunc("/bikes", handlers.BikeHandler)
@@ -72,7 +63,7 @@ func setupRoutes() http.Handler {
 }
 
 func main() {
-	allowedOrigins := getAllowedOrigins()
+	allowedOrigins := utils.GetAllowedOrigins()
 	handler := corsMiddleware(allowedOrigins, setupRoutes())
 
 	port := os.Getenv("PORT")

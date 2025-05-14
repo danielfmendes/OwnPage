@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import InputField from '@/components/helpers/InputField';
 import { Box } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import DatePicker from "@/components/helpers/DatePicker";
 import apiUrl from "@/utils/url";
 import AuthToken from "@/utils/authtoken";
@@ -13,7 +12,6 @@ import {useNotification} from "@/components/helpers/NotificationProvider";
 
 export default function RegisterCard() {
     const {addNotification} = useNotification();
-    const router = useRouter();
     const [name, setName] = useState<string>('');
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
@@ -37,6 +35,10 @@ export default function RegisterCard() {
             .then(data => {
                 AuthToken.setAuthToken(data.token);
                 window.location.href = '/dwh/dashboard';
+                addNotification(
+                    "Bestätigungs-E-Mail wurde gesendet. Bitte bestätige dein Konto innerhalb von 7 Tagen (prüfe ggf. auch den Spam-Ordner).",
+                    "success"
+                );
             })
             .catch(err => addNotification(`Fehler beim Registrieren: ${err}`, "error"))
     };
