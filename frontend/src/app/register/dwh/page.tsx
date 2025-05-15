@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, ChangeEvent } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import React, {useState, ChangeEvent} from 'react';
+import {Card, CardContent, CardHeader} from '@/components/ui/card';
+import {Button} from '@/components/ui/button';
 import InputField from '@/components/helpers/InputField';
-import { Box } from 'lucide-react';
-import DatePicker from "@/components/helpers/DatePicker";
+import {Box} from 'lucide-react';
+import {DatePicker} from "@/components/helpers/DatePicker";
 import apiUrl from "@/utils/url";
 import AuthToken from "@/utils/authtoken";
 import {useNotification} from "@/components/helpers/NotificationProvider";
@@ -20,7 +20,7 @@ export default function RegisterCard() {
     const handleSubmit = () => {
         fetch(`${apiUrl}/auth/register`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 username: name,
                 email,
@@ -56,7 +56,7 @@ export default function RegisterCard() {
         <div className="min-h-screen flex items-center justify-center p-4">
             <Card className="w-full max-w-md">
                 <CardHeader className="flex flex-row justify-center items-center space-x-2">
-                    <Box className="w-6 h-6" />
+                    <Box className="w-6 h-6"/>
                     <h1 className="text-lg font-semibold">NebulaDW</h1>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -68,7 +68,7 @@ export default function RegisterCard() {
                     <div className="space-y-1">
                         <label className="block text-sm font-medium">Geburtstag</label>
                         <div className="relative">
-                            <DatePicker date={selectedDate} onSelect={(date)=> setSelectedDate(date)} />
+                            <DatePicker date={selectedDate} setDate={setSelectedDate}/>
                         </div>
                     </div>
                     <InputField

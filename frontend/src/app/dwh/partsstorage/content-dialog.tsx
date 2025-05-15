@@ -2,14 +2,14 @@ import React from "react";
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import apiUrl, {fetchWithToken} from "@/utils/url";
-import {Project, WarehousePart} from "@/types/datatables";
+import {WarehousePart} from "@/types/datatables";
 import InputField from "@/components/helpers/InputField";
 import AuthToken from "@/utils/authtoken";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {SelectLoading} from "@/components/helpers/SelectLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import {RoleManagementWithName, WarehousePartWithName} from "@/types/custom";
-import {useRoleStore} from "@/utils/rolemananagemetstate";
+import {WarehousePartWithName} from "@/types/custom";
+import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
 
 interface Props {
     rowData?: WarehousePartWithName;
@@ -21,8 +21,6 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
     const isEditMode = !!rowData;
     const {addNotification} = useNotification();
     const token = AuthToken.getAuthToken();
-    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
-    const selectedRoles: RoleManagementWithName[] = useRoleStore((state) => state.selectedRoles);
 
     const [partId, setPartId] = React.useState<number | null>(rowData?.part_id || null);
     const [projectId, setProjectId] = React.useState<string>(rowData?.project_id?.toString() || "");
@@ -30,25 +28,8 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
     const [quantity, setQuantity] = React.useState(rowData?.quantity || 0);
     const [storageLocation, setStorageLocation] = React.useState(rowData?.storage_location || '');
     const [partIdOptions, setPartIdOptions] = React.useState<{ id: number, name: string }[]>([]);
-    const [projectIdOptions, setProjectIdOptions] = React.useState<Project[]>([]);
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [isLoadingParts, setIsLoadingParts] = React.useState<boolean>(false);
-
-    React.useEffect(() => {
-        // Filter roles to find != "user" and then map to project_id and project_name
-        const sourceRoles = selectedRoles.length > 0 ? selectedRoles : roles;
-
-        if (sourceRoles.length !== 0) {
-            const adminRoles: Project[] = sourceRoles
-                .filter((role) => role.role !== "user")
-                .map((role) => ({
-                    id: role.project_id,
-                    name: role.project_name
-                }));
-
-            setProjectIdOptions(adminRoles);
-        }
-    }, [roles, selectedRoles]);
 
     React.useEffect(() => {
         if (!isEditMode && partType) {
@@ -133,27 +114,15 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
             {isEditMode ? (
                 <>
                     <InputField label="Project" value={rowData.project_id}/>
-                    <InputField label="ID" value={rowData.id}/>
                     <InputField label="Part Type" value={rowData.part_type}/>
                     <InputField label="Part Name" value={rowData?.part_name}/>
                 </>
             ) : (
                 <>
-                    <div className="space-y-1">
-                        <label className="block text-sm font-medium">Project</label>
-                        <Select value={projectId} onValueChange={(value) => setProjectId(value)}>
-                            <SelectTrigger className="w-full p-2 border rounded">
-                                <SelectValue placeholder="Select a project"/>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {projectIdOptions.map((option, index) => (
-                                    <SelectItem key={index} value={option.id.toString()}>
-                                        {option.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    <ProjectIDSelect
+                        projectID={projectId}
+                        onChange={(value) => setProjectId(value)}
+                    />
                     <div className="space-y-1">
                         <label className="block text-sm font-medium">Part Type</label>
                         <Select value={partType} onValueChange={setPartType}>

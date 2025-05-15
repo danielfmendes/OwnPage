@@ -1,15 +1,12 @@
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import InputField from "@/components/helpers/InputField";
 import React from "react";
-import DatePicker from "@/components/helpers/DatePicker";
+import {DatePicker} from "@/components/helpers/DatePicker";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import apiUrl from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import AuthToken from "@/utils/authtoken";
-import {Project} from "@/types/datatables";
-import {RoleManagementWithName} from "@/types/custom";
-import {useRoleStore} from "@/utils/rolemananagemetstate";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
 
 interface Props {
     onClose: () => void;
@@ -19,33 +16,14 @@ interface Props {
 export default function AddCustomerContent({onClose, onRefresh}: Props) {
     const { addNotification } = useNotification();
     const token = AuthToken.getAuthToken();
-    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
-    const selectedRoles: RoleManagementWithName[] = useRoleStore((state) => state.selectedRoles);
 
     const [firstName, setFirstName] = React.useState<string>('');
     const [name, setName] = React.useState<string>('');
     const [email, setEmail] = React.useState<string>('');
-    const [dob, setDob] = React.useState<Date | undefined>(new Date());
+    const [dob, setDob] = React.useState<Date | undefined>(undefined);
     const [city, setCity] = React.useState<string>('');
     const [projectId, setProjectId] = React.useState<string>("");
-    const [projectIdOptions, setProjectIdOptions] = React.useState<Project[]>([]);
     const [isLoading, setIsLoading] = React.useState(false);
-
-    React.useEffect(() => {
-        // Filter roles to find != "user" and then map to project_id and project_name
-        const sourceRoles = selectedRoles.length > 0 ? selectedRoles : roles;
-
-        if (sourceRoles.length !== 0) {
-            const adminRoles: Project[] = sourceRoles
-                .filter((role) => role.role !== "user")
-                .map((role) => ({
-                    id: role.project_id,
-                    name: role.project_name
-                }));
-
-            setProjectIdOptions(adminRoles);
-        }
-    }, [roles, selectedRoles]);
 
     const resetForm = () => {
         setProjectId("");
@@ -92,21 +70,10 @@ export default function AddCustomerContent({onClose, onRefresh}: Props) {
             <DialogHeader>
                 <DialogTitle>Add Customer</DialogTitle>
             </DialogHeader>
-            <div className="space-y-1">
-                <label className="block text-sm font-medium">Project</label>
-                <Select value={projectId} onValueChange={(value) => setProjectId(value)}>
-                    <SelectTrigger className="w-full p-2 border rounded">
-                        <SelectValue placeholder="Select a project"/>
-                    </SelectTrigger>
-                    <SelectContent>
-                        {projectIdOptions.map((option, index) => (
-                            <SelectItem key={index} value={option.id.toString()}>
-                                {option.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
+            <ProjectIDSelect
+                projectID={projectId}
+                onChange={(value) => setProjectId(value)}
+            />
             <InputField
                 label="First Name"
                 placeholder="e.g. Peter"
@@ -127,7 +94,7 @@ export default function AddCustomerContent({onClose, onRefresh}: Props) {
             />
             <div className="space-y-1">
                 <label className="block text-sm font-medium">Date of Birth</label>
-                <DatePicker date={dob} onSelect={setDob} />
+                <DatePicker date={dob} setDate={setDob} />
             </div>
             <InputField
                 label="City"

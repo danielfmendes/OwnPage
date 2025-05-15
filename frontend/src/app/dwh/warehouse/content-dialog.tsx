@@ -1,16 +1,15 @@
 import React from "react";
-import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import apiUrl, { fetchWithToken } from "@/utils/url";
-import {Bike, Project} from "@/types/datatables";
+import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import apiUrl from "@/utils/url";
+import {Bike} from "@/types/datatables";
 import InputField from "@/components/helpers/InputField";
 import AuthToken from "@/utils/authtoken";
-import { ButtonLoading } from "@/components/helpers/ButtonLoading";
-import { SelectLoading } from "@/components/helpers/SelectLoading";
-import { useNotification } from "@/components/helpers/NotificationProvider";
-import {BikeWithModelName, RoleManagementWithName} from "@/types/custom";
-import DatePicker from "@/components/helpers/DatePicker";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {useRoleStore} from "@/utils/rolemananagemetstate";
+import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import {useNotification} from "@/components/helpers/NotificationProvider";
+import {BikeWithModelName} from "@/types/custom";
+import {DatePicker} from "@/components/helpers/DatePicker";
+import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
+import ModelNameSelect from "@/components/helpers/selects/ModelNameSelect";
 
 interface Props {
     rowData?: BikeWithModelName;
@@ -18,48 +17,18 @@ interface Props {
     onRefresh: () => void;
 }
 
-export default function BikeDialogContent({ rowData, onClose, onRefresh }: Props) {
+export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) {
     const isEditMode = !!rowData;
-    const { addNotification } = useNotification();
+    const {addNotification} = useNotification();
     const token = AuthToken.getAuthToken();
-    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
-    const selectedRoles: RoleManagementWithName[] = useRoleStore((state) => state.selectedRoles);
 
     const [projectId, setProjectId] = React.useState<string>(rowData?.project_id?.toString() || "");
     const [modelId, setModelId] = React.useState<number | null>(rowData?.model_id ?? null);
     const [serialNumber, setSerialNumber] = React.useState<string>(rowData?.serial_number ?? '');
-    const [productionDate, setProductionDate] = React.useState<Date | undefined>();
+    const [productionDate, setProductionDate] = React.useState<Date | undefined>(undefined);
     const [quantity, setQuantity] = React.useState<number>(rowData?.quantity ?? 0);
     const [warehouseLocation, setWarehouseLocation] = React.useState<string>(rowData?.warehouse_location ?? '');
-    const [modelIdOptions, setModelIdOptions] = React.useState<{ id: number, name: string }[]>([]);
-    const [projectIdOptions, setProjectIdOptions] = React.useState<Project[]>([]);
     const [isLoading, setIsLoading] = React.useState(false);
-    const [isLoadingModels, setIsLoadingModels] = React.useState(false);
-
-    React.useEffect(() => {
-        // Filter roles to find != "user" and then map to project_id and project_name
-        const sourceRoles = selectedRoles.length > 0 ? selectedRoles : roles;
-
-        if (sourceRoles.length !== 0) {
-            const adminRoles: Project[] = sourceRoles
-                .filter((role) => role.role !== "user")
-                .map((role) => ({
-                    id: role.project_id,
-                    name: role.project_name
-                }));
-
-            setProjectIdOptions(adminRoles);
-        }
-    }, [roles, selectedRoles]);
-
-    React.useEffect(() => {
-        setIsLoadingModels(true);
-        fetchWithToken(`/bikemodels`)
-            .then(res => res.json())
-            .then(setModelIdOptions)
-            .catch(err => addNotification(`Failed to load model options: ${err}`, "error"))
-            .finally(() => setIsLoadingModels(false));
-    }, []);
 
     const resetForm = () => {
         setProjectId("");
@@ -138,36 +107,19 @@ export default function BikeDialogContent({ rowData, onClose, onRefresh }: Props
 
             {isEditMode ? (
                 <>
-                    <InputField label="Project" value={rowData.project_id} />
-                    <InputField label="ID" value={rowData.id} />
-                    <InputField label="Model Name" value={rowData.model_name} />
+                    <InputField label="Project" value={rowData.project_id}/>
+                    <InputField label="Model Name" value={rowData.model_name}/>
                 </>
             ) : (
                 <>
-                    <div className="space-y-1">
-                        <label className="block text-sm font-medium">Project</label>
-                        <Select value={projectId} onValueChange={(value) => setProjectId(value)}>
-                            <SelectTrigger className="w-full p-2 border rounded">
-                                <SelectValue placeholder="Select a project"/>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {projectIdOptions.map((option, index) => (
-                                    <SelectItem key={index} value={option.id.toString()}>
-                                        {option.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-1">
-                        <label className="block text-sm font-medium">Model Name</label>
-                        <SelectLoading
-                            id={modelId}
-                            setId={setModelId}
-                            partIdOptions={modelIdOptions}
-                            isLoadingParts={isLoadingModels}
-                        />
-                    </div>
+                    <ProjectIDSelect
+                        projectID={projectId}
+                        onChange={(value) => setProjectId(value)}
+                    />
+                    <ModelNameSelect
+                        modelID={modelId}
+                        onChange={(value) => setModelId(value)}
+                    />
                 </>
             )}
 
@@ -188,7 +140,7 @@ export default function BikeDialogContent({ rowData, onClose, onRefresh }: Props
             ) : (
                 <div className="space-y-1">
                     <label className="block text-sm font-medium">Production Date</label>
-                    <DatePicker date={productionDate} onSelect={setProductionDate} />
+                    <DatePicker date={productionDate} setDate={setProductionDate} position="right"/>
                 </div>
             )}
 
