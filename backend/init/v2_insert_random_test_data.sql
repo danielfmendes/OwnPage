@@ -54,21 +54,3 @@ INSERT INTO part_costs (part_type, part_id, cost, project_id)
 SELECT 'frame', id, 199.99 + id * 50, 1 FROM frames;
 INSERT INTO part_costs (part_type, part_id, cost, project_id)
 SELECT 'fork', id, 149.99 + id * 30, 1 FROM forks;
-
--- Bestellungen (angenommen Kunden-IDs sind 1 bis 5)
-INSERT INTO orders (customer_id, order_date, project_id)
-VALUES
-    (1, '2024-09-01',1),
-    (2, '2024-09-05',1),
-    (3, '2024-09-10',1),
-    (4, '2024-09-15',1),
-    (5, '2024-09-18',1);
-
--- Bestellpositionen
-INSERT INTO order_items (order_id, bike_id, number, price)
-VALUES
-    (1, 1,1, 899.99),
-    (2, 2,2, 1099.00),
-    (3, 3,3, 1199.50),
-    (4, 4,4, 1349.75),
-    (5, 5,5, 989.99);
