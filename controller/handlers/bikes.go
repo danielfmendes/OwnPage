@@ -51,7 +51,9 @@ func DeleteBike(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Ungültige ID", http.StatusBadRequest)
 		return
 	}
-	utils.HandleDelete(w, r, "DELETE FROM bikes WHERE id = $1", []string{}, id)
+
+	projectIdQuery := "SELECT project_id FROM bikes WHERE id = $1"
+	utils.HandleDelete(w, r, "DELETE FROM bikes WHERE id = $1", []string{}, projectIdQuery, []interface{}{id}, id)
 }
 
 func DeleteCascadeBike(w http.ResponseWriter, r *http.Request) {
@@ -70,33 +72,37 @@ func DeleteCascadeBike(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Zuerst die `order_items` für das betroffene `bike` löschen
+	projectIdQuery := "SELECT project_id FROM bikes WHERE id = $1"
 	utils.HandleDelete(w, r,
 		"DELETE FROM bikes WHERE id = $1",
 		[]string{
 			"DELETE FROM order_items WHERE bike_id = $1",
 			"DELETE FROM orders WHERE id NOT IN (SELECT DISTINCT order_id FROM order_items)",
 		},
+		projectIdQuery,
+		[]interface{}{id},
 		id,
 	)
 }
 
 func UpdateBike(w http.ResponseWriter, r *http.Request) {
 	// Extrahiere die neuen Werte aus dem Request Body, inklusive der ID
-	var part models.Bike
-	err := json.NewDecoder(r.Body).Decode(&part)
+	var bike models.Bike
+	err := json.NewDecoder(r.Body).Decode(&bike)
 	if err != nil {
 		http.Error(w, "Fehler beim Verarbeiten der Anfrage", http.StatusBadRequest)
 		return
 	}
 
-	if part.ID == 0 {
+	if bike.ID == 0 {
 		http.Error(w, "ID fehlt", http.StatusBadRequest)
 		return
 	}
 
 	// Verwende die HandleUpdate-Funktion, um das Update in der DB auszuführen
 	query := `UPDATE bikes SET model_id = $1, serial_number = $2, production_date = $3, quantity = $4, warehouse_location = $5, project_id = $6 WHERE id = $7`
-	err = utils.HandleUpdate(w, r, query, part.ModelID, part.SerialNumber, part.ProductionDate, part.Quantity, part.WarehouseLocation, part.ProjectID, part.ID)
+	args := []any{bike.ModelID, bike.SerialNumber, bike.ProductionDate, bike.Quantity, bike.WarehouseLocation, bike.ProjectID, bike.ID}
+	err = utils.HandleUpdate(w, r, query, bike.ProjectID, nil, args...)
 }
 
 func InsertBike(w http.ResponseWriter, r *http.Request) {
@@ -106,14 +112,15 @@ func InsertBike(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extrahiere die neuen Werte aus dem Request Body
-	var part models.Bike
-	err := json.NewDecoder(r.Body).Decode(&part)
+	var bike models.Bike
+	err := json.NewDecoder(r.Body).Decode(&bike)
 	if err != nil {
 		http.Error(w, "Fehler beim Verarbeiten der Anfrage", http.StatusBadRequest)
 		return
 	}
 
 	// Verwende die HandleInsert-Funktion, um das Insert in der DB auszuführen
-	query := `INSERT INTO bikes (project_id, model_id ,serial_number ,production_date, quantity ,warehouse_location) VALUES ($1, $2, $3, $4, $5, $6)`
-	err = utils.HandleInsert(w, r, query, part.ProjectID, part.ModelID, part.SerialNumber, part.ProductionDate, part.Quantity, part.WarehouseLocation)
+	query := `INSERT INTO bikes (project_id, model_id, serial_number, production_date, quantity, warehouse_location) VALUES ($1, $2, $3, $4, $5, $6)`
+	args := []interface{}{bike.ModelID, bike.SerialNumber, bike.ProductionDate, bike.Quantity, bike.WarehouseLocation}
+	err = utils.HandleInsert(w, r, query, bike.ProjectID, nil, args...)
 }

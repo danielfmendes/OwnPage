@@ -110,7 +110,8 @@ func DeleteRoleManagement(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.HandleDelete(w, r, "DELETE FROM role_management WHERE project_id = $1 AND useremail = $2", []string{}, projectID, email)
+	projectIdQuery := "SELECT project_id FROM role_management WHERE project_id = $1 AND useremail = $2"
+	utils.HandleDelete(w, r, "DELETE FROM role_management WHERE project_id = $1 AND useremail = $2", []string{}, projectIdQuery, []interface{}{projectID, email}, projectID, email)
 }
 
 func UpdateRoleManagement(w http.ResponseWriter, r *http.Request) {
@@ -231,5 +232,6 @@ func InsertRoleManagement(w http.ResponseWriter, r *http.Request) {
 
 	// Schritt 4: Einfügen der neuen Rolle
 	query := `INSERT INTO role_management (project_id, useremail, role) VALUES ($1, $2, $3)`
-	err = utils.HandleInsert(w, r, query, role.ProjectID, role.UserEmail, role.Role)
+	args := []any{role.ProjectID, role.UserEmail, role.Role}
+	err = utils.HandleInsert(w, r, query, role.ProjectID, nil, args...)
 }

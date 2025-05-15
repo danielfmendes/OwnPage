@@ -49,7 +49,9 @@ func DeleteCustomer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Ungültige ID", http.StatusBadRequest)
 		return
 	}
-	utils.HandleDelete(w, r, "DELETE FROM customers WHERE id = $1", []string{}, id)
+
+	projectIdQuery := "SELECT project_id FROM customers WHERE id = $1"
+	utils.HandleDelete(w, r, "DELETE FROM customers WHERE id = $1", []string{}, projectIdQuery, []interface{}{id}, id)
 }
 
 func DeleteCascadeCustomer(w http.ResponseWriter, r *http.Request) {
@@ -68,12 +70,15 @@ func DeleteCascadeCustomer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Zuerst die `order_items` für das betroffene `bike` löschen
+	projectIdQuery := "SELECT project_id FROM customers WHERE id = $1"
 	utils.HandleDelete(w, r,
 		"DELETE FROM customers WHERE id = $1",
 		[]string{
 			"DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE customer_id = $1)",
 			"DELETE FROM orders WHERE customer_id = $1",
 		},
+		projectIdQuery,
+		[]interface{}{id},
 		id,
 	)
 }
@@ -94,7 +99,8 @@ func UpdateCustomer(w http.ResponseWriter, r *http.Request) {
 
 	// Verwende die HandleUpdate-Funktion, um das Update in der DB auszuführen
 	query := `UPDATE customers SET email = $1, password = $2, first_name = $3, name = $4, dob = $5, city = $6, project_id = $7 WHERE id = $8`
-	err = utils.HandleUpdate(w, r, query, cust.Email, cust.Password, cust.FirstName, cust.Name, cust.Dob, cust.City, cust.ProjectID, cust.ID)
+	args := []any{cust.Email, cust.Password, cust.FirstName, cust.Name, cust.Dob, cust.City, cust.ProjectID, cust.ID}
+	err = utils.HandleUpdate(w, r, query, cust.ProjectID, nil, args...)
 }
 
 func InsertCustomer(w http.ResponseWriter, r *http.Request) {
@@ -113,5 +119,6 @@ func InsertCustomer(w http.ResponseWriter, r *http.Request) {
 
 	// Verwende die HandleInsert-Funktion, um das Insert in der DB auszuführen
 	query := `INSERT INTO customers (project_id, email, password, first_name, name, dob, city) VALUES ($1, $2, $3, $4, $5, $6, $7)`
-	err = utils.HandleInsert(w, r, query, cust.ProjectID, cust.Email, cust.Password, cust.FirstName, cust.Name, cust.Dob, cust.City)
+	args := []any{cust.ProjectID, cust.Email, cust.Password, cust.FirstName, cust.Name, cust.Dob, cust.City}
+	err = utils.HandleInsert(w, r, query, cust.ProjectID, nil, args...)
 }

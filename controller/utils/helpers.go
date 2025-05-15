@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 )
 
@@ -79,31 +78,42 @@ func HandleError(w http.ResponseWriter, err error, message string) {
 	}
 }
 
-func extractTableFromDeleteQuery(query string) (string, error) {
-	re := regexp.MustCompile(`(?i)^DELETE\s+FROM\s+([a-zA-Z_][a-zA-Z0-9_]*)\s+WHERE`)
-	matches := re.FindStringSubmatch(query)
-	if len(matches) != 2 {
-		return "", fmt.Errorf("Tabelle konnte nicht aus Query extrahiert werden")
+// ValidateProjectAccess überprüft, ob der User Zugriff auf das Projekt mit bestimmter Rolle hat.
+// projectIdentifier: int (direkte ID) oder string (Query, die project_id liefert)
+// Gibt: projectID, ggf. Fehler
+func ValidateProjectAccess(w http.ResponseWriter, r *http.Request, conn *sql.DB, projectIdentifier interface{}, role string, args ...interface{}) (bool, error) {
+	userEmail, err := ValidateToken(w, r)
+	if err != nil {
+		return false, err
 	}
-	return matches[1], nil
-}
 
-func extractTableFromUpdateQuery(query string) (string, error) {
-	re := regexp.MustCompile(`(?i)^UPDATE\s+([a-zA-Z_][a-zA-Z0-9_]*)\s+SET`)
-	matches := re.FindStringSubmatch(query)
-	if len(matches) != 2 {
-		return "", fmt.Errorf("Tabelle konnte nicht aus UPDATE-Query extrahiert werden")
-	}
-	return matches[1], nil
-}
+	var projectID int
 
-func extractTableFromInsertQuery(query string) (string, error) {
-	re := regexp.MustCompile(`(?i)^INSERT\s+INTO\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(`)
-	matches := re.FindStringSubmatch(query)
-	if len(matches) != 2 {
-		return "", fmt.Errorf("Tabelle konnte nicht aus INSERT-Query extrahiert werden")
+	switch v := projectIdentifier.(type) {
+	case int:
+		projectID = v
+	case string:
+		err := conn.QueryRow(v, args...).Scan(&projectID)
+		if err != nil {
+			http.Error(w, "Konnte project_id aus Query nicht ermitteln", http.StatusBadRequest)
+			return false, err
+		}
+	default:
+		http.Error(w, "Ungültiger Typ für projectIdentifier", http.StatusBadRequest)
+		return false, fmt.Errorf("ungültiger Typ für projectIdentifier")
 	}
-	return matches[1], nil
+
+	hasAccess, err := GetProjectIDForUser(conn, userEmail, projectID, role)
+	if err != nil {
+		HandleError(w, err, "Fehler bei der Rechteprüfung")
+		return false, err
+	}
+	if !hasAccess {
+		http.Error(w, "Keine Berechtigung für dieses Projekt", http.StatusForbidden)
+		return false, fmt.Errorf("nicht berechtigt")
+	}
+
+	return true, nil
 }
 
 func MustReadSQLFile(relPath string) string {

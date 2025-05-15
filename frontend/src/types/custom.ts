@@ -1,4 +1,4 @@
-import {Bike, RoleManagement, WarehousePart} from "@/types/datatables";
+import {Bike, Order, OrderItem, RoleManagement, WarehousePart} from "@/types/datatables";
 
 export type WarehousePartWithName = WarehousePart & {
     part_name: string;
@@ -12,16 +12,14 @@ export type RoleManagementWithName = RoleManagement & {
     project_name: string;
 };
 
-export interface OrderOverview {
-    order_id: number;
-    orderitem_id: number;
-    project_id: number;
+export type OrderWithCustomer = Order & {
     customer_name: string;
-    order_date: string;
-    bike_model_name: string;
-    number: number;
-    price: number;
-}
+    customer_email: string;
+};
+
+export type OrderItemsWithBikeName = OrderItem & {
+    model_name: string;
+};
 
 export interface GraphMeta {
     current_revenue: number;

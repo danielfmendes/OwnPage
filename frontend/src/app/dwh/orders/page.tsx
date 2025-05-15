@@ -8,56 +8,96 @@ import {Button} from "@/components/ui/button";
 import {ArrowUpDown, Trash2} from "lucide-react";
 import * as React from "react";
 import apiUrl, {fetchWithToken} from "@/utils/url";
-import {OrderOverview, RoleManagementWithName} from "@/types/custom";
+import {OrderWithCustomer, RoleManagementWithName} from "@/types/custom";
 import AuthToken from "@/utils/authtoken";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 import OrderDialogContent from "@/app/dwh/orders/content-dialog";
+import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import {Order} from "@/types/datatables";
 
 
 export default function OrderPage() {
     const {addNotification} = useNotification();
     const token = AuthToken.getAuthToken();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
-    const [data, setData] = React.useState<OrderOverview[]>([]);
+    const [data, setData] = React.useState<OrderWithCustomer[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(true);
     const [loadingDeleteId, setLoadingDeleteId] = React.useState<number | null>(null);
+    const [isLoadingDeleteCascade, setIsLoadingDeleteCascade] = React.useState(false);
+    const [showCascadeDialog, setShowCascadeDialog] = React.useState(false);
+    const [deleteId, setDeleteId] = React.useState<number | null>(null);
 
     const fetchData = () => {
         setIsLoadingData(true);
         fetchWithToken(`/orders`)
             .then((res) => res.json())
-            .then((orders: OrderOverview[]) => {
+            .then((orders: OrderWithCustomer[]) => {
                 setData(orders);
             })
             .catch(err => addNotification(`Error isLoading orders: ${err}`, "error"))
             .finally(() => setIsLoadingData(false));
     };
 
-    const handleDelete = (event: React.MouseEvent, id: number) => {
-        event.stopPropagation();
-        setLoadingDeleteId(id);
-        fetch(`${apiUrl}/orders?id=${id}`, {
+    const deleteOrder = (id: number, cascade: boolean = false) => {
+        if (cascade) {
+            setIsLoadingDeleteCascade(true);
+        } else {
+            setLoadingDeleteId(id);
+        }
+
+        fetch(`${apiUrl}/orders?id=${id}${cascade ? "&cascade=true" : ""}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
         })
-            .then(res => {
+            .then((res) => {
+                if (res.status === 409 && !cascade) {
+                    setShowCascadeDialog(true);
+                    setDeleteId(id);
+                    return;
+                }
                 if (!res.ok) throw new Error("Fehler beim Löschen");
-                addNotification(`Teilelager mit id ${id} erfolgreich gelöscht`, "success");
+                addNotification(`Order mit id ${id}${cascade ? " und referenzierten Werten" : ""} erfolgreich gelöscht`, "success");
                 fetchData();
+                if (cascade) setShowCascadeDialog(false);
             })
-            .catch(err => addNotification(`Löschfehler: ${err}`, "error"))
-            .finally(() => setLoadingDeleteId(null));
+            .catch((err) => addNotification(`Löschfehler: ${err}`, "error"))
+            .finally(() => {
+                if (cascade) {
+                    setIsLoadingDeleteCascade(false);
+                } else {
+                    setLoadingDeleteId(null);
+                }
+            });
     };
 
-    const columns: ColumnDef<OrderOverview>[] = [
+    const handleDelete = (event: React.MouseEvent, id: number) => {
+        event.stopPropagation();
+        deleteOrder(id);
+    };
+
+    const handleCascadeDelete = () => {
+        if (deleteId !== null) {
+            deleteOrder(deleteId, true);
+        }
+    };
+
+    const handleCancelDelete = () => {
+        setShowCascadeDialog(false);
+    };
+
+    const columns: ColumnDef<Order>[] = [
         {
             accessorKey: "customer_name",
-            header: "Customer",
+            header: "Customer Name",
+        },
+        {
+            accessorKey: "customer_email",
+            header: "Email",
         },
         {
             accessorKey: "order_date",
@@ -75,29 +115,17 @@ export default function OrderPage() {
             },
         },
         {
-            accessorKey: "bike_model_name",
-            header: "Bike Name",
-        },
-        {
-            accessorKey: "number",
-            header: "Number",
-        },
-        {
-            accessorKey: "price",
-            header: "Price",
-        },
-        {
             id: "actions",
             enableHiding: false,
             cell: ({row}) => {
-                const order: OrderOverview = row.original
+                const order: Order = row.original
                 const roleForProject = roles.find(role => role.project_id === order.project_id);
                 const isDisabled = roleForProject?.role === "user";
 
                 return (
                     <ButtonLoading
-                        onClick={(event) => handleDelete(event, order.orderitem_id)}
-                        isLoading={loadingDeleteId === order.orderitem_id}
+                        onClick={(event) => handleDelete(event, order.id)}
+                        isLoading={loadingDeleteId === order.id}
                         className="text-black dark:text-white p-2 rounded"
                         variant="destructive"
                         disabled={isDisabled}
@@ -137,6 +165,37 @@ export default function OrderPage() {
                     />
                 )}
             />
+            {showCascadeDialog && (
+                <Dialog open={showCascadeDialog} onOpenChange={() => setShowCascadeDialog(false)}>
+                    <DialogContent className="sm:max-w-[500px]">
+                        <DialogHeader>
+                            <DialogTitle className="text-center">
+                                Willst du auch die referenzierten Werte löschen?
+                            </DialogTitle>
+                        </DialogHeader>
+                        <div className="grid">
+                            <div className="flex justify-center space-x-4">
+                                <Button
+                                    variant="outline"
+                                    onClick={handleCancelDelete}
+                                    className="w-[40%]"
+                                >
+                                    Abbrechen
+                                </Button>
+                                <ButtonLoading
+                                    isLoading={isLoadingDeleteCascade}
+                                    onClick={handleCascadeDelete}
+                                    className="w-[40%]"
+                                    variant="destructive"
+                                >
+                                    Lösche Referenzen
+                                </ButtonLoading>
+                            </div>
+                        </div>
+                    </DialogContent>
+
+                </Dialog>
+            )}
         </ContentLayout>
     );
 }

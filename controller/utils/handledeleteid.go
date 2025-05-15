@@ -1,91 +1,47 @@
 package utils
 
 import (
-	"database/sql"
-	"fmt"
 	"github.com/lib/pq"
 	"net/http"
-	"regexp"
 	"strings"
 )
 
-func HandleDelete(w http.ResponseWriter, r *http.Request, mainQuery string, preQueries []string, args ...interface{}) {
-	// Tabelle aus der Query extrahieren
-	table, err := extractTableFromDeleteQuery(mainQuery)
-	if err != nil {
-		http.Error(w, "Ungültige DELETE-Query", http.StatusBadRequest)
-		return
-	}
-
-	userEmail, err := ValidateToken(w, r)
-	if err != nil {
-		return
-	}
-
+func HandleDelete(w http.ResponseWriter, r *http.Request, mainQuery string, preQueries []string, projectIdentifier interface{}, projectArgs []interface{}, args ...interface{}) {
 	conn, err := ConnectToDB(w)
 	if err != nil {
 		return
 	}
 	defer conn.Close()
 
-	// Regex: prüft, ob "project_id" im WHERE-Teil steht
-	lowerQuery := strings.ToLower(mainQuery)
-	projectIDRegex := regexp.MustCompile(`(?i)where\s+.*\bproject[_]?id\b`)
-
-	// Projekt-ID ermitteln
-	var projectID int
-	if !projectIDRegex.MatchString(lowerQuery) {
-		queryProject := fmt.Sprintf("SELECT project_id FROM %s WHERE id = $1", table)
-		err = conn.QueryRow(queryProject, args[0]).Scan(&projectID)
-		if err != nil {
-			if err == sql.ErrNoRows {
-				http.Error(w, "Eintrag nicht gefunden", http.StatusNotFound)
-			} else {
-				HandleError(w, err, "Fehler beim Abrufen der Projekt-ID")
-			}
-			return
-		}
-
-		// Admin-Rechte prüfen
-		hasAccess, err := GetProjectIDForUser(conn, userEmail, projectID, "admin")
-		if err != nil {
-			HandleError(w, err, "Fehler bei der Rechteprüfung")
-			return
-		}
-		if !hasAccess {
-			http.Error(w, "Keine Adminrechte für dieses Projekt", http.StatusForbidden)
-			return
-		}
+	_, err = ValidateProjectAccess(w, r, conn, projectIdentifier, "admin", projectArgs...)
+	if err != nil {
+		return
 	}
 
 	// Pre-Queries ausführen
 	for _, pq := range preQueries {
+		var execErr error
 		if strings.Contains(pq, "$") {
-			_, err := conn.Exec(pq, args...)
-			if err != nil {
-				HandleError(w, err, "Fehler bei vorbereitender Löschabfrage")
-				return
-			}
+			_, execErr = conn.Exec(pq, args...)
 		} else {
-			_, err := conn.Exec(pq)
-			if err != nil {
-				HandleError(w, err, "Fehler bei vorbereitender Löschabfrage")
-				return
-			}
+			_, execErr = conn.Exec(pq)
+		}
+		if execErr != nil {
+			HandleError(w, execErr, "Fehler bei vorbereitender Löschabfrage")
+			return
 		}
 	}
 
 	// Haupt-Löschvorgang
 	_, err = conn.Exec(mainQuery, args...)
 	if err != nil {
-		if pqErr, ok := err.(*pq.Error); ok {
-			if pqErr.Code == "23503" { // Referenzielle Integritätsverletzung (Foreign Key Constraint)
-				http.Error(w, "Fehler beim Löschen des Datensatzes: Der Datensatz wird von anderen Datensätzen referenziert.", http.StatusConflict)
-				return
-			}
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23503" {
+			http.Error(w, "Der Datensatz wird von anderen Datensätzen referenziert.", http.StatusConflict)
+			return
 		}
 		HandleError(w, err, "Fehler beim Löschen des Datensatzes")
 		return
 	}
+
 	w.WriteHeader(http.StatusNoContent)
 }

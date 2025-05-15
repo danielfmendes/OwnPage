@@ -116,10 +116,13 @@ export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) 
                         projectID={projectId}
                         onChange={(value) => setProjectId(value)}
                     />
-                    <ModelNameSelect
-                        modelID={modelId}
-                        onChange={(value) => setModelId(value)}
-                    />
+                    <div className="space-y-1">
+                        <label className="block text-sm font-medium">Model Name</label>
+                        <ModelNameSelect
+                            modelID={modelId}
+                            onChange={(value) => setModelId(value)}
+                        />
+                    </div>
                 </>
             )}
 

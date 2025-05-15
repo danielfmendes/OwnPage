@@ -29,14 +29,12 @@ export default function ModelNameSelect({modelID, onChange}: Props) {
     };
 
     return (
-        <div className="space-y-1">
-            <label className="block text-sm font-medium">Model Name</label>
-            <SelectLoading
-                id={modelId}
-                setId={handleChange}
-                partIdOptions={modelIdOptions}
-                isLoadingParts={isLoadingModels}
-            />
-        </div>
+        <SelectLoading
+            id={modelId}
+            setId={handleChange}
+            partIdOptions={modelIdOptions}
+            isLoadingParts={isLoadingModels}
+            placeholder="Select model name"
+        />
     );
 }

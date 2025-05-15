@@ -48,7 +48,8 @@ func DeleteWarehousePart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.HandleDelete(w, r, "DELETE FROM warehouse_parts WHERE id = $1", []string{}, id)
+	projectIdQuery := "SELECT project_id FROM warehouse_parts WHERE id = $1"
+	utils.HandleDelete(w, r, "DELETE FROM warehouse_parts WHERE id = $1", []string{}, projectIdQuery, []interface{}{id}, id)
 }
 
 func UpdateWarehousePart(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +68,8 @@ func UpdateWarehousePart(w http.ResponseWriter, r *http.Request) {
 
 	// Verwende die HandleUpdate-Funktion, um das Update in der DB auszuführen
 	query := `UPDATE warehouse_parts SET part_type = $1, part_id = $2, quantity = $3, storage_location = $4, project_id = $5 WHERE id = $6`
-	err = utils.HandleUpdate(w, r, query, part.PartType, part.PartID, part.Quantity, part.StorageLocation, part.ProjectID, part.ID)
+	args := []any{part.PartType, part.PartID, part.Quantity, part.StorageLocation, part.ProjectID, part.ID}
+	err = utils.HandleUpdate(w, r, query, part.ProjectID, nil, args...)
 }
 
 func InsertWarehousePart(w http.ResponseWriter, r *http.Request) {
@@ -86,5 +88,6 @@ func InsertWarehousePart(w http.ResponseWriter, r *http.Request) {
 
 	// Verwende die HandleInsert-Funktion, um das Insert in der DB auszuführen
 	query := `INSERT INTO warehouse_parts (project_id, part_type, part_id, quantity, storage_location) VALUES ($1, $2, $3, $4, $5)`
-	err = utils.HandleInsert(w, r, query, part.ProjectID, part.PartType, part.PartID, part.Quantity, part.StorageLocation)
+	args := []any{part.ProjectID, part.PartType, part.PartID, part.Quantity, part.StorageLocation}
+	err = utils.HandleInsert(w, r, query, part.ProjectID, nil, args...)
 }

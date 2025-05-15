@@ -94,9 +94,9 @@ export function DatePicker({date, setDate, endYear, position = "bottom"}: DatePi
                         <CalendarIcon className="mr-2 h-4 w-4"/>
                         {date ? format(date, "PPP") : <span>Pick a date</span>}
                     </div>
-                    <div className="absolute right-2 flex items-center space-x-1">
-                        {isOpen ? <ChevronRight className="w-4 h-4 text-gray-400"/> :
-                            <ChevronDown className="w-4 h-4 text-gray-400"/>}
+                    <div className="absolute right-2 flex items-center space-x-1 opacity-50">
+                        {isOpen ? <ChevronRight className="w-4 h-4"/> :
+                            <ChevronDown className="w-4 h-4"/>}
                     </div>
                 </Button>
             </PopoverTrigger>

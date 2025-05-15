@@ -17,15 +17,15 @@ type RoleManagementWithName struct {
 	ProjectName string `json:"project_name"`
 }
 
-type OrderOverview struct {
-	OrderID      int       `json:"order_id"`
-	OrderItemID  int       `json:"orderitem_id"`
-	ProjectID    int       `json:"project_id"`
-	CustomerName string    `json:"customer_name"`
-	OrderDate    time.Time `json:"order_date"`
-	BikeModel    string    `json:"bike_model_name"`
-	Number       float64   `json:"number"`
-	Price        float64   `json:"price"`
+type OrderWithCustomer struct {
+	Order
+	CustomerName  string `json:"customer_name"`
+	CustomerEmail string `json:"customer_email"`
+}
+
+type OrderItemsWithBikeName struct {
+	OrderItem
+	ModelName string `json:"model_name"`
 }
 
 type GraphMeta struct {

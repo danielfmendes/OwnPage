@@ -82,7 +82,7 @@ export function ComboBoxLoading<T>({
                     ) : (
                         <span className="text-muted-foreground">{placeholder}</span>
                     )}
-                    <ChevronsUpDown className="w-4 opacity-50"/>
+                        <ChevronsUpDown className="absolute right-2 w-4 h-4 opacity-50"/>
                 </Button>
             </PopoverTrigger>
 
@@ -112,20 +112,25 @@ export function ComboBoxLoading<T>({
                             <CommandEmpty>No results found.</CommandEmpty>
                         ) : (
                             <CommandGroup>
-                                {items
-                                    .filter((item) => filterItems(itemLabel(item)))
-                                    .map((item) => (
-                                        <CommandItem
-                                            key={itemKey(item)}
-                                            value={itemLabel(item)}
-                                            onSelect={() => handleSelect(itemKey(item))}
-                                            className="flex flex-col items-start space-y-0.5"
-                                        >
-                                            <div className="overflow-y-auto max-h-60">
-                                                {children(item, selectedItem && itemKey(selectedItem) === itemKey(item))}
-                                            </div>
-                                        </CommandItem>
-                                    ))}
+                                {[...(selectedItem ? [selectedItem] : []), ...items.filter(item =>
+                                    !selectedItem || itemKey(item) !== itemKey(selectedItem)
+                                )]
+                                    .filter(item => filterItems(itemLabel(item)))
+                                    .map(item => {
+                                        const isSelected = selectedItem != null && itemKey(item) === itemKey(selectedItem);
+                                        return (
+                                            <CommandItem
+                                                key={itemKey(item)}
+                                                value={itemLabel(item)}
+                                                onSelect={() => handleSelect(itemKey(item))}
+                                                className={`flex flex-col items-start space-y-0.5 ${isSelected ? "bg-accent/10" : ""}`}
+                                            >
+                                                <div className="overflow-y-auto max-h-60">
+                                                    {children(item, isSelected)}
+                                                </div>
+                                            </CommandItem>
+                                        );
+                                    })}
                             </CommandGroup>
                         )}
                     </ScrollArea>

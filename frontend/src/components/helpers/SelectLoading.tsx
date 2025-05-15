@@ -6,13 +6,14 @@ type PartSelectProps = {
     setId: (id: number) => void
     partIdOptions: { id: number; name: string }[]
     isLoadingParts: boolean
+    placeholder?: string
 }
 
-export function SelectLoading({id, setId, partIdOptions, isLoadingParts}: PartSelectProps) {
+export function SelectLoading({id, setId, partIdOptions, isLoadingParts, placeholder}: PartSelectProps) {
     return (
         <Select value={id !== null ? String(id) : undefined} onValueChange={(val) => setId(Number(val))}>
             <SelectTrigger className="w-full p-2 border rounded">
-                <SelectValue placeholder="Select part" />
+                <SelectValue placeholder={placeholder || "Select a part"} />
             </SelectTrigger>
 
             <SelectContent>

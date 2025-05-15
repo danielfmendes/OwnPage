@@ -15,9 +15,9 @@ import {
     TabsTrigger
 } from "@/components/ui/tabs"
 import type {ColumnDef} from "@tanstack/react-table";
-import {OrderOverview} from "@/types/custom";
+import {OrderWithCustomer} from "@/types/custom";
 import {Button} from "@/components/ui/button";
-import {ArrowUpDown, Trash2} from "lucide-react";
+import {ArrowUpDown} from "lucide-react";
 import apiUrl, {fetchWithToken} from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import AuthToken from "@/utils/authtoken";
@@ -35,7 +35,7 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
 
     const [lastName, setLastName] = React.useState(rowData.name)
     const [city, setCity] = React.useState(rowData.city)
-    const [data, setData] = React.useState<OrderOverview[]>([]);
+    const [data, setData] = React.useState<OrderWithCustomer[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(false);
     const [isLoadingUpdate, setIsLoadingUpdate] = React.useState(false);
 
@@ -47,7 +47,7 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
         setIsLoadingData(true);
         fetchWithToken(`/orders?email=${rowData.email}`)
             .then((res) => res.json())
-            .then((orders: OrderOverview[]) => {
+            .then((orders: OrderWithCustomer[]) => {
                 setData(orders);
             })
             .catch(err => addNotification(`Error isLoading orders: ${err}`, "error"))
@@ -85,11 +85,7 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
             .finally(() => setIsLoadingUpdate(false));
     };
 
-    const columns: ColumnDef<OrderOverview>[] = [
-        {
-            accessorKey: "customer_name",
-            header: "Customer",
-        },
+    const columns: ColumnDef<OrderWithCustomer>[] = [
         {
             accessorKey: "order_date",
             header: ({column}) => (
