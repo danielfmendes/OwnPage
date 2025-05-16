@@ -1,14 +1,13 @@
 "use client";
-import { ContentLayout } from "@/components/admin-panel/content-layout";
-import { useSidebar } from "@/hooks/use-sidebar";
-import { useStore } from "@/hooks/use-store";
+import {ContentLayout} from "@/components/admin-panel/content-layout";
+import {useSidebar} from "@/hooks/use-sidebar";
+import {useStore} from "@/hooks/use-store";
 import DataTable from "@/components/helpers/Table";
 import * as React from "react";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import AuthToken from "@/utils/authtoken";
 import {RoleManagementWithName} from "@/types/custom";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
-import apiUrl, {fetchWithToken} from "@/utils/url";
+import {deleteWithToken, fetchWithToken, handleFetchError} from "@/utils/url";
 import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown, Trash2} from "lucide-react";
@@ -20,7 +19,6 @@ import AddCustomerContent from "@/app/dwh/customer/add-customer-content";
 
 export default function CustomerPage() {
     const {addNotification} = useNotification();
-    const token = AuthToken.getAuthToken();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const [data, setData] = React.useState<Customer[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(true);
@@ -32,9 +30,8 @@ export default function CustomerPage() {
     const fetchData = React.useCallback(() => {
         setIsLoadingData(true);
         fetchWithToken(`/customers`)
-            .then((res) => res.json())
             .then((customers: Customer[]) => setData(customers))
-            .catch(err => addNotification(`Error loading customer: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to load customer${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingData(false));
     }, [addNotification]);
 
@@ -45,25 +42,19 @@ export default function CustomerPage() {
             setLoadingDeleteId(id);
         }
 
-        fetch(`${apiUrl}/customers?id=${id}${cascade ? "&cascade=true" : ""}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        })
-            .then((res) => {
+        deleteWithToken(`/customers?id=${id}${cascade ? "&cascade=true" : ""}`, true)
+            .then(async (res) => {
                 if (res.status === 409 && !cascade) {
                     setShowCascadeDialog(true);
                     setDeleteId(id);
                     return;
                 }
-                if (!res.ok) throw new Error("Fehler beim Löschen");
+                if (!res.ok) await handleFetchError(res, "DELETE");
                 addNotification(`Customer with id ${id}${cascade ? " and related data" : ""} deleted successfully`, "success");
                 fetchData();
                 if (cascade) setShowCascadeDialog(false);
             })
-            .catch((err) => addNotification(`Löschfehler: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to delete customer${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => {
                 if (cascade) {
                     setIsLoadingDeleteCascade(false);

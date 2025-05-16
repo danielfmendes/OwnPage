@@ -6,10 +6,12 @@ import {Button} from '@/components/ui/button';
 import InputField from '@/components/helpers/InputField';
 import {ArrowRight, Box} from 'lucide-react';
 import {useRouter} from 'next/navigation';
-import apiUrl from "@/utils/url";
+import apiUrl, {handleFetchError} from "@/utils/url";
 import AuthToken from "@/utils/authtoken";
+import {useNotification} from "@/components/helpers/NotificationProvider";
 
 export default function LoginCard() {
+    const {addNotification} = useNotification();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessageEmail, setErrorMessageEmail] = useState('');
@@ -32,19 +34,20 @@ export default function LoginCard() {
     const login = (loginEmail: string, loginPassword: string, redirect = true) => {
         fetch(`${apiUrl}/auth/login`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: loginEmail, password: loginPassword }),
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email: loginEmail, password: loginPassword}),
         })
-            .then(res => {
-                if (!res.ok) throw new Error();
+            .then(async res => {
+                if (!res.ok) await handleFetchError(res, "POST");
                 return res.json();
             })
             .then(data => {
                 AuthToken.setAuthToken(data.token);
                 if (redirect) window.location.href = '/dwh/dashboard';
             })
-            .catch(() => {
+            .catch((err) => {
                 setErrorMessagePassword("Passwort oder Email sind falsch.");
+                addNotification(`Login error${err?.message ? `: ${err.message}` : ""}`, "error");
             });
     };
 

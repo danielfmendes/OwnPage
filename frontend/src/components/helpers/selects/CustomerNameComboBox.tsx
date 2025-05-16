@@ -25,15 +25,12 @@ export default function CustomerNameComboBox({customerID, onChange}: Props) {
     React.useEffect(() => {
         setIsLoading(true);
         fetchWithToken(`/customers`)
-            .then(res => res.json())
             .then((customers: Customer[]) => {
                 setCustomerIdOptions(customers);
                 const selected = customers.find(c => c.id === customerID) ?? null;
                 setSelectedCustomer(selected);
             })
-            .catch(err =>
-                addNotification(`Failed to load customer options: ${err}`, "error")
-            )
+            .catch(err => addNotification(`Failed to load customer options${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoading(false));
     }, [customerID]);
 

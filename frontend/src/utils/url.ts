@@ -1,5 +1,6 @@
 import AuthToken from "./authtoken";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
+
 const token = AuthToken.getAuthToken();
 let apiUrl: string;
 
@@ -9,7 +10,12 @@ if (process.env.NODE_ENV === "production") {
     apiUrl = "http://localhost:8080";
 }
 
-// Hilfsmethode für GET-Anfragen mit Bearer Token
+export const handleFetchError = async (response: Response, method: string) => {
+    const errorMessage = await response.text();
+    const defaultMessage= `Error during the ${method}-request`
+    throw new Error(errorMessage || defaultMessage);
+};
+
 export const fetchWithToken = async (endpoint: string, force = false) => {
     let finalEndpoint = endpoint;
 
@@ -47,7 +53,40 @@ export const fetchWithToken = async (endpoint: string, force = false) => {
     });
 
     if (!response.ok) {
-        throw new Error(`Fehler bei der Anfrage: ${response.statusText}`);
+        await handleFetchError(response, "GET");
+    }
+
+    return response.json();
+};
+
+export const fetchWithBodyAndToken = async (method: string, endpoint: string, body: any) => {
+    const response = await fetch(`${apiUrl}${endpoint}`, {
+        method,
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        await handleFetchError(response, method);
+    }
+
+    return response;
+};
+
+export const deleteWithToken = async (endpoint: string, suppressError: boolean = false) => {
+    const response = await fetch(`${apiUrl}${endpoint}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok && !suppressError) {
+        await handleFetchError(response, "DELETE");
     }
 
     return response;

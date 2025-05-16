@@ -40,7 +40,6 @@ export default function DashboardPage() {
     const fetchGraphMetaData = () => {
         setIsLoadingGraphMetaData(true);
         fetchWithToken(`/dashboard/graphmeta?range=${timeRange}`)
-            .then((res) => res.json())
             .then((data: GraphMeta[]) => {
                 const graphMeta = data[0];
                 setGraphMetaData(graphMeta);
@@ -60,7 +59,7 @@ export default function DashboardPage() {
                         100;
                 }
             })
-            .catch((err) => addNotification(`Error loading graph meta: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to load graph meta${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingGraphMetaData(false));
     };
 
@@ -68,9 +67,8 @@ export default function DashboardPage() {
     const fetchGraphData = () => {
         setIsLoadingGraphDataData(true);
         fetchWithToken(`/dashboard/graphdata?range=${timeRange}`)
-            .then((res) => res.json())
             .then((data: GraphData[]) => setGraphDataData(data))
-            .catch((err) => addNotification(`Error loading graph data: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to load graph data${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingGraphDataData(false));
     };
 
@@ -78,7 +76,6 @@ export default function DashboardPage() {
     const fetchCityData = () => {
         setIsLoadingCitiesData(true);
         fetchWithToken(`/dashboard/citydata?range=${timeRange}`)
-            .then((res) => res.json())
             .then((data: CityData[]) => {
                 if (data) {
                     setCitiesData(data)
@@ -86,7 +83,7 @@ export default function DashboardPage() {
                     setCitiesData([]);
                 }
             })
-            .catch((err) => addNotification(`Error loading city data: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to load city data${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingCitiesData(false));
     };
 
@@ -94,9 +91,8 @@ export default function DashboardPage() {
     const fetchBikeData = () => {
         setIsLoadingBikeData(true);
         fetchWithToken(`/dashboard/bikemodels?range=${timeRange}`)
-            .then((res) => res.json())
             .then((data: BikeSales[]) => setBikeData(data))
-            .catch((err) => addNotification(`Error loading bike data: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to load bike data${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingBikeData(false));
     };
 

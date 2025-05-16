@@ -1,10 +1,9 @@
 import React from "react";
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import apiUrl, {fetchWithToken} from "@/utils/url";
+import {fetchWithBodyAndToken, fetchWithToken} from "@/utils/url";
 import {WarehousePart} from "@/types/datatables";
 import InputField from "@/components/helpers/InputField";
-import AuthToken from "@/utils/authtoken";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {SelectLoading} from "@/components/helpers/SelectLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
@@ -20,7 +19,6 @@ interface Props {
 export default function WarehousePartDialogContent({rowData, onClose, onRefresh}: Props) {
     const isEditMode = !!rowData;
     const {addNotification} = useNotification();
-    const token = AuthToken.getAuthToken();
 
     const [partId, setPartId] = React.useState<number | null>(rowData?.part_id || null);
     const [projectId, setProjectId] = React.useState<string>(rowData?.project_id?.toString() || "");
@@ -35,9 +33,8 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
         if (!isEditMode && partType) {
             setIsLoadingParts(true)
             fetchWithToken(`/${partType}s`)
-                .then(res => res.json())
                 .then(data => setPartIdOptions(data))
-                .catch(err => addNotification(`Fehler beim Laden der Part-ID-Optionen: ${err}`, "error"))
+                .catch(err => addNotification(`Failed to load part-id.options${err?.message ? `: ${err.message}` : ""}`, "error"))
                 .finally(() => setIsLoadingParts(false));
         }
     }, [partType]);
@@ -59,22 +56,15 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
             storage_location: storageLocation
         };
         setIsLoading(true)
-        fetch(`${apiUrl}/warehouseparts`, {
-            method: "POST",
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newData),
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Fehler beim Speichern");
-                addNotification("Neuer Datensatz erfolgreich gespeichert", "success");
+
+        fetchWithBodyAndToken("POST", "/warehouseparts", newData)
+            .then(() => {
+                addNotification("Warehousepart saved successfully", "success");
                 resetForm();
                 onClose();
                 onRefresh();
             })
-            .catch(err => addNotification(`Fehler beim Speichern: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to save warehousepart${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoading(false));
     };
 
@@ -88,21 +78,14 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
             project_id: parseInt(projectId) ?? 0,
         }
         setIsLoading(true)
-        fetch(`${apiUrl}/warehouseparts`, {
-            method: "PUT",
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updatedData),
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Fehler beim Aktualisieren");
-                addNotification("Datensatz erfolgreich aktualisiert", "success");
+
+        fetchWithBodyAndToken("PUT", "/warehouseparts", updatedData)
+            .then(() => {
+                addNotification("Warehousepart updated successfully", "success");
                 onClose();
                 onRefresh();
             })
-            .catch(err => addNotification(`Fehler beim Aktualisieren: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to update warehousepart${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoading(false));
     };
 

@@ -3,9 +3,8 @@ import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import InputField from "@/components/helpers/InputField";
-import apiUrl from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import AuthToken from "@/utils/authtoken";
+import {fetchWithBodyAndToken} from "@/utils/url";
 
 interface RoleManagementProps {
     onClose: () => void;
@@ -13,8 +12,7 @@ interface RoleManagementProps {
 }
 
 export default function AddProjektDialogContent({onClose, onRefresh}: RoleManagementProps) {
-    const { addNotification } = useNotification();
-    const token = AuthToken.getAuthToken();
+    const {addNotification} = useNotification();
     const [isLoadingAddProject, setIsLoadingAddProject] = React.useState(false);
     const [projectName, setProjectName] = React.useState<string>('');
 
@@ -24,22 +22,14 @@ export default function AddProjektDialogContent({onClose, onRefresh}: RoleManage
         };
 
         setIsLoadingAddProject(true);
-        fetch(`${apiUrl}/projects`, {
-            method: "POST",
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newData),
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Save failed");
-                addNotification("New project saved successfully", "success");
+        fetchWithBodyAndToken("POST", "/projects", newData)
+            .then(() => {
+                addNotification("Project saved successfully", "success");
                 setProjectName("");
                 onClose();
                 onRefresh();
             })
-            .catch(err => addNotification(`Save error: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to save project${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingAddProject(false));
     };
 

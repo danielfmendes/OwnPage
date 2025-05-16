@@ -33,16 +33,14 @@ export default function DemoLayout({children}: { children: React.ReactNode }) {
             if (decoded.sub) {
                 setIsLoadingUser(true);
                 fetchWithToken(`/user?email=${decoded.sub}`, true)
-                    .then((res) => res.json())
                     .then((data) => setUser(data[0]))
-                    .catch((err) => addNotification(`Error fetching user data: ${err}`, "error"))
+                    .catch(err => addNotification(`Failed to load user data${err?.message ? `: ${err.message}` : ""}`, "error"))
                     .finally(() => setIsLoadingUser(false));
             }
             setIsLoadingRole(true);
             fetchWithToken(`/rolemanagements`, true)
-                .then((res) => res.json())
                 .then((roles: RoleManagementWithName[]) => setRoles(roles))
-                .catch((err) => addNotification(`Error loading role management: ${err}`, "error"))
+                .catch(err => addNotification(`Failed to load role management${err?.message ? `: ${err.message}` : ""}`, "error"))
                 .finally(() => setIsLoadingRole(false));
         } catch (err) {
             addNotification(`Invalid or expired token: ${err}`, "error");

@@ -7,9 +7,8 @@ import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown, Trash2} from "lucide-react";
 import * as React from "react";
-import apiUrl, {fetchWithToken} from "@/utils/url";
+import {deleteWithToken, fetchWithToken, handleFetchError} from "@/utils/url";
 import {OrderWithCustomer, RoleManagementWithName} from "@/types/custom";
-import AuthToken from "@/utils/authtoken";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
@@ -20,7 +19,6 @@ import {Order} from "@/types/datatables";
 
 export default function OrderPage() {
     const {addNotification} = useNotification();
-    const token = AuthToken.getAuthToken();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const [data, setData] = React.useState<OrderWithCustomer[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(true);
@@ -32,11 +30,10 @@ export default function OrderPage() {
     const fetchData = () => {
         setIsLoadingData(true);
         fetchWithToken(`/orders`)
-            .then((res) => res.json())
             .then((orders: OrderWithCustomer[]) => {
                 setData(orders);
             })
-            .catch(err => addNotification(`Error isLoading orders: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to load orders${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingData(false));
     };
 
@@ -47,25 +44,19 @@ export default function OrderPage() {
             setLoadingDeleteId(id);
         }
 
-        fetch(`${apiUrl}/orders?id=${id}${cascade ? "&cascade=true" : ""}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        })
-            .then((res) => {
+        deleteWithToken(`/orders?id=${id}${cascade ? "&cascade=true" : ""}`, true)
+            .then(async (res) => {
                 if (res.status === 409 && !cascade) {
                     setShowCascadeDialog(true);
                     setDeleteId(id);
                     return;
                 }
-                if (!res.ok) throw new Error("Fehler beim Löschen");
-                addNotification(`Order mit id ${id}${cascade ? " und referenzierten Werten" : ""} erfolgreich gelöscht`, "success");
+                if (!res.ok) await handleFetchError(res, "DELETE");
+                addNotification(`Order with id ${id}${cascade ? " and related data" : ""} deleted successfully`, "success");
                 fetchData();
                 if (cascade) setShowCascadeDialog(false);
             })
-            .catch((err) => addNotification(`Löschfehler: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to delete order${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => {
                 if (cascade) {
                     setIsLoadingDeleteCascade(false);

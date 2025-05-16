@@ -3,10 +3,9 @@ import InputField from "@/components/helpers/InputField";
 import React from "react";
 import {DatePicker} from "@/components/helpers/DatePicker";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
-import apiUrl from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import AuthToken from "@/utils/authtoken";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
+import {fetchWithBodyAndToken} from "@/utils/url";
 
 interface Props {
     onClose: () => void;
@@ -14,9 +13,7 @@ interface Props {
 }
 
 export default function AddCustomerContent({onClose, onRefresh}: Props) {
-    const { addNotification } = useNotification();
-    const token = AuthToken.getAuthToken();
-
+    const {addNotification} = useNotification();
     const [firstName, setFirstName] = React.useState<string>('');
     const [name, setName] = React.useState<string>('');
     const [email, setEmail] = React.useState<string>('');
@@ -46,22 +43,14 @@ export default function AddCustomerContent({onClose, onRefresh}: Props) {
         };
 
         setIsLoading(true);
-        fetch(`${apiUrl}/customers`, {
-            method: "POST",
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newData),
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Save failed");
+        fetchWithBodyAndToken("POST", "/customers", newData)
+            .then(() => {
                 addNotification("Customer saved successfully", "success");
                 resetForm();
                 onClose();
                 onRefresh();
             })
-            .catch(err => addNotification(`Save error: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to save customers${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoading(false));
     };
 
@@ -94,7 +83,7 @@ export default function AddCustomerContent({onClose, onRefresh}: Props) {
             />
             <div className="space-y-1">
                 <label className="block text-sm font-medium">Date of Birth</label>
-                <DatePicker date={dob} setDate={setDob} />
+                <DatePicker date={dob} setDate={setDob}/>
             </div>
             <InputField
                 label="City"

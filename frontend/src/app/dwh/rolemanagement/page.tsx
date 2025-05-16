@@ -26,9 +26,8 @@ export default function RoleManagementPage() {
             setIsLoadingData(true);
         }
         fetchWithToken(`/rolemanagements`)
-            .then((res) => res.json())
             .then((roles: RoleManagementWithName[]) => setData(roles))
-            .catch(err => addNotification(`Error loading bikes: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to load bikes${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingData(false));
     }, []);
 

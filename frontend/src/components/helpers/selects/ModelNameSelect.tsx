@@ -17,9 +17,8 @@ export default function ModelNameSelect({modelID, onChange}: Props) {
     React.useEffect(() => {
         setIsLoadingModels(true);
         fetchWithToken(`/bikemodels`)
-            .then(res => res.json())
             .then(setModelIdOptions)
-            .catch(err => addNotification(`Failed to load model options: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to load model options${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingModels(false));
     }, []);
 

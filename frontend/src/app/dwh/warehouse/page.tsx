@@ -7,10 +7,9 @@ import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown, Trash2} from "lucide-react";
 import * as React from "react";
-import apiUrl, {fetchWithToken} from "@/utils/url";
+import {deleteWithToken, fetchWithToken, handleFetchError} from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
-import AuthToken from "@/utils/authtoken";
 import BikeDialogContent from "@/app/dwh/warehouse/content-dialog";
 import {BikeWithModelName, RoleManagementWithName} from "@/types/custom";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
@@ -18,7 +17,6 @@ import {useRoleStore} from "@/utils/rolemananagemetstate";
 
 export default function WareHousePage() {
     const {addNotification} = useNotification();
-    const token = AuthToken.getAuthToken();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const [data, setData] = React.useState<BikeWithModelName[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(true);
@@ -30,9 +28,8 @@ export default function WareHousePage() {
     const fetchData = React.useCallback(() => {
         setIsLoadingData(true);
         fetchWithToken(`/bikes`)
-            .then((res) => res.json())
             .then((bikes: BikeWithModelName[]) => setData(bikes))
-            .catch(err => addNotification(`Error loading bikes: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to load bikes${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingData(false));
     }, [addNotification]);
 
@@ -43,25 +40,19 @@ export default function WareHousePage() {
             setLoadingDeleteId(id);
         }
 
-        fetch(`${apiUrl}/bikes?id=${id}${cascade ? "&cascade=true" : ""}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        })
-            .then((res) => {
+        deleteWithToken(`/bikes?id=${id}${cascade ? "&cascade=true" : ""}`, true)
+            .then(async (res) => {
                 if (res.status === 409 && !cascade) {
                     setShowCascadeDialog(true);
                     setDeleteId(id);
                     return;
                 }
-                if (!res.ok) throw new Error("Fehler beim Löschen");
-                addNotification(`Teilelager mit id ${id}${cascade ? " und referenzierten Werten" : ""} erfolgreich gelöscht`, "success");
+                if (!res.ok) await handleFetchError(res, "DELETE");
+                addNotification(`Bike with id ${id}${cascade ? " and related data" : ""} deleted successfully`, "success");
                 fetchData();
                 if (cascade) setShowCascadeDialog(false);
             })
-            .catch((err) => addNotification(`Löschfehler: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to delete bike${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => {
                 if (cascade) {
                     setIsLoadingDeleteCascade(false);

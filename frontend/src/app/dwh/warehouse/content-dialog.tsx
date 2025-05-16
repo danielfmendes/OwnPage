@@ -1,15 +1,14 @@
 import React from "react";
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
-import apiUrl from "@/utils/url";
 import {Bike} from "@/types/datatables";
 import InputField from "@/components/helpers/InputField";
-import AuthToken from "@/utils/authtoken";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {BikeWithModelName} from "@/types/custom";
 import {DatePicker} from "@/components/helpers/DatePicker";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
 import ModelNameSelect from "@/components/helpers/selects/ModelNameSelect";
+import {fetchWithBodyAndToken} from "@/utils/url";
 
 interface Props {
     rowData?: BikeWithModelName;
@@ -20,7 +19,6 @@ interface Props {
 export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) {
     const isEditMode = !!rowData;
     const {addNotification} = useNotification();
-    const token = AuthToken.getAuthToken();
 
     const [projectId, setProjectId] = React.useState<string>(rowData?.project_id?.toString() || "");
     const [modelId, setModelId] = React.useState<number | null>(rowData?.model_id ?? null);
@@ -50,22 +48,14 @@ export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) 
         };
 
         setIsLoading(true);
-        fetch(`${apiUrl}/bikes`, {
-            method: "POST",
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newData),
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Save failed");
-                addNotification("Entry saved successfully", "success");
+        fetchWithBodyAndToken("POST", "/bikes", newData)
+            .then(() => {
+                addNotification("Bike saved successfully", "success");
                 resetForm();
                 onClose();
                 onRefresh();
             })
-            .catch(err => addNotification(`Save error: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to save bike${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoading(false));
     };
 
@@ -81,21 +71,13 @@ export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) 
         };
 
         setIsLoading(true);
-        fetch(`${apiUrl}/bikes`, {
-            method: "PUT",
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updatedData),
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Update failed");
-                addNotification("Entry updated successfully", "success");
+        fetchWithBodyAndToken("PUT", "/bikes", updatedData)
+            .then(() => {
+                addNotification("Bike updated successfully", "success");
                 onClose();
                 onRefresh();
             })
-            .catch(err => addNotification(`Update error: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to update bike${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoading(false));
     };
 

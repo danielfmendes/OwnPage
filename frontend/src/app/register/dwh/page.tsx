@@ -6,7 +6,7 @@ import {Button} from '@/components/ui/button';
 import InputField from '@/components/helpers/InputField';
 import {Box} from 'lucide-react';
 import {DatePicker} from "@/components/helpers/DatePicker";
-import apiUrl from "@/utils/url";
+import apiUrl, {handleFetchError} from "@/utils/url";
 import AuthToken from "@/utils/authtoken";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 
@@ -28,8 +28,8 @@ export default function RegisterCard() {
                 dob: selectedDate,
             }),
         })
-            .then(res => {
-                if (!res.ok) throw new Error();
+            .then(async res => {
+                if (!res.ok) await handleFetchError(res, "POST");
                 return res.json();
             })
             .then(data => {
@@ -40,9 +40,8 @@ export default function RegisterCard() {
                     "success"
                 );
             })
-            .catch(err => addNotification(`Fehler beim Registrieren: ${err}`, "error"))
+            .catch(err => addNotification(`Registration error${err?.message ? `: ${err.message}` : ""}`, "error"));
     };
-
 
     const handleBack = () => {
         if (document.referrer) {

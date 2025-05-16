@@ -7,10 +7,9 @@ import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown, Trash2} from "lucide-react";
 import * as React from "react";
-import apiUrl, {fetchWithToken} from "@/utils/url";
+import {deleteWithToken, fetchWithToken} from "@/utils/url";
 import WarehousePartDialogContent from "@/app/dwh/partsstorage/content-dialog";
 import {RoleManagementWithName, WarehousePartWithName} from "@/types/custom";
-import AuthToken from "@/utils/authtoken";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
@@ -18,7 +17,6 @@ import {useRoleStore} from "@/utils/rolemananagemetstate";
 
 export default function PartsStoragePage() {
     const {addNotification} = useNotification();
-    const token = AuthToken.getAuthToken();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const [data, setData] = React.useState<WarehousePartWithName[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(true);
@@ -27,30 +25,22 @@ export default function PartsStoragePage() {
     const fetchData = () => {
         setIsLoadingData(true);
         fetchWithToken(`/warehouseparts`)
-            .then((res) => res.json())
             .then((warehouseparts: WarehousePartWithName[]) => {
                 setData(warehouseparts);
             })
-            .catch(err => addNotification(`Error isLoading warehouseparts: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to load warehouseparts${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingData(false));
     };
 
     const handleDelete = (event: React.MouseEvent, id: number) => {
         event.stopPropagation();
         setLoadingDeleteId(id);
-        fetch(`${apiUrl}/warehouseparts?id=${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Fehler beim Löschen");
-                addNotification(`Teilelager mit id ${id} erfolgreich gelöscht`, "success");
+        deleteWithToken(`/warehouseparts?id=${id}`)
+            .then(() => {
+                addNotification(`Warehousepart with id ${id} successfully deleted`, "success");
                 fetchData();
             })
-            .catch(err => addNotification(`Löschfehler: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to delete warehousepart${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setLoadingDeleteId(null));
     };
 

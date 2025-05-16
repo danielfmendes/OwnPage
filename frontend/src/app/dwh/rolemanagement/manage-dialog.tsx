@@ -4,7 +4,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import apiUrl, {fetchWithToken} from "@/utils/url";
+import {deleteWithToken, fetchWithBodyAndToken, fetchWithToken} from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {RoleManagement} from "@/types/datatables";
 import {Select, SelectTrigger, SelectValue, SelectContent, SelectItem} from "@/components/ui/select";
@@ -13,7 +13,6 @@ import {Input} from "@/components/ui/input";
 import type {ColumnDef} from "@tanstack/react-table";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
-import AuthToken from "@/utils/authtoken";
 
 interface RoleSelectProps {
     value: string;
@@ -40,7 +39,6 @@ interface ManageProps {
 
 export default function ManageDialogContent({manageId}: ManageProps) {
     const {addNotification} = useNotification();
-    const token = AuthToken.getAuthToken();
     const [data, setData] = React.useState<RoleManagement[]>([]);
     const [originalData, setOriginalData] = React.useState<Record<string, string>>({});
     const [isLoadingData, setIsLoadingData] = React.useState(true);
@@ -57,7 +55,6 @@ export default function ManageDialogContent({manageId}: ManageProps) {
         if (manageId) {
             setIsLoadingData(true);
             fetchWithToken(`/rolemanagements/${manageId}`)
-                .then((res) => res.json())
                 .then((roles: RoleManagement[]) => {
                     setData(roles);
                     const original: Record<string, string> = {};
@@ -66,9 +63,7 @@ export default function ManageDialogContent({manageId}: ManageProps) {
                     });
                     setOriginalData(original);
                 })
-                .catch((err) =>
-                    addNotification(`Fehler beim Laden der Rollen: ${err}`, "error")
-                )
+                .catch(err => addNotification(`Failed to load roles${err?.message ? `: ${err.message}` : ""}`, "error"))
                 .finally(() => setIsLoadingData(false));
         }
     };
@@ -85,48 +80,6 @@ export default function ManageDialogContent({manageId}: ManageProps) {
         );
     };
 
-    const handleSaveRole = (email: string, currentRole: string) => {
-        const updatedData: RoleManagement = {
-            user_email: email,
-            project_id: manageId ?? 0,
-            role: currentRole,
-        }
-        setLoadingEditEmail(email);
-        fetch(`${apiUrl}/rolemanagements`, {
-            method: "PUT",
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updatedData),
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Update failed");
-                addNotification("User Role updated successfully", "success");
-                fetchData();
-            })
-            .catch(err => addNotification(`Update error: ${err}`, "error"))
-            .finally(() => setLoadingEditEmail(null));
-    };
-
-    const handleDelete = (email: string) => {
-        setLoadingDeleteEmail(email);
-        fetch(`${apiUrl}/rolemanagements?email=${email}&project_id=${manageId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Fehler beim Löschen");
-                addNotification(`Email ${email} aus Projekt mit id ${manageId} erfolgreich gelöscht`, "success");
-                fetchData();
-            })
-            .catch(err => addNotification(`Löschfehler: ${err}`, "error"))
-            .finally(() => setLoadingDeleteEmail(null));
-    };
-
     const handleAddUser = () => {
         const isEmailValid = newEmail.trim() !== "";
         const isRoleValid = newRole !== "";
@@ -136,24 +89,43 @@ export default function ManageDialogContent({manageId}: ManageProps) {
         if (newEmail && newRole) {
             const newRoleManagement: RoleManagement = {user_email: newEmail, project_id: manageId ?? 0, role: newRole};
             setIsLoadingAdd(true);
-            fetch(`${apiUrl}/rolemanagements`, {
-                method: "POST",
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newRoleManagement),
-            })
-                .then(res => {
-                    if (!res.ok) throw new Error("Save failed");
-                    addNotification("New role saved successfully", "success");
+            fetchWithBodyAndToken("POST", "/rolemanagements", newRoleManagement)
+                .then(() => {
+                    addNotification("Role saved successfully", "success");
                     setNewEmail("");
                     setNewRole("");
                     fetchData();
                 })
-                .catch(err => addNotification(`Save error: ${err}`, "error"))
+                .catch(err => addNotification(`Failed to save rolemanagement${err?.message ? `: ${err.message}` : ""}`, "error"))
                 .finally(() => setIsLoadingAdd(false));
         }
+    };
+
+    const handleSaveRole = (email: string, currentRole: string) => {
+        const updatedData: RoleManagement = {
+            user_email: email,
+            project_id: manageId ?? 0,
+            role: currentRole,
+        }
+        setLoadingEditEmail(email);
+        fetchWithBodyAndToken("PUT", "/rolemanagements", updatedData)
+            .then(() => {
+                addNotification("Role updated successfully", "success");
+                fetchData();
+            })
+            .catch(err => addNotification(`Failed to update rolemanagement${err?.message ? `: ${err.message}` : ""}`, "error"))
+            .finally(() => setLoadingEditEmail(null));
+    };
+
+    const handleDelete = (email: string) => {
+        setLoadingDeleteEmail(email);
+        deleteWithToken(`/rolemanagements?email=${email}&project_id=${manageId}`)
+            .then(() => {
+                addNotification(`Email ${email} was successfully deleted from project with id ${manageId}`, "success");
+                fetchData();
+            })
+            .catch(err => addNotification(`Failed to delete rolemanagement${err?.message ? `: ${err.message}` : ""}`, "error"))
+            .finally(() => setLoadingDeleteEmail(null));
     };
 
     const columns: ColumnDef<RoleManagement>[] = [

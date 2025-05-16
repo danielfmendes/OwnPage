@@ -18,9 +18,8 @@ import type {ColumnDef} from "@tanstack/react-table";
 import {OrderWithCustomer} from "@/types/custom";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown} from "lucide-react";
-import apiUrl, {fetchWithToken} from "@/utils/url";
+import {fetchWithBodyAndToken, fetchWithToken} from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import AuthToken from "@/utils/authtoken";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
 
 interface Props {
@@ -31,8 +30,6 @@ interface Props {
 
 export default function CustomerDetailContent({rowData, onClose, onRefresh}: Props) {
     const {addNotification} = useNotification();
-    const token = AuthToken.getAuthToken();
-
     const [lastName, setLastName] = React.useState(rowData.name)
     const [city, setCity] = React.useState(rowData.city)
     const [data, setData] = React.useState<OrderWithCustomer[]>([]);
@@ -46,11 +43,10 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
     const fetchData = () => {
         setIsLoadingData(true);
         fetchWithToken(`/orders?email=${rowData.email}`)
-            .then((res) => res.json())
             .then((orders: OrderWithCustomer[]) => {
                 setData(orders);
             })
-            .catch(err => addNotification(`Error isLoading orders: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to load orders${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingData(false));
     };
 
@@ -67,21 +63,13 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
         };
 
         setIsLoadingUpdate(true);
-        fetch(`${apiUrl}/customers`, {
-            method: "PUT",
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updatedData),
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Update failed");
+        fetchWithBodyAndToken("PUT", "/customers", updatedData)
+            .then(() => {
                 addNotification("Customer updated successfully", "success");
                 onClose();
                 onRefresh();
             })
-            .catch(err => addNotification(`Update error: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to update customer${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingUpdate(false));
     };
 

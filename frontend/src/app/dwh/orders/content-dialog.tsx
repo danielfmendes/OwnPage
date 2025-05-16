@@ -1,6 +1,5 @@
 import React from "react";
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
-import AuthToken from "@/utils/authtoken";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import InputField from "@/components/helpers/InputField";
@@ -8,7 +7,7 @@ import {OrderItemsWithBikeName, OrderWithCustomer, RoleManagementWithName} from 
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
 import {DatePicker} from "@/components/helpers/DatePicker";
 import CustomerNameComboBox from "@/components/helpers/selects/CustomerNameComboBox";
-import apiUrl, {fetchWithToken} from "@/utils/url";
+import {deleteWithToken, fetchWithBodyAndToken, fetchWithToken} from "@/utils/url";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
 import {Order, OrderItem} from "@/types/datatables";
@@ -27,7 +26,6 @@ interface Props {
 
 export default function OrderDialogContent({rowData, onClose, onRefresh}: Props) {
     const {addNotification} = useNotification();
-    const token = AuthToken.getAuthToken();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const isEditMode = !!rowData;
     const isDisabled = roles.find(role => role.project_id === rowData?.project_id)?.role === "user";
@@ -75,11 +73,10 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
     const fetchOrderItems = () => {
         setIsLoadingData(true);
         fetchWithToken(`/orderitems?order_id=${rowData?.id}`)
-            .then((res) => res.json())
             .then((orders: OrderItemsWithBikeName[]) => {
                 setData(orders);
             })
-            .catch(err => addNotification(`Error isLoading orders: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to load orderitems${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingData(false));
     };
 
@@ -91,22 +88,14 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
         };
 
         setIsLoadingOrder(true);
-        fetch(`${apiUrl}/orders`, {
-            method: "POST",
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newData),
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Save failed");
+        fetchWithBodyAndToken("POST", "/orders", newData)
+            .then(() => {
                 addNotification("Order saved successfully", "success");
                 resetFormOrder();
                 onClose();
                 onRefresh();
             })
-            .catch(err => addNotification(`Save error: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to save order${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingOrder(false));
     };
 
@@ -119,21 +108,13 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
         };
 
         setIsLoadingOrder(true);
-        fetch(`${apiUrl}/orders`, {
-            method: "PUT",
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updatedData),
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Update failed");
+        fetchWithBodyAndToken("PUT", "/orders", updatedData)
+            .then(() => {
                 addNotification("Order updated successfully", "success");
                 onClose();
                 onRefresh();
             })
-            .catch(err => addNotification(`Update error: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to update order${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingOrder(false));
     };
 
@@ -146,41 +127,15 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
         };
 
         setIsLoadingOrderItems(true);
-        fetch(`${apiUrl}/orderitems`, {
-            method: "POST",
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newData),
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Save failed");
+        fetchWithBodyAndToken("POST", "/orderitems", newData)
+            .then(() => {
                 addNotification("Orderitem saved successfully", "success");
                 resetFormOrderItems();
                 fetchOrderItems();
             })
-            .catch(err => addNotification(`Save error: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to save orderitem${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingOrderItems(false));
     }
-
-    const handleDeleteOrderItems = (id: number) => {
-        setLoadingDeleteID(id);
-        fetch(`${apiUrl}/orderitems?id=${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Fehler beim Löschen");
-                addNotification(`Order mit id ${id} erfolgreich gelöscht`, "success");
-                fetchOrderItems();
-            })
-            .catch(err => addNotification(`Löschfehler: ${err}`, "error"))
-            .finally(() => setLoadingDeleteID(null));
-    };
 
     const handleOrderItemUpdate = (localEditNumber: number, localEditPrice: number) => {
         const updatedData: OrderItem = {
@@ -191,22 +146,26 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
             price: localEditPrice,
         };
         setLoadingEditID(updatedData.id);
-        fetch(`${apiUrl}/orderitems`, {
-            method: "PUT",
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updatedData),
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Update failed");
-                addNotification("User Role updated successfully", "success");
+
+        fetchWithBodyAndToken("PUT", "/orderitems", updatedData)
+            .then(() => {
+                addNotification("OrderItem updated successfully", "success");
                 fetchOrderItems();
                 handleEdit(null);
             })
-            .catch(err => addNotification(`Update error: ${err}`, "error"))
+            .catch(err => addNotification(`Failed to update orderitem${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setLoadingEditID(null));
+    };
+
+    const handleDeleteOrderItems = (id: number) => {
+        setLoadingDeleteID(id);
+        deleteWithToken(`/orderitems?id=${id}`)
+            .then(() => {
+                addNotification(`Order mit id ${id} erfolgreich gelöscht`, "success");
+                fetchOrderItems();
+            })
+            .catch(err => addNotification(`Failed to delete orderitem${err?.message ? `: ${err.message}` : ""}`, "error"))
+            .finally(() => setLoadingDeleteID(null));
     };
 
     const columns: ColumnDef<OrderItemsWithBikeName>[] = [
@@ -336,6 +295,7 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
                                     isLoading={isLoadingOrder}
                                     onClick={handleOrderUpdate}
                                     loadingText={"Please wait"}
+                                    disabled={isDisabled}
                                 >
                                     Update
                                 </ButtonLoading>
