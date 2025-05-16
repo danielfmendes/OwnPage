@@ -31,7 +31,7 @@ export interface GraphMeta {
 export interface GraphData {
     bucket: string;
     revenue: number;
-    sales_no: number; 
+    sales_no: number;
 }
 
 export interface CityData {
@@ -44,4 +44,5 @@ export interface BikeSales {
     bike_model: string;
     order_date: string;
     total_sales: number;
+    revenue: number;
 }

@@ -99,6 +99,7 @@ func GetSalesPerBikeModel(w http.ResponseWriter, r *http.Request) {
 			&data.BikeModel,
 			&data.OrderDate,
 			&data.TotalSales,
+			&data.Revenue,
 		)
 		return data, err
 	}, timeRange)

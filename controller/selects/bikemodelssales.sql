@@ -23,7 +23,8 @@ WITH time_range AS (
          SELECT
              bm.name AS bike_model,
              o.order_date,
-             SUM(oi.number) AS total_sales
+             SUM(oi.number) AS total_sales,
+             SUM(oi.price * oi.number) AS revenue
          FROM order_items oi
                   JOIN orders o ON oi.order_id = o.id
                   JOIN bikes b ON oi.bike_id = b.id
@@ -43,7 +44,8 @@ WITH time_range AS (
          SELECT
              ac.bike_model,
              ac.order_date,
-             COALESCE(bs.total_sales, 0) AS total_sales
+             COALESCE(bs.total_sales, 0) AS total_sales,
+             COALESCE(bs.revenue, 0) AS revenue
          FROM all_combinations ac
                   LEFT JOIN bike_sales bs
                             ON ac.bike_model = bs.bike_model AND ac.order_date = bs.order_date
@@ -51,6 +53,7 @@ WITH time_range AS (
 SELECT
     bike_model,
     order_date,
-    total_sales
+    total_sales,
+    revenue
 FROM final_sales
 ORDER BY bike_model, order_date

@@ -1,5 +1,5 @@
-import { useMemo, useState, useEffect } from "react";
-import { Line, LineChart, Tooltip, XAxis } from "recharts";
+import {useMemo, useState, useEffect} from "react";
+import {Line, LineChart, Tooltip, XAxis} from "recharts";
 import {
     Card,
     CardContent,
@@ -17,51 +17,49 @@ import {
     CommandGroup,
     CommandItem,
 } from "@/components/ui/command";
-import { Button } from "@/components/ui/button";
-import { Check, ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { ChartContainer, ChartConfig } from "@/components/ui/chart";
-import { BikeSales } from "@/types/custom";
-import { Skeleton } from "@/components/ui/skeleton";
+import {Button} from "@/components/ui/button";
+import {Check, ChevronDown} from "lucide-react";
+import {cn} from "@/lib/utils";
+import {ChartContainer, ChartConfig} from "@/components/ui/chart";
+import {BikeSales} from "@/types/custom";
+import {Skeleton} from "@/components/ui/skeleton";
+import {Switch} from "@/components/ui/switch";
 
 interface Props {
     bikeData: BikeSales[] | null;
     isLoading: boolean;
 }
 
-export function BikeModels({ bikeData, isLoading }: Props) {
+export function BikeModels({bikeData, isLoading}: Props) {
     // Finde alle Modelle, die Verkäufe haben
     const modelsWithSales = Array.from(new Set(
         (bikeData || []).filter((b) => b.total_sales > 0).map((b) => b.bike_model)
     ));
-
-    // Die ausgewählten Modelle werden im Zustand gespeichert
     const [selectedModels, setSelectedModels] = useState<string[]>(modelsWithSales);
+
+    // State for metric-typ: "total_sales" or "revenue"
+    const [metric, setMetric] = useState<"total_sales" | "revenue">("total_sales");
 
     const modelColors = [
         "#3b82f6", "#10b981", "#f59e0b", "#6366f1",
         "#ec4899", "#14b8a6", "#8b5cf6", "#f97316"
     ];
 
-    // Effect to update selected models if bikeData changes
     useEffect(() => {
-        // Nur Modelle mit Verkäufen in den Filter aufnehmen
         setSelectedModels(modelsWithSales);
     }, [bikeData]);
 
-    // Transformation der Daten für das Diagramm
+    // Prepare chart data, depending on the selected metric (total_sales / revenue)
     const chartData = useMemo(() => {
         if (!bikeData) return [];
 
         const grouped: Record<string, Record<string, number>> = {};
 
-        bikeData.forEach(entry => {
+        bikeData.forEach((entry) => {
             const date = entry.order_date.split("T")[0];
-
-            if (!grouped[date]) {
-                grouped[date] = {};
-            }
-            grouped[date][entry.bike_model] = entry.total_sales;
+            if (!grouped[date]) grouped[date] = {};
+            grouped[date][entry.bike_model] =
+                metric === "total_sales" ? entry.total_sales : entry.revenue;
         });
 
         const sortedDates = Object.keys(grouped).sort();
@@ -82,11 +80,10 @@ export function BikeModels({ bikeData, isLoading }: Props) {
 
             return base;
         });
-    }, [bikeData, modelsWithSales]);
+    }, [bikeData, modelsWithSales, metric]);
 
     const chartConfig = {} satisfies ChartConfig;
 
-    // Funktion zum Umschalten der Modellauswahl
     const toggleModel = (model: string) => {
         setSelectedModels((prev) =>
             prev.includes(model)
@@ -102,60 +99,93 @@ export function BikeModels({ bikeData, isLoading }: Props) {
 
     return (
         <Card className="h-[440px] flex flex-col">
-            <CardHeader className="flex flex-row items-start justify-between space-y-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <div>
-                    <CardTitle>Bike Model Sales</CardTitle>
+                    <CardTitle>
+                        {metric === "revenue" ? "Bike Model Revenue" : "Bike Model Sales"}
+                    </CardTitle>
                     <CardDescription>
-                        Sales per model over time. Select models to view.
+                        {metric === "revenue"
+                            ? "Revenue per model over time. Select models to view."
+                            : "Sales per model over time. Select models to view."}
                     </CardDescription>
                 </div>
-                {!isLoading && (
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <Button variant="outline" className="text-sm h-8 px-3">
-                                Filter Models
-                                <ChevronDown className="ml-2 h-4 w-4" />
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[200px] p-0">
-                            <Command>
-                                <CommandGroup>
-                                    {modelsWithSales.map((model) => (
-                                        <CommandItem
-                                            key={model}
-                                            onSelect={() => toggleModel(model)}
-                                        >
-                                            <div
-                                                className={cn(
-                                                    "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                                                    selectedModels.includes(model)
-                                                        ? "bg-primary text-primary-foreground"
-                                                        : "opacity-50"
-                                                )}
-                                            >
-                                                {selectedModels.includes(model) && (
-                                                    <Check className="h-3 w-3" />
-                                                )}
-                                            </div>
-                                            {model}
-                                        </CommandItem>
-                                    ))}
-                                </CommandGroup>
-                            </Command>
-                        </PopoverContent>
-                    </Popover>
-                )}
+
+                <div className="flex items-center space-x-4">
+                    {/* Metric Switch */}
+                    {!isLoading && (
+                        <div className="flex items-center space-x-1">
+                            <span
+                              className={cn(
+                                  "text-sm text-muted-foreground",
+                                  metric === "total_sales" && "font-semibold"
+                              )}
+                            >
+                                Sales
+                            </span>
+                            <Switch
+                                checked={metric === "revenue"}
+                                onCheckedChange={(checked) =>
+                                    setMetric(checked ? "revenue" : "total_sales")
+                                }
+                            />
+                            <span
+                                className={cn(
+                                    "text-sm text-muted-foreground",
+                                    metric === "revenue" && "font-semibold"
+                                )}
+                            >
+                                Revenue
+                            </span>
+                        </div>
+                    )}
+
+                    {/* Filter Models */}
+                    {!isLoading && (
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" className="text-sm h-8 px-3">
+                                    Filter Models
+                                    <ChevronDown className="ml-2 h-4 w-4"/>
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[200px] p-0">
+                                <Command>
+                                    <CommandGroup>
+                                        {modelsWithSales.map((model) => (
+                                            <CommandItem key={model} onSelect={() => toggleModel(model)}>
+                                                <div
+                                                    className={cn(
+                                                        "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                                                        selectedModels.includes(model)
+                                                            ? "bg-primary text-primary-foreground"
+                                                            : "opacity-50"
+                                                    )}
+                                                >
+                                                    {selectedModels.includes(model) && (
+                                                        <Check className="h-3 w-3"/>
+                                                    )}
+                                                </div>
+                                                {model}
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
+                    )}
+                </div>
             </CardHeader>
             <CardContent className="pb-4 flex-grow">
                 {isLoading ? (
-                    <Skeleton className="w-full h-[300px]" />
+                    <Skeleton className="w-full h-[300px]"/>
                 ) : isNoSalesData ? (
                     <p className="text-sm text-muted-foreground mt-4">No data to display.</p>
                 ) : (
                     <ChartContainer config={chartConfig} className="w-full h-[300px]">
                         <LineChart
                             data={chartData}
-                            margin={{ top: 5, right: 10, left: 10, bottom: 0 }}
+                            margin={{top: 5, right: 10, left: 10, bottom: 0}}
                         >
                             {selectedModels.map((modelName, index) => (
                                 <Line
@@ -175,12 +205,11 @@ export function BikeModels({ bikeData, isLoading }: Props) {
                                 tickFormatter={(tick) => tick}
                                 axisLine={false}
                                 tickLine={false}
-                                tick={{ fontSize: 12, fill: "#555" }}
+                                tick={{fontSize: 12, fill: "#555"}}
                             />
                             <Tooltip
-                                content={({ active, payload }) => {
-                                    if (!active || !payload || payload.length === 0)
-                                        return null;
+                                content={({active, payload}) => {
+                                    if (!active || !payload || payload.length === 0) return null;
                                     const currentPoint = payload[0].payload;
                                     return (
                                         <div className="rounded-md border bg-background p-2 shadow-sm text-sm">
@@ -189,10 +218,7 @@ export function BikeModels({ bikeData, isLoading }: Props) {
                                             </div>
                                             <div className="space-y-1">
                                                 {payload.map((entry, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="flex items-center gap-2"
-                                                    >
+                                                    <div key={index} className="flex items-center gap-2">
                                                         <span
                                                             className="h-2 w-2 rounded-full"
                                                             style={{
@@ -201,7 +227,9 @@ export function BikeModels({ bikeData, isLoading }: Props) {
                                                         />
                                                         <span>{entry.name}</span>
                                                         <span className="ml-auto font-medium">
-                                                            {entry.value}
+                                                          {metric === "revenue"
+                                                              ? `$${(entry.value as number).toFixed(2)}`
+                                                              : entry.value}
                                                         </span>
                                                     </div>
                                                 ))}

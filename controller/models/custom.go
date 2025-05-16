@@ -51,4 +51,5 @@ type BikeSales struct {
 	BikeModel  string    `json:"bike_model"`
 	OrderDate  time.Time `json:"order_date"`
 	TotalSales int       `json:"total_sales"`
+	Revenue    float64   `json:"revenue"`
 }
