@@ -51,3 +51,24 @@ DELETE FROM orders
 WHERE id NOT IN (
     SELECT DISTINCT order_id FROM order_items
 );
+
+-- Check Overview
+INSERT into orders (customer_id, order_date, project_id) values (1, '2023-10-01', 1);
+INSERT into orders (customer_id, order_date, project_id) values (1, '2025-05-14', 1);
+SELECT * from orders;
+
+INSERT INTO order_items (order_id, bike_id, number, price) values (70, 1, 2, 1234.00);
+INSERT INTO order_items (order_id, bike_id, number, price) values (71, 1, 2, 555.00);
+
+Update orders set order_date='2025-05-09' where order_date='2025-05-10';
+
+SELECT Sum(oi.price*oi.number) as revenue
+FROM orders
+         JOIN public.order_items oi ON orders.id = oi.order_id
+WHERE order_date >= CURRENT_DATE - INTERVAL '7 days';
+
+SELECT distinct (bm.name)
+FROM orders
+         JOIN public.order_items oi ON orders.id = oi.order_id
+         JOIN public.bikes b on b.id = oi.bike_id
+         JOIN public.bike_models bm on b.model_id = bm.id;

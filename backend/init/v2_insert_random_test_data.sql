@@ -32,12 +32,12 @@ INSERT INTO bikes (model_id, serial_number, production_date, quantity, warehouse
 VALUES
     (1, 'SN1001', '2024-01-15',1, 'WH-A1', 1),
     (2, 'SN1002', '2024-02-10',2, 'WH-A2', 1),
-    (1, 'SN1003', '2024-03-12',3, 'WH-A3', 1),
-    (2, 'SN1004', '2024-04-01',4, 'WH-B1', 1),
-    (1, 'SN1005', '2024-05-20',5, 'WH-B2', 1),
-    (2, 'SN1006', '2024-06-18',6, 'WH-B3', 1),
-    (1, 'SN1007', '2024-07-11',7, 'WH-C1', 1),
-    (2, 'SN1008', '2024-08-23',8, 'WH-C2', 1);
+    (3, 'SN1003', '2024-03-12',3, 'WH-A3', 1),
+    (4, 'SN1004', '2024-04-01',4, 'WH-B1', 1),
+    (5, 'SN1005', '2024-05-20',5, 'WH-B2', 1),
+    (6, 'SN1006', '2024-06-18',6, 'WH-B3', 1),
+    (7, 'SN1007', '2024-07-11',7, 'WH-C1', 1),
+    (8, 'SN1008', '2024-08-23',8, 'WH-C2', 1);
 
 -- Lagerteile
 INSERT INTO warehouse_parts (part_type, part_id, quantity, storage_location, project_id)

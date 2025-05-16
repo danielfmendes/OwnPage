@@ -40,7 +40,7 @@ export function MetricStats({graphData, graphMeta, timeRange, isLoadingGraphMeta
         value.toLocaleString("en-US", { style: "currency", currency: "USD" })
 
     const formatPercentage = (value: number) =>
-        `${value > 0 ? "+" : ""}${value.toFixed(1)}%`
+        `${value > 0 ? "+" : ""}${value.toFixed(2)}%`
 
     const timeLabels: Record<Props["timeRange"], string | null> = {
         "1d": "yesterday",

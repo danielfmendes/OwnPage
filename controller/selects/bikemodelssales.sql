@@ -6,7 +6,9 @@ WITH time_range AS (
                     WHEN $1 = '1w' THEN CURRENT_DATE - INTERVAL '6 days'
                     WHEN $1 = '1m' THEN CURRENT_DATE - INTERVAL '29 days'
                     WHEN $1 = '1y' THEN CURRENT_DATE - INTERVAL '1 year'
-                    WHEN $1 = 'max' THEN DATE '2020-01-01'
+                    WHEN $1 = 'max' THEN (
+                            SELECT MIN(order_date) FROM orders WHERE project_id = ANY($2)
+                    )
                     END AS start_date
 ),
      date_series AS (

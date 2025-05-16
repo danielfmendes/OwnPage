@@ -25,6 +25,9 @@ export default function DashboardPage() {
     const {addNotification} = useNotification();
     const sidebar = useStore(useSidebar, (x) => x);
     const [timeRange, setTimeRange] = useState("1m");
+    const [revenueChangePct, setRevenueChangePct] = useState(100);
+    const [salesChangePct, setSalesChangePct] = useState(100);
+
     const [graphMetaData, setGraphMetaData] = useState<GraphMeta | null>(null);
     const [graphDataData, setGraphDataData] = useState<GraphData[]>([]);
     const [citiesData, setCitiesData] = useState<CityData[]>([]);
@@ -33,8 +36,6 @@ export default function DashboardPage() {
     const [isLoadingGraphDataData, setIsLoadingGraphDataData] = useState(false);
     const [isLoadingCitiesData, setIsLoadingCitiesData] = useState(false);
     const [isLoadingBikeData, setIsLoadingBikeData] = useState(false);
-    let revenueChangePct = 100;
-    let salesChangePct = 100;
 
     // Fetch graph meta data and calculate revenue and sales change percentage
     const fetchGraphMetaData = () => {
@@ -46,17 +47,19 @@ export default function DashboardPage() {
 
                 // Calculate revenue change percentage and sales change percentage only if previous values are available
                 if (graphMeta?.previous_revenue && graphMeta?.previous_revenue > 0) {
-                    revenueChangePct =
+                    const calcRevenueChangePct =
                         ((graphMeta?.current_revenue - graphMeta?.previous_revenue) /
                             graphMeta?.previous_revenue) *
                         100;
+                    setRevenueChangePct(calcRevenueChangePct)
                 }
 
                 if (graphMeta?.previous_sales && graphMeta?.previous_sales > 0) {
-                    salesChangePct =
+                    const calcSalesChangePct =
                         ((graphMeta?.current_sales - graphMeta?.previous_sales) /
                             graphMeta?.previous_sales) *
                         100;
+                    setSalesChangePct(calcSalesChangePct)
                 }
             })
             .catch(err => addNotification(`Failed to load graph meta${err?.message ? `: ${err.message}` : ""}`, "error"))
