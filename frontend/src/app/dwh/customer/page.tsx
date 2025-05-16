@@ -16,8 +16,10 @@ import {Customer} from "@/types/datatables";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import CustomerDetailContent from "@/app/dwh/customer/customer-detail-content";
 import AddCustomerContent from "@/app/dwh/customer/add-customer-content";
+import {useTranslation} from "react-i18next";
 
 export default function CustomerPage() {
+    const {t} = useTranslation();
     const {addNotification} = useNotification();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const [data, setData] = React.useState<Customer[]>([]);
@@ -82,11 +84,11 @@ export default function CustomerPage() {
     const columns: ColumnDef<Customer>[] = [
         {
             accessorKey: "first_name",
-            header: "First Name",
+            header: t("label.first_name"),
         },
         {
             accessorKey: "name",
-            header: "Name",
+            header: t("label.name"),
         },
         {
             accessorKey: "email",
@@ -95,13 +97,13 @@ export default function CustomerPage() {
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Email <ArrowUpDown className="ml-2 h-4 w-4"/>
+                    {t("label.email")} <ArrowUpDown className="ml-2 h-4 w-4"/>
                 </Button>
             ),
         },
         {
             accessorKey: "dob",
-            header: "Date of Birth",
+            header: t("dob"),
             cell: ({row}) => {
                 const date = new Date(row.getValue("dob"))
                 return date.toLocaleDateString()
@@ -109,7 +111,7 @@ export default function CustomerPage() {
         },
         {
             accessorKey: "city",
-            header: "City",
+            header: t("label.city"),
         },
         {
             id: "actions",
@@ -138,9 +140,9 @@ export default function CustomerPage() {
     if (!sidebar) return null;
 
     return (
-        <ContentLayout title="Kundendaten">
+        <ContentLayout title={t("customer.data")}>
             <DataTable
-                title="Kundendaten"
+                title={t("label.dob")}
                 columns={columns}
                 data={data}
                 isLoading={isLoadingData}
@@ -167,7 +169,7 @@ export default function CustomerPage() {
                     <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
                             <DialogTitle className="text-center">
-                                Do you want to delete orders for the user?
+                                {t("delete_reference.info")}
                             </DialogTitle>
                         </DialogHeader>
                         <div className="grid">
@@ -177,7 +179,7 @@ export default function CustomerPage() {
                                     onClick={handleCancelDelete}
                                     className="w-[40%]"
                                 >
-                                    Abbrechen
+                                    {t("button.cancel")}
                                 </Button>
                                 <ButtonLoading
                                     isLoading={isLoadingDeleteCascade}
@@ -185,7 +187,7 @@ export default function CustomerPage() {
                                     className="w-[40%]"
                                     variant="destructive"
                                 >
-                                    Lösche Referenzen
+                                    {t("delete_reference.button")}
                                 </ButtonLoading>
                             </div>
                         </div>

@@ -5,17 +5,19 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import {Avatar, AvatarFallback} from "@/components/ui/avatar";
-import {Skeleton} from "@/components/ui/skeleton";
-import {Building2} from "lucide-react";
-import {CityData} from "@/types/custom";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Building2 } from "lucide-react";
+import { CityData } from "@/types/custom";
+import { useTranslation } from "react-i18next";
 
 interface Props {
     citiesData: CityData[];
     isLoading: boolean;
 }
 
-export default function CitiesList({citiesData, isLoading}: Props) {
+export default function CitiesList({ citiesData, isLoading }: Props) {
+    const {t} = useTranslation();
 
     function calculatePercentageChange(current: number, previous: number): number | undefined {
         if (previous === 0) {
@@ -27,13 +29,13 @@ export default function CitiesList({citiesData, isLoading}: Props) {
     return (
         <Card className="col-span-3 h-[440px] flex flex-col">
             <CardHeader>
-                <CardTitle>Top 5 Cities per Revenue</CardTitle>
+                <CardTitle>{t("cities_list_title")}</CardTitle>
                 <CardDescription>
                     {isLoading
-                        ? "Loading cities..."
+                        ? t("loading_cities")
                         : citiesData.length > 0
-                            ? `You made sales to ${citiesData.length} different cities`
-                            : "No sales data available for any cities."}
+                            ? t("sales_to_cities", { count: citiesData.length })
+                            : t("no_sales_data")}
                 </CardDescription>
             </CardHeader>
             <CardContent className="flex-grow overflow-auto">
@@ -51,11 +53,15 @@ export default function CitiesList({citiesData, isLoading}: Props) {
                             </div>
                         ))
                     ) : citiesData.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">No data to display.</p>
+                        <p className="text-sm text-muted-foreground">{t("no_data_to_display")}</p>
                     ) : (
                         citiesData.map((cityData, index) => {
-                            const percentageChange = calculatePercentageChange(cityData.current_revenue, cityData.previous_revenue);
-                            const formattedPercentage = percentageChange !== undefined ? percentageChange.toFixed(1) : "";
+                            const percentageChange = calculatePercentageChange(
+                                cityData.current_revenue,
+                                cityData.previous_revenue
+                            );
+                            const formattedPercentage =
+                                percentageChange !== undefined ? percentageChange.toFixed(1) : "";
 
                             let avatarClass = '';
                             if (index === 0) {
@@ -80,8 +86,8 @@ export default function CitiesList({citiesData, isLoading}: Props) {
                                         {percentageChange !== undefined && (
                                             <p className="text-sm text-muted-foreground">
                                                 {percentageChange > 0
-                                                    ? `Up ${formattedPercentage}%`
-                                                    : `Down ${Math.abs(parseFloat(formattedPercentage)).toFixed(2)}%`}
+                                                    ? t("up_percentage", { value: formattedPercentage })
+                                                    : t("down_percentage", { value: Math.abs(parseFloat(formattedPercentage)).toFixed(2) })}
                                             </p>
                                         )}
                                     </div>

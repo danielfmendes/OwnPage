@@ -20,8 +20,10 @@ import * as React from "react";
 import {fetchWithToken} from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {BikeSales, CityData, GraphData, GraphMeta} from "@/types/custom";
+import {useTranslation} from "react-i18next";
 
 export default function DashboardPage() {
+    const {t} = useTranslation();
     const {addNotification} = useNotification();
     const sidebar = useStore(useSidebar, (x) => x);
     const [timeRange, setTimeRange] = useState("1m");
@@ -109,18 +111,18 @@ export default function DashboardPage() {
     if (!sidebar) return null;
 
     return (
-        <ContentLayout title="Dashboard">
+        <ContentLayout title={t("menu.dashboard")}>
             <div className="flex flex-row items-center justify-between gap-4 mb-4">
                 <Breadcrumb>
                     <BreadcrumbList>
                         <BreadcrumbItem>
                             <BreadcrumbLink asChild>
-                                <Link href="/">Home</Link>
+                                <Link href="/">{t("home")}</Link>
                             </BreadcrumbLink>
                         </BreadcrumbItem>
                         <BreadcrumbSeparator/>
                         <BreadcrumbItem>
-                            <BreadcrumbPage>Dashboard</BreadcrumbPage>
+                            <BreadcrumbPage>{t("menu.dashboard")}</BreadcrumbPage>
                         </BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>

@@ -9,6 +9,7 @@ import {DatePicker} from "@/components/helpers/DatePicker";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
 import ModelNameSelect from "@/components/helpers/selects/ModelNameSelect";
 import {fetchWithBodyAndToken} from "@/utils/url";
+import {useTranslation} from "react-i18next";
 
 interface Props {
     rowData?: BikeWithModelName;
@@ -18,6 +19,7 @@ interface Props {
 
 export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) {
     const isEditMode = !!rowData;
+    const {t} = useTranslation();
     const {addNotification} = useNotification();
 
     const [projectId, setProjectId] = React.useState<string>(rowData?.project_id?.toString() || "");
@@ -84,13 +86,13 @@ export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) 
     return (
         <DialogContent>
             <DialogHeader>
-                <DialogTitle>{isEditMode ? 'Edit Inventory' : 'Add New Item'}</DialogTitle>
+                <DialogTitle>{isEditMode ? t("warehouse.edit") : t("warehouse.add")}</DialogTitle>
             </DialogHeader>
 
             {isEditMode ? (
                 <>
-                    <InputField label="Project" value={rowData.project_id}/>
-                    <InputField label="Model Name" value={rowData.model_name}/>
+                    <InputField label={t("label.project")} value={rowData.project_id}/>
+                    <InputField label={t("label.model_name")} value={rowData.model_name}/>
                 </>
             ) : (
                 <>
@@ -99,7 +101,7 @@ export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) 
                         onChange={(value) => setProjectId(value)}
                     />
                     <div className="space-y-1">
-                        <label className="block text-sm font-medium">Model Name</label>
+                        <label className="block text-sm font-medium">{t("label.model_name")}</label>
                         <ModelNameSelect
                             modelID={modelId}
                             onChange={(value) => setModelId(value)}
@@ -110,8 +112,8 @@ export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) 
 
             <div className="space-y-1">
                 <InputField
-                    label="Serial Number"
-                    placeholder="e.g. SN1001"
+                    label={t("label.serial_number")}
+                    placeholder={t("placeholder.serial_number")}
                     value={serialNumber}
                     onChange={(e) => setSerialNumber(e.target.value)}
                 />
@@ -119,25 +121,25 @@ export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) 
 
             {isEditMode ? (
                 <InputField
-                    label="Production Date"
+                    label={t("label.production_date")}
                     value={rowData.production_date ? new Date(rowData.production_date).toLocaleDateString('de-DE') : ''}
                 />
             ) : (
                 <div className="space-y-1">
-                    <label className="block text-sm font-medium">Production Date</label>
+                    <label className="block text-sm font-medium">{t("label.production_date")}</label>
                     <DatePicker date={productionDate} setDate={setProductionDate} position="right"/>
                 </div>
             )}
 
             <div className="space-y-1">
                 <InputField
-                    label="Quantity"
+                    label={t("label.quantity")}
                     value={quantity}
                     onChange={(e) => setQuantity(Number(e.target.value))}
                 />
                 <InputField
-                    label="Warehouse Position"
-                    placeholder="e.g. WH-A1"
+                    label={t("label.warehouse_position")}
+                    placeholder={t("placeholder.warehouse_position")}
                     value={warehouseLocation}
                     onChange={(e) => setWarehouseLocation(e.target.value)}
                 />
@@ -149,7 +151,7 @@ export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) 
                 className="w-full mt-4"
                 loadingText="Please wait"
             >
-                {isEditMode ? 'Update' : 'Save'}
+                {isEditMode ? t("button.update") : t("button.save")}
             </ButtonLoading>
         </DialogContent>
     );

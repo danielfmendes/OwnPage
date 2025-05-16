@@ -9,8 +9,10 @@ import {useRouter} from 'next/navigation';
 import apiUrl, {handleFetchError} from "@/utils/url";
 import AuthToken from "@/utils/authtoken";
 import {useNotification} from "@/components/helpers/NotificationProvider";
+import {useTranslation} from "react-i18next";
 
 export default function LoginCard() {
+    const {t} = useTranslation();
     const {addNotification} = useNotification();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -24,8 +26,8 @@ export default function LoginCard() {
     };
 
     const validateInputs = () => {
-        const emailError = email ? '' : 'Bitte geben Sie eine E-Mail-Adresse ein.';
-        const passwordError = password ? '' : 'Bitte geben Sie ein Passwort ein.';
+        const emailError = email ? '' : t("error.email");
+        const passwordError = password ? '' : t("error.password");
         setErrorMessageEmail(emailError);
         setErrorMessagePassword(passwordError);
         return !(emailError || passwordError);
@@ -46,7 +48,7 @@ export default function LoginCard() {
                 if (redirect) window.location.href = '/dwh/dashboard';
             })
             .catch((err) => {
-                setErrorMessagePassword("Passwort oder Email sind falsch.");
+                setErrorMessagePassword(t("error.login"));
                 addNotification(`Login error${err?.message ? `: ${err.message}` : ""}`, "error");
             });
     };
@@ -77,25 +79,25 @@ export default function LoginCard() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <InputField
-                        label="E-Mail"
+                        label={t("label.email")}
                         value={email}
                         onChange={handleChange('email')}
                         errorMessage={errorMessageEmail}
                     />
                     <InputField
-                        label="Passwort"
+                        label={t("label.password")}
                         value={password}
                         onChange={handleChange('password')}
                         errorMessage={errorMessagePassword}
                     />
                     <Button onClick={event => handleSubmit(event)} className="w-full mt-4">
-                        Senden
+                        {t("button.send")}
                     </Button>
                     <Button onClick={handleBack} variant="secondary" className="w-full mt-4">
-                        Zurück
+                        {t("button.back")}
                     </Button>
                     <Button onClick={handleRegister} variant="link" className="w-full mt-4 text-blue-600">
-                        Noch kein Konto? Registrieren
+                        {t("go_to_register")}
                     </Button>
 
                     <div className="flex items-center my-4">
@@ -104,7 +106,7 @@ export default function LoginCard() {
                         <div className="flex-grow h-px bg-gray-300"/>
                     </div>
                     <Button onClick={handleDemo} className="w-1/2 mx-auto flex justify-center items-center space-x-2">
-                        <span>Demo</span>
+                        <span>{t("demo")}</span>
                         <ArrowRight className="w-4 h-4"/>
                     </Button>
                 </CardContent>

@@ -6,20 +6,23 @@ import { useState } from "react";
 import { useRoleStore } from "@/utils/rolemananagemetstate";
 import { RoleManagementWithName } from "@/types/custom";
 import {SheetMenu} from "@/components/admin-panel/sheet-menu";
+import {useTranslation} from "react-i18next";
 
 interface NavbarProps {
   title: string;
 }
 
 export function Navbar({ title }: NavbarProps) {
+    const {t} = useTranslation();
     const [open, setOpen] = useState(false);
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.selectedRoles);
 
-    const dynamicTitle = roles.length === 0
-        ? 'Open Ancestor Dialog'
-        : roles.length === 1
-            ? "1 Ancestor"
-            : `${roles.length} Ancestors`;
+    const dynamicTitle =
+        roles.length === 0
+            ? t("ancestorDialog.open")
+            : roles.length === 1
+                ? t("ancestorDialog.single", { count: 1 })
+                : t("ancestorDialog.multiple", { count: roles.length });
 
     return (
         <header className="sticky top-0 z-10 w-full bg-background/95 shadow backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:shadow-secondary">

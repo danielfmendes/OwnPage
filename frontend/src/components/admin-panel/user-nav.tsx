@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogOut, User as UserIcon } from "lucide-react";
+import {BookA, Check, ChevronDown, ChevronRight, LogOut, User as UserIcon} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -25,8 +25,11 @@ import { useUserStore } from "@/utils/userstate";
 import {handleLogOut} from "@/utils/helpers";
 import {useRouter} from "next/navigation";
 import {useNotification} from "@/components/helpers/NotificationProvider";
+import {useTranslation} from "react-i18next";
+import Language from "@/utils/language";
 
 export function UserNav() {
+  const { t, i18n } = useTranslation();
   const { setTheme, theme } = useTheme();
   const { addNotification } = useNotification();
   const router = useRouter();
@@ -38,6 +41,16 @@ export function UserNav() {
   const handleLogout = () => {
     handleLogOut(router, addNotification);
   };
+
+  const [showLanguageCard, setShowLanguageCard] = React.useState(false)
+  const currentLang = i18n.language.toUpperCase();
+
+  // See flags here: https://github.com/HatScripts/circle-flags/tree/gh-pages/flags
+  const languages = [
+    { code: "en", label: "English", flag: "/languages/flags/gb.svg" },
+    { code: "de", label: "Deutsch", flag: "/languages/flags/de.svg" },
+    { code: "pt", label: "Português", flag: "/languages/flags/pt.svg" },
+  ];
 
   return (
       <DropdownMenu>
@@ -67,7 +80,7 @@ export function UserNav() {
                 </Button>
               </DropdownMenuTrigger>
             </TooltipTrigger>
-            <TooltipContent side="bottom">Profile</TooltipContent>
+            <TooltipContent side="bottom">{t("menu.profile")}</TooltipContent>
           </Tooltip>
         </TooltipProvider>
 
@@ -83,9 +96,53 @@ export function UserNav() {
             <DropdownMenuItem className="hover:cursor-pointer" asChild>
               <Link href={`/dwh/rolemanagement${currentQuery}`} className="flex items-center">
                 <UserIcon className="w-4 h-4 mr-3 text-muted-foreground" />
-                Role Management
+                {t("menu.role_management")}
               </Link>
             </DropdownMenuItem>
+
+            <div
+                className="flex items-center justify-between px-2 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-md"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowLanguageCard(!showLanguageCard)
+                }}
+            >
+              <div className="flex items-center">
+                <BookA className="w-4 h-4 mr-3 text-muted-foreground"/>
+                {t("placeholder.language")}
+              </div>
+              <div className="flex items-center space-x-1 text-muted-foreground">
+                <span className="text-xs font-medium">{currentLang}</span>
+                {showLanguageCard ? (
+                    <ChevronDown className="w-4 h-4"/>
+                ) : (
+                    <ChevronRight className="w-4 h-4"/>
+                )}
+              </div>
+            </div>
+            {showLanguageCard && (
+                <div className="p-2 pt-1">
+                  {languages.map((lang) => (
+                      <Button
+                          key={lang.code}
+                          variant="ghost"
+                          className="w-full justify-start space-x-2"
+                          onClick={() => {
+                            i18n.changeLanguage(lang.code);
+                            Language.setLanguage(lang.code);
+                            setShowLanguageCard(false);
+                          }}
+                      >
+                        <img src={lang.flag} alt={lang.label} className="w-5 h-5 rounded-full" />
+                        <span className="flex-1 text-left">{lang.label}</span>
+                        {i18n.language === lang.code && (
+                            <Check className="w-4 h-4 text-green-500 ml-auto" />
+                        )}
+                      </Button>
+                  ))}
+                </div>
+            )}
+
             <DropdownMenuItem className="hover:cursor-pointer" asChild>
               <div onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
                 {theme === "dark" ? (
@@ -93,14 +150,14 @@ export function UserNav() {
                 ) : (
                     <MoonIcon className="w-4 h-4 mr-3 text-muted-foreground" />
                 )}
-                Switch Theme
+                {t("switch_theme")}
               </div>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout} className="hover:cursor-pointer">
             <LogOut className="w-4 h-4 mr-3 text-muted-foreground" />
-            Sign out
+            {t("button.sign_out")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

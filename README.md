@@ -14,3 +14,23 @@ https://lucide.dev/icons/box
 
 go run main.go --local => mit localhost
 go run main.go => mit railway db
+
+Railway Postgres: just add a new database and copy the connection string
+
+Vercel:
+- Framework Preset: Next.js => use all default settings
+- Root Directory: frontend
+- Node Version: 22.x
+- Under Domain add your domain name => add cname in webhosting provider, f.ex. in ionos
+
+Railway Go Deployment:
+- Environment: Go
+- Custom Build Command: cd controller && go build -o out
+- Custom Start Command: cd controller && ./out
+
+Need to export these variables in Railway:
+- BACKEND_BASE_URL
+- DATABASE_PUBLIC_URL
+- EMAIL_FROM
+- EMAIL_PASS
+- JWT_SECRET

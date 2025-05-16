@@ -14,8 +14,10 @@ import BikeDialogContent from "@/app/dwh/warehouse/content-dialog";
 import {BikeWithModelName, RoleManagementWithName} from "@/types/custom";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
+import {useTranslation} from "react-i18next";
 
 export default function WareHousePage() {
+    const {t} = useTranslation();
     const {addNotification} = useNotification();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const [data, setData] = React.useState<BikeWithModelName[]>([]);
@@ -80,11 +82,11 @@ export default function WareHousePage() {
     const columns: ColumnDef<BikeWithModelName>[] = [
         {
             accessorKey: "id",
-            header: "ID",
+            header: t("label.id"),
         },
         {
             accessorKey: "model_name",
-            header: "Model Name",
+            header: t("label.model_name"),
         },
         {
             accessorKey: "serial_number",
@@ -93,13 +95,13 @@ export default function WareHousePage() {
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Serial Number <ArrowUpDown className="ml-2 h-4 w-4"/>
+                    {t("label.serial_number")} <ArrowUpDown className="ml-2 h-4 w-4"/>
                 </Button>
             ),
         },
         {
             accessorKey: "production_date",
-            header: "Production Date",
+            header: t("label.production_date"),
             cell: ({row}) => {
                 const date = new Date(row.getValue("production_date"))
                 return date.toLocaleDateString()
@@ -107,11 +109,11 @@ export default function WareHousePage() {
         },
         {
             accessorKey: "quantity",
-            header: "Quantity",
+            header: t("label.quantity"),
         },
         {
             accessorKey: "warehouse_location",
-            header: "Warehouse",
+            header: t("menu.warehouse"),
         },
         {
             id: "actions",
@@ -140,9 +142,9 @@ export default function WareHousePage() {
     if (!sidebar) return null;
 
     return (
-        <ContentLayout title="Warenlager">
+        <ContentLayout title={t("menu.warehouse")}>
             <DataTable
-                title="Warenlager"
+                title={t("menu.warehouse")}
                 columns={columns}
                 data={data}
                 isLoading={isLoadingData}
@@ -169,7 +171,7 @@ export default function WareHousePage() {
                     <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
                             <DialogTitle className="text-center">
-                                Willst du auch die referenzierten Werte löschen?
+                                {t("delete_reference.info")}
                             </DialogTitle>
                         </DialogHeader>
                         <div className="grid">
@@ -179,7 +181,7 @@ export default function WareHousePage() {
                                     onClick={handleCancelDelete}
                                     className="w-[40%]"
                                 >
-                                    Abbrechen
+                                    {t("button.cancel")}
                                 </Button>
                                 <ButtonLoading
                                     isLoading={isLoadingDeleteCascade}
@@ -187,7 +189,7 @@ export default function WareHousePage() {
                                     className="w-[40%]"
                                     variant="destructive"
                                 >
-                                    Lösche Referenzen
+                                    {t("delete_reference.button")}
                                 </ButtonLoading>
                             </div>
                         </div>

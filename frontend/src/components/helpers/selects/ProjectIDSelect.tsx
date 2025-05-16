@@ -2,6 +2,7 @@ import React from "react";
 import {Project} from "@/types/datatables";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
+import {useTranslation} from "react-i18next";
 
 interface Props {
     projectID: string;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function ProjectIDSelect({ projectID, onChange }: Props) {
+    const {t} = useTranslation();
     const roles = useRoleStore((state) => state.roles);
     const selectedRoles = useRoleStore((state) => state.selectedRoles);
 
@@ -39,14 +41,14 @@ export default function ProjectIDSelect({ projectID, onChange }: Props) {
 
     return (
         <div className="space-y-1">
-            <label className="block text-sm font-medium">Project</label>
+            <label className="block text-sm font-medium">{t("label.project")}</label>
             <Select value={projectId} onValueChange={handleChange}>
                 <SelectTrigger className="w-full p-2 border rounded">
-                    <SelectValue placeholder={"Select a project"} />
+                    <SelectValue placeholder={t("placeholder.project")} />
                 </SelectTrigger>
                 <SelectContent>
                     {projectIdOptions.length === 0 ? (
-                        <div className="p-2 text-sm text-gray-500">No available projects</div>
+                        <div className="p-2 text-sm text-gray-500">{t("placeholder.no_project")}</div>
                     ) : (
                         projectIdOptions.map((option) => (
                             <SelectItem key={option.id} value={option.id.toString()}>

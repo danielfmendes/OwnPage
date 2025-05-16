@@ -9,6 +9,7 @@ import {SelectLoading} from "@/components/helpers/SelectLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {WarehousePartWithName} from "@/types/custom";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
+import {useTranslation} from "react-i18next";
 
 interface Props {
     rowData?: WarehousePartWithName;
@@ -18,6 +19,7 @@ interface Props {
 
 export default function WarehousePartDialogContent({rowData, onClose, onRefresh}: Props) {
     const isEditMode = !!rowData;
+    const {t} = useTranslation();
     const {addNotification} = useNotification();
 
     const [partId, setPartId] = React.useState<number | null>(rowData?.part_id || null);
@@ -92,13 +94,13 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
     return (
         <DialogContent>
             <DialogHeader>
-                <DialogTitle>{isEditMode ? 'Teilelager bearbeiten' : 'Neues Teil hinzufügen'}</DialogTitle>
+                <DialogTitle>{isEditMode ? t("partsstorage.edit") : t("partsstorage.add")}</DialogTitle>
             </DialogHeader>
             {isEditMode ? (
                 <>
-                    <InputField label="Project" value={rowData.project_id}/>
-                    <InputField label="Part Type" value={rowData.part_type}/>
-                    <InputField label="Part Name" value={rowData?.part_name}/>
+                    <InputField label={t("label.project")} value={rowData.project_id}/>
+                    <InputField label={t("label.part_type")} value={rowData.part_type}/>
+                    <InputField label={t("label.part_name")} value={rowData?.part_name}/>
                 </>
             ) : (
                 <>
@@ -110,17 +112,17 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
                         <label className="block text-sm font-medium">Part Type</label>
                         <Select value={partType} onValueChange={setPartType}>
                             <SelectTrigger className="w-full p-2 border rounded">
-                                <SelectValue placeholder="Select part type"/>
+                                <SelectValue placeholder={t("placeholder.part_name")}/>
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="saddle">Saddle</SelectItem>
-                                <SelectItem value="frame">Frame</SelectItem>
-                                <SelectItem value="fork">Fork</SelectItem>
+                                <SelectItem value="saddle">{t("bike_parts.saddle")}</SelectItem>
+                                <SelectItem value="frame">{t("bike_parts.frame")}</SelectItem>
+                                <SelectItem value="fork">{t("bike_parts.fork")}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                     <div className="space-y-1">
-                        <label className="block text-sm font-medium">Part Name</label>
+                        <label className="block text-sm font-medium">{t("label.part_name")}</label>
                         <SelectLoading
                             id={partId}
                             setId={setPartId}
@@ -132,8 +134,8 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
             )}
 
             <div className="space-y-1">
-                <InputField label="Quantity" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))}/>
-                <InputField label="Warehouse Position" value={storageLocation}
+                <InputField label={t("label.quantity")} value={quantity} onChange={(e) => setQuantity(Number(e.target.value))}/>
+                <InputField label={t("label.warehouse_position")} value={storageLocation}
                             onChange={(e) => setStorageLocation(e.target.value)}/>
             </div>
 
@@ -141,9 +143,9 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
                 isLoading={isLoading}
                 onClick={isEditMode ? handleUpdate : handleSave}
                 className="w-full mt-4"
-                loadingText={"Please wait"}
+                loadingText={t("placeholder.please_wait")}
             >
-                {isEditMode ? 'Update' : 'Save'}
+                {isEditMode ? t("button.update") : t("button.save")}
             </ButtonLoading>
 
         </DialogContent>

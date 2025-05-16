@@ -13,6 +13,7 @@ import {Input} from "@/components/ui/input";
 import type {ColumnDef} from "@tanstack/react-table";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import {useTranslation} from "react-i18next";
 
 interface RoleSelectProps {
     value: string;
@@ -20,24 +21,12 @@ interface RoleSelectProps {
     hasRoleError?: boolean;
 }
 
-const RoleSelect = ({value, onValueChange, hasRoleError = false}: RoleSelectProps) => (
-    <Select value={value} onValueChange={onValueChange}>
-        <SelectTrigger className={`w-[120px] ${hasRoleError ? "border-red-500" : ""}`}>
-            <SelectValue placeholder="Select Role"/>
-        </SelectTrigger>
-        <SelectContent>
-            <SelectItem value="creator">Creator</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
-            <SelectItem value="user">User</SelectItem>
-        </SelectContent>
-    </Select>
-);
-
 interface ManageProps {
     manageId: number | null;
 }
 
 export default function ManageDialogContent({manageId}: ManageProps) {
+    const {t} = useTranslation();
     const {addNotification} = useNotification();
     const [data, setData] = React.useState<RoleManagement[]>([]);
     const [originalData, setOriginalData] = React.useState<Record<string, string>>({});
@@ -128,14 +117,27 @@ export default function ManageDialogContent({manageId}: ManageProps) {
             .finally(() => setLoadingDeleteEmail(null));
     };
 
+    const RoleSelect = ({value, onValueChange, hasRoleError = false}: RoleSelectProps) => (
+        <Select value={value} onValueChange={onValueChange}>
+            <SelectTrigger className={`w-[120px] ${hasRoleError ? "border-red-500" : ""}`}>
+                <SelectValue placeholder={t("placeholder.role")}/>
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="creator">{t("rolemanagement.role.creator")}</SelectItem>
+                <SelectItem value="admin">{t("rolemanagement.role.admin")}</SelectItem>
+                <SelectItem value="user">{t("rolemanagement.role.user")}</SelectItem>
+            </SelectContent>
+        </Select>
+    );
+
     const columns: ColumnDef<RoleManagement>[] = [
         {
             accessorKey: "user_email",
-            header: "User Email",
+            header: t("label.user_email"),
         },
         {
             accessorKey: "role",
-            header: "Role",
+            header: t("label.role"),
             cell: ({row}) => {
                 const email = row.original.user_email;
                 const value = row.original.role;
@@ -181,20 +183,20 @@ export default function ManageDialogContent({manageId}: ManageProps) {
     return (
         <DialogContent className="sm:max-w-[640px]">
             <DialogHeader>
-                <DialogTitle>Rechte bearbeiten</DialogTitle>
+                <DialogTitle>{t("rolemanagement.edit")}</DialogTitle>
             </DialogHeader>
 
             <div className="mb-4 flex gap-4 items-center">
                 <Input
-                    type="email"
+                    type={t("label.email")}
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
-                    placeholder="Add user email"
+                    placeholder={t("placeholder.enter.email")}
                     className={`${hasEmailError ? "border-red-500" : ""}`}
                 />
                 <RoleSelect value={newRole} onValueChange={setNewRole} hasRoleError={hasRoleError}/>
                 <ButtonLoading isLoading={isLoadingAdd} onClick={handleAddUser} className="w-1/6">
-                    Add User
+                    {t("rolemanagement.add")}
                 </ButtonLoading>
             </div>
 

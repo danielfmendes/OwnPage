@@ -5,6 +5,7 @@ import {useNotification} from "@/components/helpers/NotificationProvider";
 import {Customer} from "@/types/datatables";
 import {cn} from "@/lib/utils";
 import {ComboBoxLoading} from "@/components/helpers/ComboBoxLoading";
+import {useTranslation} from "react-i18next";
 
 interface Props {
     customerID: number | null;
@@ -17,6 +18,7 @@ function formatDate(dateString: string): string {
 }
 
 export default function CustomerNameComboBox({customerID, onChange}: Props) {
+    const {t} = useTranslation();
     const {addNotification} = useNotification();
     const [customerIdOptions, setCustomerIdOptions] = React.useState<Customer[]>([]);
     const [selectedCustomer, setSelectedCustomer] = React.useState<Customer | null>(null);
@@ -42,7 +44,7 @@ export default function CustomerNameComboBox({customerID, onChange}: Props) {
 
     return (
         <div className="space-y-1">
-            <label className="block text-sm font-medium">Customer Name</label>
+            <label className="block text-sm font-medium">{t("label.customer_name")}</label>
             <ComboBoxLoading
                 selectedItem={selectedCustomer}
                 items={customerIdOptions}
@@ -50,7 +52,7 @@ export default function CustomerNameComboBox({customerID, onChange}: Props) {
                 itemKey={(c) => c.id}
                 itemLabel={(c) => c.email}
                 isLoading={isLoading}
-                placeholder="Select customer..."
+                placeholder={t("placeholder.customer")}
             >
                 {(customer, isSelected) => (
                     <div className="w-full flex justify-between items-center">

@@ -17,6 +17,7 @@ import ModelNameSelect from "@/components/helpers/selects/ModelNameSelect";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {Button} from "@/components/ui/button";
+import {useTranslation} from "react-i18next";
 
 interface Props {
     rowData?: OrderWithCustomer;
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export default function OrderDialogContent({rowData, onClose, onRefresh}: Props) {
+    const {t} = useTranslation();
     const {addNotification} = useNotification();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const isEditMode = !!rowData;
@@ -171,17 +173,17 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
     const columns: ColumnDef<OrderItemsWithBikeName>[] = [
         {
             accessorKey: "model_name",
-            header: "Bike Name",
+            header: t("label.bike_name"),
             cell: ({getValue}) => <div className="min-w-[230px]">{getValue() as string}</div>,
         },
         {
             accessorKey: "number",
-            header: "Number",
+            header: t("label.number"),
             cell: ({getValue}) => <div className="min-w-[100px]">{getValue() as number}</div>,
         },
         {
             accessorKey: "price",
-            header: "Price",
+            header: t("label.price"),
             cell: ({getValue}) => <div className="min-w-[100px]">{getValue() as number}</div>,
         },
         {
@@ -232,17 +234,17 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
                                     sideOffset={40}
                                     className="w-64 p-4 space-y-4"
                                 >
-                                    <h4 className="font-semibold text-lg">Edit OrderItem</h4>
+                                    <h4 className="font-semibold text-lg">{t("orders.edit_item")}</h4>
                                     <div className="space-y-2">
                                         <InputField
-                                            label="Number of items"
-                                            placeholder="Enter number"
+                                            label={t("label.number")}
+                                            placeholder={t("placeholder.enter.number")}
                                             value={localEditNumber ?? ""}
                                             onChange={(e) => setLocalEditNumber(Number(e.target.value))}
                                         />
                                         <InputField
-                                            label="Price"
-                                            placeholder="Enter price"
+                                            label={t("label.price")}
+                                            placeholder={t("placeholder.enter.price")}
                                             value={localEditPrice ?? ""}
                                             onChange={(e) => setLocalEditPrice(Number(e.target.value))}
                                         />
@@ -253,7 +255,7 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
                                             className="w-full"
                                             disabled={isDisabled}
                                         >
-                                            Update
+                                            {t("button.update")}
                                         </ButtonLoading>
                                     </div>
                                 </PopoverContent>
@@ -268,21 +270,21 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
     return (
         <DialogContent className={`${isEditMode ? 'sm:max-w-[700px]' : ''}`}>
             <DialogHeader>
-                <DialogTitle>{isEditMode ? 'Edit Order' : 'Add new Order'}</DialogTitle>
+                <DialogTitle>{isEditMode ? t("orders.edit") : t("orders.add")}</DialogTitle>
             </DialogHeader>
             {isEditMode ? (
                 <>
                     <Tabs defaultValue="info" className="mt-4">
                         <TabsList>
-                            <TabsTrigger value="info">Order Info</TabsTrigger>
-                            <TabsTrigger value="orders">Order Items</TabsTrigger>
+                            <TabsTrigger value="info">{t("orders.info")}</TabsTrigger>
+                            <TabsTrigger value="orders">{t("orders.items")}</TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="info">
                             <div className="space-y-3">
                                 <InputField label="Project" value={rowData?.project_id}/>
                                 <div className="space-y-1">
-                                    <label className="block text-sm font-medium">Order Date</label>
+                                    <label className="block text-sm font-medium">{t("label.order_date")}</label>
                                     <DatePicker date={orderDate} setDate={setOrderDate} position="right"/>
                                 </div>
                                 <CustomerNameComboBox
@@ -294,10 +296,10 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
                                 <ButtonLoading
                                     isLoading={isLoadingOrder}
                                     onClick={handleOrderUpdate}
-                                    loadingText={"Please wait"}
+                                    loadingText={t("placeholder.please_wait")}
                                     disabled={isDisabled}
                                 >
-                                    Update
+                                    {t("button.update")}
                                 </ButtonLoading>
                             </div>
                         </TabsContent>
@@ -310,12 +312,12 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
                                     />
                                 </div>
                                 <InputField
-                                    placeholder="Enter NoS"
+                                    placeholder={t("placeholder.enter.number_short")}
                                     value={number}
                                     onChange={(e) => setNumber(Number(e.target.value))}
                                 />
                                 <InputField
-                                    placeholder="Enter price"
+                                    placeholder={t("placeholder.enter.price")}
                                     value={price}
                                     onChange={(e) => setPrice(Number(e.target.value))}
                                 />
@@ -324,7 +326,7 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
                                     onClick={handleOrderItemSave}
                                     className="w-1/6"
                                 >
-                                    Add Item
+                                    {t("button.add_item")}
                                 </ButtonLoading>
                             </div>
                             <SimpleTable data={data} columns={columns} isLoading={isLoadingData}/>
@@ -339,7 +341,7 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
                     />
 
                     <div className="space-y-1">
-                        <label className="block text-sm font-medium">Order Date</label>
+                        <label className="block text-sm font-medium">{t("label.order_date")}</label>
                         <DatePicker date={orderDate} setDate={setOrderDate}/>
                     </div>
 
@@ -352,9 +354,9 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
                         isLoading={isLoadingOrder}
                         onClick={handleOrderSave}
                         className="w-full mt-4"
-                        loadingText={"Please wait"}
+                        loadingText={t("placeholder.please_wait")}
                     >
-                        Save
+                        {t("button.save")}
                     </ButtonLoading>
                 </>
             )}

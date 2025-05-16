@@ -16,12 +16,14 @@ import {
 } from "@/components/ui/tooltip";
 import {handleLogOut} from "@/utils/helpers";
 import {useNotification} from "@/components/helpers/NotificationProvider";
+import {useTranslation} from "react-i18next";
 
 interface MenuProps {
   isOpen: boolean | undefined;
 }
 
 export function Menu({ isOpen }: MenuProps) {
+  const {t} = useTranslation();
   const router = useRouter();
   const {addNotification} = useNotification();
   const pathname = usePathname();
@@ -139,12 +141,12 @@ export function Menu({ isOpen }: MenuProps) {
                         isOpen === false ? "opacity-0 hidden" : "opacity-100"
                       )}
                     >
-                      Sign out
+                      {t("button.sign_out")}
                     </p>
                   </Button>
                 </TooltipTrigger>
                 {isOpen === false && (
-                  <TooltipContent side="right">Sign out</TooltipContent>
+                  <TooltipContent side="right">{t("button.sign_out")}</TooltipContent>
                 )}
               </Tooltip>
             </TooltipProvider>

@@ -5,6 +5,7 @@ import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import InputField from "@/components/helpers/InputField";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {fetchWithBodyAndToken} from "@/utils/url";
+import {useTranslation} from "react-i18next";
 
 interface RoleManagementProps {
     onClose: () => void;
@@ -12,6 +13,7 @@ interface RoleManagementProps {
 }
 
 export default function AddProjektDialogContent({onClose, onRefresh}: RoleManagementProps) {
+    const {t} = useTranslation();
     const {addNotification} = useNotification();
     const [isLoadingAddProject, setIsLoadingAddProject] = React.useState(false);
     const [projectName, setProjectName] = React.useState<string>('');
@@ -36,12 +38,12 @@ export default function AddProjektDialogContent({onClose, onRefresh}: RoleManage
     return (
         <DialogContent>
             <DialogHeader>
-                <DialogTitle>Add Project</DialogTitle>
+                <DialogTitle>{t("project_title")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-1">
                 <InputField
-                    label="Project Name"
-                    placeholder="e.g. Standardprojekt"
+                    label={t("label.project_name")}
+                    placeholder={t("placeholder.project_name")}
                     value={projectName}
                     onChange={(e) => setProjectName(e.target.value)}
                 />
@@ -52,7 +54,7 @@ export default function AddProjektDialogContent({onClose, onRefresh}: RoleManage
                     onClick={onClose}
                     className="w-[40%]"
                 >
-                    Abbrechen
+                    {t("button.cancel")}
                 </Button>
                 <ButtonLoading
                     isLoading={isLoadingAddProject}
@@ -60,7 +62,7 @@ export default function AddProjektDialogContent({onClose, onRefresh}: RoleManage
                     className="w-[40%]"
                     variant="default"
                 >
-                    Speichern
+                    {t("button.save")}
                 </ButtonLoading>
             </div>
         </DialogContent>

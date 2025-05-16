@@ -18,6 +18,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
+import {useTranslation} from "react-i18next";
 
 interface DatePickerProps {
     date: Date | undefined;
@@ -27,6 +28,7 @@ interface DatePickerProps {
 }
 
 export function DatePicker({date, setDate, endYear, position = "bottom"}: DatePickerProps) {
+    const {t} = useTranslation();
     const [isOpen, setIsOpen] = React.useState(false);
     const [month, setMonth] = React.useState<number>(
         date ? date.getMonth() : new Date().getMonth()
@@ -92,7 +94,7 @@ export function DatePicker({date, setDate, endYear, position = "bottom"}: DatePi
                 >
                     <div className="flex items-center">
                         <CalendarIcon className="mr-2 h-4 w-4"/>
-                        {date ? format(date, "PPP") : <span>Pick a date</span>}
+                        {date ? format(date, "PPP") : <span>{t("placeholder.pick_date")}</span>}
                     </div>
                     <div className="absolute right-2 flex items-center space-x-1 opacity-50">
                         {isOpen ? <ChevronRight className="w-4 h-4"/> :

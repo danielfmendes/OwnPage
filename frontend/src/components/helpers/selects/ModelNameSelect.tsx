@@ -2,6 +2,7 @@ import React from "react";
 import {SelectLoading} from "@/components/helpers/SelectLoading";
 import {fetchWithToken} from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
+import {useTranslation} from "react-i18next";
 
 interface Props {
     modelID: number | null;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function ModelNameSelect({modelID, onChange}: Props) {
+    const {t} = useTranslation();
     const {addNotification} = useNotification();
     const [modelId, setModelId] = React.useState<number | null>(modelID);
     const [modelIdOptions, setModelIdOptions] = React.useState<{ id: number, name: string }[]>([]);
@@ -33,7 +35,7 @@ export default function ModelNameSelect({modelID, onChange}: Props) {
             setId={handleChange}
             partIdOptions={modelIdOptions}
             isLoadingParts={isLoadingModels}
-            placeholder="Select model name"
+            placeholder={t("placeholder.model_name")}
         />
     );
 }

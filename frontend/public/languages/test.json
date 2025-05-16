@@ -1,0 +1,175 @@
+{
+  "button": {
+    "send": "Test",
+    "save": "Test",
+    "apply": "Test",
+    "sign_out": "Test",
+    "update": "Test",
+    "cancel": "Test",
+    "back": "Test",
+    "delete_ref": "Test",
+    "register": "Test",
+    "manage": "Test",
+    "add": "Test",
+    "add_item": "Test",
+    "previous": "Test",
+    "next": "Test",
+    "select_all": "Test",
+    "deselect_all": "Test",
+    "clear_selection": "Test"
+  },
+  "switch_theme": "Test",
+  "error": {
+    "email": "Test",
+    "password": "Test",
+    "login": "Test"
+  },
+  "label": {
+    "id": "Test",
+    "email": "Test",
+    "user_email": "Test",
+    "password": "Test",
+    "name": "Test",
+    "first_name": "Test",
+    "last_name": "Test",
+    "bike_name": "Test",
+    "customer_name": "Test",
+    "number": "Test",
+    "price": "Test",
+    "order_date": "Test",
+    "production_date": "Test",
+    "city": "Test",
+    "sales": "Test",
+    "revenue": "Test",
+    "project": "Test",
+    "project_name": "Test",
+    "model_name": "Test",
+    "part_type": "Test",
+    "part_name": "Test",
+    "serial_number": "Test",
+    "total_revenue": "Test",
+    "quantity": "Test",
+    "role": "Test",
+    "warehouse_position": "Test",
+    "number_of_sales": "Test",
+    "birthday": "Test",
+    "dob": "Test"
+  },
+  "placeholder": {
+    "email": "Test",
+    "name": "Test",
+    "first_name": "Test",
+    "city": "Test",
+    "pick_date": "Test",
+    "part_type": "Test",
+    "role": "Test",
+    "part": "Test",
+    "customer": "Test",
+    "language": "Test",
+    "model_name": "Test",
+    "project": "Test",
+    "no_project": "Test",
+    "project_name": "Test",
+    "serial_number": "Test",
+    "filter": "Test",
+    "no_results": "Test",
+    "loading": "Test",
+    "search": "Test",
+    "please_wait": "Test",
+    "warehouse_position": "Test",
+    "enter": {
+      "email": "Test",
+      "number": "Test",
+      "number_short": "Test",
+      "price": "Test"
+    }
+  },
+  "go_to_register": "Test",
+  "demo": "Test",
+  "customer": {
+    "add": "Test",
+    "details": "Test",
+    "info": "Test",
+    "data": "Test"
+  },
+  "cities_list_title": "Test",
+  "project_title": "Test",
+  "loading_cities": "Test",
+  "sales_to_cities": "Test",
+  "no_sales_data": "Test",
+  "no_data_to_display": "Test",
+  "up_percentage": "Test",
+  "down_percentage": "Test",
+  "table_selection": "Test",
+  "menu": {
+    "dashboard": "Test",
+    "orders": "Test",
+    "customer": "Test",
+    "warehouse": "Test",
+    "parts_storage": "Test",
+    "role_management": "Test",
+    "profile": "Test"
+  },
+  "home": "Test",
+  "from_time_period": "Test",
+  "time": {
+    "yesterday": "Test",
+    "last_week": "Test",
+    "last_month": "Test",
+    "last_year": "Test"
+  },
+  "bike_models": {
+    "title": {
+      "sales": "Test",
+      "revenue": "Test"
+    },
+    "description": {
+      "sales": "Test",
+      "revenue": "Test"
+    },
+    "filter_models": "Test"
+  },
+  "orders": {
+    "edit": "Test",
+    "add": "Test",
+    "edit_item": "Test",
+    "info": "Test",
+    "items": "Test",
+    "history": "Test"
+  },
+  "partsstorage": {
+    "edit": "Test",
+    "add": "Test"
+  },
+  "bike_parts": {
+    "saddle": "Test",
+    "frame": "Test",
+    "fork": "Test"
+  },
+  "rolemanagement": {
+    "edit": "Test",
+    "add": "Test",
+    "role": {
+      "creator": "Test",
+      "admin": "Test",
+      "user": "Test"
+    }
+  },
+  "warehouse": {
+    "add": "Test",
+    "edit": "Test"
+  },
+  "delete_references": {
+    "info": "Test",
+    "button": "Test"
+  },
+  "ancestorDialog": {
+    "title": "Test",
+    "description": "Test",
+    "refine": "Test",
+    "open": "Test",
+    "single": "Test",
+    "multiple": "Test",
+    "chosen": "Test"
+  }
+}

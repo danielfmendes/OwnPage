@@ -24,6 +24,7 @@ import {ChartContainer, ChartConfig} from "@/components/ui/chart";
 import {BikeSales} from "@/types/custom";
 import {Skeleton} from "@/components/ui/skeleton";
 import {Switch} from "@/components/ui/switch";
+import {useTranslation} from "react-i18next";
 
 interface Props {
     bikeData: BikeSales[] | null;
@@ -31,7 +32,8 @@ interface Props {
 }
 
 export function BikeModels({bikeData, isLoading}: Props) {
-    // Finde alle Modelle, die Verkäufe haben
+    const { t } = useTranslation();
+
     const modelsWithSales = Array.from(new Set(
         (bikeData || []).filter((b) => b.total_sales > 0).map((b) => b.bike_model)
     ));
@@ -92,7 +94,7 @@ export function BikeModels({bikeData, isLoading}: Props) {
         );
     };
 
-    // Überprüfen, ob es Daten gibt
+    // Check, if data is available for the selected models
     const isNoSalesData = chartData.every((data) =>
         modelsWithSales.every((model) => data[model] === 0)
     );
@@ -102,26 +104,27 @@ export function BikeModels({bikeData, isLoading}: Props) {
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <div>
                     <CardTitle>
-                        {metric === "revenue" ? "Bike Model Revenue" : "Bike Model Sales"}
+                        {metric === "revenue"
+                            ? t("bike_models.title.revenue")
+                            : t("bike_models.title.sales")}
                     </CardTitle>
                     <CardDescription>
                         {metric === "revenue"
-                            ? "Revenue per model over time. Select models to view."
-                            : "Sales per model over time. Select models to view."}
+                            ? t("bike_models.description.revenue")
+                            : t("bike_models.description.sales")}
                     </CardDescription>
                 </div>
 
                 <div className="flex items-center space-x-4">
-                    {/* Metric Switch */}
                     {!isLoading && (
                         <div className="flex items-center space-x-1">
                             <span
-                              className={cn(
-                                  "text-sm text-muted-foreground",
-                                  metric === "total_sales" && "font-semibold"
-                              )}
+                                className={cn(
+                                    "text-sm text-muted-foreground",
+                                    metric === "total_sales" && "font-semibold"
+                                )}
                             >
-                                Sales
+                                {t("label.sales")}
                             </span>
                             <Switch
                                 checked={metric === "revenue"}
@@ -135,17 +138,16 @@ export function BikeModels({bikeData, isLoading}: Props) {
                                     metric === "revenue" && "font-semibold"
                                 )}
                             >
-                                Revenue
+                                {t("label.revenue")}
                             </span>
                         </div>
                     )}
 
-                    {/* Filter Models */}
                     {!isLoading && (
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button variant="outline" className="text-sm h-8 px-3">
-                                    Filter Models
+                                    {t("bike_models.filter_models")}
                                     <ChevronDown className="ml-2 h-4 w-4"/>
                                 </Button>
                             </PopoverTrigger>
@@ -180,7 +182,9 @@ export function BikeModels({bikeData, isLoading}: Props) {
                 {isLoading ? (
                     <Skeleton className="w-full h-[300px]"/>
                 ) : isNoSalesData ? (
-                    <p className="text-sm text-muted-foreground mt-4">No data to display.</p>
+                    <p className="text-sm text-muted-foreground mt-4">
+                        {t("no_data_to_display")}
+                    </p>
                 ) : (
                     <ChartContainer config={chartConfig} className="w-full h-[300px]">
                         <LineChart

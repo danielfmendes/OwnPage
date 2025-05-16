@@ -21,6 +21,7 @@ import {ArrowUpDown} from "lucide-react";
 import {fetchWithBodyAndToken, fetchWithToken} from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
+import {useTranslation} from "react-i18next";
 
 interface Props {
     rowData: Customer,
@@ -29,6 +30,7 @@ interface Props {
 }
 
 export default function CustomerDetailContent({rowData, onClose, onRefresh}: Props) {
+    const {t} = useTranslation();
     const {addNotification} = useNotification();
     const [lastName, setLastName] = React.useState(rowData.name)
     const [city, setCity] = React.useState(rowData.city)
@@ -81,7 +83,7 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    OrderDate<ArrowUpDown className="ml-2 h-4 w-4"/>
+                    {t("label.order_date")}<ArrowUpDown className="ml-2 h-4 w-4"/>
                 </Button>
             ),
             cell: ({row}) => {
@@ -91,49 +93,49 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
         },
         {
             accessorKey: "bike_model_name",
-            header: "Bike Name",
+            header: t("label.bike_name"),
         },
         {
             accessorKey: "number",
-            header: "Number",
+            header: t("label.number"),
         },
         {
             accessorKey: "price",
-            header: "Price",
+            header: t("label.price"),
         },
     ]
 
     return (
         <DialogContent className="sm:max-w-[800px]">
             <DialogHeader>
-                <DialogTitle>Customer Details</DialogTitle>
+                <DialogTitle>{t("customer.details")}</DialogTitle>
             </DialogHeader>
 
             <Tabs defaultValue="info" className="mt-4">
                 <TabsList>
-                    <TabsTrigger value="info">Customer Info</TabsTrigger>
-                    <TabsTrigger value="orders">Order History</TabsTrigger>
+                    <TabsTrigger value="info">{t("customer.info")}</TabsTrigger>
+                    <TabsTrigger value="orders">{t("orders.history")}</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="info">
                     <Card className="mt-4">
                         <CardContent className="space-y-4 pt-6">
-                            <InputField label="E-Mail" value={rowData.email}/>
-                            <InputField label="Vorname" value={rowData.first_name}/>
+                            <InputField label={t("label.email")} value={rowData.email}/>
+                            <InputField label={t("label.first_name")} value={rowData.first_name}/>
                             <InputField
-                                label="Nachname"
-                                placeholder="e.g. Griffin"
+                                label={t("label.last_name")}
+                                placeholder={t("placeholder.name")}
                                 value={lastName}
                                 onChange={(e) => setLastName(e.target.value)}
                             />
                             <InputField
-                                label="City"
-                                placeholder="e.g. Hamburg"
+                                label={t("label.city")}
+                                placeholder={t("placeholder.city")}
                                 value={city}
                                 onChange={(e) => setCity(e.target.value)}
                             />
                             <InputField
-                                label="Date of Birth"
+                                label={t("label.dob")}
                                 value={new Date(rowData.dob).toLocaleDateString()}
                             />
                         </CardContent>
@@ -143,9 +145,9 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
                         <ButtonLoading
                             isLoading={isLoadingUpdate}
                             onClick={handleUpdate}
-                            loadingText="Please wait"
+                            loadingText={t("placeholder.please_wait")}
                         >
-                            Update
+                            {t("button.update")}
                         </ButtonLoading>
                     </div>
                 </TabsContent>
@@ -153,7 +155,7 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
                 <TabsContent value="orders">
                     <Card className="mt-4">
                         <CardContent className="pt-4">
-                            <h3 className="text-lg font-semibold mb-4">Order History</h3>
+                            <h3 className="text-lg font-semibold mb-4">{t("orders.history")}</h3>
                             <SimpleTable data={data} columns={columns} isLoading={isLoadingData}/>
                         </CardContent>
                     </Card>

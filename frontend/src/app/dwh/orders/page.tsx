@@ -15,9 +15,11 @@ import {useRoleStore} from "@/utils/rolemananagemetstate";
 import OrderDialogContent from "@/app/dwh/orders/content-dialog";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Order} from "@/types/datatables";
+import {useTranslation} from "react-i18next";
 
 
 export default function OrderPage() {
+    const {t} = useTranslation();
     const {addNotification} = useNotification();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const [data, setData] = React.useState<OrderWithCustomer[]>([]);
@@ -84,11 +86,11 @@ export default function OrderPage() {
     const columns: ColumnDef<Order>[] = [
         {
             accessorKey: "customer_name",
-            header: "Customer Name",
+            header: t("label.customer_name"),
         },
         {
             accessorKey: "customer_email",
-            header: "Email",
+            header: t("label.email"),
         },
         {
             accessorKey: "order_date",
@@ -97,7 +99,7 @@ export default function OrderPage() {
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    OrderDate<ArrowUpDown className="ml-2 h-4 w-4"/>
+                    {t("label.order_date")}<ArrowUpDown className="ml-2 h-4 w-4"/>
                 </Button>
             ),
             cell: ({row}) => {
@@ -132,9 +134,9 @@ export default function OrderPage() {
     if (!sidebar) return null;
 
     return (
-        <ContentLayout title="Orders">
+        <ContentLayout title={t("menu.orders")}>
             <DataTable
-                title="Orders"
+                title={t("menu.orders")}
                 columns={columns}
                 data={data}
                 isLoading={isLoadingData}
@@ -161,7 +163,7 @@ export default function OrderPage() {
                     <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
                             <DialogTitle className="text-center">
-                                Willst du auch die referenzierten Werte löschen?
+                                {t("delete_reference.info")}
                             </DialogTitle>
                         </DialogHeader>
                         <div className="grid">
@@ -171,7 +173,7 @@ export default function OrderPage() {
                                     onClick={handleCancelDelete}
                                     className="w-[40%]"
                                 >
-                                    Abbrechen
+                                    {t("button.cancel")}
                                 </Button>
                                 <ButtonLoading
                                     isLoading={isLoadingDeleteCascade}
@@ -179,7 +181,8 @@ export default function OrderPage() {
                                     className="w-[40%]"
                                     variant="destructive"
                                 >
-                                    Lösche Referenzen
+
+                                    {t("button.delete_ref")}
                                 </ButtonLoading>
                             </div>
                         </div>

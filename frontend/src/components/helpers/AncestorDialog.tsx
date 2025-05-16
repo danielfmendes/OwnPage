@@ -16,12 +16,14 @@ import {
 import {Trash, X} from "lucide-react";
 import { RoleManagementWithName } from "@/types/custom";
 import { useRoleStore } from "@/utils/rolemananagemetstate";
+import {useTranslation} from "react-i18next";
 
 interface Props {
     onClose: () => void;
 }
 
 export function AncestorDialog({onClose}: Props) {
+    const {t} = useTranslation();
     const projects: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const applySelected = useRoleStore((state) => state.setSelectedRoles);
     const [selected, setSelected] = useState<RoleManagementWithName[]>(useRoleStore((state) => state.selectedRoles));
@@ -68,19 +70,17 @@ export function AncestorDialog({onClose}: Props) {
     return (
         <div className="space-y-4">
             <DialogHeader>
-                <DialogTitle>Ancestor Scope</DialogTitle>
-                <DialogDescription>
-                    The platform will exclusively present information relevant to the ancestor you select.
-                </DialogDescription>
+                <DialogTitle>{t("ancestorDialog.title")}</DialogTitle>
+                <DialogDescription>{t("ancestorDialog.description")}</DialogDescription>
             </DialogHeader>
 
             <Accordion type="single" collapsible className="w-full space-y-4">
                 <AccordionItem value="refine">
-                    <AccordionTrigger>Refine ancestors</AccordionTrigger>
+                    <AccordionTrigger>{t("ancestorDialog.refine")}</AccordionTrigger>
                     <AccordionContent>
                         <div className="flex justify-end mb-2">
                             <Button variant="ghost" size="sm" onClick={selectAll}>
-                                Select all
+                                {t("button.select_all")}
                             </Button>
                         </div>
                         <ScrollArea className="h-48 pr-2">
@@ -99,7 +99,7 @@ export function AncestorDialog({onClose}: Props) {
                                         <div>
                                             <div>{project.project_name}</div>
                                             <div className="text-xs text-muted-foreground">
-                                                Role: {project.role}
+                                                {t("label.role")}: {project.role}
                                             </div>
                                         </div>
                                     </li>
@@ -110,11 +110,11 @@ export function AncestorDialog({onClose}: Props) {
                 </AccordionItem>
 
                 <AccordionItem value="chosen">
-                    <AccordionTrigger>Chosen ({selected.length})</AccordionTrigger>
+                    <AccordionTrigger>{t("ancestorDialog.chosen")} ({selected.length})</AccordionTrigger>
                     <AccordionContent>
                         <div className="flex justify-end mb-2">
                             <Button variant="ghost" size="sm" onClick={deselectAll}>
-                                Deselect all
+                                {t("button.deselect_all")}
                             </Button>
                         </div>
                         <ScrollArea className="h-32 pr-2">
@@ -143,13 +143,14 @@ export function AncestorDialog({onClose}: Props) {
 
             <div className="flex justify-between gap-2">
                 <Button variant="ghost" onClick={clearSelection} className="flex items-center gap-2">
-                    <Trash className="w-4 h-4" /> Clear selection
+                    <Trash className="w-4 h-4" />
+                    {t("button.clear_selection")}
                 </Button>
 
                 <div className="flex gap-2">
-                    <Button variant="ghost" onClick={onClose}>Cancel</Button>
+                    <Button variant="ghost" onClick={onClose}>{t("button.cancel")}</Button>
                     <Button disabled={selected.length === 0} onClick={handleApply}>
-                        Apply
+                        {t("button.apply")}
                     </Button>
                 </div>
             </div>

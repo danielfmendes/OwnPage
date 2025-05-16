@@ -1,56 +1,65 @@
-"use client"
+"use client";
 
-import { Bar, BarChart, Line, LineChart } from "recharts"
+import { Bar, BarChart, Line, LineChart } from "recharts";
 import {
     Card,
     CardContent,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card"
-import { ChartConfig, ChartContainer } from "@/components/ui/chart"
-import { GraphData } from "@/types/custom"
-import { Skeleton } from "@/components/ui/skeleton"
+} from "@/components/ui/card";
+import { ChartConfig, ChartContainer } from "@/components/ui/chart";
+import { GraphData } from "@/types/custom";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
 
 interface Props {
-    graphData: GraphData[]
+    graphData: GraphData[];
     graphMeta: {
-        currentRevenue: number
-        revenueChangePct: number
-        currentSales: number
-        salesChangePct: number
-    }
-    timeRange: string
-    isLoadingGraphMetaData: boolean
-    isLoadingGraphDataData: boolean
+        currentRevenue: number;
+        revenueChangePct: number;
+        currentSales: number;
+        salesChangePct: number;
+    };
+    timeRange: string;
+    isLoadingGraphMetaData: boolean;
+    isLoadingGraphDataData: boolean;
 }
 
-export function MetricStats({graphData, graphMeta, timeRange, isLoadingGraphMetaData, isLoadingGraphDataData}: Props) {
+export function MetricStats({
+                                graphData,
+                                graphMeta,
+                                timeRange,
+                                isLoadingGraphMetaData,
+                                isLoadingGraphDataData,
+                            }: Props) {
+    const { t } = useTranslation();
+
     const chartConfig = {
         revenue: {
-            label: "Revenue",
+            label: t("label.revenue"),
             color: "hsl(var(--primary))",
         },
         sales_no: {
-            label: "Number of Sales",
+            label: t("label.number_of_sales"),
             color: "hsl(var(--primary))",
         },
-    } satisfies ChartConfig
+    } satisfies ChartConfig;
 
     const formatCurrency = (value: number) =>
-        value.toLocaleString("en-US", { style: "currency", currency: "USD" })
+        value.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
     const formatPercentage = (value: number) =>
-        `${value > 0 ? "+" : ""}${value.toFixed(2)}%`
+        `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
 
     const timeLabels: Record<Props["timeRange"], string | null> = {
-        "1d": "yesterday",
-        "1w": "last week",
-        "1m": "last month",
-        "1y": "last year",
+        "1d": t("time.yesterday"),
+        "1w": t("time.last_week"),
+        "1m": t("time.last_month"),
+        "1y": t("time.last_year"),
         "max": null,
-    }
+    };
 
-    const timeLabel = timeLabels[timeRange]
+    const timeLabel = timeLabels[timeRange];
 
     const isNoRevenueData = graphData.every((data) => data.revenue === 0);
     const isNoSalesData = graphData.every((data) => data.sales_no === 0);
@@ -60,7 +69,9 @@ export function MetricStats({graphData, graphMeta, timeRange, isLoadingGraphMeta
             {/* Revenue Card */}
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-normal">Total Revenue</CardTitle>
+                    <CardTitle className="text-sm font-normal">
+                        {t("label.total_revenue")}
+                    </CardTitle>
                 </CardHeader>
                 <CardContent className="pb-0">
                     {isLoadingGraphMetaData ? (
@@ -75,7 +86,10 @@ export function MetricStats({graphData, graphMeta, timeRange, isLoadingGraphMeta
                             </div>
                             {timeLabel && (
                                 <p className="text-xs text-muted-foreground">
-                                    {formatPercentage(graphMeta.revenueChangePct)} from {timeLabel}
+                                    {t("from_time_period", {
+                                        change: formatPercentage(graphMeta.revenueChangePct),
+                                        time: timeLabel,
+                                    })}
                                 </p>
                             )}
                         </>
@@ -83,7 +97,9 @@ export function MetricStats({graphData, graphMeta, timeRange, isLoadingGraphMeta
                     {isLoadingGraphDataData ? (
                         <Skeleton className="h-[80px] w-full mt-4" />
                     ) : isNoRevenueData ? (
-                        <p className="text-sm text-muted-foreground mt-4">No data to display.</p>
+                        <p className="text-sm text-muted-foreground mt-4">
+                            {t("no_data_to_display")}
+                        </p>
                     ) : (
                         <ChartContainer config={chartConfig} className="h-[80px] w-full mt-2">
                             <LineChart
@@ -106,7 +122,9 @@ export function MetricStats({graphData, graphMeta, timeRange, isLoadingGraphMeta
             {/* Sales Card */}
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-normal">Number of Sales</CardTitle>
+                    <CardTitle className="text-sm font-normal">
+                        {t("label.number_of_sales")}
+                    </CardTitle>
                 </CardHeader>
                 <CardContent>
                     {isLoadingGraphMetaData ? (
@@ -121,7 +139,10 @@ export function MetricStats({graphData, graphMeta, timeRange, isLoadingGraphMeta
                             </div>
                             {timeLabel && (
                                 <p className="text-xs text-muted-foreground">
-                                    {formatPercentage(graphMeta.salesChangePct)} from {timeLabel}
+                                    {t("from_time_period", {
+                                        change: formatPercentage(graphMeta.salesChangePct),
+                                        time: timeLabel,
+                                    })}
                                 </p>
                             )}
                         </>
@@ -129,7 +150,9 @@ export function MetricStats({graphData, graphMeta, timeRange, isLoadingGraphMeta
                     {isLoadingGraphDataData ? (
                         <Skeleton className="h-[80px] w-full mt-4" />
                     ) : isNoSalesData ? (
-                        <p className="text-sm text-muted-foreground mt-4">No data to display.</p>
+                        <p className="text-sm text-muted-foreground mt-4">
+                            {t("no_data_to_display")}
+                        </p>
                     ) : (
                         <ChartContainer config={chartConfig} className="mt-2 h-[80px] w-full">
                             <BarChart data={graphData}>
@@ -144,5 +167,5 @@ export function MetricStats({graphData, graphMeta, timeRange, isLoadingGraphMeta
                 </CardContent>
             </Card>
         </div>
-    )
+    );
 }

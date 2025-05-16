@@ -15,6 +15,7 @@ import {Plus} from "lucide-react"
 import {Button} from "@/components/ui/button"
 import {Input} from "@/components/ui/input"
 import {SimpleTable} from "@/components/helpers/SimpleTable";
+import {useTranslation} from "react-i18next";
 
 interface DataTableProps {
     title?: string;
@@ -29,6 +30,7 @@ interface DataTableProps {
 }
 
 export default function DataTable({title, columns, data, isLoading, filterColumn, onRefresh, noHeaders, rowDialogContent, addDialogContent}: DataTableProps) {
+    const {t} = useTranslation();
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -79,7 +81,7 @@ export default function DataTable({title, columns, data, isLoading, filterColumn
             {title}
             <div className="flex items-center py-4">
                 <Input
-                    placeholder={`Filter ${filterColumn.replace(/_/g, ' ')} ...`}
+                    placeholder={`${t("placeholder.filter")} ${filterColumn.replace(/_/g, ' ')} ...`}
                     value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ""}
                     onChange={(event) =>
                         table.getColumn(filterColumn)?.setFilterValue(event.target.value)
@@ -91,7 +93,7 @@ export default function DataTable({title, columns, data, isLoading, filterColumn
                     className="ml-auto bg-zinc-300 dark:bg-zinc-800 hover:bg-zinc-400 dark:hover:bg-zinc-600 text-zinc-800 dark:text-white"
                 >
                     <Plus className="mr-2 h-4 w-4"/>
-                    Add
+                    {t("button.add")}
                 </Button>
 
             </div>
@@ -101,8 +103,10 @@ export default function DataTable({title, columns, data, isLoading, filterColumn
             <div className="flex items-center justify-end space-x-2 py-4">
                 {table.getAllColumns().some(col => col.id === 'select') && (
                     <div className="flex-1 text-sm text-muted-foreground">
-                        {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                        {table.getFilteredRowModel().rows.length} row(s) selected.
+                        {t("table_selection", {
+                            selected: table.getFilteredSelectedRowModel().rows.length,
+                            total: table.getFilteredRowModel().rows.length,
+                        })}
                     </div>
                 )}
                 <div className="space-x-2">
@@ -112,7 +116,7 @@ export default function DataTable({title, columns, data, isLoading, filterColumn
                         onClick={() => table.previousPage()}
                         disabled={(data?.length ?? 0) === 0 || !table.getCanPreviousPage()}
                     >
-                        Previous
+                        {t("button.previous")}
                     </Button>
                     <Button
                         variant="outline"
@@ -120,7 +124,7 @@ export default function DataTable({title, columns, data, isLoading, filterColumn
                         onClick={() => table.nextPage()}
                         disabled={(data?.length ?? 0) === 0 || !table.getCanNextPage()}
                     >
-                        Next
+                        {t("button.next")}
                     </Button>
                 </div>
             </div>

@@ -10,6 +10,8 @@ import {useRoleStore} from "@/utils/rolemananagemetstate";
 import {RoleManagementWithName} from "@/types/custom";
 import {handleLogOut} from "@/utils/helpers";
 import {useRouter} from "next/navigation";
+import Language from "@/utils/language";
+import {useTranslation} from "react-i18next";
 
 export default function DemoLayout({children}: { children: React.ReactNode }) {
     const {addNotification} = useNotification();
@@ -21,6 +23,14 @@ export default function DemoLayout({children}: { children: React.ReactNode }) {
     const setIsLoadingRole = useRoleStore((state) => state.setIsLoading);
     const setSelectedRoles = useRoleStore((state) => state.setSelectedRoles);
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
+    const { i18n } = useTranslation();
+
+    useEffect(() => {
+        const savedLang = Language.getLanguage();
+        if (savedLang && i18n.language !== savedLang) {
+            i18n.changeLanguage(savedLang);
+        }
+    }, [i18n]);
 
     useEffect(() => {
         if (!token) {

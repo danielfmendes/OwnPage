@@ -11,8 +11,10 @@ import RoleManagementDialogContent from "@/app/dwh/rolemanagement/manage-dialog"
 import {Dialog} from "@/components/ui/dialog";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 import AddProjektDialogContent from "@/app/dwh/rolemanagement/add-project-dialog";
+import {useTranslation} from "react-i18next";
 
 export default function RoleManagementPage() {
+    const {t} = useTranslation();
     const {addNotification} = useNotification();
     const data = useRoleStore((state) => state.roles);
     const setData = useRoleStore((state) => state.setRoles);
@@ -34,11 +36,11 @@ export default function RoleManagementPage() {
     const columns: ColumnDef<RoleManagementWithName>[] = [
         {
             accessorKey: "project_name",
-            header: "Projekt Name",
+            header: t("label.project_name")
         },
         {
             accessorKey: "role",
-            header: "Role",
+            header: t("label.role")
         },
         {
             id: "actions",
@@ -53,7 +55,7 @@ export default function RoleManagementPage() {
                         }}
                         className="text-white dark:text-black p-2 rounded"
                     >
-                        Manage
+                        {t("button.manage")}
                     </Button>
                 ) : (
                     <Button
@@ -61,16 +63,16 @@ export default function RoleManagementPage() {
                         className="text-black dark:text-white p-2 rounded opacity-50 cursor-not-allowed"
                         variant="secondary"
                     >
-                        Manage
+                        {t("button.manage")}
                     </Button>
                 );
             },
         },
     ]
     return (
-        <ContentLayout title="Role Management">
+        <ContentLayout title={t("menu.role_management")}>
             <DataTable
-                title="Role Management"
+                title={t("menu.role_management")}
                 columns={columns}
                 data={data}
                 isLoading={isLoadingData}

@@ -1,4 +1,5 @@
 import {Gauge, PersonStanding, ArchiveIcon, BoxIcon, PackageCheck, LucideIcon} from "lucide-react";
+import {useTranslation} from "react-i18next";
 
 type Submenu = {
     href: string;
@@ -20,6 +21,7 @@ type Group = {
 };
 
 export function getMenuList(pathname: string): Group[] {
+    const {t} = useTranslation();
     // Extrahiere die project_id aus der aktuellen URL
     const urlParams = new URLSearchParams(window.location.search);
     const currentQuery = urlParams.get('project_id') ? `?project_id=${urlParams.get('project_id')}` : "";
@@ -30,27 +32,27 @@ export function getMenuList(pathname: string): Group[] {
             menus: [
                 {
                     href: `/dwh/dashboard${currentQuery}`,
-                    label: "Dashboard",
+                    label: t("menu.dashboard"),
                     icon: Gauge,
                 },
                 {
                     href: `/dwh/orders${currentQuery}`,
-                    label: "Orders",
+                    label: t("menu.orders"),
                     icon: PackageCheck,
                 },
                 {
                     href: `/dwh/customer${currentQuery}`,
-                    label: "Kundendaten",
+                    label: t("menu.customer"),
                     icon: PersonStanding,
                 },
                 {
                     href: `/dwh/warehouse${currentQuery}`,
-                    label: "Warenlager",
+                    label: t("menu.warehouse"),
                     icon: ArchiveIcon,
                 },
                 {
                     href: `/dwh/partsstorage${currentQuery}`,
-                    label: "Teilelager",
+                    label: t("menu.parts_storage"),
                     icon: BoxIcon,
                 },
             ],

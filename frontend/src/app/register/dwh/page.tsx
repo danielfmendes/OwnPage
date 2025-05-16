@@ -9,8 +9,10 @@ import {DatePicker} from "@/components/helpers/DatePicker";
 import apiUrl, {handleFetchError} from "@/utils/url";
 import AuthToken from "@/utils/authtoken";
 import {useNotification} from "@/components/helpers/NotificationProvider";
+import {useTranslation} from "react-i18next";
 
 export default function RegisterCard() {
+    const {t} = useTranslation();
     const {addNotification} = useNotification();
     const [name, setName] = useState<string>('');
     const [email, setEmail] = useState<string>('');
@@ -36,7 +38,7 @@ export default function RegisterCard() {
                 AuthToken.setAuthToken(data.token);
                 window.location.href = '/dwh/dashboard';
                 addNotification(
-                    "Bestätigungs-E-Mail wurde gesendet. Bitte bestätige dein Konto innerhalb von 7 Tagen (prüfe ggf. auch den Spam-Ordner).",
+                    "Confirmation e-mail has been sent. Please confirm your account within 7 days (check your spam folder if necessary).",
                     "success"
                 );
             })
@@ -60,31 +62,31 @@ export default function RegisterCard() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <InputField
-                        label="Name"
+                        label={t("label.name")}
                         value={name}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
                     />
                     <div className="space-y-1">
-                        <label className="block text-sm font-medium">Geburtstag</label>
+                        <label className="block text-sm font-medium">{t("label.birthday")}</label>
                         <div className="relative">
                             <DatePicker date={selectedDate} setDate={setSelectedDate}/>
                         </div>
                     </div>
                     <InputField
-                        label="E-Mail"
+                        label={t("label.email")}
                         value={email}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                     />
                     <InputField
-                        label="Passwort"
+                        label={t("label.password")}
                         value={password}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                     />
                     <Button onClick={handleSubmit} className="w-full mt-4">
-                        Registrieren
+                        {t("button.register")}
                     </Button>
                     <Button onClick={handleBack} variant="secondary" className="w-full mt-4">
-                        Zurück
+                        {t("button.back")}
                     </Button>
                 </CardContent>
             </Card>

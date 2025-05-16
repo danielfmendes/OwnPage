@@ -13,9 +13,11 @@ import {RoleManagementWithName, WarehousePartWithName} from "@/types/custom";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
+import {useTranslation} from "react-i18next";
 
 
 export default function PartsStoragePage() {
+    const {t} = useTranslation();
     const {addNotification} = useNotification();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const [data, setData] = React.useState<WarehousePartWithName[]>([]);
@@ -47,7 +49,7 @@ export default function PartsStoragePage() {
     const columns: ColumnDef<WarehousePartWithName>[] = [
         {
             accessorKey: "id",
-            header: "ID",
+            header: t("label.id"),
         },
         {
             accessorKey: "part_type",
@@ -56,21 +58,21 @@ export default function PartsStoragePage() {
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Part Type<ArrowUpDown className="ml-2 h-4 w-4"/>
+                    {t("label.part_type")}<ArrowUpDown className="ml-2 h-4 w-4"/>
                 </Button>
             ),
         },
         {
             accessorKey: "part_name",
-            header: "Part Name",
+            header: t("label.part_name"),
         },
         {
             accessorKey: "quantity",
-            header: "Quantity",
+            header: t("label.quantity"),
         },
         {
             accessorKey: "storage_location",
-            header: "Warehouse",
+            header: t("label.warehouse_position"),
         },
         {
             id: "actions",
@@ -99,9 +101,9 @@ export default function PartsStoragePage() {
     if (!sidebar) return null;
 
     return (
-        <ContentLayout title="Teilelager">
+        <ContentLayout title={t("menu.parts_storage")}>
             <DataTable
-                title="Teilelager"
+                title={t("menu.parts_storage")}
                 columns={columns}
                 data={data}
                 isLoading={isLoadingData}

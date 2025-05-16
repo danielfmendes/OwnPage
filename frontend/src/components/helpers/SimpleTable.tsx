@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import * as React from "react";
+import {useTranslation} from "react-i18next";
 
 interface SimpleTableProps<TData> {
     data: TData[];
@@ -25,6 +26,7 @@ interface SimpleTableProps<TData> {
 }
 
 export function SimpleTable<TData>({ data, columns, onRowClick, isLoading = false, noHeaders = false, table }: SimpleTableProps<TData>) {
+    const {t} = useTranslation();
     const tableReact = table ? table : useReactTable({
         data,
         columns,
@@ -78,7 +80,7 @@ export function SimpleTable<TData>({ data, columns, onRowClick, isLoading = fals
                     ) : (
                         <TableRow>
                             <TableCell colSpan={columns.length} className="h-24 text-center">
-                                No results.
+                                {t("placeholder.no_results")}
                             </TableCell>
                         </TableRow>
                     )}

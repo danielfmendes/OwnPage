@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/popover";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import {Button} from "@/components/ui/button";
+import {useTranslation} from "react-i18next";
 
 interface ComboBoxLoadingProps<T> {
     selectedItem: T | null;
@@ -36,6 +37,7 @@ export function ComboBoxLoading<T>({
                                        itemKey,
                                        itemLabel,
                                    }: ComboBoxLoadingProps<T>) {
+    const {t} = useTranslation();
     const [open, setOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const triggerRef = useRef<HTMLButtonElement>(null);
@@ -89,7 +91,7 @@ export function ComboBoxLoading<T>({
             <PopoverContent className="p-0" align="start" style={{width: popoverWidth}}>
                 <Command shouldFilter={true} className="overflow-auto max-h-60">
                     <CommandInput
-                        placeholder="Search..."
+                        placeholder={t("placeholder.search")}
                         className="h-9"
                         onValueChange={setSearchTerm}
                     />
@@ -106,10 +108,10 @@ export function ComboBoxLoading<T>({
                         {isLoading ? (
                             <CommandItem disabled className="opacity-50 italic pointer-events-none">
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin inline-block"/>
-                                Loading...
+                                {t("placeholder.loading")}
                             </CommandItem>
                         ) : items.length === 0 ? (
-                            <CommandEmpty>No results found.</CommandEmpty>
+                            <CommandEmpty>{t("placeholder.no_results")}</CommandEmpty>
                         ) : (
                             <CommandGroup>
                                 {[...(selectedItem ? [selectedItem] : []), ...items.filter(item =>
