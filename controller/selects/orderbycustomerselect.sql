@@ -1,25 +1,13 @@
-SELECT *
-FROM (
-         SELECT o.id                              AS order_id,
-                oi.id                             AS orderitem_id,
-                o.project_id                      AS project_id,
-                CONCAT(c.first_name, ' ', c.name) AS customer_name,
-                o.order_date,
-                bm.name                           AS bike_model_name,
-                oi.number,
-                oi.price
-         FROM orders o
-                  JOIN customers c ON o.customer_id = c.id
-                  JOIN order_items oi ON oi.order_id = o.id
-                  JOIN bikes b ON oi.bike_id = b.id
-                  JOIN bike_models bm ON b.model_id = bm.id
-     ) AS sub
-WHERE sub.customer_name IS NOT NULL
-  AND sub.customer_name != ''
-  AND sub.customer_name IS NOT NULL
-  AND EXISTS (
-    SELECT 1
-    FROM customers c
-    WHERE CONCAT(c.first_name, ' ', c.name) = sub.customer_name
-      AND c.email = $1
-)
+SELECT oi.id       AS id,
+       oi.order_id AS order_id,
+       oi.bike_id,
+       oi.number,
+       oi.price,
+       bm.name     AS model_name,
+       o.order_date
+FROM orders o
+         JOIN customers c ON o.customer_id = c.id
+         JOIN order_items oi ON oi.order_id = o.id
+         JOIN bikes b ON oi.bike_id = b.id
+         JOIN bike_models bm ON b.model_id = bm.id
+WHERE o.project_id = ANY ($2) AND c.email = $1

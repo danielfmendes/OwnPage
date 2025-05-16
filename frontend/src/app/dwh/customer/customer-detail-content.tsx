@@ -15,7 +15,7 @@ import {
     TabsTrigger
 } from "@/components/ui/tabs"
 import type {ColumnDef} from "@tanstack/react-table";
-import {OrderWithCustomer} from "@/types/custom";
+import {OrderItemsWithBikeAndDate} from "@/types/custom";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown} from "lucide-react";
 import {fetchWithBodyAndToken, fetchWithToken} from "@/utils/url";
@@ -34,7 +34,7 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
     const {addNotification} = useNotification();
     const [lastName, setLastName] = React.useState(rowData.name)
     const [city, setCity] = React.useState(rowData.city)
-    const [data, setData] = React.useState<OrderWithCustomer[]>([]);
+    const [data, setData] = React.useState<OrderItemsWithBikeAndDate[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(false);
     const [isLoadingUpdate, setIsLoadingUpdate] = React.useState(false);
 
@@ -45,7 +45,7 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
     const fetchData = () => {
         setIsLoadingData(true);
         fetchWithToken(`/orders?email=${rowData.email}`)
-            .then((orders: OrderWithCustomer[]) => {
+            .then((orders: OrderItemsWithBikeAndDate[]) => {
                 setData(orders);
             })
             .catch(err => addNotification(`Failed to load orders${err?.message ? `: ${err.message}` : ""}`, "error"))
@@ -75,7 +75,7 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
             .finally(() => setIsLoadingUpdate(false));
     };
 
-    const columns: ColumnDef<OrderWithCustomer>[] = [
+    const columns: ColumnDef<OrderItemsWithBikeAndDate>[] = [
         {
             accessorKey: "order_date",
             header: ({column}) => (
@@ -92,7 +92,7 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
             },
         },
         {
-            accessorKey: "bike_model_name",
+            accessorKey: "model_name",
             header: t("label.bike_name"),
         },
         {

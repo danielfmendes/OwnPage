@@ -28,6 +28,12 @@ type OrderItemsWithBikeName struct {
 	ModelName string `json:"model_name"`
 }
 
+type OrderItemsWithBikeAndDate struct {
+	OrderItem
+	ModelName string    `json:"model_name"`
+	OrderDate time.Time `json:"order_date"`
+}
+
 type GraphMeta struct {
 	CurrentRevenue  float64 `json:"current_revenue"`
 	PreviousRevenue float64 `json:"previous_revenue"`

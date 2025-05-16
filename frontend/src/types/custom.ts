@@ -21,6 +21,11 @@ export type OrderItemsWithBikeName = OrderItem & {
     model_name: string;
 };
 
+export type OrderItemsWithBikeAndDate = OrderItem & {
+    model_name: string;
+    order_date: string;
+};
+
 export interface GraphMeta {
     current_revenue: number;
     previous_revenue: number;
