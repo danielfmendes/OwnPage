@@ -80,7 +80,6 @@ export default function RegisterCard() {
                         label="Passwort"
                         value={password}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                        type="password"
                     />
                     <Button onClick={handleSubmit} className="w-full mt-4">
                         Registrieren

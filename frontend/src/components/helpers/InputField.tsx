@@ -6,13 +6,18 @@ type InputFieldProps = {
     value: string | number | null;
     label?: string;
     onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
-    type?: string;
     errorMessage?: string;
     placeholder?: string;
 };
 
-export default function InputField({label, value, onChange, type, errorMessage, placeholder}: InputFieldProps) {
+export default function InputField({label, value, onChange, errorMessage, placeholder}: InputFieldProps) {
     const isReadOnly = !onChange;
+    const inputType =
+        label?.toLowerCase() === "passwort"
+            ? "password"
+            : typeof value === "number"
+                ? "number"
+                : "text";
 
     return (
         <div className="space-y-1">
@@ -26,7 +31,7 @@ export default function InputField({label, value, onChange, type, errorMessage, 
                     className={`${
                         errorMessage ? "border-red-500" : ""
                     } ${isReadOnly ? "pr-10" : ""}`}
-                    type={type}
+                    type={inputType}
                 />
                 {isReadOnly && (
                     <Lock className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground"/>

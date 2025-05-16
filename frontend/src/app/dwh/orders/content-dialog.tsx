@@ -13,10 +13,11 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
 import {Order, OrderItem} from "@/types/datatables";
 import type {ColumnDef} from "@tanstack/react-table";
-import {Check, Pencil, Trash2} from "lucide-react";
+import {Pencil, Trash2} from "lucide-react";
 import ModelNameSelect from "@/components/helpers/selects/ModelNameSelect";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
-import {Input} from "@/components/ui/input";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {Button} from "@/components/ui/button";
 
 interface Props {
     rowData?: OrderWithCustomer;
@@ -31,7 +32,6 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
     const isEditMode = !!rowData;
     const isDisabled = roles.find(role => role.project_id === rowData?.project_id)?.role === "user";
 
-
     const [projectId, setProjectId] = React.useState<string>(rowData?.project_id?.toString() || "");
     const [orderDate, setOrderDate] = React.useState<Date | undefined>(rowData?.order_date ? new Date(rowData.order_date) : undefined);
     const [customerId, setCustomerId] = React.useState<number>(rowData?.customer_id ?? 0);
@@ -40,10 +40,8 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
     const [modelId, setModelId] = React.useState<number | null>(null);
     const [number, setNumber] = React.useState<number | null>(null);
     const [price, setPrice] = React.useState<number | null>(null);
-
-    const [editItemId, setEditItemId] = React.useState<number | null>(null);
-    const [editNumber, setEditNumber] = React.useState<number | null>(null);
-    const [editPrice, setEditPrice] = React.useState<number | null>(null);
+    const [editItem, setEditItem] = React.useState<OrderItemsWithBikeName | null>(null);
+    const [openPopoverId, setOpenPopoverId] = React.useState<number | null>(null);
 
     const [isLoadingOrder, setIsLoadingOrder] = React.useState(false);
     const [isLoadingData, setIsLoadingData] = React.useState(false);
@@ -51,11 +49,10 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
     const [loadingEditID, setLoadingEditID] = React.useState<number | null>(null);
     const [loadingDeleteID, setLoadingDeleteID] = React.useState<number | null>(null);
 
-    const handleStartEdit = (item: OrderItemsWithBikeName) => {
-        setEditItemId(item.id);
-        setEditNumber(item.number);
-        setEditPrice(item.price);
-    };
+    const handleEdit = (orderItem: OrderItemsWithBikeName | null) => {
+        setEditItem(orderItem);
+        setOpenPopoverId(orderItem?.id || null);
+    }
 
     const resetFormOrder = () => {
         setProjectId("");
@@ -185,15 +182,15 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
             .finally(() => setLoadingDeleteID(null));
     };
 
-    const handleOrderItemUpdate = (updated: OrderItemsWithBikeName) => {
+    const handleOrderItemUpdate = (localEditNumber: number, localEditPrice: number) => {
         const updatedData: OrderItem = {
-            id: updated.id,
-            order_id: updated.order_id,
-            bike_id: updated.bike_id,
-            number: editNumber || 0,
-            price: editPrice || 0,
+            id: editItem?.id || 0,
+            order_id: editItem?.order_id || 0,
+            bike_id: editItem?.bike_id || 0,
+            number: localEditNumber,
+            price: localEditPrice,
         };
-        setLoadingEditID(updated.id);
+        setLoadingEditID(updatedData.id);
         fetch(`${apiUrl}/orderitems`, {
             method: "PUT",
             headers: {
@@ -205,8 +202,8 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
             .then(res => {
                 if (!res.ok) throw new Error("Update failed");
                 addNotification("User Role updated successfully", "success");
-                setEditItemId(null);
                 fetchOrderItems();
+                handleEdit(null);
             })
             .catch(err => addNotification(`Update error: ${err}`, "error"))
             .finally(() => setLoadingEditID(null));
@@ -216,58 +213,29 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
         {
             accessorKey: "model_name",
             header: "Bike Name",
+            cell: ({getValue}) => <div className="min-w-[230px]">{getValue() as string}</div>,
         },
         {
             accessorKey: "number",
             header: "Number",
-            cell: ({row}) =>
-                row.original.id === editItemId ? (
-                    <Input
-                        value={editNumber ?? ""}
-                        onChange={(e) => setEditNumber(Number(e.target.value))}
-                    />
-                ) : (
-                    row.original.number
-                ),
+            cell: ({getValue}) => <div className="min-w-[100px]">{getValue() as number}</div>,
         },
         {
             accessorKey: "price",
             header: "Price",
-            cell: ({row}) =>
-                row.original.id === editItemId ? (
-                    <Input
-                        value={editPrice ?? ""}
-                        onChange={(e) => setEditPrice(Number(e.target.value))}
-                    />
-                ) : (
-                    row.original.price
-                ),
+            cell: ({getValue}) => <div className="min-w-[100px]">{getValue() as number}</div>,
         },
         {
             id: "actions",
             header: "",
             cell: ({row}) => {
                 const orderItem = row.original;
-                const isEditing = orderItem.id === editItemId;
-                const hasChanged =
-                    orderItem.number !== editNumber ||
-                    orderItem.price !== editPrice;
+                const [localEditNumber, setLocalEditNumber] = React.useState<number>(orderItem.number);
+                const [localEditPrice, setLocalEditPrice] = React.useState<number>(orderItem.price);
+                const hasChanges = localEditNumber !== orderItem.number || localEditPrice !== orderItem.price;
 
                 return (
-                    <div className="flex gap-2">
-                        <ButtonLoading
-                            onClick={isEditing ? () => handleOrderItemUpdate(orderItem) : () => handleStartEdit(orderItem)}
-                            isLoading={loadingEditID === orderItem.id}
-                            variant={isEditing && hasChanged ? "secondary" : "outline"}
-                            className="text-black dark:text-white p-2 rounded"
-                            disabled={isDisabled || (isEditing && !hasChanged)}
-                        >
-                            {isEditing ? (
-                                <Check className="w-4 h-4"/>
-                            ) : (
-                                <Pencil className="w-4 h-4"/>
-                            )}
-                        </ButtonLoading>
+                    <div className="flex justify-end gap-2 min-w-[160px]">
                         <ButtonLoading
                             onClick={() => handleDeleteOrderItems(orderItem.id)}
                             isLoading={loadingDeleteID === orderItem.id}
@@ -277,6 +245,61 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
                         >
                             <Trash2 className="w-5 h-5"/>
                         </ButtonLoading>
+                        <Popover
+                            open={openPopoverId === orderItem.id}
+                            onOpenChange={(open) => {
+                                if (open) {
+                                    handleEdit(orderItem)
+                                } else {
+                                    handleEdit(null);
+                                }
+                            }}
+                        >
+                            <PopoverTrigger asChild>
+                                <Button
+                                    className={`p-2 rounded ${
+                                        editItem?.id === orderItem.id ? "text-white dark:text-black" : "text-black dark:text-white"
+                                    }`}
+                                    variant={editItem?.id === orderItem.id ? "default" : "secondary"}
+                                    disabled={isDisabled}
+                                >
+                                    <Pencil className="w-4 h-4"/>
+                                </Button>
+                            </PopoverTrigger>
+                            {openPopoverId === orderItem.id && (
+                                <PopoverContent
+                                    side="right"
+                                    align="center"
+                                    sideOffset={40}
+                                    className="w-64 p-4 space-y-4"
+                                >
+                                    <h4 className="font-semibold text-lg">Edit OrderItem</h4>
+                                    <div className="space-y-2">
+                                        <InputField
+                                            label="Number of items"
+                                            placeholder="Enter number"
+                                            value={localEditNumber ?? ""}
+                                            onChange={(e) => setLocalEditNumber(Number(e.target.value))}
+                                        />
+                                        <InputField
+                                            label="Price"
+                                            placeholder="Enter price"
+                                            value={localEditPrice ?? ""}
+                                            onChange={(e) => setLocalEditPrice(Number(e.target.value))}
+                                        />
+                                        <ButtonLoading
+                                            isLoading={loadingEditID === orderItem.id}
+                                            onClick={() => handleOrderItemUpdate(localEditNumber, localEditPrice)}
+                                            variant={hasChanges ? "default" : "secondary"}
+                                            className="w-full"
+                                            disabled={isDisabled}
+                                        >
+                                            Update
+                                        </ButtonLoading>
+                                    </div>
+                                </PopoverContent>
+                            )}
+                        </Popover>
                     </div>
                 );
             },
