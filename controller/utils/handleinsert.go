@@ -19,7 +19,7 @@ func HandleInsert(w http.ResponseWriter, r *http.Request, query string, projectI
 	// INSERT ausführen
 	_, err = conn.Exec(query, args...)
 	if err != nil {
-		HandleError(w, err, "Fehler beim Einfügen des Datensatzes")
+		HandleError(w, err, ErrMsgInsertRecordFailed)
 		return err
 	}
 

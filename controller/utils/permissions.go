@@ -2,22 +2,13 @@ package utils
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
-)
-
-var (
-	ErrNoPermission            = errors.New("keine Berechtigung für dieses Projekt")
-	ErrAdminCannotBeDegraded   = errors.New("adminrechte dürfen nicht entzogen werden")
-	ErrAdminCannotGrantCreator = errors.New("admin darf keine creator-rechte vergeben")
-	ErrUserCannotModify        = errors.New("user darf keine Rollen ändern")
-	ErrSelfDelegation          = errors.New("eigene Rolle darf nicht verändert werden")
 )
 
 // CanModifyRole prüft, ob actorEmail die Rolle von targetEmail im Projekt ändern darf.
 func CanModifyRole(db *sql.DB, actorEmail string, projectID int, targetEmail string, oldRole string, newRole string) error {
 	if actorEmail == targetEmail {
-		return ErrSelfDelegation
+		return fmt.Errorf(ErrMsgSelfDelegation)
 	}
 
 	actorRole, err := GetUserRole(db, actorEmail, projectID)
@@ -27,19 +18,19 @@ func CanModifyRole(db *sql.DB, actorEmail string, projectID int, targetEmail str
 
 	// Keine Rechte vorhanden
 	if actorRole == "user" {
-		return ErrUserCannotModify
+		return fmt.Errorf(ErrMsgUserCannotModify)
 	}
 
 	// Admin-Einschränkungen
 	if actorRole == "admin" {
 		if oldRole == "admin" && newRole != "admin" && newRole != "" {
-			return ErrAdminCannotBeDegraded
+			return fmt.Errorf(ErrMsgAdminCannotBeDegraded)
 		}
 		if newRole == "creator" {
-			return ErrAdminCannotGrantCreator
+			return fmt.Errorf(ErrMsgAdminCannotGrantCreator)
 		}
 		if oldRole == "admin" && newRole == "" {
-			return ErrAdminCannotBeDegraded
+			return fmt.Errorf(ErrMsgAdminCannotBeDegraded)
 		}
 	}
 
@@ -56,9 +47,9 @@ func GetUserRole(db *sql.DB, email string, projectID int) (string, error) {
 	).Scan(&role)
 
 	if err == sql.ErrNoRows {
-		return "", ErrNoPermission
+		return "", fmt.Errorf(ErrMsgNoPermission)
 	} else if err != nil {
-		return "", fmt.Errorf("fehler beim Abrufen der Rolle für %s: %w", email, err)
+		return "", fmt.Errorf("Error retrieving role for %s: %w.", email, err)
 	}
 
 	return role, nil

@@ -11,7 +11,7 @@ import (
 func Connect() (*sql.DB, error) {
 	connStr := os.Getenv("DATABASE_PUBLIC_URL")
 	if connStr == "" {
-		log.Println("Database Public URL nicht gesetzt, verwende Standardverbindung")
+		log.Println("Database Public URL not set, using default connection string")
 		connStr = "host=localhost port=5433 user=fahrrad_user password=geheim dbname=fahrrad_db sslmode=disable"
 	}
 

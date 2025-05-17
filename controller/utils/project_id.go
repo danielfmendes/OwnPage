@@ -74,7 +74,7 @@ func hasSufficientRole(current, required string) bool {
 func getAllowedRoles(requiredRole string) ([]string, error) {
 	requiredLevel, ok := rolePriority[requiredRole]
 	if !ok {
-		return nil, fmt.Errorf("Ungültige Rolle: %s", requiredRole)
+		return nil, fmt.Errorf("Invalid role: %s", requiredRole)
 	}
 
 	var roles []string

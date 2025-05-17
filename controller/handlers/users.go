@@ -38,7 +38,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 	if email == "" {
-		http.Error(w, "Email fehlt", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgEmailMissing, http.StatusBadRequest)
 		return
 	}
 
@@ -56,7 +56,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 func HandleEmailVerification(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
 	if token == "" {
-		http.Error(w, "Token fehlt", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgTokenMissing, http.StatusBadRequest)
 		return
 	}
 
@@ -71,47 +71,47 @@ func HandleEmailVerification(w http.ResponseWriter, r *http.Request) {
 	query := `SELECT email, verification_expires FROM users WHERE verification_token = $1`
 	err = conn.QueryRow(query, token).Scan(&email, &expires)
 	if err != nil {
-		http.Error(w, "Ungültiger oder abgelaufener Token", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgTokenExpiredOrInvalid, http.StatusBadRequest)
 		return
 	}
 
 	if time.Now().After(expires) {
-		http.Error(w, "Token abgelaufen", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgTokenExpired, http.StatusBadRequest)
 		return
 	}
 
 	_, err = conn.Exec(`UPDATE users SET is_verified = TRUE, verification_token = NULL, verification_expires = NULL WHERE email = $1`, email)
 	if err != nil {
-		http.Error(w, "Fehler beim Verifizieren", http.StatusInternalServerError)
+		http.Error(w, "Error during verification.", http.StatusInternalServerError)
 		return
 	}
 
-	w.Write([]byte("E-Mail erfolgreich bestätigt! Du kannst dich jetzt einloggen."))
+	w.Write([]byte("Email successfully confirmed! You can now log in."))
 }
 
 func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Nur POST erlaubt", http.StatusMethodNotAllowed)
+		http.Error(w, utils.ErrMsgPostOnly, http.StatusMethodNotAllowed)
 		return
 	}
 
 	var user models.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		utils.HandleError(w, err, "Ungültiger Request Body")
+		utils.HandleError(w, err, utils.ErrMsgInvalidRequestBody)
 		return
 	}
 
 	// Geburtsdatum parsen
 	dob, err := time.Parse("2006-01-02", user.Dob.Format("2006-01-02"))
 	if err != nil {
-		utils.HandleError(w, err, "Ungültiges Geburtsdatum")
+		utils.HandleError(w, err, utils.ErrMsgDobInvalid)
 		return
 	}
 
 	// Passwort hashen
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-		utils.HandleError(w, err, "Fehler beim Hashen des Passworts")
+		utils.HandleError(w, err, "Error when hashing the password.")
 		return
 	}
 
@@ -127,7 +127,7 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
           VALUES ($1, $2, $3, $4, FALSE, $5, $6)`
 	_, err = conn.Exec(query, user.Username, user.Email, string(hashedPassword), dob, verificationExpires, verificationToken)
 	if err != nil {
-		utils.HandleError(w, err, "Fehler beim Einfügen in die Datenbank")
+		utils.HandleError(w, err, utils.ErrMsgInsertRecordFailed)
 		return
 	}
 
@@ -137,7 +137,7 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	// JWT-Token erstellen
 	tokenString, err := utils.CreateJWT(user.Email)
 	if err != nil {
-		http.Error(w, "Fehler beim Erstellen des Tokens", http.StatusInternalServerError)
+		http.Error(w, utils.ErrMsgCreateToken, http.StatusInternalServerError)
 		return
 	}
 
@@ -145,14 +145,14 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{
-		"message": "Registrierung erfolgreich",
+		"message": "Registration successful",
 		"token":   tokenString,
 	})
 }
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Nur POST erlaubt", http.StatusMethodNotAllowed)
+		http.Error(w, utils.ErrMsgPostOnly, http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -162,7 +162,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.HandleError(w, err, "Ungültiger Request Body")
+		utils.HandleError(w, err, utils.ErrMsgInvalidRequestBody)
 		return
 	}
 
@@ -176,43 +176,43 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	query := `SELECT username, dob, email, password, is_verified, verification_expires FROM users WHERE email = $1`
 	err = conn.QueryRow(query, req.Email).Scan(&user.Username, &user.Dob, &user.Email, &user.Password, &user.IsVerified, &user.VerificationExpires)
 	if err != nil {
-		http.Error(w, "Benutzer nicht gefunden oder Fehler beim Abruf", http.StatusUnauthorized)
+		http.Error(w, "User not found", http.StatusUnauthorized)
 		return
 	}
 
 	if !user.IsVerified {
 		if user.VerificationExpires == nil {
-			http.Error(w, "Verifizierung erforderlich", http.StatusForbidden)
+			http.Error(w, "Verification required", http.StatusForbidden)
 			return
 		}
 
 		if time.Now().After(*user.VerificationExpires) {
-			http.Error(w, "Verifizierungszeit abgelaufen", http.StatusForbidden)
+			http.Error(w, "Verification time expired", http.StatusForbidden)
 			return
 		}
 
-		http.Error(w, "Bitte bestätige deine E-Mail-Adresse", http.StatusForbidden)
+		http.Error(w, "Please confirm your e-mail address", http.StatusForbidden)
 		return
 	}
 
 	// Passwort vergleichen
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil {
-		http.Error(w, "Falsches Passwort", http.StatusUnauthorized)
+		http.Error(w, "Incorrect password", http.StatusUnauthorized)
 		return
 	}
 
 	// JWT-Token erstellen
 	tokenString, err := utils.CreateJWT(user.Email)
 	if err != nil {
-		http.Error(w, "Fehler beim Erstellen des Tokens", http.StatusInternalServerError)
+		http.Error(w, utils.ErrMsgCreateToken, http.StatusInternalServerError)
 		return
 	}
 
 	// Token zurückgeben
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
-		"message": "Login erfolgreich",
+		"message": "Login successful",
 		"token":   tokenString,
 	})
 }
@@ -223,15 +223,15 @@ func SendVerificationEmail(to string, token string) {
 	log.Println("from:", from)
 	log.Println("pass:", pass)
 
-	subject := "Bitte bestätige deine E-Mail-Adresse für NebulaDW"
+	subject := "Please confirm your e-mail address for NebulaDW"
 	baseURL := utils.GetBackendBaseURL()
 	msg := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n"
 	msg += fmt.Sprintf("From: %s\nTo: %s\nSubject: %s\n\n", from, to, subject)
-	msg += fmt.Sprintf("<html><body><p>Klicke <a href=\"%s/auth/verify?token=%s\">hier</a>, um dein Konto zu bestätigen.</p></body></html>", baseURL, token)
+	msg += fmt.Sprintf("<html><body><p>Click <a href=\"%s/auth/verify?token=%s\">hier</a>, to verify your account.</p></body></html>", baseURL, token)
 
 	err := smtp.SendMail("smtp.gmail.com:587", smtp.PlainAuth("", from, pass, "smtp.gmail.com"),
 		from, []string{to}, []byte(msg))
 	if err != nil {
-		log.Println("Fehler beim Senden der E-Mail:", err)
+		log.Println("Error sending the e-mail:", err)
 	}
 }

@@ -23,7 +23,7 @@ func OrderItemsHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		InsertOrderItems(w, r)
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		http.Error(w, utils.ErrMsgMethodNotAllowed, http.StatusMethodNotAllowed)
 	}
 }
 
@@ -38,14 +38,14 @@ func GetOrderItems(w http.ResponseWriter, r *http.Request) {
 func GetOrderItemsByOrderID(w http.ResponseWriter, r *http.Request) {
 	orderidIdStr := r.URL.Query().Get("order_id")
 	if orderidIdStr == "" {
-		http.Error(w, "ID fehlt", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdMissing, http.StatusBadRequest)
 		return
 	}
 
 	// Convert string ID to integer
 	orderid, err := strconv.Atoi(orderidIdStr)
 	if err != nil {
-		http.Error(w, "Ungültige ID", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdInvalid, http.StatusBadRequest)
 		return
 	}
 
@@ -62,14 +62,14 @@ func DeleteOrderItems(w http.ResponseWriter, r *http.Request) {
 	// ID aus der URL oder Anfrage extrahieren
 	idStr := r.URL.Query().Get("id")
 	if idStr == "" {
-		http.Error(w, "ID fehlt", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdMissing, http.StatusBadRequest)
 		return
 	}
 
 	// Convert string ID to integer
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Ungültige ID", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdInvalid, http.StatusBadRequest)
 		return
 	}
 	projectIdQuery := "SELECT project_id FROM order_items oi JOIN public.orders o ON o.id = oi.order_id WHERE oi.id = $1"
@@ -81,12 +81,12 @@ func UpdateOrderItems(w http.ResponseWriter, r *http.Request) {
 	var orderItem models.OrderItem
 	err := json.NewDecoder(r.Body).Decode(&orderItem)
 	if err != nil {
-		http.Error(w, "Fehler beim Verarbeiten der Anfrage", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgProcessingRequest, http.StatusBadRequest)
 		return
 	}
 
 	if orderItem.ID == 0 {
-		http.Error(w, "ID fehlt", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdMissing, http.StatusBadRequest)
 		return
 	}
 
@@ -98,7 +98,7 @@ func UpdateOrderItems(w http.ResponseWriter, r *http.Request) {
 
 func InsertOrderItems(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Nur POST erlaubt", http.StatusMethodNotAllowed)
+		http.Error(w, utils.ErrMsgPostOnly, http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -106,7 +106,7 @@ func InsertOrderItems(w http.ResponseWriter, r *http.Request) {
 	var orderItem models.OrderItem
 	err := json.NewDecoder(r.Body).Decode(&orderItem)
 	if err != nil {
-		http.Error(w, "Fehler beim Verarbeiten der Anfrage", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgProcessingRequest, http.StatusBadRequest)
 		return
 	}
 

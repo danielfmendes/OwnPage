@@ -21,7 +21,7 @@ func RoleManagementHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		InsertRoleManagement(w, r)
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		http.Error(w, utils.ErrMsgMethodNotAllowed, http.StatusMethodNotAllowed)
 	}
 }
 
@@ -29,13 +29,13 @@ func GetRoleManagementByID(w http.ResponseWriter, r *http.Request) {
 	// Beispiel: /rolemanagements/3 → wir wollen nur die "3"
 	path := strings.TrimPrefix(r.URL.Path, "/rolemanagements/")
 	if path == "" || strings.Contains(path, "/") {
-		http.Error(w, "ID fehlt oder ungültig", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIDMissingOrInvalid, http.StatusBadRequest)
 		return
 	}
 
 	id, err := strconv.Atoi(path)
 	if err != nil {
-		http.Error(w, "Ungültige ID", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdInvalid, http.StatusBadRequest)
 		return
 	}
 
@@ -71,13 +71,13 @@ func DeleteRoleManagement(w http.ResponseWriter, r *http.Request) {
 	projectIDStr := r.URL.Query().Get("project_id")
 
 	if email == "" || projectIDStr == "" {
-		http.Error(w, "Email und ProjectID müssen angegeben werden", http.StatusBadRequest)
+		http.Error(w, "Email and ProjectID must be specified.", http.StatusBadRequest)
 		return
 	}
 
 	projectID, err := strconv.Atoi(projectIDStr)
 	if err != nil {
-		http.Error(w, "Ungültige ProjectID", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdInvalid, http.StatusBadRequest)
 		return
 	}
 
@@ -98,10 +98,10 @@ func DeleteRoleManagement(w http.ResponseWriter, r *http.Request) {
 		email, projectID,
 	).Scan(&currentRole)
 	if err == sql.ErrNoRows {
-		http.Error(w, "Eintrag nicht gefunden", http.StatusNotFound)
+		http.Error(w, "Entry not found.", http.StatusNotFound)
 		return
 	} else if err != nil {
-		utils.HandleError(w, err, "Fehler beim Abrufen der aktuellen Rolle")
+		utils.HandleError(w, err, utils.ErrMsgErrorFetchingCurrentRole)
 		return
 	}
 
@@ -116,14 +116,14 @@ func DeleteRoleManagement(w http.ResponseWriter, r *http.Request) {
 
 func UpdateRoleManagement(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
-		http.Error(w, "Nur PUT erlaubt", http.StatusMethodNotAllowed)
+		http.Error(w, utils.ErrMsgMethodPUTOnly, http.StatusMethodNotAllowed)
 		return
 	}
 
 	var role models.RoleManagement
 	err := json.NewDecoder(r.Body).Decode(&role)
 	if err != nil {
-		http.Error(w, "Fehler beim Verarbeiten der Anfrage", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgProcessingRequest, http.StatusBadRequest)
 		return
 	}
 
@@ -144,10 +144,10 @@ func UpdateRoleManagement(w http.ResponseWriter, r *http.Request) {
 		role.UserEmail, role.ProjectID,
 	).Scan(&currentRole)
 	if err == sql.ErrNoRows {
-		http.Error(w, "Eintrag nicht gefunden", http.StatusNotFound)
+		http.Error(w, "Entry not found.", http.StatusNotFound)
 		return
 	} else if err != nil {
-		utils.HandleError(w, err, "Fehler beim Abrufen der aktuellen Rolle")
+		utils.HandleError(w, err, utils.ErrMsgErrorFetchingCurrentRole)
 		return
 	}
 
@@ -166,7 +166,7 @@ func UpdateRoleManagement(w http.ResponseWriter, r *http.Request) {
 		role.Role, role.UserEmail, role.ProjectID,
 	)
 	if err != nil {
-		utils.HandleError(w, err, "Fehler beim Aktualisieren der Rolle")
+		utils.HandleError(w, err, utils.ErrMsgErrorUpdatingRole)
 		return
 	}
 
@@ -175,14 +175,14 @@ func UpdateRoleManagement(w http.ResponseWriter, r *http.Request) {
 
 func InsertRoleManagement(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Nur POST erlaubt", http.StatusMethodNotAllowed)
+		http.Error(w, utils.ErrMsgPostOnly, http.StatusMethodNotAllowed)
 		return
 	}
 
 	var role models.RoleManagement
 	err := json.NewDecoder(r.Body).Decode(&role)
 	if err != nil {
-		http.Error(w, "Fehler beim Verarbeiten der Anfrage", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgProcessingRequest, http.StatusBadRequest)
 		return
 	}
 
@@ -207,11 +207,11 @@ func InsertRoleManagement(w http.ResponseWriter, r *http.Request) {
 	var userExists bool
 	err = conn.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)", role.UserEmail).Scan(&userExists)
 	if err != nil {
-		http.Error(w, "Fehler beim Überprüfen des Benutzers", http.StatusInternalServerError)
+		http.Error(w, utils.ErrMsgErrorCheckingUser, http.StatusInternalServerError)
 		return
 	}
 	if !userExists {
-		http.Error(w, "Benutzer existiert nicht", http.StatusBadRequest)
+		http.Error(w, "User does not exist.", http.StatusBadRequest)
 		return
 	}
 
@@ -222,11 +222,11 @@ func InsertRoleManagement(w http.ResponseWriter, r *http.Request) {
 		role.UserEmail, role.ProjectID,
 	).Scan(&roleExists)
 	if err != nil {
-		http.Error(w, "Fehler beim Überprüfen der Rollen-Zuweisung", http.StatusInternalServerError)
+		http.Error(w, utils.ErrMsgErrorCheckingRoleAssignment, http.StatusInternalServerError)
 		return
 	}
 	if roleExists {
-		http.Error(w, "Benutzer ist diesem Projekt bereits zugewiesen", http.StatusConflict)
+		http.Error(w, "User is already assigned to this project.", http.StatusConflict)
 		return
 	}
 

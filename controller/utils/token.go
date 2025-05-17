@@ -29,34 +29,34 @@ func CreateJWT(useremail string) (string, error) {
 func ValidateToken(w http.ResponseWriter, r *http.Request) (string, error) {
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
-		http.Error(w, "Token fehlt", http.StatusUnauthorized)
-		return "", fmt.Errorf("Token fehlt")
+		http.Error(w, ErrMsgTokenMissing, http.StatusUnauthorized)
+		return "", fmt.Errorf(ErrMsgTokenMissing)
 	}
 
 	if len(tokenString) > 7 && tokenString[:7] == "Bearer " {
 		tokenString = tokenString[7:]
 	} else {
-		http.Error(w, "Ungültiges Token-Format", http.StatusUnauthorized)
-		return "", fmt.Errorf("Ungültiges Token-Format")
+		http.Error(w, ErrMsgInvalidTokenFormat, http.StatusUnauthorized)
+		return "", fmt.Errorf(ErrMsgInvalidTokenFormat)
 	}
 
 	token, err := jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return secrets.JwtSecret, nil
 	})
 	if err != nil {
-		http.Error(w, "Ungültiges Token", http.StatusUnauthorized)
+		http.Error(w, ErrMsgInvalidToken, http.StatusUnauthorized)
 		return "", err
 	}
 
 	claims, ok := token.Claims.(*jwt.StandardClaims)
 	if !ok || claims.ExpiresAt < time.Now().Unix() {
-		http.Error(w, "Token abgelaufen oder ungültig", http.StatusUnauthorized)
-		return "", fmt.Errorf("Token abgelaufen oder ungültig")
+		http.Error(w, ErrMsgTokenExpiredOrInvalid, http.StatusUnauthorized)
+		return "", fmt.Errorf(ErrMsgTokenExpiredOrInvalid)
 	}
 
 	if claims.Issuer != "NebulaDW" {
-		http.Error(w, "Ungültiger Token Issuer", http.StatusUnauthorized)
-		return "", fmt.Errorf("Ungültiger Token Issuer")
+		http.Error(w, ErrMsgInvalidIssuer, http.StatusUnauthorized)
+		return "", fmt.Errorf(ErrMsgInvalidIssuer)
 	}
 
 	// E-Mail aus dem Subject zurückgeben

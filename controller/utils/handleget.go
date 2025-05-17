@@ -28,7 +28,7 @@ func HandleGet(w http.ResponseWriter, r *http.Request, query string, scanFunc fu
 	// Übergib die args (Parameter) an die Query
 	rows, err := conn.Query(query, args...)
 	if err != nil {
-		HandleError(w, err, "Fehler bei der Datenbankabfrage")
+		HandleError(w, err, ErrMsgDBQueryFailed)
 		return
 	}
 	defer rows.Close()
@@ -37,14 +37,14 @@ func HandleGet(w http.ResponseWriter, r *http.Request, query string, scanFunc fu
 	for rows.Next() {
 		item, err := scanFunc(rows)
 		if err != nil {
-			HandleError(w, err, "Fehler beim Scannen der Daten")
+			HandleError(w, err, ErrMsgScanFailed)
 			return
 		}
 		results = append(results, item)
 	}
 
 	if err := rows.Err(); err != nil {
-		HandleError(w, err, "Fehler beim Lesen der Zeilen")
+		HandleError(w, err, ErrMsgRowsReadFailed)
 		return
 	}
 
@@ -67,7 +67,7 @@ func HandleGetWithProjectIDs(w http.ResponseWriter, r *http.Request, baseQuery s
 	// Hole alle zulässigen Projekt-IDs für den Benutzer
 	userProjectIDs, err := GetAllProjectsIDsForUser(conn, userEmail, "user")
 	if err != nil {
-		HandleError(w, err, "Fehler beim Ermitteln der Zugriffsrechte")
+		HandleError(w, err, ErrMsgNoProjectAccess)
 		return
 	}
 
@@ -83,7 +83,7 @@ func HandleGetWithProjectIDs(w http.ResponseWriter, r *http.Request, baseQuery s
 
 	rows, err := conn.Query(finalQuery, finalArgs...)
 	if err != nil {
-		HandleError(w, err, "Fehler bei der Datenbankabfrage")
+		HandleError(w, err, ErrMsgDBQueryFailed)
 		return
 	}
 	defer rows.Close()
@@ -92,14 +92,14 @@ func HandleGetWithProjectIDs(w http.ResponseWriter, r *http.Request, baseQuery s
 	for rows.Next() {
 		item, err := scanFunc(rows)
 		if err != nil {
-			HandleError(w, err, "Fehler beim Scannen der Daten")
+			HandleError(w, err, ErrMsgScanFailed)
 			return
 		}
 		results = append(results, item)
 	}
 
 	if err := rows.Err(); err != nil {
-		HandleError(w, err, "Fehler beim Lesen der Zeilen")
+		HandleError(w, err, ErrMsgRowsReadFailed)
 		return
 	}
 
@@ -120,7 +120,7 @@ func filterProjectIDs(r *http.Request, allowedIDs []int) ([]int, error) {
 		}
 		id, err := strconv.Atoi(part)
 		if err != nil {
-			return nil, fmt.Errorf("ungültige project_id-Parameter")
+			return nil, fmt.Errorf(ErrMsgInvalidProjectIDParam)
 		}
 		requestedIDs = append(requestedIDs, id)
 	}
@@ -139,7 +139,7 @@ func filterProjectIDs(r *http.Request, allowedIDs []int) ([]int, error) {
 	}
 
 	if len(filtered) == 0 {
-		return nil, fmt.Errorf("keine Berechtigung für angegebene Projekt-IDs")
+		return nil, fmt.Errorf(ErrMsgNoPermissionForProjectIDs)
 	}
 	return filtered, nil
 }

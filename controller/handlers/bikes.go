@@ -23,7 +23,7 @@ func BikeHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		InsertBike(w, r)
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		http.Error(w, utils.ErrMsgMethodNotAllowed, http.StatusMethodNotAllowed)
 	}
 }
 
@@ -41,14 +41,14 @@ func DeleteBike(w http.ResponseWriter, r *http.Request) {
 	// ID aus der URL oder Anfrage extrahieren
 	idStr := r.URL.Query().Get("id")
 	if idStr == "" {
-		http.Error(w, "ID fehlt", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdMissing, http.StatusBadRequest)
 		return
 	}
 
 	// Convert string ID to integer
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Ungültige ID", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdInvalid, http.StatusBadRequest)
 		return
 	}
 
@@ -60,14 +60,14 @@ func DeleteCascadeBike(w http.ResponseWriter, r *http.Request) {
 	// ID aus der URL oder Anfrage extrahieren
 	idStr := r.URL.Query().Get("id")
 	if idStr == "" {
-		http.Error(w, "ID fehlt", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdMissing, http.StatusBadRequest)
 		return
 	}
 
 	// Convert string ID to integer
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Ungültige ID", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdInvalid, http.StatusBadRequest)
 		return
 	}
 
@@ -90,12 +90,12 @@ func UpdateBike(w http.ResponseWriter, r *http.Request) {
 	var bike models.Bike
 	err := json.NewDecoder(r.Body).Decode(&bike)
 	if err != nil {
-		http.Error(w, "Fehler beim Verarbeiten der Anfrage", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgProcessingRequest, http.StatusBadRequest)
 		return
 	}
 
 	if bike.ID == 0 {
-		http.Error(w, "ID fehlt", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdMissing, http.StatusBadRequest)
 		return
 	}
 
@@ -107,7 +107,7 @@ func UpdateBike(w http.ResponseWriter, r *http.Request) {
 
 func InsertBike(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Nur POST erlaubt", http.StatusMethodNotAllowed)
+		http.Error(w, utils.ErrMsgPostOnly, http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -115,7 +115,7 @@ func InsertBike(w http.ResponseWriter, r *http.Request) {
 	var bike models.Bike
 	err := json.NewDecoder(r.Body).Decode(&bike)
 	if err != nil {
-		http.Error(w, "Fehler beim Verarbeiten der Anfrage", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgProcessingRequest, http.StatusBadRequest)
 		return
 	}
 

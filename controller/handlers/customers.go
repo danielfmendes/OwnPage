@@ -23,7 +23,7 @@ func CustomerHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		InsertCustomer(w, r)
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		http.Error(w, utils.ErrMsgMethodNotAllowed, http.StatusMethodNotAllowed)
 	}
 }
 
@@ -39,14 +39,14 @@ func DeleteCustomer(w http.ResponseWriter, r *http.Request) {
 	// ID aus der URL oder Anfrage extrahieren
 	idStr := r.URL.Query().Get("id")
 	if idStr == "" {
-		http.Error(w, "ID fehlt", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdMissing, http.StatusBadRequest)
 		return
 	}
 
 	// Convert string ID to integer
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Ungültige ID", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdInvalid, http.StatusBadRequest)
 		return
 	}
 
@@ -58,14 +58,14 @@ func DeleteCascadeCustomer(w http.ResponseWriter, r *http.Request) {
 	// ID aus der URL oder Anfrage extrahieren
 	idStr := r.URL.Query().Get("id")
 	if idStr == "" {
-		http.Error(w, "ID fehlt", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdMissing, http.StatusBadRequest)
 		return
 	}
 
 	// Convert string ID to integer
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Ungültige ID", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdInvalid, http.StatusBadRequest)
 		return
 	}
 
@@ -88,12 +88,12 @@ func UpdateCustomer(w http.ResponseWriter, r *http.Request) {
 	var cust models.Customer
 	err := json.NewDecoder(r.Body).Decode(&cust)
 	if err != nil {
-		http.Error(w, "Fehler beim Verarbeiten der Anfrage", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgProcessingRequest, http.StatusBadRequest)
 		return
 	}
 
 	if cust.ID == 0 {
-		http.Error(w, "ID fehlt", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdMissing, http.StatusBadRequest)
 		return
 	}
 
@@ -105,7 +105,7 @@ func UpdateCustomer(w http.ResponseWriter, r *http.Request) {
 
 func InsertCustomer(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Nur POST erlaubt", http.StatusMethodNotAllowed)
+		http.Error(w, utils.ErrMsgPostOnly, http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -113,7 +113,7 @@ func InsertCustomer(w http.ResponseWriter, r *http.Request) {
 	var cust models.Customer
 	err := json.NewDecoder(r.Body).Decode(&cust)
 	if err != nil {
-		http.Error(w, "Fehler beim Verarbeiten der Anfrage", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgProcessingRequest, http.StatusBadRequest)
 		return
 	}
 

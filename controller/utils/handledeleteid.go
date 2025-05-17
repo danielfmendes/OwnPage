@@ -9,12 +9,14 @@ import (
 func HandleDelete(w http.ResponseWriter, r *http.Request, mainQuery string, preQueries []string, projectIdentifier interface{}, projectArgs []interface{}, args ...interface{}) {
 	conn, err := ConnectToDB(w)
 	if err != nil {
+		http.Error(w, ErrMsgDBConnectionFailed, http.StatusInternalServerError)
 		return
 	}
 	defer conn.Close()
 
 	_, err = ValidateProjectAccess(w, r, conn, projectIdentifier, "admin", projectArgs...)
 	if err != nil {
+		http.Error(w, ErrMsgNoProjectAccess, http.StatusForbidden)
 		return
 	}
 
@@ -27,7 +29,7 @@ func HandleDelete(w http.ResponseWriter, r *http.Request, mainQuery string, preQ
 			_, execErr = conn.Exec(pq)
 		}
 		if execErr != nil {
-			HandleError(w, execErr, "Fehler bei vorbereitender Löschabfrage")
+			HandleError(w, execErr, ErrMsgPreDeleteQueryFailed)
 			return
 		}
 	}
@@ -36,10 +38,10 @@ func HandleDelete(w http.ResponseWriter, r *http.Request, mainQuery string, preQ
 	_, err = conn.Exec(mainQuery, args...)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23503" {
-			http.Error(w, "Der Datensatz wird von anderen Datensätzen referenziert.", http.StatusConflict)
+			http.Error(w, ErrMsgRecordReferenced, http.StatusConflict)
 			return
 		}
-		HandleError(w, err, "Fehler beim Löschen des Datensatzes")
+		HandleError(w, err, ErrMsgDeleteRecordFailed)
 		return
 	}
 

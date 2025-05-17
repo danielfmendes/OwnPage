@@ -46,7 +46,7 @@ func GetEmailCredentials() (from, pass string) {
 	}
 
 	if from == "" || pass == "" {
-		log.Fatal("EMAIL_FROM oder EMAIL_PASS ist nicht gesetzt")
+		log.Fatal(ErrMsgEmailCredentialsNotSet)
 	}
 
 	return
@@ -65,7 +65,7 @@ func GenerateVerificationToken() string {
 func ConnectToDB(w http.ResponseWriter) (*sql.DB, error) {
 	conn, err := db.Connect()
 	if err != nil {
-		HandleError(w, err, "Datenbankverbindung fehlgeschlagen")
+		HandleError(w, err, ErrMsgDBConnectionFailed)
 		return nil, err
 	}
 	return conn, nil
@@ -95,22 +95,22 @@ func ValidateProjectAccess(w http.ResponseWriter, r *http.Request, conn *sql.DB,
 	case string:
 		err := conn.QueryRow(v, args...).Scan(&projectID)
 		if err != nil {
-			http.Error(w, "Konnte project_id aus Query nicht ermitteln", http.StatusBadRequest)
+			http.Error(w, ErrMsgCannotRetrieveProjectID, http.StatusBadRequest)
 			return false, err
 		}
 	default:
-		http.Error(w, "Ungültiger Typ für projectIdentifier", http.StatusBadRequest)
-		return false, fmt.Errorf("ungültiger Typ für projectIdentifier")
+		http.Error(w, ErrMsgInvalidProjectIdentifier, http.StatusBadRequest)
+		return false, fmt.Errorf("invalid projectIdentifier type")
 	}
 
 	hasAccess, err := GetProjectIDForUser(conn, userEmail, projectID, role)
 	if err != nil {
-		HandleError(w, err, "Fehler bei der Rechteprüfung")
+		HandleError(w, err, ErrMsgAccessCheckFailed)
 		return false, err
 	}
 	if !hasAccess {
-		http.Error(w, "Keine Berechtigung für dieses Projekt", http.StatusForbidden)
-		return false, fmt.Errorf("nicht berechtigt")
+		http.Error(w, ErrMsgNoProjectAccess, http.StatusForbidden)
+		return false, fmt.Errorf("not authorized")
 	}
 
 	return true, nil
@@ -135,7 +135,7 @@ func MustReadSQLFile(relPath string) string {
 func loadEnvFile(path string) {
 	file, err := os.Open(path)
 	if err != nil {
-		log.Println("Warnung: .env.local konnte nicht geöffnet werden")
+		log.Println("Warning: .env.local could not be opened")
 		return
 	}
 	defer file.Close()

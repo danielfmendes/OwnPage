@@ -19,7 +19,7 @@ func HandleUpdate(w http.ResponseWriter, r *http.Request, query string, projectI
 	// Update durchführen
 	_, err = conn.Exec(query, queryArgs...)
 	if err != nil {
-		HandleError(w, err, "Fehler beim Aktualisieren des Datensatzes")
+		HandleError(w, err, ErrMsgUpdateRecordFailed)
 		return err
 	}
 

@@ -16,7 +16,7 @@ func ProjectHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		InsertProject(w, r)
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		http.Error(w, utils.ErrMsgMethodNotAllowed, http.StatusMethodNotAllowed)
 	}
 }
 
@@ -39,7 +39,7 @@ func GetProjectsForUserByRole(w http.ResponseWriter, r *http.Request) {
 	// Projekt-IDs abrufen
 	projectIDs, err := utils.GetAllProjectsIDsForUser(conn, userEmail, requiredRole)
 	if err != nil {
-		utils.HandleError(w, err, "Fehler beim Abrufen der Projekt-IDs")
+		utils.HandleError(w, err, utils.ErrMsgNoProjectAccess)
 		return
 	}
 
@@ -65,14 +65,14 @@ func GetProjectsForUserByRole(w http.ResponseWriter, r *http.Request) {
 
 func InsertProject(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Nur POST erlaubt", http.StatusMethodNotAllowed)
+		http.Error(w, utils.ErrMsgPostOnly, http.StatusMethodNotAllowed)
 		return
 	}
 
 	// JSON-Daten einlesen
 	var project models.Project
 	if err := json.NewDecoder(r.Body).Decode(&project); err != nil {
-		http.Error(w, "Ungültige JSON-Daten", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgInvalidRequestBody, http.StatusBadRequest)
 		return
 	}
 
@@ -97,7 +97,7 @@ func InsertProject(w http.ResponseWriter, r *http.Request) {
 		RETURNING id
 	`, project.Name).Scan(&projectID)
 	if err != nil {
-		utils.HandleError(w, err, "Fehler beim Einfügen des Projekts")
+		utils.HandleError(w, err, utils.ErrMsgInsertRecordFailed)
 		return
 	}
 
@@ -107,7 +107,7 @@ func InsertProject(w http.ResponseWriter, r *http.Request) {
 		VALUES ($1, $2, 'creator')
 	`, userEmail, projectID)
 	if err != nil {
-		utils.HandleError(w, err, "Fehler beim Setzen der Rolle")
+		utils.HandleError(w, err, utils.ErrMsgInsertRecordFailed)
 		return
 	}
 

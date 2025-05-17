@@ -19,7 +19,7 @@ func WarehousePartHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		InsertWarehousePart(w, r)
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		http.Error(w, utils.ErrMsgMethodNotAllowed, http.StatusMethodNotAllowed)
 	}
 }
 
@@ -37,14 +37,14 @@ func DeleteWarehousePart(w http.ResponseWriter, r *http.Request) {
 	// ID aus der URL oder Anfrage extrahieren
 	idStr := r.URL.Query().Get("id")
 	if idStr == "" {
-		http.Error(w, "ID fehlt", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdMissing, http.StatusBadRequest)
 		return
 	}
 
 	// Convert string ID to integer
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Ungültige ID", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdInvalid, http.StatusBadRequest)
 		return
 	}
 
@@ -57,12 +57,12 @@ func UpdateWarehousePart(w http.ResponseWriter, r *http.Request) {
 	var part models.WarehousePart
 	err := json.NewDecoder(r.Body).Decode(&part)
 	if err != nil {
-		http.Error(w, "Fehler beim Verarbeiten der Anfrage", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgProcessingRequest, http.StatusBadRequest)
 		return
 	}
 
 	if part.ID == 0 {
-		http.Error(w, "ID fehlt", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgIdMissing, http.StatusBadRequest)
 		return
 	}
 
@@ -74,7 +74,7 @@ func UpdateWarehousePart(w http.ResponseWriter, r *http.Request) {
 
 func InsertWarehousePart(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Nur POST erlaubt", http.StatusMethodNotAllowed)
+		http.Error(w, utils.ErrMsgPostOnly, http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -82,7 +82,7 @@ func InsertWarehousePart(w http.ResponseWriter, r *http.Request) {
 	var part models.WarehousePart
 	err := json.NewDecoder(r.Body).Decode(&part)
 	if err != nil {
-		http.Error(w, "Fehler beim Verarbeiten der Anfrage", http.StatusBadRequest)
+		http.Error(w, utils.ErrMsgProcessingRequest, http.StatusBadRequest)
 		return
 	}
 
