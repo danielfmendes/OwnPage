@@ -1,0 +1,69 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:latest
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        env:
+          POSTGRES_DB: fahrrad_db
+          POSTGRES_USER: fahrrad_user
+          POSTGRES_PASSWORD: geheim
+        volumes:
+          - ./init:/docker-entrypoint-initdb.d
+          - postgres_data:/var/lib/postgresql/data
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Controller starten: dependencies installieren und starten
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Run Controller
+        working-directory: ./controller
+        run: |
+          go mod tidy
+          nohup go run main.go &
+
+      # Frontend installieren und starten
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install and start frontend
+        working-directory: ./frontend
+        run: |
+          npm install
+          nohup npm run dev &
+
+      # Maven Test ausführen
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Run Maven Tests
+        working-directory: ./frontend-testing
+        run: mvn test
+
+volumes:
+  postgres_data:

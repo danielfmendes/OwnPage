@@ -24,6 +24,7 @@ export default function InputField({label, value, onChange, errorMessage, placeh
             {label && <label className="block text-sm font-medium">{label}</label>}
             <div className="relative">
                 <Input
+                    id={label?.toLowerCase()}
                     value={value ?? ""}
                     onChange={onChange}
                     readOnly={isReadOnly}

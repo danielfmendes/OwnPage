@@ -9,11 +9,13 @@ type ButtonLoadingProps = {
     size?: "default" | "sm" | "lg"
     children?: ReactNode
     loadingText?: string
+    id?: string
 } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'>
 
-export function ButtonLoading({ isLoading, onClick, variant, size, children, loadingText, ...props }: ButtonLoadingProps) {
+export function ButtonLoading({ isLoading, onClick, variant, size, children, loadingText, id, ...props }: ButtonLoadingProps) {
     return (
         <Button
+            {...(id ? { id } : {})}
             onClick={onClick}
             disabled={isLoading || props.disabled}
             variant={variant}

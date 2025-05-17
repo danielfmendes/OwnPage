@@ -34,3 +34,7 @@ Need to export these variables in Railway:
 - EMAIL_FROM
 - EMAIL_PASS
 - JWT_SECRET
+
+Frontend Test: 
+cd frontend-testing/
+mvn test
