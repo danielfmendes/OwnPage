@@ -6,31 +6,42 @@ on:
       - main
   pull_request:
 
+env:
+  DB_PASS: geheim
+  DB_NAME: fahrrad_db
+  DB_USER: fahrrad_user
+  DB_PORT: 5432
+  DB_HOST: localhost
+  test_type: postgres
+
 jobs:
-  test:
+  frontend-test:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:latest
-        ports:
-          - 5433:5432
-        options: >-
-          --health-cmd="pg_isready -U postgres"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-        env:
-          POSTGRES_DB: fahrrad_db
-          POSTGRES_USER: fahrrad_user
-          POSTGRES_PASSWORD: geheim
-        volumes:
-          - ./init:/docker-entrypoint-initdb.d
-          - postgres_data:/var/lib/postgresql/data
 
     steps:
       - uses: actions/checkout@v3
 
-      # Controller starten: dependencies installieren und starten
+      - name: Start PostgreSQL container
+        run: |
+          docker run --name postgres-${{ env.test_type }} -d \
+            -e POSTGRES_PASSWORD=${{ env.DB_PASS }} \
+            -e POSTGRES_DB=${{ env.DB_NAME }} \
+            -e POSTGRES_USER=${{ env.DB_USER }} \
+            -p ${{ env.DB_PORT }}:5432 \
+            postgres:15
+          
+          echo "Waiting for PostgreSQL..."
+          until docker exec postgres-${{ env.test_type }} pg_isready --host=${{ env.DB_HOST }} --port=${{ env.DB_PORT }} --username=${{ env.DB_USER }}; do sleep 1; done
+          echo "PostgreSQL is ready!"
+
+      - name: Run all SQL scripts in alphabetical order
+        run: |
+          for file in backend/init/*.sql
+          do
+            echo "Running $file"
+            docker exec -i postgres-${{ env.test_type }} psql -U ${{ env.DB_USER }} -d ${{ env.DB_NAME }} < $file
+          done
+
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
@@ -42,7 +53,6 @@ jobs:
           go mod tidy
           nohup go run main.go &
 
-      # Frontend installieren und starten
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -54,16 +64,26 @@ jobs:
           npm install
           nohup npm run dev &
 
-      # Maven Test ausführen
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Wait for frontend to be available
+        run: |
+          echo "Warte auf http://localhost:3000/login/dwh ..."
+          until curl --fail --silent http://localhost:3000/login/dwh > /dev/null; do
+            echo "Frontend noch nicht bereit, warte..."
+            sleep 2
+          done
+          echo "Frontend ist bereit!"
+
+      - name: Output login page HTML
+        run: |
+          echo "Inhalt von http://localhost:3000/login/dwh:"
+          curl http://localhost:3000/login/dwh
+
       - name: Run Maven Tests
         working-directory: ./frontend-testing
         run: mvn test
-
-volumes:
-  postgres_data:
