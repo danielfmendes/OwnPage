@@ -99,7 +99,7 @@ export default function AddCustomerContent({onClose, onRefresh}: Props) {
                 className="w-full mt-4"
                 loadingText={t("placeholder.please_wait")}
             >
-                {t("save_button")}
+                {t("button.save")}
             </ButtonLoading>
         </DialogContent>
     );

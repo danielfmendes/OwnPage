@@ -64,75 +64,24 @@ func HandleGetWithProjectIDs(w http.ResponseWriter, r *http.Request, baseQuery s
 	}
 	defer conn.Close()
 
-	// Hole alle Projekt-IDs, für die der Nutzer Zugriff hat
+	// Hole alle zulässigen Projekt-IDs für den Benutzer
 	userProjectIDs, err := GetAllProjectsIDsForUser(conn, userEmail, "user")
 	if err != nil {
 		HandleError(w, err, "Fehler beim Ermitteln der Zugriffsrechte")
 		return
 	}
 
-	if len(userProjectIDs) == 0 {
-		http.Error(w, "Keine Projektberechtigung", http.StatusForbidden)
+	// Effektive Projekt-IDs basierend auf URL-Parameter und Berechtigungen
+	effectiveProjectIDs, err := filterProjectIDs(r, userProjectIDs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
 
-	// Prüfe, ob project_id als URL-Parameter gesetzt ist
-	queryParam := r.URL.Query().Get("project_id")
-	var effectiveProjectIDs []int
+	// Final Query zusammenbauen
+	finalQuery, finalArgs := injectProjectIDFilter(baseQuery, args, effectiveProjectIDs)
 
-	if queryParam != "" {
-		requestedIDs := []int{}
-		for _, idStr := range strings.Split(queryParam, "|") {
-			if idStr == "" {
-				continue
-			}
-			id, err := strconv.Atoi(idStr)
-			if err != nil {
-				http.Error(w, "Ungültige project_id-Parameter", http.StatusBadRequest)
-				return
-			}
-			requestedIDs = append(requestedIDs, id)
-		}
-
-		// Filter: nur IDs nehmen, für die der Nutzer Zugriff hat
-		allowed := map[int]bool{}
-		for _, id := range userProjectIDs {
-			allowed[id] = true
-		}
-		for _, id := range requestedIDs {
-			if allowed[id] {
-				effectiveProjectIDs = append(effectiveProjectIDs, id)
-			}
-		}
-
-		if len(effectiveProjectIDs) == 0 {
-			http.Error(w, "Keine Berechtigung für angegebene Projekt-IDs", http.StatusForbidden)
-			return
-		}
-	} else {
-		effectiveProjectIDs = userProjectIDs
-	}
-
-	lowerQuery := strings.ToLower(baseQuery)
-	query := baseQuery
-	finalArgs := args
-
-	// Regex: prüft, ob "project_id" im WHERE-Teil steht
-	projectIDRegex := regexp.MustCompile(`(?i)where\s+.*\bproject[_]?id\b`)
-
-	if !projectIDRegex.MatchString(lowerQuery) {
-		projectIDParamPos := len(args) + 1
-		if strings.Contains(lowerQuery, "where") {
-			query = fmt.Sprintf("%s AND project_id = ANY($%d)", baseQuery, projectIDParamPos)
-		} else {
-			query = fmt.Sprintf("%s WHERE project_id = ANY($%d)", baseQuery, projectIDParamPos)
-		}
-	}
-
-	// Füge Projekt-IDs als letzten Parameter hinzu
-	finalArgs = append(finalArgs, pq.Array(effectiveProjectIDs))
-
-	rows, err := conn.Query(query, finalArgs...)
+	rows, err := conn.Query(finalQuery, finalArgs...)
 	if err != nil {
 		HandleError(w, err, "Fehler bei der Datenbankabfrage")
 		return
@@ -156,4 +105,59 @@ func HandleGetWithProjectIDs(w http.ResponseWriter, r *http.Request, baseQuery s
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(results)
+}
+
+func filterProjectIDs(r *http.Request, allowedIDs []int) ([]int, error) {
+	queryParam := r.URL.Query().Get("project_id")
+	if queryParam == "" {
+		return allowedIDs, nil
+	}
+
+	requestedIDs := []int{}
+	for _, part := range strings.Split(queryParam, "|") {
+		if part == "" {
+			continue
+		}
+		id, err := strconv.Atoi(part)
+		if err != nil {
+			return nil, fmt.Errorf("ungültige project_id-Parameter")
+		}
+		requestedIDs = append(requestedIDs, id)
+	}
+
+	// Erlaube nur IDs, auf die der Nutzer Zugriff hat
+	allowedMap := make(map[int]struct{}, len(allowedIDs))
+	for _, id := range allowedIDs {
+		allowedMap[id] = struct{}{}
+	}
+
+	var filtered []int
+	for _, id := range requestedIDs {
+		if _, ok := allowedMap[id]; ok {
+			filtered = append(filtered, id)
+		}
+	}
+
+	if len(filtered) == 0 {
+		return nil, fmt.Errorf("keine Berechtigung für angegebene Projekt-IDs")
+	}
+	return filtered, nil
+}
+
+func injectProjectIDFilter(query string, args []interface{}, projectIDs []int) (string, []interface{}) {
+	lowerQuery := strings.ToLower(query)
+	paramIndex := len(args) + 1
+
+	// Regex prüft, ob WHERE ... project_id bereits existiert
+	projectIDRegex := regexp.MustCompile(`(?i)where\s+.*\bproject[_]?id\b`)
+	if !projectIDRegex.MatchString(lowerQuery) {
+		if strings.Contains(lowerQuery, "where") {
+			query += fmt.Sprintf(" AND project_id = ANY($%d)", paramIndex)
+		} else {
+			query += fmt.Sprintf(" WHERE project_id = ANY($%d)", paramIndex)
+		}
+	}
+
+	args = append(args, pq.Array(projectIDs))
+	return query, args
 }

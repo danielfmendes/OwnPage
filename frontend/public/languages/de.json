@@ -62,6 +62,7 @@
     "city": "z.B. Hamburg",
     "pick_date": "Datum auswählen",
     "part_type": "Teileart auswählen",
+    "part_name": "Bitte wählen Sie zunächst einen Teiletyp",
     "role": "Rolle auswählen",
     "part": "Teil auswählen",
     "customer": "Kunde auswählen",

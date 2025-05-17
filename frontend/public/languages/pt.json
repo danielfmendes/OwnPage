@@ -62,6 +62,7 @@
     "city": "ex.: Hamburgo",
     "pick_date": "Escolha uma data",
     "part_type": "Selecione o tipo de peça",
+    "part_name": "Selecione primeiro um tipo de peça",
     "role": "Selecione a função",
     "part": "Selecione uma peça",
     "customer": "Selecione o cliente",

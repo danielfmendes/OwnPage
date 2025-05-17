@@ -23,7 +23,7 @@ export default function DemoLayout({children}: { children: React.ReactNode }) {
     const setIsLoadingRole = useRoleStore((state) => state.setIsLoading);
     const setSelectedRoles = useRoleStore((state) => state.setSelectedRoles);
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
-    const { i18n } = useTranslation();
+    const {i18n} = useTranslation();
 
     useEffect(() => {
         const savedLang = Language.getLanguage();
@@ -49,7 +49,9 @@ export default function DemoLayout({children}: { children: React.ReactNode }) {
             }
             setIsLoadingRole(true);
             fetchWithToken(`/rolemanagements`, true)
-                .then((roles: RoleManagementWithName[]) => setRoles(roles))
+                .then((roles: RoleManagementWithName[]) => {
+                    setRoles(roles || []);
+                })
                 .catch(err => addNotification(`Failed to load role management${err?.message ? `: ${err.message}` : ""}`, "error"))
                 .finally(() => setIsLoadingRole(false));
         } catch (err) {

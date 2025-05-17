@@ -20,11 +20,11 @@ export const fetchWithToken = async (endpoint: string, force = false) => {
     let finalEndpoint = endpoint;
 
     if (!force) {
-        const waitForRoles = async (maxWaitMs = 5000, intervalMs = 100): Promise<void> => {
+        const waitForRoles = async (maxWaitMs = 1000, intervalMs = 100): Promise<void> => {
             const start = Date.now();
             while (useRoleStore.getState().roles.length === 0) {
                 if (Date.now() - start > maxWaitMs) {
-                    throw new Error("Timeout: roles remain empty.");
+                    return;
                 }
                 await new Promise((resolve) => setTimeout(resolve, intervalMs));
             }

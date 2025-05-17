@@ -36,7 +36,7 @@ export const Notification = ({
                 const newProgress = prev - (100 / (duration / 50));
                 if (newProgress <= 0) {
                     clearInterval(interval);
-                    onDismissAction(message.id);
+                    setTimeout(() => onDismissAction(message.id), 0);
                     return 0;
                 }
                 return newProgress;

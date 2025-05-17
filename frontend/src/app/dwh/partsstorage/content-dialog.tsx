@@ -112,7 +112,7 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
                         <label className="block text-sm font-medium">Part Type</label>
                         <Select value={partType} onValueChange={setPartType}>
                             <SelectTrigger className="w-full p-2 border rounded">
-                                <SelectValue placeholder={t("placeholder.part_name")}/>
+                                <SelectValue placeholder={t("placeholder.part_type")}/>
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="saddle">{t("bike_parts.saddle")}</SelectItem>
@@ -128,6 +128,7 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
                             setId={setPartId}
                             partIdOptions={partIdOptions}
                             isLoadingParts={isLoadingParts}
+                            placeholderNoResults={t("placeholder.part_name")}
                         />
                     </div>
                 </>
@@ -135,8 +136,11 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
 
             <div className="space-y-1">
                 <InputField label={t("label.quantity")} value={quantity} onChange={(e) => setQuantity(Number(e.target.value))}/>
-                <InputField label={t("label.warehouse_position")} value={storageLocation}
-                            onChange={(e) => setStorageLocation(e.target.value)}/>
+                <InputField label={t("label.warehouse_position")}
+                            value={storageLocation}
+                            onChange={(e) => setStorageLocation(e.target.value)}
+                            placeholder={t("placeholder.warehouse_position")}/>
+
             </div>
 
             <ButtonLoading

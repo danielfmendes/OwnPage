@@ -8,9 +8,10 @@ type PartSelectProps = {
     partIdOptions: { id: number; name: string }[]
     isLoadingParts: boolean
     placeholder?: string
+    placeholderNoResults?: string
 }
 
-export function SelectLoading({id, setId, partIdOptions, isLoadingParts, placeholder}: PartSelectProps) {
+export function SelectLoading({id, setId, partIdOptions, isLoadingParts, placeholder, placeholderNoResults}: PartSelectProps) {
     const {t} = useTranslation();
     return (
         <Select value={id !== null ? String(id) : undefined} onValueChange={(val) => setId(Number(val))}>
@@ -26,7 +27,7 @@ export function SelectLoading({id, setId, partIdOptions, isLoadingParts, placeho
                     </SelectItem>
                 ) : partIdOptions.length === 0 ? (
                     <SelectItem value="none" disabled className="opacity-50 italic pointer-events-none">
-                        {t("placeholder.no_results")}
+                        {placeholderNoResults || t("placeholder.no_results")}
                     </SelectItem>
                 ) : (
                     partIdOptions.map((option) => (

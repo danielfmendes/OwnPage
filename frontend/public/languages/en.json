@@ -62,6 +62,7 @@
     "city": "e.g. Hamburg",
     "pick_date": "Pick a date",
     "part_type": "Select part type",
+    "part_name": "Please first select a part type",
     "role": "Select role",
     "part": "Select a part",
     "customer": "Select customer",

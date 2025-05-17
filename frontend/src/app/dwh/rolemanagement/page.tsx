@@ -16,20 +16,20 @@ import {useTranslation} from "react-i18next";
 export default function RoleManagementPage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
-    const data = useRoleStore((state) => state.roles);
-    const setData = useRoleStore((state) => state.setRoles);
+    const [data, setData] = React.useState<RoleManagementWithName[]>([]);
     const isLoadingData = useRoleStore((state) => state.isLoading);
     const setIsLoadingData = useRoleStore((state) => state.setIsLoading);
     const [showDialog, setShowDialog] = React.useState(false);
     const [manageId, setManageId] = React.useState<number | null>(null);
 
-    const fetchData = React.useCallback((isLoading?: boolean) => {
-        if (!data || isLoading) {
-            setIsLoadingData(true);
-        }
+    const fetchData = React.useCallback(() => {
+        setIsLoadingData(true);
         fetchWithToken(`/rolemanagements`)
-            .then((roles: RoleManagementWithName[]) => setData(roles))
-            .catch(err => addNotification(`Failed to load bikes${err?.message ? `: ${err.message}` : ""}`, "error"))
+            .then((roles: RoleManagementWithName[]) => {
+                setData(roles ?? [])
+                useRoleStore.getState().setRoles(roles ?? [])
+            })
+            .catch(err => addNotification(`Failed to load rolemanagement${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingData(false));
     }, []);
 
@@ -83,7 +83,7 @@ export default function RoleManagementPage() {
                 addDialogContent={(onClose) => (
                     <AddProjektDialogContent
                         onClose={onClose}
-                        onRefresh={() => fetchData(true)}
+                        onRefresh={fetchData}
                     />
                 )}
             />
