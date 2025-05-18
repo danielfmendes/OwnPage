@@ -21,6 +21,29 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install dependencies for recording
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb ffmpeg x11-utils
+
+      - name: Start screen recording
+        run: |
+          mkdir -p recordings
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
+          echo "Waiting for Xvfb..."
+          sleep 3
+          nohup ffmpeg -y \
+            -video_size 1920x1080 \
+            -framerate 25 \
+            -f x11grab -i :99.0 \
+            -c:v libx264 \
+            -preset ultrafast \
+            -pix_fmt yuv420p \
+            -movflags +faststart \
+            recordings/test_run.mp4 > /dev/null 2>&1 &
+          echo $! > ffmpeg_pid.txt
+
       - name: Start PostgreSQL container
         run: |
           docker run --name postgres-${{ env.test_type }} -d \
@@ -72,7 +95,16 @@ jobs:
 
       - name: Run Maven Tests
         working-directory: ./frontend-testing
+        env:
+          DISPLAY: :99
         run: mvn test
+
+      - name: Stop screen recording
+        if: always()
+        run: |
+          if [ -f ffmpeg_pid.txt ]; then
+            kill $(cat ffmpeg_pid.txt)
+          fi
 
       - name: Upload test screenshots
         if: always()
@@ -80,3 +112,10 @@ jobs:
         with:
           name: test-screenshots
           path: frontend-testing/screenshots
+
+      - name: Upload screen recording
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-screenrecording
+          path: recordings/test_run.mp4

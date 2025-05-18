@@ -35,9 +35,11 @@ public class LoginSteps {
         // Run headless only in CI environments
         String ciEnv = System.getenv("CI");
         if ("true".equalsIgnoreCase(ciEnv)) {
-            options.addArguments("--headless=new");
             options.addArguments("--no-sandbox");
             options.addArguments("--disable-dev-shm-usage");
+            options.addArguments("--disable-gpu");
+            options.addArguments("--window-size=1920,1080");
+            options.addArguments("--start-maximized");
         }
 
         driver = new ChromeDriver(options);
@@ -65,13 +67,14 @@ public class LoginSteps {
     @Given("ich bin auf der Login-Seite")
     public void ichBinAufDerLoginSeite() {
         driver.get(BASE_URL + "/login/dwh");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("e-mail")));
         takeScreenshot("screenshots/login/login_page.png");
     }
 
     @When("ich gebe {string} und {string} ein")
     public void ichGebeBenutzernameUndPasswortEin(String email, String password) {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email")));
-        driver.findElement(By.id("email")).sendKeys(email);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("e-mail")));
+        driver.findElement(By.id("e-mail")).sendKeys(email);
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password")));
         driver.findElement(By.id("password")).sendKeys(password);
         takeScreenshot("screenshots/login/enter_email_passwort.png");
@@ -81,11 +84,10 @@ public class LoginSteps {
     public void ichKlickeAufDenLoginButton() {
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("send-btn")));
         driver.findElement(By.id("send-btn")).click();
-        takeScreenshot("screenshots/login/send_btn.png");
     }
 
-    @Then("sollte ich die Startseite sehen")
-    public void sollteIchDieStartseiteSehen() {
+    @Then("sollte ich die Startseite nach login sehen")
+    public void sollteIchDieStartseiteNachLoginSehen() {
         String expectedUrl = BASE_URL + "/dwh/dashboard";
         wait.until(ExpectedConditions.urlToBe(expectedUrl));
         String currentUrl = driver.getCurrentUrl();
