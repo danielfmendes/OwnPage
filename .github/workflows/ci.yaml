@@ -71,9 +71,12 @@ jobs:
 
       - name: Install and start frontend
         working-directory: ./frontend
+        env:
+          NEXT_PUBLIC_API_ENV: local
         run: |
           npm install
-          nohup npm run dev &
+          npm run build
+          nohup npm start &
 
       - name: Setup Java
         uses: actions/setup-java@v3
