@@ -1,40 +1,109 @@
-https://tailwindcss.com/docs/installation/framework-guides/react-router
-https://ui.shadcn.com/docs/components/card
+# 🌌 NebulaDW
 
-https://ui.shadcn.com/docs/components/sidebar
+**NebulaDW** ist ein modernes, cloud-basiertes Data-Warehouse-System.
 
-🔷 Name: "NebulaDW"
-Bedeutung:
+### 🔷 Bedeutung des Namens:
+- **Nebula**: Eine Wolke aus Daten, Wissen und Möglichkeiten – inspiriert von Sternennebeln.
+- **DW**: Steht für „Data Warehouse“ – der technische Fokus des Projekts.
 
-Nebula steht für eine Wolke aus Daten, Wissen und Möglichkeiten (wie bei einer Sternennebel-Analogie), was gut zur Cloud- oder Big-Data-Welt passt.
-DW steht für „Data Warehouse“, was es sofort als technisches System kenntlich macht.
-Der Name klingt modern, tech-orientiert und ist leicht zu merken.
+---
 
-https://lucide.dev/icons/box
+## 🔧 Setup & Installation
 
-go run main.go --local => mit localhost
-go run main.go => mit railway db
+### 📦 Backend (Go)
 
-Railway Postgres: just add a new database and copy the connection string
+#### 🔁 Lokal starten:
+```bash
+go run main.go --local
+```
 
-Vercel:
-- Framework Preset: Next.js => use all default settings
-- Root Directory: frontend
-- Node Version: 22.x
-- Under Domain add your domain name => add cname in webhosting provider, f.ex. in ionos
+#### 🌐 Mit Railway-Postgres starten:
+```bash
+go run main.go
+```
 
-Railway Go Deployment:
-- Environment: Go
-- Custom Build Command: cd controller && go build -o out
-- Custom Start Command: cd controller && ./out
+> 💡 **Hinweis:** In Railway eine neue Postgres-Datenbank erstellen und die Verbindungszeichenfolge als Umgebungsvariable einfügen.
 
-Need to export these variables in Railway:
-- BACKEND_BASE_URL
-- DATABASE_PUBLIC_URL
-- EMAIL_FROM
-- EMAIL_PASS
-- JWT_SECRET
+#### 🚀 Deployment auf Railway:
+- **Environment:** `Go`
+- **Build Command:**
+  ```bash
+  cd controller && go build -o out
+  ```
+- **Start Command:**
+  ```bash
+  cd controller && ./out
+  ```
 
-Frontend Test: 
-cd frontend-testing/
+##### Benötigte Umgebungsvariablen (Railway):
+```env
+BACKEND_BASE_URL=
+DATABASE_PUBLIC_URL=
+EMAIL_FROM=
+EMAIL_PASS=
+JWT_SECRET=
+```
+
+---
+
+### 🎨 Frontend (Next.js + Tailwind CSS + shadcn/ui)
+
+#### Lokale Einrichtung:
+```bash
+cd frontend
+npm install
+```
+
+In `/frontend/.env.local` einfügen:
+```env
+NEXT_PUBLIC_API_ENV=local
+```
+
+#### ✅ Frontend-Test:
+```bash
+cd frontend-testing
 mvn test
+```
+
+#### 🌍 Deployment auf Vercel:
+- **Framework Preset:** Next.js (Standard-Einstellungen verwenden)
+- **Root Directory:** `frontend`
+- **Node Version:** `22.x`
+- **Domain hinzufügen:** Eigene Domain hinzufügen und CNAME-Eintrag im Hosting-Provider (z. B. IONOS) setzen
+- **Umgebungsvariablen:** In Vercel diese Umgebungsvariable hinzufügen:
+```env
+NEXT_PUBLIC_API_ENV=vercel
+```
+
+---
+
+## 🧱 Komponenten
+
+- **📚 Tailwind CSS + React Router Integration**  
+  → [Guide ansehen](https://tailwindcss.com/docs/installation/framework-guides/react-router)
+
+- **🃏 UI-Komponenten mit shadcn/ui**
+    - [📦 Card-Komponente](https://ui.shadcn.com/docs/components/card)
+    - [📂 Sidebar-Komponente](https://ui.shadcn.com/docs/components/sidebar)
+
+---
+
+## 🧩 Icon Library
+
+- Verwendete Icons: [Box (Lucide Icons)](https://lucide.dev/icons/box)
+
+---
+
+## 📁 Projektstruktur
+
+```bash
+/
+├── controller/           # Backend (Go)
+│   └── main.go
+├── frontend/             # Next.js Frontend mit Tailwind & shadcn/ui
+│   └── .env.local
+├── frontend-testing/     # End-to-End Tests (Java + Maven)
+```
+
+---
+Daniel Freire Mendes
