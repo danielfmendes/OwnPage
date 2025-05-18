@@ -83,12 +83,14 @@ export default function LoginCard() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <InputField
+                        id="email"
                         label={t("label.email")}
                         value={email}
                         onChange={handleChange('email')}
                         errorMessage={errorMessageEmail}
                     />
                     <InputField
+                        id="password"
                         label={t("label.password")}
                         value={password}
                         onChange={handleChange('password')}
