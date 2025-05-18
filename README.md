@@ -46,6 +46,18 @@ JWT_SECRET=
 
 ---
 
+#### 🌍 Deployment auf Vercel:
+- **Framework Preset:** Next.js (Standard-Einstellungen verwenden)
+- **Root Directory:** `frontend`
+- **Node Version:** `22.x`
+- **Domain hinzufügen:** Eigene Domain hinzufügen und CNAME-Eintrag im Hosting-Provider (z. B. IONOS) setzen
+- **Umgebungsvariablen:** In Vercel diese Umgebungsvariable hinzufügen:
+```env
+NEXT_PUBLIC_API_ENV=link_from_controller_endpoint
+```
+
+---
+
 ### 🎨 Frontend (Next.js + Tailwind CSS + shadcn/ui)
 
 #### Lokale Einrichtung:
@@ -54,25 +66,10 @@ cd frontend
 npm install
 ```
 
-In `/frontend/.env.local` einfügen:
-```env
-NEXT_PUBLIC_API_ENV=local
-```
-
 #### ✅ Frontend-Test:
 ```bash
 cd frontend-testing
 mvn test
-```
-
-#### 🌍 Deployment auf Vercel:
-- **Framework Preset:** Next.js (Standard-Einstellungen verwenden)
-- **Root Directory:** `frontend`
-- **Node Version:** `22.x`
-- **Domain hinzufügen:** Eigene Domain hinzufügen und CNAME-Eintrag im Hosting-Provider (z. B. IONOS) setzen
-- **Umgebungsvariablen:** In Vercel diese Umgebungsvariable hinzufügen:
-```env
-NEXT_PUBLIC_API_ENV=vercel
 ```
 
 ---

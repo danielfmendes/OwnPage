@@ -2,16 +2,7 @@ import AuthToken from "./authtoken";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 
 const token = AuthToken.getAuthToken();
-let apiUrl: string;
-
-switch (process.env.NEXT_PUBLIC_API_ENV) {
-    case "vercel":
-        apiUrl = "https://test-production.up.railway.app";
-        break;
-    case "local":
-    default:
-        apiUrl = "http://localhost:8080";
-}
+const apiUrl = process.env.NEXT_PUBLIC_API_ENV || "http://localhost:8080";
 
 export const handleFetchError = async (response: Response, method: string) => {
     const errorMessage = await response.text();

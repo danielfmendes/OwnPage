@@ -16,6 +16,7 @@ export default function LoginCard() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingDemo, setIsLoadingDemo] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessageEmail, setErrorMessageEmail] = useState('');
@@ -35,8 +36,10 @@ export default function LoginCard() {
         return !(emailError || passwordError);
     };
 
-    const login = (loginEmail: string, loginPassword: string, redirect = true) => {
-        setIsLoading(true);
+    const login = (loginEmail: string, loginPassword: string, redirect = true, demo = false) => {
+        const setLoading = demo ? setIsLoadingDemo : setIsLoading;
+        setLoading(true);
+
         fetch(`${apiUrl}/auth/login`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -50,11 +53,11 @@ export default function LoginCard() {
                 AuthToken.setAuthToken(data.token);
                 if (redirect) window.location.href = '/dwh/dashboard';
             })
-            .catch((err) => {
+            .catch(err => {
                 setErrorMessagePassword(t("error.login"));
                 addNotification(`Login error${err?.message ? `: ${err.message}` : ""}`, "error");
             })
-            .finally(() => setIsLoading(false));
+            .finally(() => setLoading(false));
     };
 
     const handleSubmit = (e: FormEvent) => {
@@ -71,7 +74,7 @@ export default function LoginCard() {
     };
 
     const handleDemo = () => {
-        login("testuser@example.com", "test");
+        login("testuser@example.com", "test", true, true);
     };
 
     return (
@@ -111,10 +114,10 @@ export default function LoginCard() {
                         <span className="px-2 text-sm text-gray-500">or</span>
                         <div className="flex-grow h-px bg-gray-300"/>
                     </div>
-                    <Button onClick={handleDemo} className="w-1/2 mx-auto flex justify-center items-center space-x-2">
+                    <ButtonLoading onClick={handleDemo} isLoading={isLoadingDemo} className="w-1/2 mx-auto flex justify-center items-center space-x-2">
                         <span>{t("demo")}</span>
                         <ArrowRight className="w-4 h-4"/>
-                    </Button>
+                    </ButtonLoading>
                 </CardContent>
             </Card>
         </div>

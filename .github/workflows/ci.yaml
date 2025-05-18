@@ -71,8 +71,6 @@ jobs:
 
       - name: Install and start frontend
         working-directory: ./frontend
-        env:
-          NEXT_PUBLIC_API_ENV: local
         run: |
           npm install
           npm run build
