@@ -40,7 +40,7 @@ jobs:
             -e POSTGRES_USER=${{ env.DB_USER }} \
             -p ${{ env.DB_PORT }}:5432 \
             postgres:15
-          
+
           echo "Waiting for PostgreSQL..."
           until docker exec postgres-${{ env.test_type }} pg_isready --host=${{ env.DB_HOST }} --port=${{ env.DB_PORT }} --username=${{ env.DB_USER }}; do sleep 1; done
           echo "PostgreSQL is ready!"
@@ -84,25 +84,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Start screen recording
+      - name: Prepare recording directory
+        run: mkdir -p recordings
+
+      - name: Start virtual display
         run: |
-          mkdir -p recordings
           export DISPLAY=:99
           Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
-          echo "Waiting for Xvfb..."
           sleep 3
-          nohup ffmpeg -y \
-            -video_size 1920x1080 \
-            -framerate 25 \
-            -f x11grab -i :99.0 \
-            -c:v libx264 \
-            -profile:v baseline \
-            -level 3.0 \
-            -preset ultrafast \
-            -pix_fmt yuv420p \
-            -movflags +faststart \
-            recordings/test_run.mp4 > ffmpeg.log 2>&1 &
-          echo $! > ffmpeg_pid.txt
 
       - name: Run Maven Tests for ${{ matrix.test-run }}
         working-directory: ./frontend-testing
@@ -110,24 +99,12 @@ jobs:
           DISPLAY: :99
         run: mvn test -Dcucumber.feature.path=src/test/resources/features/${{ matrix.test-run }}.feature
 
-      - name: Stop screen recording
-        if: always()
-        run: |
-          if [ -f ffmpeg_pid.txt ]; then
-            kill -15 $(cat ffmpeg_pid.txt)
-            sleep 5
-          fi
-
       - name: Prepare test artifact directory
         if: always()
         run: |
           mkdir -p test-results/${{ matrix.test-run }}
-          cp recordings/test_run.mp4 test-results/${{ matrix.test-run }}/
-          if [ -d frontend-testing/screenshots/${{ matrix.test-run }} ]; then
-            cp -r frontend-testing/screenshots/${{ matrix.test-run }} test-results/${{ matrix.test-run }}/screenshots
-          else
-            echo "No screenshots found for ${{ matrix.test-run }}"
-          fi
+          [ -f frontend-testing/recordings/test_run.mp4 ] && cp frontend-testing/recordings/test_run.mp4 test-results/${{ matrix.test-run }}/ || echo "No recording found for ${{ matrix.test-run }}"
+          [ -d frontend-testing/screenshots/${{ matrix.test-run }} ] && cp -r frontend-testing/screenshots/${{ matrix.test-run }} test-results/${{ matrix.test-run }}/ || echo "No screenshots found for ${{ matrix.test-run }}"
 
       - name: Upload test results
         if: always()
