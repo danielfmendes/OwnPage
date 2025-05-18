@@ -109,7 +109,7 @@ export default function LoginCard() {
                         <span className="px-2 text-sm text-gray-500">or</span>
                         <div className="flex-grow h-px bg-gray-300"/>
                     </div>
-                    <Button id="demo-btn" onClick={handleDemo} className="w-1/2 mx-auto flex justify-center items-center space-x-2">
+                    <Button onClick={handleDemo} className="w-1/2 mx-auto flex justify-center items-center space-x-2">
                         <span>{t("demo")}</span>
                         <ArrowRight className="w-4 h-4"/>
                     </Button>

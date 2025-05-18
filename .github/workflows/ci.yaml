@@ -70,20 +70,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Wait for frontend to be available
-        run: |
-          echo "Warte auf http://localhost:3000/login/dwh ..."
-          until curl --fail --silent http://localhost:3000/login/dwh > /dev/null; do
-            echo "Frontend noch nicht bereit, warte..."
-            sleep 2
-          done
-          echo "Frontend ist bereit!"
-
-      - name: Output login page HTML
-        run: |
-          echo "Inhalt von http://localhost:3000/login/dwh:"
-          curl http://localhost:3000/login/dwh
-
       - name: Run Maven Tests
         working-directory: ./frontend-testing
         run: mvn test
+
+      - name: Upload test screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-screenshots
+          path: frontend-testing/screenshots
