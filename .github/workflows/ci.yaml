@@ -20,9 +20,9 @@ jobs:
 
     strategy:
       matrix:
-        feature-file:
-          - register.feature
-          - login.feature
+        test-run:
+          - register
+          - login
 
     steps:
       - uses: actions/checkout@v3
@@ -101,11 +101,11 @@ jobs:
             recordings/test_run.mp4 > ffmpeg.log 2>&1 &
           echo $! > ffmpeg_pid.txt
 
-      - name: Run Maven Tests for ${{ matrix.feature-file }}
+      - name: Run Maven Tests for ${{ matrix.test-run }}
         working-directory: ./frontend-testing
         env:
           DISPLAY: :99
-        run: mvn test -Dcucumber.feature.path=src/test/resources/features/${{ matrix.feature-file }}
+        run: mvn test -Dcucumber.feature.path=src/test/resources/features/${{ matrix.test-run }}.feature
 
       - name: Stop screen recording
         if: always()
@@ -115,16 +115,20 @@ jobs:
             sleep 5
           fi
 
-      - name: Upload test screenshots
+      - name: Prepare test artifact directory
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-screenshots-${{ matrix.feature-file }}
-          path: frontend-testing/screenshots
+        run: |
+          mkdir -p test-results/${{ matrix.test-run }}
+          cp recordings/test_run.mp4 test-results/${{ matrix.test-run }}/
+          if [ -d frontend-testing/screenshots/${{ matrix.test-run }} ]; then
+            cp -r frontend-testing/screenshots/${{ matrix.test-run }} test-results/${{ matrix.test-run }}/screenshots
+          else
+            echo "No screenshots found for ${{ matrix.test-run }}"
+          fi
 
-      - name: Upload screen recording
+      - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-screenrecording
-          path: recordings/test_run.mp4
+          name: test-results-${{ matrix.test-run }}
+          path: test-results/${{ matrix.test-run }}
