@@ -14,7 +14,7 @@ type InputFieldProps = {
 export default function InputField({label, value, onChange, errorMessage, placeholder, id}: InputFieldProps) {
     const isReadOnly = !onChange;
     const inputType =
-        label?.toLowerCase() === "password"
+        !id?.toLowerCase().includes("password") && label?.toLowerCase() === "password"
             ? "password"
             : typeof value === "number"
                 ? "number"

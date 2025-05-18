@@ -102,7 +102,7 @@ export default function LoginCard() {
                     <Button onClick={handleBack} variant="secondary" className="w-full mt-4">
                         {t("button.back")}
                     </Button>
-                    <Button onClick={handleRegister} variant="link" className="w-full mt-4 text-blue-600">
+                    <Button id="register-btn" onClick={handleRegister} variant="link" className="w-full mt-4 text-blue-600">
                         {t("go_to_register")}
                     </Button>
 

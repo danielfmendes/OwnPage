@@ -1,14 +1,22 @@
 package com.example.frontend.runner;
 
-import org.junit.runner.RunWith;
-import io.cucumber.junit.Cucumber;
-import io.cucumber.junit.CucumberOptions;
+import io.cucumber.core.cli.Main;
+import org.junit.Test;
 
-@RunWith(Cucumber.class)
-@CucumberOptions(
-    features = "src/test/resources/features",
-    glue = "com.example.frontend.steps",
-    plugin = {"pretty"}
-)
 public class RunCucumberTest {
+
+    @Test
+    public void runCucumber() {
+        String featurePath = System.getProperty("cucumber.feature.path", "src/test/resources/features");
+
+        int exitCode = Main.run(new String[]{
+                "--glue", "com.example.frontend.steps",
+                "--plugin", "pretty",
+                featurePath
+        }, Thread.currentThread().getContextClassLoader());
+
+        if (exitCode != 0) {
+            throw new RuntimeException("Cucumber tests failed with exit code " + exitCode);
+        }
+    }
 }

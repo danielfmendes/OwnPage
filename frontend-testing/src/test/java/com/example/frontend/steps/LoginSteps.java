@@ -5,94 +5,53 @@ import io.cucumber.java.After;
 import io.cucumber.java.en.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import com.example.frontend.utils.WebDriverUtils;
 
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import java.io.File;
-import org.apache.commons.io.FileUtils;
-
-import java.time.Duration;
-
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 public class LoginSteps {
 
     private WebDriver driver;
     private WebDriverWait wait;
-    private static final String BASE_URL = "http://localhost:3000";
 
     @Before
     public void setUp() {
-        WebDriverManager.chromedriver().setup();
-
-        ChromeOptions options = new ChromeOptions();
-
-        // Run headless only in CI environments
-        String ciEnv = System.getenv("CI");
-        if ("true".equalsIgnoreCase(ciEnv)) {
-            options.addArguments("--no-sandbox");
-            options.addArguments("--disable-dev-shm-usage");
-            options.addArguments("--disable-gpu");
-            options.addArguments("--window-size=1920,1080");
-            options.addArguments("--start-maximized");
-        }
-
-        driver = new ChromeDriver(options);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebDriverUtils.setUp();
+        driver = WebDriverUtils.getDriver();
+        wait = WebDriverUtils.getWait();
     }
 
     @After
     public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
-    }
-
-    // Neue Methode, um screenshots/login zu machen
-    private void takeScreenshot(String filename) {
-        try {
-            File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            FileUtils.copyFile(scrFile, new File(filename));
-            System.out.println("Screenshot gespeichert unter: " + filename);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        WebDriverUtils.tearDown();
     }
 
     @Given("ich bin auf der Login-Seite")
     public void ichBinAufDerLoginSeite() {
-        driver.get(BASE_URL + "/login/dwh");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("e-mail")));
-        takeScreenshot("screenshots/login/login_page.png");
+        driver.get(WebDriverUtils.getBaseUrl() + "/login/dwh");
+        WebDriverUtils.takeScreenshot("screenshots/login/login_page.png");
     }
 
     @When("ich gebe {string} und {string} ein")
     public void ichGebeBenutzernameUndPasswortEin(String email, String password) {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("e-mail")));
-        driver.findElement(By.id("e-mail")).sendKeys(email);
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password")));
-        driver.findElement(By.id("password")).sendKeys(password);
-        takeScreenshot("screenshots/login/enter_email_passwort.png");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email"))).sendKeys(email);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password"))).sendKeys(password);
+        WebDriverUtils.takeScreenshot("screenshots/login/enter_email_passwort.png");
     }
 
     @When("ich klicke auf den Login-Button")
     public void ichKlickeAufDenLoginButton() {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("send-btn")));
-        driver.findElement(By.id("send-btn")).click();
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("send-btn"))).click();
+        WebDriverUtils.takeScreenshot("screenshots/login/sent_btn.png");
     }
 
     @Then("sollte ich die Startseite nach login sehen")
     public void sollteIchDieStartseiteNachLoginSehen() {
-        String expectedUrl = BASE_URL + "/dwh/dashboard";
+        String expectedUrl = WebDriverUtils.getBaseUrl() + "/dwh/dashboard";
         wait.until(ExpectedConditions.urlToBe(expectedUrl));
-        String currentUrl = driver.getCurrentUrl();
-        assertTrue("Erwartete URL: " + expectedUrl + ", aber war: " + currentUrl,
-                currentUrl.equals(expectedUrl));
-        takeScreenshot("screenshots/login/dashboard.png");
+        assertEquals("Die URL nach dem Login ist nicht korrekt.", expectedUrl, driver.getCurrentUrl());
+        WebDriverUtils.takeScreenshot("screenshots/login/dashboard.png");
     }
 }

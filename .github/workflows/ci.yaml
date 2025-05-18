@@ -18,6 +18,12 @@ jobs:
   frontend-test:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        feature-file:
+          - register.feature
+          - login.feature
+
     steps:
       - uses: actions/checkout@v3
 
@@ -25,24 +31,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y xvfb ffmpeg x11-utils
-
-      - name: Start screen recording
-        run: |
-          mkdir -p recordings
-          export DISPLAY=:99
-          Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
-          echo "Waiting for Xvfb..."
-          sleep 3
-          nohup ffmpeg -y \
-            -video_size 1920x1080 \
-            -framerate 25 \
-            -f x11grab -i :99.0 \
-            -c:v libx264 \
-            -preset ultrafast \
-            -pix_fmt yuv420p \
-            -movflags +faststart \
-            recordings/test_run.mp4 > /dev/null 2>&1 &
-          echo $! > ffmpeg_pid.txt
 
       - name: Start PostgreSQL container
         run: |
@@ -93,24 +81,45 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Run Maven Tests
+      - name: Start screen recording
+        run: |
+          mkdir -p recordings
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
+          echo "Waiting for Xvfb..."
+          sleep 3
+          nohup ffmpeg -y \
+            -video_size 1920x1080 \
+            -framerate 25 \
+            -f x11grab -i :99.0 \
+            -c:v libx264 \
+            -profile:v baseline \
+            -level 3.0 \
+            -preset ultrafast \
+            -pix_fmt yuv420p \
+            -movflags +faststart \
+            recordings/test_run.mp4 > ffmpeg.log 2>&1 &
+          echo $! > ffmpeg_pid.txt
+
+      - name: Run Maven Tests for ${{ matrix.feature-file }}
         working-directory: ./frontend-testing
         env:
           DISPLAY: :99
-        run: mvn test
+        run: mvn test -Dcucumber.feature.path=src/test/resources/features/${{ matrix.feature-file }}
 
       - name: Stop screen recording
         if: always()
         run: |
           if [ -f ffmpeg_pid.txt ]; then
-            kill $(cat ffmpeg_pid.txt)
+            kill -15 $(cat ffmpeg_pid.txt)
+            sleep 5
           fi
 
       - name: Upload test screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-screenshots
+          name: test-screenshots-${{ matrix.feature-file }}
           path: frontend-testing/screenshots
 
       - name: Upload screen recording

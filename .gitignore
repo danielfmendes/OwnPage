@@ -1,3 +1,5 @@
 .idea
 backend/info.txt
 controller/.env.local
+frontend-testing/target
+frontend-testing/screenshots
