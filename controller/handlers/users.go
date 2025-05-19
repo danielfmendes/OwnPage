@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/smtp"
+	"os"
 	"time"
 )
 
@@ -132,7 +133,9 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// E-Mail zur Bestätigung senden
-	SendVerificationEmail(user.Email, verificationToken)
+	if os.Getenv("DISABLE_EMAILS") != "true" {
+		SendVerificationEmail(user.Email, verificationToken)
+	}
 
 	// JWT-Token erstellen
 	tokenString, err := utils.CreateJWT(user.Email)
@@ -219,9 +222,6 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 func SendVerificationEmail(to string, token string) {
 	from, pass := utils.GetEmailCredentials()
-
-	log.Println("from:", from)
-	log.Println("pass:", pass)
 
 	subject := "Please confirm your e-mail address for NebulaDW"
 	baseURL := utils.GetBackendBaseURL()

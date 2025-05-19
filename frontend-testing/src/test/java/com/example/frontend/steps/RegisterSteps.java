@@ -45,6 +45,10 @@ public class RegisterSteps {
 
     @When("ich gebe {string}, {string} und {string} ein")
     public void ichGebeEmailPasswortUndNameEin(String email, String password, String name) {
+        String expectedUrl = WebDriverUtils.getBaseUrl() + "/register/dwh";
+        wait.until(ExpectedConditions.urlToBe(expectedUrl));
+        assertEquals("Die URL nach dem Klicken des Registrier-Buttons ist nicht korrekt.", expectedUrl, driver.getCurrentUrl());
+
         // Get all input fields on the page
         List<WebElement> inputs = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.tagName("input")));
 

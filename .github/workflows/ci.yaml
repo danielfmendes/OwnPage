@@ -61,6 +61,7 @@ jobs:
       - name: Run Controller
         working-directory: ./controller
         run: |
+          export DISABLE_EMAILS=true
           go mod tidy
           nohup go run main.go &
 
