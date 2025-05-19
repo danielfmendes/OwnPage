@@ -2,9 +2,15 @@
 
 **NebulaDW** ist ein modernes, cloud-basiertes Data-Warehouse-System.
 
-### 🔷 Bedeutung des Namens:
-- **Nebula**: Eine Wolke aus Daten, Wissen und Möglichkeiten – inspiriert von Sternennebeln.
-- **DW**: Steht für „Data Warehouse“ – der technische Fokus des Projekts.
+### 🚀 Durchführung
+- **🔗 Deployte Live-Version:**  
+  👉 [NebulaDW – Live ansehen](https://danielfreiremendes.com/)
+
+
+- **🖥️ Lokale Ausführung:**  
+  Details zur lokalen Einrichtung und Ausführung findest du in den Abschnitten:  
+  → **„Setup & Installation“**  
+  → **„Deployment“**
 
 ---
 
