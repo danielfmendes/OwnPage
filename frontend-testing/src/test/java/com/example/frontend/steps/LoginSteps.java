@@ -57,4 +57,23 @@ public class LoginSteps {
         assertEquals("Die URL nach dem Login ist nicht korrekt.", expectedUrl, driver.getCurrentUrl());
         WebDriverUtils.takeScreenshot("screenshots/login/dashboard.png");
     }
+
+    @And("ich überprüfe, ob {string} und {string} angezeigt werden")
+    public void ichÜberpruefeObBenutzernameUndEmailAngezeigtWerden(String userName, String email) {
+        // Klicke auf den Avatar-Button (der mit dem "T")
+        WebElement avatarButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[aria-haspopup='menu']")));
+        avatarButton.click();
+        WebDriverUtils.takeScreenshot("screenshots/login/avatar_clicked.png");
+
+        // Warte, bis das Dropdown-Menü erscheint und die gewünschten Texte sichtbar sind
+        WebElement userNameElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//p[contains(text(), '" + userName + "')]")));
+        WebElement emailElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//p[contains(text(), '" + email + "')]")));
+
+        // Assertions
+        assertEquals(userName, userNameElement.getText());
+        assertEquals(email, emailElement.getText());
+
+        WebDriverUtils.takeScreenshot("screenshots/login/user_info_checked.png");
+    }
+
 }
