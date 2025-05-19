@@ -86,6 +86,7 @@ export function DatePicker({date, setDate, endYear, position = "bottom"}: DatePi
         <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
                 <Button
+                    id="datepicker"
                     variant={"outline"}
                     className={cn(
                         "w-full justify-between text-left font-normal relative pr-10",

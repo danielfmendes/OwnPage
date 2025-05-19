@@ -8,13 +8,12 @@ type InputFieldProps = {
     onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
     errorMessage?: string;
     placeholder?: string;
-    id?: string
 };
 
-export default function InputField({label, value, onChange, errorMessage, placeholder, id}: InputFieldProps) {
+export default function InputField({label, value, onChange, errorMessage, placeholder}: InputFieldProps) {
     const isReadOnly = !onChange;
     const inputType =
-        !id?.toLowerCase().includes("password") && label?.toLowerCase() === "password"
+        label?.toLowerCase() === "password"
             ? "password"
             : typeof value === "number"
                 ? "number"
@@ -25,7 +24,6 @@ export default function InputField({label, value, onChange, errorMessage, placeh
             {label && <label className="block text-sm font-medium">{label}</label>}
             <div className="relative">
                 <Input
-                    {...(id ? { id } : {})}
                     value={value ?? ""}
                     onChange={onChange}
                     readOnly={isReadOnly}

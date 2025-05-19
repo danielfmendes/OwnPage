@@ -146,4 +146,14 @@ public class WebDriverUtils {
             System.err.println("Screenshot fehlgeschlagen: " + e.getMessage());
         }
     }
+
+    public static void sleepMillis(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            e.printStackTrace();
+        }
+    }
+
 }

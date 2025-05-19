@@ -8,8 +8,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import com.example.frontend.utils.WebDriverUtils;
-
+import java.util.List;
 import static org.junit.Assert.assertEquals;
+import org.openqa.selenium.WebElement;
 
 public class LoginSteps {
 
@@ -36,8 +37,10 @@ public class LoginSteps {
 
     @When("ich gebe {string} und {string} ein")
     public void ichGebeBenutzernameUndPasswortEin(String email, String password) {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email"))).sendKeys(email);
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password"))).sendKeys(password);
+        // Get all input fields on the page
+        List<WebElement> inputs = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.tagName("input")));
+        inputs.get(0).sendKeys(email);
+        inputs.get(1).sendKeys(password);
         WebDriverUtils.takeScreenshot("screenshots/login/enter_email_passwort.png");
     }
 

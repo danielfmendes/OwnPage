@@ -8,6 +8,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import com.example.frontend.utils.WebDriverUtils;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.WebElement;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -40,24 +43,58 @@ public class RegisterSteps {
         WebDriverUtils.takeScreenshot("screenshots/register/register_btn.png");
     }
 
-//    @When("ich gebe {string}, {string} und {string} ein")
-//    public void ichGebeEmailPasswortUndNameEin(String email, String password, String name) {
-//        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email"))).sendKeys(email);
-//        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password"))).sendKeys(password);
-//        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("name"))).sendKeys(name);
-//        WebDriverUtils.takeScreenshot("screenshots/register/enter_email_passwort_name.png");
-//    }
-//
-//    @When("ich klicke auf den Registrieren-Button")
-//    public void ichKlickeAufDenRegistrierenButton() {
-//        wait.until(ExpectedConditions.elementToBeClickable(By.id("send-btn"))).click();
-//        WebDriverUtils.takeScreenshot("screenshots/register/sent_btn.png");
-//    }
+    @When("ich gebe {string}, {string} und {string} ein")
+    public void ichGebeEmailPasswortUndNameEin(String email, String password, String name) {
+        // Get all input fields on the page
+        List<WebElement> inputs = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.tagName("input")));
+
+        // Fill out name
+        inputs.get(0).sendKeys(name);
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("datepicker"))).click();
+
+        // Select Month: August
+        wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//button[.//span[text()='May']]"))
+        ).click();
+
+        wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//div[@role='option' and .//span[text()='August']]"))
+        ).click();
+
+        // Select Year: 2002
+        wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//button[.//span[text()='2025']]"))
+        ).click();
+        WebDriverUtils.sleepMillis(500);
+        wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//div[@role='option' and .//span[text()='2002']]"))
+        ).click();
+
+        // Select date: 20/08/2002
+        List<WebElement> rows = driver.findElements(By.cssSelector("tbody.rdp-tbody > tr"));
+        WebElement cell = rows.get(4).findElements(By.tagName("td")).get(2);
+        WebElement button = cell.findElement(By.tagName("button"));
+        button.click();
+
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("datepicker"))).click();
+
+        // Continue with email and password
+        inputs.get(1).sendKeys(email);
+        inputs.get(2).sendKeys(password);
+
+        WebDriverUtils.takeScreenshot("screenshots/register/enter_email_passwort_name.png");
+    }
+
+
+    @When("ich klicke auf den Registrieren-Button")
+    public void ichKlickeAufDenRegistrierenButton() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("send-btn"))).click();
+        WebDriverUtils.takeScreenshot("screenshots/register/sent_btn.png");
+    }
 
     @Then("sollte ich die Startseite nach register sehen")
     public void sollteIchDieStartseiteNachRegistrierenSehen() {
-//        String expectedUrl = WebDriverUtils.getBaseUrl() + "/dwh/dashboard";
-        String expectedUrl = WebDriverUtils.getBaseUrl() + "/register/dwh";
+        String expectedUrl = WebDriverUtils.getBaseUrl() + "/dwh/dashboard";
         wait.until(ExpectedConditions.urlToBe(expectedUrl));
         assertEquals("Die URL nach dem Registrieren ist nicht korrekt.", expectedUrl, driver.getCurrentUrl());
         WebDriverUtils.takeScreenshot("screenshots/register/dashboard.png");

@@ -15,13 +15,14 @@ import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 export default function LoginCard() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
-    const [isLoading, setIsLoading] = useState(false);
-    const [isLoadingDemo, setIsLoadingDemo] = useState(false);
+    const router = useRouter();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessageEmail, setErrorMessageEmail] = useState('');
     const [errorMessagePassword, setErrorMessagePassword] = useState('');
-    const router = useRouter();
+    const [isLoadingDemo, setIsLoadingDemo] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (field: 'email' | 'password') => (e: ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -86,14 +87,12 @@ export default function LoginCard() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <InputField
-                        id="email"
                         label={t("label.email")}
                         value={email}
                         onChange={handleChange('email')}
                         errorMessage={errorMessageEmail}
                     />
                     <InputField
-                        id="password"
                         label={t("label.password")}
                         value={password}
                         onChange={handleChange('password')}

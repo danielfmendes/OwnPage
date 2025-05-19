@@ -10,6 +10,7 @@ import apiUrl, {handleFetchError} from "@/utils/url";
 import AuthToken from "@/utils/authtoken";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useTranslation} from "react-i18next";
+import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 
 export default function RegisterCard() {
     const {t} = useTranslation();
@@ -18,8 +19,10 @@ export default function RegisterCard() {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = () => {
+        setIsLoading(true);
         fetch(`${apiUrl}/auth/register`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -42,7 +45,8 @@ export default function RegisterCard() {
                     "success"
                 );
             })
-            .catch(err => addNotification(`Registration error${err?.message ? `: ${err.message}` : ""}`, "error"));
+            .catch(err => addNotification(`Registration error${err?.message ? `: ${err.message}` : ""}`, "error"))
+            .finally(() => setIsLoading(false));
     };
 
     const handleBack = () => {
@@ -82,9 +86,9 @@ export default function RegisterCard() {
                         value={password}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                     />
-                    <Button onClick={handleSubmit} className="w-full mt-4">
+                    <ButtonLoading id="send-btn" onClick={handleSubmit} isLoading={isLoading} className="w-full mt-4">
                         {t("button.register")}
-                    </Button>
+                    </ButtonLoading>
                     <Button onClick={handleBack} variant="secondary" className="w-full mt-4">
                         {t("button.back")}
                     </Button>
