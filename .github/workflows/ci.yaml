@@ -57,7 +57,7 @@ jobs:
       - name: Run Flyway migrations
         run: |
           docker run --rm --network ${{ env.DOCKER_NETWORK }} \
-            -v ${{ github.workspace }}backend/init:/flyway/sql \
+            -v ${{ github.workspace }}/backend/init:/flyway/sql \
             flyway/flyway \
             -url=jdbc:postgresql://${{ env.POSTGRES_CONTAINER_NAME }}:${{ env.DB_PORT }}/${{ env.DB_NAME }} \
             -user=${{ env.DB_USER }} \
