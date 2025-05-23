@@ -83,6 +83,7 @@ export default function RegisterCard() {
                     />
                     <InputField
                         label={t("label.password")}
+                        type="password"
                         value={password}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                     />
