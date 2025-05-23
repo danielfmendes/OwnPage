@@ -40,6 +40,7 @@ public class WebDriverUtils {
         }
 
         driver = new ChromeDriver(options);
+        driver.manage().window().setSize(new Dimension(1920, 1080));
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 

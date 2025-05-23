@@ -12,7 +12,8 @@ env:
   DB_USER: fahrrad_user
   DB_PORT: 5432
   DB_HOST: localhost
-  test_type: postgres
+  DOCKER_NETWORK: flyway-network
+  POSTGRES_CONTAINER_NAME: postgres-container
 
 jobs:
   frontend-test:
@@ -32,9 +33,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y xvfb ffmpeg x11-utils
 
+      - name: Create Docker network
+        run: docker network create ${{ env.DOCKER_NETWORK }} || true
+
       - name: Start PostgreSQL container
         run: |
-          docker run --name postgres-${{ env.test_type }} -d \
+          docker run --rm -d \
+            --name ${{ env.POSTGRES_CONTAINER_NAME }} \
+            --network ${{ env.DOCKER_NETWORK }} \
             -e POSTGRES_PASSWORD=${{ env.DB_PASS }} \
             -e POSTGRES_DB=${{ env.DB_NAME }} \
             -e POSTGRES_USER=${{ env.DB_USER }} \
@@ -42,16 +48,22 @@ jobs:
             postgres:15
 
           echo "Waiting for PostgreSQL..."
-          until docker exec postgres-${{ env.test_type }} pg_isready --host=${{ env.DB_HOST }} --port=${{ env.DB_PORT }} --username=${{ env.DB_USER }}; do sleep 1; done
+          until docker exec ${{ env.POSTGRES_CONTAINER_NAME }} pg_isready --host=localhost --port=5432 --username=${{ env.DB_USER }}; do
+            echo "Still waiting for PostgreSQL..."
+            sleep 2
+          done
           echo "PostgreSQL is ready!"
 
-      - name: Run all SQL scripts in alphabetical order
+      - name: Run Flyway migrations
         run: |
-          for file in backend/init/*.sql
-          do
-            echo "Running $file"
-            docker exec -i postgres-${{ env.test_type }} psql -U ${{ env.DB_USER }} -d ${{ env.DB_NAME }} < $file
-          done
+          docker run --rm --network ${{ env.DOCKER_NETWORK }} \
+            -v ${{ github.workspace }}backend/init:/flyway/sql \
+            flyway/flyway \
+            -url=jdbc:postgresql://${{ env.POSTGRES_CONTAINER_NAME }}:${{ env.DB_PORT }}/${{ env.DB_NAME }} \
+            -user=${{ env.DB_USER }} \
+            -password=${{ env.DB_PASS }} \
+            -baselineOnMigrate=true \
+            migrate
 
       - name: Setup Go
         uses: actions/setup-go@v4
