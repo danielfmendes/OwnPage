@@ -9,12 +9,12 @@ import {ArrowUpDown, Trash2} from "lucide-react";
 import * as React from "react";
 import {deleteWithToken, fetchWithToken} from "@/utils/url";
 import WarehousePartDialogContent from "@/app/dwh/partsstorage/content-dialog";
-import {RoleManagementWithName, WarehousePartWithName} from "@/types/custom";
+import {RoleManagementWithName} from "@/models/api";
+import {WarehousePartWithName} from "@/types/custom";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 import {useTranslation} from "react-i18next";
-
 
 export default function PartsStoragePage() {
     const {t} = useTranslation();

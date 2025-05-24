@@ -5,7 +5,6 @@ import {useStore} from "@/hooks/use-store";
 import DataTable from "@/components/helpers/Table";
 import * as React from "react";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import {RoleManagementWithName} from "@/types/custom";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
@@ -15,7 +14,7 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/
 import CustomerDetailContent from "@/app/dwh/customer/customer-detail-content";
 import AddCustomerContent from "@/app/dwh/customer/add-customer-content";
 import {useTranslation} from "react-i18next";
-import {Customer, CustomersService} from "@/models/api";
+import {Customer, CustomersService, RoleManagementWithName} from "@/models/api";
 import FilterManager from "@/utils/filtermanager";
 
 export default function CustomerPage() {
@@ -33,7 +32,7 @@ export default function CustomerPage() {
     const fetchData = React.useCallback(async () => {
         setIsLoadingData(true);
         CustomersService.getCustomers(
-            await filterManager.toString()
+            await filterManager.getFilterString()
         )
             .then((customers: Customer[]) => setData(customers))
             .catch(err => addNotification(`Failed to load customer${err?.message ? `: ${err.message}` : ""}`, "error"))

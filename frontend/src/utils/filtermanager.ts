@@ -45,7 +45,7 @@ class FilterManager {
     }
 
     // Jetzt async, damit wir getProjectIds awaiten können
-    async toString(): Promise<string> {
+    async getFilterString(): Promise<string> {
         // Projekt-IDs holen
         const projectIds = await this.getProjectIds();
 

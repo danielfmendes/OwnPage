@@ -1,18 +1,18 @@
-import { UserNav } from "@/components/admin-panel/user-nav";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { AncestorDialog } from "@/components/helpers/AncestorDialog";
-import { useState } from "react";
-import { useRoleStore } from "@/utils/rolemananagemetstate";
-import { RoleManagementWithName } from "@/types/custom";
+import {UserNav} from "@/components/admin-panel/user-nav";
+import {Button} from "@/components/ui/button";
+import {Dialog, DialogContent, DialogTrigger} from "@/components/ui/dialog";
+import {AncestorDialog} from "@/components/helpers/AncestorDialog";
+import {useState} from "react";
+import {useRoleStore} from "@/utils/rolemananagemetstate";
+import {RoleManagementWithName} from "@/models/api";
 import {SheetMenu} from "@/components/admin-panel/sheet-menu";
 import {useTranslation} from "react-i18next";
 
 interface NavbarProps {
-  title: string;
+    title: string;
 }
 
-export function Navbar({ title }: NavbarProps) {
+export function Navbar({title}: NavbarProps) {
     const {t} = useTranslation();
     const [open, setOpen] = useState(false);
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.selectedRoles);
@@ -21,14 +21,15 @@ export function Navbar({ title }: NavbarProps) {
         roles.length === 0
             ? t("ancestorDialog.open")
             : roles.length === 1
-                ? t("ancestorDialog.single", { count: 1 })
-                : t("ancestorDialog.multiple", { count: roles.length });
+                ? t("ancestorDialog.single", {count: 1})
+                : t("ancestorDialog.multiple", {count: roles.length});
 
     return (
-        <header className="sticky top-0 z-10 w-full bg-background/95 shadow backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:shadow-secondary">
+        <header
+            className="sticky top-0 z-10 w-full bg-background/95 shadow backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:shadow-secondary">
             <div className="mx-4 sm:mx-8 flex h-14 items-center">
                 <div className="flex items-center space-x-4 lg:space-x-2">
-                    <SheetMenu />
+                    <SheetMenu/>
                     <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
                             <Button variant="outline" className="mr-2" onClick={() => setOpen(true)}>
@@ -36,13 +37,13 @@ export function Navbar({ title }: NavbarProps) {
                             </Button>
                         </DialogTrigger>
                         <DialogContent>
-                            <AncestorDialog onClose={() => setOpen(false)} />
+                            <AncestorDialog onClose={() => setOpen(false)}/>
                         </DialogContent>
                     </Dialog>
                     <h1 className="font-bold">{title}</h1>
                 </div>
                 <div className="flex flex-1 items-center justify-end">
-                    <UserNav />
+                    <UserNav/>
                 </div>
             </div>
         </header>

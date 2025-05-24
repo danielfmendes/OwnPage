@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { RoleManagementWithName } from "@/types/custom";
+import { RoleManagementWithName } from "@/models/api";
 
 interface RoleManagementState {
     roles: RoleManagementWithName[];

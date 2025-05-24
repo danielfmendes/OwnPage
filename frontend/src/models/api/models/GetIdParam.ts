@@ -3,6 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * ID of the customer to delete
+ * ID of the primary key to retrieve
  */
-export type IdParam = number;
+export type GetIdParam = number;

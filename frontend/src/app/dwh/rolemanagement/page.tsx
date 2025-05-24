@@ -2,8 +2,7 @@
 import DataTable from "@/components/helpers/Table";
 import * as React from "react";
 import type {ColumnDef} from "@tanstack/react-table";
-import {fetchWithToken} from "@/utils/url";
-import {RoleManagementWithName} from "@/types/custom";
+import {RoleManagementsService, RoleManagementWithName} from "@/models/api";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {ContentLayout} from "@/components/admin-panel/content-layout";
 import {Button} from "@/components/ui/button";
@@ -12,19 +11,23 @@ import {Dialog} from "@/components/ui/dialog";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 import AddProjektDialogContent from "@/app/dwh/rolemanagement/add-project-dialog";
 import {useTranslation} from "react-i18next";
+import FilterManager from "@/utils/filtermanager";
 
 export default function RoleManagementPage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
+    const filterManager = new FilterManager();
     const [data, setData] = React.useState<RoleManagementWithName[]>([]);
     const isLoadingData = useRoleStore((state) => state.isLoading);
     const setIsLoadingData = useRoleStore((state) => state.setIsLoading);
     const [showDialog, setShowDialog] = React.useState(false);
     const [manageId, setManageId] = React.useState<number | null>(null);
 
-    const fetchData = React.useCallback(() => {
+    const fetchData = React.useCallback(async () => {
         setIsLoadingData(true);
-        fetchWithToken(`/rolemanagements`)
+        RoleManagementsService.getRoleManagements(
+            await filterManager.getFilterString()
+        )
             .then((roles: RoleManagementWithName[]) => {
                 setData(roles ?? [])
                 useRoleStore.getState().setRoles(roles ?? [])
@@ -77,8 +80,8 @@ export default function RoleManagementPage() {
                 data={data}
                 isLoading={isLoadingData}
                 filterColumn={"project_name"}
-                onRefresh={() => {
-                    fetchData()
+                onRefresh={async () => {
+                    await fetchData()
                 }}
                 addDialogContent={(onClose) => (
                     <AddProjektDialogContent

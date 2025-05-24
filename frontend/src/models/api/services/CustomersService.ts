@@ -31,7 +31,7 @@ export class CustomersService {
     }
     /**
      * Delete a customer by ID
-     * @param id ID of the customer to delete
+     * @param id ID of the primary key to delete
      * @param cascade Whether to delete related data as well
      * @returns void
      * @throws ApiError

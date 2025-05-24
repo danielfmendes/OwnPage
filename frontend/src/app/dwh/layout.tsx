@@ -7,7 +7,7 @@ import AuthToken from "@/utils/authtoken";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useUserStore} from "@/utils/userstate";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
-import {RoleManagementWithName} from "@/types/custom";
+import {RoleManagementsService, RoleManagementWithName} from "@/models/api";
 import {handleLogOut} from "@/utils/helpers";
 import {useRouter} from "next/navigation";
 import Language from "@/utils/language";
@@ -57,7 +57,7 @@ export default function DemoLayout({children}: { children: React.ReactNode }) {
                     .finally(() => setIsLoadingUser(false));
             }
             setIsLoadingRole(true);
-            fetchWithToken(`/rolemanagements`, true)
+            RoleManagementsService.getRoleManagements()
                 .then((roles: RoleManagementWithName[]) => {
                     setRoles(roles || []);
                 })

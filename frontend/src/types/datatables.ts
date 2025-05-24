@@ -1,9 +1,3 @@
-export interface RoleManagement {
-    user_email: string;
-    project_id: number;
-    role: string;
-}
-
 export interface Saddle {
     id: number;
     name: string;

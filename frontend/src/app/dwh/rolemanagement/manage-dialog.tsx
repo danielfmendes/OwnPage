@@ -4,9 +4,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import {deleteWithToken, fetchWithBodyAndToken, fetchWithToken} from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import {RoleManagement} from "@/types/datatables";
+import {RoleManagement, RoleManagementsService} from "@/models/api";
 import {Select, SelectTrigger, SelectValue, SelectContent, SelectItem} from "@/components/ui/select";
 import {Check, Trash2} from "lucide-react";
 import {Input} from "@/components/ui/input";
@@ -43,7 +42,7 @@ export default function ManageDialogContent({manageId}: ManageProps) {
     const fetchData = () => {
         if (manageId) {
             setIsLoadingData(true);
-            fetchWithToken(`/rolemanagements/${manageId}`)
+            RoleManagementsService.getRoleManagementsById(manageId)
                 .then((roles: RoleManagement[]) => {
                     setData(roles);
                     const original: Record<string, string> = {};
@@ -78,7 +77,7 @@ export default function ManageDialogContent({manageId}: ManageProps) {
         if (newEmail && newRole) {
             const newRoleManagement: RoleManagement = {user_email: newEmail, project_id: manageId ?? 0, role: newRole};
             setIsLoadingAdd(true);
-            fetchWithBodyAndToken("POST", "/rolemanagements", newRoleManagement)
+            RoleManagementsService.createRoleManagement(newRoleManagement)
                 .then(() => {
                     addNotification("Role saved successfully", "success");
                     setNewEmail("");
@@ -97,7 +96,7 @@ export default function ManageDialogContent({manageId}: ManageProps) {
             role: currentRole,
         }
         setLoadingEditEmail(email);
-        fetchWithBodyAndToken("PUT", "/rolemanagements", updatedData)
+        RoleManagementsService.updateRoleManagement(updatedData)
             .then(() => {
                 addNotification("Role updated successfully", "success");
                 fetchData();
@@ -108,7 +107,7 @@ export default function ManageDialogContent({manageId}: ManageProps) {
 
     const handleDelete = (email: string) => {
         setLoadingDeleteEmail(email);
-        deleteWithToken(`/rolemanagements?email=${email}&project_id=${manageId}`)
+        RoleManagementsService.deleteRoleManagementByEmailAndProjectId(email, manageId!)
             .then(() => {
                 addNotification(`Email ${email} was successfully deleted from project with id ${manageId}`, "success");
                 fetchData();

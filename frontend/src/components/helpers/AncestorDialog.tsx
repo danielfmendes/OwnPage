@@ -1,21 +1,21 @@
-import { useState } from "react";
+import {useState} from "react";
 import {
     Accordion,
     AccordionItem,
     AccordionTrigger,
     AccordionContent,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import {Button} from "@/components/ui/button";
+import {Checkbox} from "@/components/ui/checkbox";
+import {ScrollArea} from "@/components/ui/scroll-area";
 import {
     DialogHeader,
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
 import {Trash, X} from "lucide-react";
-import { RoleManagementWithName } from "@/types/custom";
-import { useRoleStore } from "@/utils/rolemananagemetstate";
+import {RoleManagementWithName} from "@/models/api";
+import {useRoleStore} from "@/utils/rolemananagemetstate";
 import {useTranslation} from "react-i18next";
 
 interface Props {
@@ -131,7 +131,7 @@ export function AncestorDialog({onClose}: Props) {
                                             className="h-5 w-5"
                                             onClick={() => removeSelection(project)}
                                         >
-                                            <X className="h-4 w-4" />
+                                            <X className="h-4 w-4"/>
                                         </Button>
                                     </li>
                                 ))}
@@ -143,7 +143,7 @@ export function AncestorDialog({onClose}: Props) {
 
             <div className="flex justify-between gap-2">
                 <Button variant="ghost" onClick={clearSelection} className="flex items-center gap-2">
-                    <Trash className="w-4 h-4" />
+                    <Trash className="w-4 h-4"/>
                     {t("button.clear_selection")}
                 </Button>
 

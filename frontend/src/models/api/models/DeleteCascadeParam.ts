@@ -5,4 +5,4 @@
 /**
  * Whether to delete related data as well
  */
-export type CascadeParam = boolean;
+export type DeleteCascadeParam = boolean;
