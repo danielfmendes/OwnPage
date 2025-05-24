@@ -1,12 +1,3 @@
-export interface WarehousePart {
-    id: number;
-    part_type: string;
-    part_id: number;
-    quantity: number;
-    storage_location: string;
-    project_id: number;
-}
-
 export interface Order {
     id: number;
     customer_id: number;

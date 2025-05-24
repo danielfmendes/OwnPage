@@ -1,13 +1,12 @@
 import React from "react";
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {fetchWithBodyAndToken, fetchWithToken} from "@/utils/url";
-import {WarehousePart} from "@/types/datatables";
+import {fetchWithToken} from "@/utils/url";
+import {WarehousePart, WareHousePartsService, WarehousePartWithName} from "@/models/api";
 import InputField from "@/components/helpers/InputField";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {SelectLoading} from "@/components/helpers/SelectLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import {WarehousePartWithName} from "@/types/custom";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
 import {useTranslation} from "react-i18next";
 
@@ -53,13 +52,13 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
         const newData = {
             project_id: parseInt(projectId),
             part_type: partType,
-            part_id: partId,
+            part_id: partId ?? 0,
             quantity,
             storage_location: storageLocation
         };
         setIsLoading(true)
 
-        fetchWithBodyAndToken("POST", "/warehouseparts", newData)
+        WareHousePartsService.createWareHousePart(newData)
             .then(() => {
                 addNotification("Warehousepart saved successfully", "success");
                 resetForm();
@@ -81,7 +80,7 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
         }
         setIsLoading(true)
 
-        fetchWithBodyAndToken("PUT", "/warehouseparts", updatedData)
+        WareHousePartsService.updateWareHousePart(updatedData)
             .then(() => {
                 addNotification("Warehousepart updated successfully", "success");
                 onClose();

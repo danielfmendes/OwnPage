@@ -24,8 +24,11 @@ export type { RoleManagement } from './models/RoleManagement';
 export type { RoleManagementWithName } from './models/RoleManagementWithName';
 export type { Saddle } from './models/Saddle';
 export type { User } from './models/User';
+export type { WarehousePart } from './models/WarehousePart';
+export type { WarehousePartWithName } from './models/WarehousePartWithName';
 
 export { BikesService } from './services/BikesService';
 export { CustomersService } from './services/CustomersService';
 export { ProjectsService } from './services/ProjectsService';
 export { RoleManagementsService } from './services/RoleManagementsService';
+export { WareHousePartsService } from './services/WareHousePartsService';

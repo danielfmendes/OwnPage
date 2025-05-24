@@ -290,6 +290,7 @@ paths:
           description: Internal server error
       tags:
         - RoleManagements
+
   /rolemanagements/{id}:
     get:
       summary: Retrieve a list of role managements for a given ID
@@ -315,6 +316,90 @@ paths:
           description: Internal server error
       tags:
         - RoleManagements
+
+  /warehouseparts:
+    get:
+      summary: Retrieve a list of warehouse parts
+      operationId: getWareHouseParts
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of warehouse parts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WarehousePartWithName'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - WareHouseParts
+    delete:
+      summary: Delete a warehouse part by ID
+      operationId: deleteWareHousePart
+      parameters:
+        - $ref: "#/components/parameters/DeleteIdParam"
+      responses:
+        '204':
+          description: Warehouse part deleted successfully
+        '400':
+          description: Bad request – missing or invalid ID
+        '401':
+          description: Unauthorized – missing or invalid token
+        '500':
+          description: Internal server error
+      tags:
+        - WareHouseParts
+    put:
+      summary: Update a warehouse part
+      operationId: updateWareHousePart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WarehousePart'
+      responses:
+        '200':
+          description: WareHousePart updated successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '404':
+          description: WareHousePart not found
+        '500':
+          description: Internal server error
+      tags:
+        - WareHouseParts
+    post:
+      summary: Create a new warehouse part
+      operationId: createWareHousePart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WarehousePart'
+      responses:
+        '201':
+          description: WareHousePart created successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '409':
+          description: Conflict – duplicate or invalid data
+        '500':
+          description: Internal server error
+      tags:
+        - WareHouseParts
 
 components:
   parameters:
@@ -523,6 +608,39 @@ components:
         project_id:
           type: integer
           description: ID of the associated project
+    WarehousePart:
+      type: object
+      required: [ part_type, part_id, quantity, storage_location, project_id ]
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the part in the warehouse
+        part_type:
+          type: string
+          description: Type/category of the part
+        part_id:
+          type: integer
+          description: ID of the specific part
+        quantity:
+          type: integer
+          description: Quantity available in stock
+        storage_location:
+          type: string
+          description: Location of the part in the warehouse
+        project_id:
+          type: integer
+          description: Associated project ID
+
+    # Extended Types
+    WarehousePartWithName:
+      allOf:
+        - $ref: '#/components/schemas/WarehousePart'
+        - type: object
+          required: [ part_name ]
+          properties:
+            part_name:
+              type: string
+              description: Human-readable name of the warehouse part
     BikeWithModelName:
       allOf:
         - $ref: '#/components/schemas/Bike'

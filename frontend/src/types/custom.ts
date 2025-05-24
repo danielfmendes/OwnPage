@@ -1,8 +1,4 @@
-import {Order, OrderItem, WarehousePart} from "@/types/datatables";
-
-export type WarehousePartWithName = WarehousePart & {
-    part_name: string;
-};
+import {Order, OrderItem} from "@/types/datatables";
 
 export type OrderWithCustomer = Order & {
     customer_name: string;

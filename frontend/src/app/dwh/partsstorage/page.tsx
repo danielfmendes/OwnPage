@@ -7,26 +7,27 @@ import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown, Trash2} from "lucide-react";
 import * as React from "react";
-import {deleteWithToken, fetchWithToken} from "@/utils/url";
 import WarehousePartDialogContent from "@/app/dwh/partsstorage/content-dialog";
-import {RoleManagementWithName} from "@/models/api";
-import {WarehousePartWithName} from "@/types/custom";
+import {RoleManagementWithName, WareHousePartsService, WarehousePartWithName} from "@/models/api";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 import {useTranslation} from "react-i18next";
+import FilterManager from "@/utils/filtermanager";
 
 export default function PartsStoragePage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
+    const filterManager = new FilterManager();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const [data, setData] = React.useState<WarehousePartWithName[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(true);
     const [loadingDeleteId, setLoadingDeleteId] = React.useState<number | null>(null);
 
-    const fetchData = () => {
+    const fetchData = async () => {
         setIsLoadingData(true);
-        fetchWithToken(`/warehouseparts`)
+        const filterString = await filterManager.getFilterString();
+        WareHousePartsService.getWareHouseParts(filterString === "" ? undefined : filterString)
             .then((warehouseparts: WarehousePartWithName[]) => {
                 setData(warehouseparts);
             })
@@ -37,10 +38,10 @@ export default function PartsStoragePage() {
     const handleDelete = (event: React.MouseEvent, id: number) => {
         event.stopPropagation();
         setLoadingDeleteId(id);
-        deleteWithToken(`/warehouseparts?id=${id}`)
-            .then(() => {
+        WareHousePartsService.deleteWareHousePart(id)
+            .then(async () => {
                 addNotification(`Warehousepart with id ${id} successfully deleted`, "success");
-                fetchData();
+                await fetchData();
             })
             .catch(err => addNotification(`Failed to delete warehousepart${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setLoadingDeleteId(null));
@@ -84,7 +85,7 @@ export default function PartsStoragePage() {
 
                 return (
                     <ButtonLoading
-                        onClick={(event) => handleDelete(event, warehousePart.id)}
+                        onClick={(event) => handleDelete(event, warehousePart.id!)}
                         isLoading={loadingDeleteId === warehousePart.id}
                         className="text-black dark:text-white p-2 rounded"
                         variant="destructive"
@@ -108,8 +109,8 @@ export default function PartsStoragePage() {
                 data={data}
                 isLoading={isLoadingData}
                 filterColumn={"storage_location"}
-                onRefresh={() => {
-                    fetchData()
+                onRefresh={async () => {
+                    await fetchData()
                 }}
                 rowDialogContent={(rowData, onClose) => (
                     <WarehousePartDialogContent
