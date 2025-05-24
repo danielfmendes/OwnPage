@@ -1,14 +1,12 @@
 import React from "react";
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
-import {Bike} from "@/types/datatables";
+import {Bike, BikesService, BikeWithModelName} from "@/models/api";
 import InputField from "@/components/helpers/InputField";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import {BikeWithModelName} from "@/types/custom";
 import {DatePicker} from "@/components/helpers/DatePicker";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
 import ModelNameSelect from "@/components/helpers/selects/ModelNameSelect";
-import {fetchWithBodyAndToken} from "@/utils/url";
 import {useTranslation} from "react-i18next";
 
 interface Props {
@@ -42,7 +40,7 @@ export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) 
     const handleSave = () => {
         const newData = {
             project_id: parseInt(projectId),
-            model_id: modelId,
+            model_id: modelId ?? 0,
             serial_number: serialNumber,
             production_date: productionDate ? productionDate.toISOString() : '',
             quantity,
@@ -50,7 +48,7 @@ export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) 
         };
 
         setIsLoading(true);
-        fetchWithBodyAndToken("POST", "/bikes", newData)
+        BikesService.createBike(newData)
             .then(() => {
                 addNotification("Bike saved successfully", "success");
                 resetForm();
@@ -73,7 +71,7 @@ export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) 
         };
 
         setIsLoading(true);
-        fetchWithBodyAndToken("PUT", "/bikes", updatedData)
+        BikesService.updateBike(updatedData)
             .then(() => {
                 addNotification("Bike updated successfully", "success");
                 onClose();

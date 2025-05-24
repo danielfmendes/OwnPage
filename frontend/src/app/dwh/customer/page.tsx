@@ -31,9 +31,8 @@ export default function CustomerPage() {
 
     const fetchData = React.useCallback(async () => {
         setIsLoadingData(true);
-        CustomersService.getCustomers(
-            await filterManager.getFilterString()
-        )
+        const filterString = await filterManager.getFilterString();
+        CustomersService.getCustomers(filterString === "" ? undefined : filterString)
             .then((customers: Customer[]) => setData(customers))
             .catch(err => addNotification(`Failed to load customer${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingData(false));

@@ -1,12 +1,98 @@
 openapi: 3.0.3
 info:
-  title: Customer API
+  title: Nebula DW API
   version: 1.0.0
-  description: API for managing customer data
+  description: API for managing nebula data warehouse operations, including bikes, customers, projects, and role management.
 servers:
   - url: https://api.example.com
 
 paths:
+  /bikes:
+    get:
+      summary: Retrieve a list of bikes
+      operationId: getBikes
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of bikes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BikeWithModelName'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Bikes
+    delete:
+      summary: Delete a bike by ID
+      operationId: deleteBike
+      parameters:
+        - $ref: "#/components/parameters/DeleteIdParam"
+        - $ref: "#/components/parameters/DeleteCascadeParam"
+      responses:
+        '204':
+          description: Bike deleted successfully
+        '409':
+          description: Conflict – related data exists; use cascade=true to force delete
+        '400':
+          description: Bad request – missing or invalid ID
+        '401':
+          description: Unauthorized – missing or invalid token
+        '500':
+          description: Internal server error
+      tags:
+        - Bikes
+    put:
+      summary: Update a bike
+      operationId: updateBike
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Bike'
+      responses:
+        '200':
+          description: Bike updated successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '404':
+          description: Bike not found
+        '500':
+          description: Internal server error
+      tags:
+        - Bikes
+    post:
+      summary: Create a new bike
+      operationId: createBike
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Bike'
+      responses:
+        '201':
+          description: Bike created successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '409':
+          description: Conflict – duplicate or invalid data
+        '500':
+          description: Internal server error
+      tags:
+        - Bikes
   /customers:
     get:
       summary: Retrieve a list of customers
@@ -362,10 +448,95 @@ components:
         project_id:
           type: integer
           description: Project ID associated with the customer
+    Saddle:
+      type: object
+      required: [ id, name ]
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the saddle
+        name:
+          type: string
+          description: Name of the saddle
+    Frame:
+      type: object
+      required: [ id, name ]
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the frame
+        name:
+          type: string
+          description: Name of the frame
+    Fork:
+      type: object
+      required: [ id, name ]
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the fork
+        name:
+          type: string
+          description: Name of the fork
+    BikeModel:
+      type: object
+      required: [ id, name, saddle_id, frame_id, fork_id ]
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the bike model
+        name:
+          type: string
+          description: Name of the bike model
+        saddle_id:
+          type: integer
+          description: ID of the associated saddle
+        frame_id:
+          type: integer
+          description: ID of the associated frame
+        fork_id:
+          type: integer
+          description: ID of the associated fork
+    Bike:
+      type: object
+      required: [ model_id, serial_number, production_date, quantity, warehouse_location, project_id ]
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the bike
+        model_id:
+          type: integer
+          description: ID of the bike model
+        serial_number:
+          type: string
+          description: Serial number of the bike
+        production_date:
+          type: string
+          format: date
+          description: Date when the bike was produced
+        quantity:
+          type: integer
+          description: Quantity produced or available
+        warehouse_location:
+          type: string
+          description: Location in the warehouse
+        project_id:
+          type: integer
+          description: ID of the associated project
+    BikeWithModelName:
+      allOf:
+        - $ref: '#/components/schemas/Bike'
+        - type: object
+          required: [ model_name ]
+          properties:
+            model_name:
+              type: string
+              description: Name of the bike model
     RoleManagementWithName:
       allOf:
         - $ref: '#/components/schemas/RoleManagement'
         - type: object
+          required: [ project_name ]
           properties:
             project_name:
               type: string

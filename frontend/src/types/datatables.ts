@@ -1,36 +1,3 @@
-export interface Saddle {
-    id: number;
-    name: string;
-}
-
-export interface Frame {
-    id: number;
-    name: string;
-}
-
-export interface Fork {
-    id: number;
-    name: string;
-}
-
-export interface BikeModel {
-    id: number;
-    name: string;
-    saddle_id: number;
-    frame_id: number;
-    fork_id: number;
-}
-
-export interface Bike {
-    id: number;
-    model_id: number;
-    serial_number: string;
-    production_date: string;
-    quantity: number;
-    warehouse_location: string;
-    project_id: number;
-}
-
 export interface WarehousePart {
     id: number;
     part_type: string;

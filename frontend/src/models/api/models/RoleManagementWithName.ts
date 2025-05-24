@@ -7,6 +7,6 @@ export type RoleManagementWithName = (RoleManagement & {
     /**
      * Name of the associated project
      */
-    project_name?: string;
+    project_name: string;
 });
 

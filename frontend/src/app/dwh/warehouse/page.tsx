@@ -7,19 +7,19 @@ import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown, Trash2} from "lucide-react";
 import * as React from "react";
-import {deleteWithToken, fetchWithToken, handleFetchError} from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import BikeDialogContent from "@/app/dwh/warehouse/content-dialog";
-import {BikeWithModelName} from "@/types/custom";
-import {RoleManagementWithName} from "@/models/api";
+import {BikesService, BikeWithModelName, RoleManagementWithName} from "@/models/api";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 import {useTranslation} from "react-i18next";
+import FilterManager from "@/utils/filtermanager";
 
 export default function WareHousePage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
+    const filterManager = new FilterManager();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const [data, setData] = React.useState<BikeWithModelName[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(true);
@@ -28,9 +28,10 @@ export default function WareHousePage() {
     const [showCascadeDialog, setShowCascadeDialog] = React.useState(false);
     const [deleteId, setDeleteId] = React.useState<number | null>(null);
 
-    const fetchData = React.useCallback(() => {
+    const fetchData = React.useCallback(async () => {
         setIsLoadingData(true);
-        fetchWithToken(`/bikes`)
+        const filterString = await filterManager.getFilterString();
+        BikesService.getBikes(filterString === "" ? undefined : filterString)
             .then((bikes: BikeWithModelName[]) => setData(bikes))
             .catch(err => addNotification(`Failed to load bikes${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingData(false));
@@ -43,19 +44,20 @@ export default function WareHousePage() {
             setLoadingDeleteId(id);
         }
 
-        deleteWithToken(`/bikes?id=${id}${cascade ? "&cascade=true" : ""}`, true)
-            .then(async (res) => {
-                if (res.status === 409 && !cascade) {
+        BikesService.deleteBike(id, cascade)
+            .then(async () => {
+                addNotification(`Bike with id ${id}${cascade ? " and related data" : ""} deleted successfully`, "success");
+                await fetchData();
+                if (cascade) setShowCascadeDialog(false);
+            })
+            .catch((err) => {
+                if (err?.status === 409 && !cascade) {
                     setShowCascadeDialog(true);
                     setDeleteId(id);
                     return;
                 }
-                if (!res.ok) await handleFetchError(res, "DELETE");
-                addNotification(`Bike with id ${id}${cascade ? " and related data" : ""} deleted successfully`, "success");
-                fetchData();
-                if (cascade) setShowCascadeDialog(false);
+                addNotification(`Failed to delete bike${err?.message ? `: ${err.message}` : ""}`, "error")
             })
-            .catch(err => addNotification(`Failed to delete bike${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => {
                 if (cascade) {
                     setIsLoadingDeleteCascade(false);
@@ -126,7 +128,7 @@ export default function WareHousePage() {
 
                 return (
                     <ButtonLoading
-                        onClick={(event) => handleDelete(event, bike.id)}
+                        onClick={(event) => handleDelete(event, bike.id!)}
                         isLoading={loadingDeleteId === bike.id}
                         className="text-black dark:text-white p-2 rounded"
                         variant="destructive"
@@ -150,8 +152,8 @@ export default function WareHousePage() {
                 data={data}
                 isLoading={isLoadingData}
                 filterColumn={"serial_number"}
-                onRefresh={() => {
-                    fetchData()
+                onRefresh={async () => {
+                    await fetchData()
                 }}
                 rowDialogContent={(rowData, onClose) => (
                     <BikeDialogContent
