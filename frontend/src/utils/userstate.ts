@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import { User } from "@/types/datatables";
+import {create} from "zustand";
+import {User} from "@/models/api";
 
 interface UserState {
     user: User | null;
@@ -12,7 +12,7 @@ interface UserState {
 export const useUserStore = create<UserState>((set) => ({
     user: null,
     isLoading: true,
-    setUser: (user) => set({ user }),
-    clearUser: () => set({ user: null }),
-    setIsLoading: (isLoading) => set({ isLoading }),
+    setUser: (user) => set({user}),
+    clearUser: () => set({user: null}),
+    setIsLoading: (isLoading) => set({isLoading}),
 }));

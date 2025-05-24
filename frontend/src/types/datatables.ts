@@ -1,13 +1,3 @@
-export interface User {
-    email: string;
-    password: string;
-    username: string;
-    dob: string;
-    is_verified: boolean;
-    verification_expires: string;
-    verification_token: string;
-}
-
 export interface RoleManagement {
     user_email: string;
     project_id: number;

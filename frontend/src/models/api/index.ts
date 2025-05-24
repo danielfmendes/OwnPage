@@ -12,6 +12,7 @@ export type { Customer } from './models/Customer';
 export type { FilterParam } from './models/FilterParam';
 export type { IdParam } from './models/IdParam';
 export type { Project } from './models/Project';
+export type { User } from './models/User';
 
 export { CustomersService } from './services/CustomersService';
 export { ProjectsService } from './services/ProjectsService';
