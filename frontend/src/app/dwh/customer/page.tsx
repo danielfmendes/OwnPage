@@ -7,7 +7,7 @@ import * as React from "react";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {RoleManagementWithName} from "@/types/custom";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
-import {deleteWithToken, fetchWithToken, handleFetchError} from "@/utils/url";
+import {deleteWithToken, handleFetchError} from "@/utils/url";
 import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown, Trash2} from "lucide-react";
@@ -17,10 +17,13 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/
 import CustomerDetailContent from "@/app/dwh/customer/customer-detail-content";
 import AddCustomerContent from "@/app/dwh/customer/add-customer-content";
 import {useTranslation} from "react-i18next";
+import {CustomersService} from "@/models/api";
+import FilterManager from "@/utils/filtermanager";
 
 export default function CustomerPage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
+    const filterManager = new FilterManager();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const [data, setData] = React.useState<Customer[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(true);
@@ -29,9 +32,11 @@ export default function CustomerPage() {
     const [showCascadeDialog, setShowCascadeDialog] = React.useState(false);
     const [deleteId, setDeleteId] = React.useState<number | null>(null);
 
-    const fetchData = React.useCallback(() => {
+    const fetchData = React.useCallback(async () => {
         setIsLoadingData(true);
-        fetchWithToken(`/customers`)
+        CustomersService.getCustomers(
+            await filterManager.toString()
+        )
             .then((customers: Customer[]) => setData(customers))
             .catch(err => addNotification(`Failed to load customer${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingData(false));

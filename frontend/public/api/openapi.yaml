@@ -1,0 +1,71 @@
+openapi: 3.0.3
+info:
+  title: Customer API
+  version: 1.0.0
+  description: API for managing customer data
+servers:
+  - url: https://api.example.com
+
+paths:
+  /customers:
+    get:
+      summary: Retrieve a list of customers
+      operationId: getCustomers
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Customer'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '500':
+          description: Internal server error
+      tags:
+        - Customers
+
+components:
+  parameters:
+    FilterParam:
+      name: filter
+      in: query
+      description: Query filter string, e.g. project_id:$eq.1|2|3
+      required: false
+      schema:
+        type: string
+
+  schemas:
+    Customer:
+      type: object
+      required: [id, email, password, first_name, name, dob, city, project_id]
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the customer
+        email:
+          type: string
+          description: Customer's email address
+        password:
+          type: string
+          description: Hashed password for authentication
+        first_name:
+          type: string
+          description: Customer's given name
+        name:
+          type: string
+          description: Customer's family name
+        dob:
+          type: string
+          format: date
+          description: Date of birth (YYYY-MM-DD)
+        city:
+          type: string
+          description: City of residence
+        project_id:
+          type: integer
+          description: Project ID associated with the customer

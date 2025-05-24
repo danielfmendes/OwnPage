@@ -108,21 +108,48 @@ func HandleGetWithProjectIDs(w http.ResponseWriter, r *http.Request, baseQuery s
 }
 
 func filterProjectIDs(r *http.Request, allowedIDs []int) ([]int, error) {
-	queryParam := r.URL.Query().Get("project_id")
-	if queryParam == "" {
+	filterParam := r.URL.Query().Get("filter")
+	if filterParam == "" {
 		return allowedIDs, nil
 	}
 
-	requestedIDs := []int{}
-	for _, part := range strings.Split(queryParam, "|") {
-		if part == "" {
-			continue
+	// Beispiel filterParam: "project_id:$eq.2" oder "project_id:$in.1|2|3,customer_id:$eq.5"
+	filters := strings.Split(filterParam, ",")
+	var projectFilter string
+	for _, f := range filters {
+		if strings.HasPrefix(f, "project_id:") {
+			projectFilter = f
+			break
 		}
-		id, err := strconv.Atoi(part)
+	}
+
+	if projectFilter == "" {
+		return allowedIDs, nil
+	}
+
+	filterValue := strings.TrimPrefix(projectFilter, "project_id:")
+
+	var requestedIDs []int
+	if strings.HasPrefix(filterValue, "$eq.") {
+		// Single ID
+		idStr := strings.TrimPrefix(filterValue, "$eq.")
+		id, err := strconv.Atoi(idStr)
 		if err != nil {
 			return nil, fmt.Errorf(ErrMsgInvalidProjectIDParam)
 		}
-		requestedIDs = append(requestedIDs, id)
+		requestedIDs = []int{id}
+	} else if strings.HasPrefix(filterValue, "$in.") {
+		// Mehrere IDs, pipe-separiert
+		idStrs := strings.Split(strings.TrimPrefix(filterValue, "$in."), "|")
+		for _, s := range idStrs {
+			id, err := strconv.Atoi(s)
+			if err != nil {
+				return nil, fmt.Errorf(ErrMsgInvalidProjectIDParam)
+			}
+			requestedIDs = append(requestedIDs, id)
+		}
+	} else {
+		return nil, fmt.Errorf(ErrMsgInvalidProjectIDParam)
 	}
 
 	// Erlaube nur IDs, auf die der Nutzer Zugriff hat

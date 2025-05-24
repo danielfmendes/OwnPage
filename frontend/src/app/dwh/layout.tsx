@@ -12,6 +12,7 @@ import {handleLogOut} from "@/utils/helpers";
 import {useRouter} from "next/navigation";
 import Language from "@/utils/language";
 import {useTranslation} from "react-i18next";
+import {OpenAPI} from "@/models/api/core/OpenAPI";
 
 export default function DemoLayout({children}: { children: React.ReactNode }) {
     const {addNotification} = useNotification();
@@ -24,6 +25,14 @@ export default function DemoLayout({children}: { children: React.ReactNode }) {
     const setSelectedRoles = useRoleStore((state) => state.setSelectedRoles);
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const {i18n} = useTranslation();
+
+    // Set up API base + token once
+    useEffect(() => {
+        if (token) {
+            OpenAPI.BASE = process.env.NEXT_PUBLIC_API_ENV || "http://localhost:8080";
+            OpenAPI.TOKEN = token
+        }
+    }, [token]);
 
     useEffect(() => {
         const savedLang = Language.getLanguage();
