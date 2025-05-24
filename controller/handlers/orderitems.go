@@ -38,20 +38,12 @@ func GetOrderItems(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetOrderItemsByOrderID(w http.ResponseWriter, r *http.Request) {
-	filter := r.URL.Query().Get("filter")
-	if filter == "" {
+	orderidStr, found := utils.ExtractFilterValue(r, "order_id")
+	if !found {
 		http.Error(w, utils.ErrMsgIdMissing, http.StatusBadRequest)
 		return
 	}
 
-	// Beispiel: filter = "order_id:$eq.3"
-	prefix := "order_id:$eq."
-	if !strings.HasPrefix(filter, prefix) {
-		http.Error(w, "Invalid filter format", http.StatusBadRequest)
-		return
-	}
-
-	orderidStr := strings.TrimPrefix(filter, prefix)
 	orderid, err := strconv.Atoi(orderidStr)
 	if err != nil {
 		http.Error(w, utils.ErrMsgIdInvalid, http.StatusBadRequest)

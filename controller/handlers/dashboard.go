@@ -24,8 +24,8 @@ func DashBoardHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetGraphMeta(w http.ResponseWriter, r *http.Request) {
-	timeRange := r.URL.Query().Get("range")
-	if timeRange == "" {
+	timeRange, found := utils.ExtractFilterValue(r, "range")
+	if !found {
 		http.Error(w, utils.ErrMsgRangeMissing, http.StatusBadRequest)
 		return
 	}
@@ -45,8 +45,8 @@ func GetGraphMeta(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetGraphData(w http.ResponseWriter, r *http.Request) {
-	timeRange := r.URL.Query().Get("range")
-	if timeRange == "" {
+	timeRange, found := utils.ExtractFilterValue(r, "range")
+	if !found {
 		http.Error(w, utils.ErrMsgRangeMissing, http.StatusBadRequest)
 		return
 	}
@@ -65,8 +65,8 @@ func GetGraphData(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetCityData(w http.ResponseWriter, r *http.Request) {
-	timeRange := r.URL.Query().Get("range")
-	if timeRange == "" {
+	timeRange, found := utils.ExtractFilterValue(r, "range")
+	if !found {
 		http.Error(w, utils.ErrMsgRangeMissing, http.StatusBadRequest)
 		return
 	}
@@ -85,8 +85,8 @@ func GetCityData(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetSalesPerBikeModel(w http.ResponseWriter, r *http.Request) {
-	timeRange := r.URL.Query().Get("range")
-	if timeRange == "" {
+	timeRange, found := utils.ExtractFilterValue(r, "range")
+	if !found {
 		http.Error(w, utils.ErrMsgRangeMissing, http.StatusBadRequest)
 		return
 	}

@@ -7,10 +7,10 @@ export type OrderWithCustomer = (Order & {
     /**
      * Full name of the customer
      */
-    customer_name?: string;
+    customer_name: string;
     /**
      * Email address of the customer
      */
-    customer_email?: string;
+    customer_email: string;
 });
 

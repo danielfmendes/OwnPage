@@ -7,10 +7,10 @@ export type OrderItemsWithBikeAndDate = (OrderItem & {
     /**
      * Bike model name
      */
-    model_name?: string;
+    model_name: string;
     /**
      * Date when the order was placed
      */
-    order_date?: string;
+    order_date: string;
 });
 

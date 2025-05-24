@@ -93,6 +93,7 @@ paths:
           description: Internal server error
       tags:
         - Bikes
+
   /customers:
     get:
       summary: Retrieve a list of customers
@@ -179,7 +180,99 @@ paths:
           description: Internal server error
       tags:
         - Customers
-  
+  /dashboard/bikemodels:
+    get:
+      summary: Retrieve a list of bike sales by model
+      operationId: getBikeSales
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of bike sales by model and date
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BikeSales'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Dashboards
+  /dashboard/citydata:
+    get:
+      summary: Retrieve a list of city data
+      operationId: getCityData
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of city data (current and previous revenue from top 5 cities)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CityData'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Dashboards
+  /dashboard/graphdata:
+    get:
+      summary: Retrieve a list of graph data
+      operationId: getGraphData
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of graph data (time buckets with revenue and sales)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GraphData'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Dashboards
+  /dashboard/graphmeta:
+    get:
+      summary: Retrieve a list of graph meta
+      operationId: getGraphMeta
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of graph meta (current and previous revenue/sales)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GraphMeta'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Dashboards
+
   /orders:
     get:
       summary: Retrieve a list of orders
@@ -838,6 +931,23 @@ components:
           type: number
           format: float
           description: Price per unit of the bike
+    PartCost:
+      type: object
+      required: [ part_type, part_id, cost, project_id ]
+      properties:
+        part_type:
+          type: string
+          description: Type/category of the part
+        part_id:
+          type: integer
+          description: ID of the part
+        cost:
+          type: number
+          format: float
+          description: Cost of the part
+        project_id:
+          type: integer
+          description: ID of the project the part cost belongs to
 
     # Extended Types
     WarehousePartWithName:
@@ -871,6 +981,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/Order'
         - type: object
+          required: [ customer_name, customer_email ]
           properties:
             customer_name:
               type: string
@@ -882,6 +993,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/OrderItem'
         - type: object
+          required: [ model_name ]
           properties:
             model_name:
               type: string
@@ -890,6 +1002,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/OrderItem'
         - type: object
+          required: [ model_name, order_date ]
           properties:
             model_name:
               type: string
@@ -898,3 +1011,62 @@ components:
               type: string
               format: date
               description: Date when the order was placed
+    GraphMeta:
+      type: object
+      required: [ current_revenue, previous_revenue, current_sales, previous_sales ]
+      properties:
+        current_revenue:
+          type: number
+          description: Revenue in the current time period
+        previous_revenue:
+          type: number
+          description: Revenue in the previous time period
+        current_sales:
+          type: number
+          description: Number of sales in the current time period
+        previous_sales:
+          type: number
+          description: Number of sales in the previous time period
+    GraphData:
+      type: object
+      required: [ bucket, revenue, sales_no ]
+      properties:
+        bucket:
+          type: string
+          description: Time bucket (e.g., week, month)
+        revenue:
+          type: number
+          description: Revenue for the bucket
+        sales_no:
+          type: number
+          description: Number of sales in the bucket
+    CityData:
+      type: object
+      required: [ city, current_revenue, previous_revenue ]
+      properties:
+        city:
+          type: string
+          description: Name of the city
+        current_revenue:
+          type: number
+          description: Current revenue for this city
+        previous_revenue:
+          type: number
+          description: Revenue for the previous period in this city
+    BikeSales:
+      type: object
+      required: [ bike_model, order_date, total_sales, revenue ]
+      properties:
+        bike_model:
+          type: string
+          description: Name of the bike model
+        order_date:
+          type: string
+          format: date
+          description: Date of the sale
+        total_sales:
+          type: number
+          description: Total number of bikes sold
+        revenue:
+          type: number
+          description: Total revenue generated by this model

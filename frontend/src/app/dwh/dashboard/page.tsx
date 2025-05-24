@@ -17,14 +17,15 @@ import {BikeModels} from "@/app/dwh/dashboard/time-graph";
 import {MetricStats} from "@/app/dwh/dashboard/revenue-graph";
 import CitiesList from "@/app/dwh/dashboard/cities-list";
 import * as React from "react";
-import {fetchWithToken} from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import {BikeSales, CityData, GraphData, GraphMeta} from "@/types/custom";
+import {BikeSales, CityData, DashboardsService, GraphData, GraphMeta} from "@/models/api";
 import {useTranslation} from "react-i18next";
+import FilterManager from "@/utils/filtermanager";
 
 export default function DashboardPage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
+    const filterManager = new FilterManager();
     const sidebar = useStore(useSidebar, (x) => x);
     const [timeRange, setTimeRange] = useState("1m");
     const [revenueChangePct, setRevenueChangePct] = useState(100);
@@ -40,9 +41,11 @@ export default function DashboardPage() {
     const [isLoadingBikeData, setIsLoadingBikeData] = useState(false);
 
     // Fetch graph meta data and calculate revenue and sales change percentage
-    const fetchGraphMetaData = () => {
+    const fetchGraphMetaData = async () => {
         setIsLoadingGraphMetaData(true);
-        fetchWithToken(`/dashboard/graphmeta?range=${timeRange}`)
+        filterManager.addFilter("range", [timeRange]);
+        const filterString = await filterManager.getFilterString();
+        DashboardsService.getGraphMeta(filterString === "" ? undefined : filterString)
             .then((data: GraphMeta[]) => {
                 const graphMeta = data[0];
                 setGraphMetaData(graphMeta);
@@ -69,18 +72,22 @@ export default function DashboardPage() {
     };
 
     // Fetch graph data
-    const fetchGraphData = () => {
+    const fetchGraphData = async () => {
         setIsLoadingGraphDataData(true);
-        fetchWithToken(`/dashboard/graphdata?range=${timeRange}`)
+        filterManager.addFilter("range", [timeRange]);
+        const filterString = await filterManager.getFilterString();
+        DashboardsService.getGraphData(filterString === "" ? undefined : filterString)
             .then((data: GraphData[]) => setGraphDataData(data))
             .catch(err => addNotification(`Failed to load graph data${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingGraphDataData(false));
     };
 
     // Fetch city data
-    const fetchCityData = () => {
+    const fetchCityData = async () => {
         setIsLoadingCitiesData(true);
-        fetchWithToken(`/dashboard/citydata?range=${timeRange}`)
+        filterManager.addFilter("range", [timeRange]);
+        const filterString = await filterManager.getFilterString();
+        DashboardsService.getCityData(filterString === "" ? undefined : filterString)
             .then((data: CityData[]) => {
                 if (data) {
                     setCitiesData(data)
@@ -93,19 +100,21 @@ export default function DashboardPage() {
     };
 
     // Fetch bike data
-    const fetchBikeData = () => {
+    const fetchBikeData = async () => {
         setIsLoadingBikeData(true);
-        fetchWithToken(`/dashboard/bikemodels?range=${timeRange}`)
+        filterManager.addFilter("range", [timeRange]);
+        const filterString = await filterManager.getFilterString();
+        DashboardsService.getBikeSales(filterString === "" ? undefined : filterString)
             .then((data: BikeSales[]) => setBikeData(data))
             .catch(err => addNotification(`Failed to load bike data${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingBikeData(false));
     };
 
     useEffect(() => {
-        fetchGraphMetaData();
-        fetchGraphData();
-        fetchCityData();
-        fetchBikeData();
+        void fetchGraphMetaData();
+        void fetchGraphData();
+        void fetchCityData();
+        void fetchBikeData();
     }, [timeRange]);
 
     if (!sidebar) return null;

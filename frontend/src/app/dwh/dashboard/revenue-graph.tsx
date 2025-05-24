@@ -1,16 +1,16 @@
 "use client";
 
-import { Bar, BarChart, Line, LineChart } from "recharts";
+import {Bar, BarChart, Line, LineChart} from "recharts";
 import {
     Card,
     CardContent,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { GraphData } from "@/types/custom";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useTranslation } from "react-i18next";
+import {ChartConfig, ChartContainer} from "@/components/ui/chart";
+import {GraphData} from "@/models/api";
+import {Skeleton} from "@/components/ui/skeleton";
+import {useTranslation} from "react-i18next";
 
 interface Props {
     graphData: GraphData[];
@@ -32,7 +32,7 @@ export function MetricStats({
                                 isLoadingGraphMetaData,
                                 isLoadingGraphDataData,
                             }: Props) {
-    const { t } = useTranslation();
+    const {t} = useTranslation();
 
     const chartConfig = {
         revenue: {
@@ -46,7 +46,7 @@ export function MetricStats({
     } satisfies ChartConfig;
 
     const formatCurrency = (value: number) =>
-        value.toLocaleString("en-US", { style: "currency", currency: "USD" });
+        value.toLocaleString("en-US", {style: "currency", currency: "USD"});
 
     const formatPercentage = (value: number) =>
         `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
@@ -76,8 +76,8 @@ export function MetricStats({
                 <CardContent className="pb-0">
                     {isLoadingGraphMetaData ? (
                         <>
-                            <Skeleton className="h-6 w-32 mb-1" />
-                            {timeLabel && <Skeleton className="h-4 w-40" />}
+                            <Skeleton className="h-6 w-32 mb-1"/>
+                            {timeLabel && <Skeleton className="h-4 w-40"/>}
                         </>
                     ) : (
                         <>
@@ -95,7 +95,7 @@ export function MetricStats({
                         </>
                     )}
                     {isLoadingGraphDataData ? (
-                        <Skeleton className="h-[80px] w-full mt-4" />
+                        <Skeleton className="h-[80px] w-full mt-4"/>
                     ) : isNoRevenueData ? (
                         <p className="text-sm text-muted-foreground mt-4">
                             {t("no_data_to_display")}
@@ -104,14 +104,14 @@ export function MetricStats({
                         <ChartContainer config={chartConfig} className="h-[80px] w-full mt-2">
                             <LineChart
                                 data={graphData}
-                                margin={{ top: 5, right: 10, left: 10, bottom: 0 }}
+                                margin={{top: 5, right: 10, left: 10, bottom: 0}}
                             >
                                 <Line
                                     type="monotone"
                                     strokeWidth={2}
                                     dataKey="revenue"
                                     stroke="var(--color-revenue)"
-                                    activeDot={{ r: 6 }}
+                                    activeDot={{r: 6}}
                                 />
                             </LineChart>
                         </ChartContainer>
@@ -129,8 +129,8 @@ export function MetricStats({
                 <CardContent>
                     {isLoadingGraphMetaData ? (
                         <>
-                            <Skeleton className="h-6 w-24 mb-1" />
-                            {timeLabel && <Skeleton className="h-4 w-40" />}
+                            <Skeleton className="h-6 w-24 mb-1"/>
+                            {timeLabel && <Skeleton className="h-4 w-40"/>}
                         </>
                     ) : (
                         <>
@@ -148,7 +148,7 @@ export function MetricStats({
                         </>
                     )}
                     {isLoadingGraphDataData ? (
-                        <Skeleton className="h-[80px] w-full mt-4" />
+                        <Skeleton className="h-[80px] w-full mt-4"/>
                     ) : isNoSalesData ? (
                         <p className="text-sm text-muted-foreground mt-4">
                             {t("no_data_to_display")}

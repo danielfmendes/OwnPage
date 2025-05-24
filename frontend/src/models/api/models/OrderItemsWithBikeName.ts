@@ -7,6 +7,6 @@ export type OrderItemsWithBikeName = (OrderItem & {
     /**
      * Name of the bike model in the order item
      */
-    model_name?: string;
+    model_name: string;
 });
 

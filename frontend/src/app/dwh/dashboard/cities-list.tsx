@@ -5,18 +5,18 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Building2 } from "lucide-react";
-import { CityData } from "@/types/custom";
-import { useTranslation } from "react-i18next";
+import {Avatar, AvatarFallback} from "@/components/ui/avatar";
+import {Skeleton} from "@/components/ui/skeleton";
+import {Building2} from "lucide-react";
+import {CityData} from "@/models/api";
+import {useTranslation} from "react-i18next";
 
 interface Props {
     citiesData: CityData[];
     isLoading: boolean;
 }
 
-export default function CitiesList({ citiesData, isLoading }: Props) {
+export default function CitiesList({citiesData, isLoading}: Props) {
     const {t} = useTranslation();
 
     function calculatePercentageChange(current: number, previous: number): number | undefined {
@@ -34,7 +34,7 @@ export default function CitiesList({ citiesData, isLoading }: Props) {
                     {isLoading
                         ? t("loading_cities")
                         : citiesData.length > 0
-                            ? t("sales_to_cities", { count: citiesData.length })
+                            ? t("sales_to_cities", {count: citiesData.length})
                             : t("no_sales_data")}
                 </CardDescription>
             </CardHeader>
@@ -86,8 +86,8 @@ export default function CitiesList({ citiesData, isLoading }: Props) {
                                         {percentageChange !== undefined && (
                                             <p className="text-sm text-muted-foreground">
                                                 {percentageChange > 0
-                                                    ? t("up_percentage", { value: formattedPercentage })
-                                                    : t("down_percentage", { value: Math.abs(parseFloat(formattedPercentage)).toFixed(2) })}
+                                                    ? t("up_percentage", {value: formattedPercentage})
+                                                    : t("down_percentage", {value: Math.abs(parseFloat(formattedPercentage)).toFixed(2)})}
                                             </p>
                                         )}
                                     </div>

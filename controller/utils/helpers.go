@@ -78,6 +78,24 @@ func HandleError(w http.ResponseWriter, err error, message string) {
 	}
 }
 
+func ExtractFilterValue(r *http.Request, key string) (string, bool) {
+	filter := r.URL.Query().Get("filter")
+	if filter == "" {
+		return "", false
+	}
+	parts := strings.Split(filter, ",")
+	prefixes := []string{key + ":$eq.", key + ":$in."}
+
+	for _, part := range parts {
+		for _, prefix := range prefixes {
+			if strings.HasPrefix(part, prefix) {
+				return strings.TrimPrefix(part, prefix), true
+			}
+		}
+	}
+	return "", false
+}
+
 // ValidateProjectAccess überprüft, ob der User Zugriff auf das Projekt mit bestimmter Rolle hat.
 // projectIdentifier: int (direkte ID) oder string (Query, die project_id liefert)
 // Gibt: projectID, ggf. Fehler

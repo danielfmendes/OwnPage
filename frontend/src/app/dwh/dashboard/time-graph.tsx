@@ -21,7 +21,7 @@ import {Button} from "@/components/ui/button";
 import {Check, ChevronDown} from "lucide-react";
 import {cn} from "@/lib/utils";
 import {ChartContainer, ChartConfig} from "@/components/ui/chart";
-import {BikeSales} from "@/types/custom";
+import {BikeSales} from "@/models/api";
 import {Skeleton} from "@/components/ui/skeleton";
 import {Switch} from "@/components/ui/switch";
 import {useTranslation} from "react-i18next";
@@ -32,7 +32,7 @@ interface Props {
 }
 
 export function BikeModels({bikeData, isLoading}: Props) {
-    const { t } = useTranslation();
+    const {t} = useTranslation();
 
     const modelsWithSales = Array.from(new Set(
         (bikeData || []).filter((b) => b.total_sales > 0).map((b) => b.bike_model)
