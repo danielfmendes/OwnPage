@@ -71,7 +71,7 @@ func DeleteOrder(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, utils.ErrMsgIdInvalid, http.StatusBadRequest)
 		return
 	}
-	projectIdQuery := "SELECT project_id FROM customers WHERE id = $1"
+	projectIdQuery := "SELECT project_id FROM orders WHERE id = $1"
 	utils.HandleDelete(w, r, "DELETE FROM orders WHERE id = $1", []string{}, projectIdQuery, []interface{}{id}, id)
 }
 

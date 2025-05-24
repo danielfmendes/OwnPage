@@ -179,6 +179,177 @@ paths:
           description: Internal server error
       tags:
         - Customers
+  
+  /orders:
+    get:
+      summary: Retrieve a list of orders
+      operationId: getOrders
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderWithCustomer'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Orders
+    delete:
+      summary: Delete a order by ID
+      operationId: deleteOrder
+      parameters:
+        - $ref: "#/components/parameters/DeleteIdParam"
+        - $ref: "#/components/parameters/DeleteCascadeParam"
+      responses:
+        '204':
+          description: Order deleted successfully
+        '409':
+          description: Conflict – related data exists; use cascade=true to force delete
+        '400':
+          description: Bad request – missing or invalid ID
+        '401':
+          description: Unauthorized – missing or invalid token
+        '500':
+          description: Internal server error
+      tags:
+        - Orders
+    put:
+      summary: Update a order
+      operationId: updateOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses:
+        '200':
+          description: Order updated successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '404':
+          description: Order not found
+        '500':
+          description: Internal server error
+      tags:
+        - Orders
+    post:
+      summary: Create a new order
+      operationId: createOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses:
+        '201':
+          description: Order created successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '409':
+          description: Conflict – duplicate or invalid data
+        '500':
+          description: Internal server error
+      tags:
+        - Orders
+
+  /orderitems:
+    get:
+      summary: Retrieve a list of order items
+      operationId: getOrderItems
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of order items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderItemsWithBikeName'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Orders
+    put:
+      summary: Update a order item
+      operationId: updateOrderItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderItem'
+      responses:
+        '200':
+          description: Order item updated successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '404':
+          description: Order not found
+        '500':
+          description: Internal server error
+      tags:
+        - Orders
+    post:
+      summary: Create a new order item
+      operationId: createOrderItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderItem'
+      responses:
+        '201':
+          description: Order item created successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '409':
+          description: Conflict – duplicate or invalid data
+        '500':
+          description: Internal server error
+      tags:
+        - Orders
+    delete:
+      summary: Delete a order item by ID
+      operationId: deleteOrderItem
+      parameters:
+        - $ref: "#/components/parameters/DeleteIdParam"
+      responses:
+        '204':
+          description: Order item deleted successfully
+        '400':
+          description: Bad request – missing or invalid ID
+        '401':
+          description: Unauthorized – missing or invalid token
+        '500':
+          description: Internal server error
+      tags:
+        - Orders
 
   /projects:
     post:
@@ -630,6 +801,43 @@ components:
         project_id:
           type: integer
           description: Associated project ID
+    Order:
+      type: object
+      required: [ customer_id, order_date, project_id ]
+      properties:
+        id:
+          type: integer
+          description: Unique order ID
+        customer_id:
+          type: integer
+          description: ID of the customer who placed the order
+        order_date:
+          type: string
+          format: date
+          description: Date when the order was placed
+        project_id:
+          type: integer
+          description: Associated project ID
+    OrderItem:
+      type: object
+      required: [ order_id, bike_id, number, price ]
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the order item
+        order_id:
+          type: integer
+          description: ID of the related order
+        bike_id:
+          type: integer
+          description: ID of the ordered bike
+        number:
+          type: integer
+          description: Quantity of bikes in this item
+        price:
+          type: number
+          format: float
+          description: Price per unit of the bike
 
     # Extended Types
     WarehousePartWithName:
@@ -659,3 +867,34 @@ components:
             project_name:
               type: string
               description: Name of the associated project
+    OrderWithCustomer:
+      allOf:
+        - $ref: '#/components/schemas/Order'
+        - type: object
+          properties:
+            customer_name:
+              type: string
+              description: Full name of the customer
+            customer_email:
+              type: string
+              description: Email address of the customer
+    OrderItemsWithBikeName:
+      allOf:
+        - $ref: '#/components/schemas/OrderItem'
+        - type: object
+          properties:
+            model_name:
+              type: string
+              description: Name of the bike model in the order item
+    OrderItemsWithBikeAndDate:
+      allOf:
+        - $ref: '#/components/schemas/OrderItem'
+        - type: object
+          properties:
+            model_name:
+              type: string
+              description: Bike model name
+            order_date:
+              type: string
+              format: date
+              description: Date when the order was placed

@@ -3,15 +3,19 @@ import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import InputField from "@/components/helpers/InputField";
-import {OrderItemsWithBikeName, OrderWithCustomer} from "@/types/custom";
-import {RoleManagementWithName} from "@/models/api";
+import {
+    Order,
+    OrderItem,
+    OrderItemsWithBikeName,
+    OrdersService,
+    OrderWithCustomer,
+    RoleManagementWithName
+} from "@/models/api";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
 import {DatePicker} from "@/components/helpers/DatePicker";
 import CustomerNameComboBox from "@/components/helpers/selects/CustomerNameComboBox";
-import {deleteWithToken, fetchWithBodyAndToken, fetchWithToken} from "@/utils/url";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
-import {Order, OrderItem} from "@/types/datatables";
 import type {ColumnDef} from "@tanstack/react-table";
 import {Pencil, Trash2} from "lucide-react";
 import ModelNameSelect from "@/components/helpers/selects/ModelNameSelect";
@@ -19,6 +23,7 @@ import {useRoleStore} from "@/utils/rolemananagemetstate";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {Button} from "@/components/ui/button";
 import {useTranslation} from "react-i18next";
+import FilterManager from "@/utils/filtermanager";
 
 interface Props {
     rowData?: OrderWithCustomer;
@@ -29,6 +34,7 @@ interface Props {
 export default function OrderDialogContent({rowData, onClose, onRefresh}: Props) {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
+    const filterManager = new FilterManager();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const isEditMode = !!rowData;
     const isDisabled = roles.find(role => role.project_id === rowData?.project_id)?.role === "user";
@@ -69,13 +75,15 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
 
     React.useEffect(() => {
         if (rowData) {
-            fetchOrderItems();
+            void fetchOrderItems();
         }
     }, [rowData]);
 
-    const fetchOrderItems = () => {
+    const fetchOrderItems = async () => {
         setIsLoadingData(true);
-        fetchWithToken(`/orderitems?order_id=${rowData?.id}`)
+        filterManager.addFilter("order_id", [rowData?.id]);
+        const filterString = await filterManager.getFilterString();
+        OrdersService.getOrderItems(filterString === "" ? undefined : filterString)
             .then((orders: OrderItemsWithBikeName[]) => {
                 setData(orders);
             })
@@ -91,7 +99,7 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
         };
 
         setIsLoadingOrder(true);
-        fetchWithBodyAndToken("POST", "/orders", newData)
+        OrdersService.createOrder(newData)
             .then(() => {
                 addNotification("Order saved successfully", "success");
                 resetFormOrder();
@@ -111,7 +119,7 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
         };
 
         setIsLoadingOrder(true);
-        fetchWithBodyAndToken("PUT", "/orders", updatedData)
+        OrdersService.updateOrder(updatedData)
             .then(() => {
                 addNotification("Order updated successfully", "success");
                 onClose();
@@ -124,17 +132,17 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
     const handleOrderItemSave = () => {
         const newData = {
             order_id: rowData?.id || 0,
-            bike_id: modelId,
-            number,
-            price,
+            bike_id: modelId ?? 0,
+            number: number ?? 0,
+            price: price ?? 0,
         };
 
         setIsLoadingOrderItems(true);
-        fetchWithBodyAndToken("POST", "/orderitems", newData)
-            .then(() => {
+        OrdersService.createOrderItem(newData)
+            .then(async () => {
                 addNotification("Orderitem saved successfully", "success");
                 resetFormOrderItems();
-                fetchOrderItems();
+                await fetchOrderItems();
             })
             .catch(err => addNotification(`Failed to save orderitem${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingOrderItems(false));
@@ -148,12 +156,12 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
             number: localEditNumber,
             price: localEditPrice,
         };
-        setLoadingEditID(updatedData.id);
+        setLoadingEditID(updatedData.id!);
 
-        fetchWithBodyAndToken("PUT", "/orderitems", updatedData)
-            .then(() => {
+        OrdersService.updateOrderItem(updatedData)
+            .then(async () => {
                 addNotification("OrderItem updated successfully", "success");
-                fetchOrderItems();
+                await fetchOrderItems();
                 handleEdit(null);
             })
             .catch(err => addNotification(`Failed to update orderitem${err?.message ? `: ${err.message}` : ""}`, "error"))
@@ -162,10 +170,10 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
 
     const handleDeleteOrderItems = (id: number) => {
         setLoadingDeleteID(id);
-        deleteWithToken(`/orderitems?id=${id}`)
-            .then(() => {
-                addNotification(`Order mit id ${id} erfolgreich gelöscht`, "success");
-                fetchOrderItems();
+        OrdersService.deleteOrderItem(id)
+            .then(async () => {
+                addNotification(`Order item mit id ${id} erfolgreich gelöscht`, "success");
+                await fetchOrderItems();
             })
             .catch(err => addNotification(`Failed to delete orderitem${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setLoadingDeleteID(null));
@@ -199,7 +207,7 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
                 return (
                     <div className="flex justify-end gap-2 min-w-[160px]">
                         <ButtonLoading
-                            onClick={() => handleDeleteOrderItems(orderItem.id)}
+                            onClick={() => handleDeleteOrderItems(orderItem.id!)}
                             isLoading={loadingDeleteID === orderItem.id}
                             className="text-black dark:text-white p-2 rounded"
                             variant="destructive"

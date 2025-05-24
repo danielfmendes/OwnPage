@@ -14,14 +14,13 @@ import {
     TabsTrigger
 } from "@/components/ui/tabs"
 import type {ColumnDef} from "@tanstack/react-table";
-import {OrderItemsWithBikeAndDate} from "@/types/custom";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown} from "lucide-react";
 import {fetchWithToken} from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
 import {useTranslation} from "react-i18next";
-import {Customer, CustomersService} from "@/models/api";
+import {Customer, CustomersService, OrderItemsWithBikeAndDate} from "@/models/api";
 
 interface Props {
     rowData: Customer,

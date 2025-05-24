@@ -6,12 +6,14 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func OrderItemsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		if r.URL.Query().Get("order_id") != "" {
+		filter := r.URL.Query().Get("filter")
+		if strings.HasPrefix(filter, "order_id:$eq.") {
 			GetOrderItemsByOrderID(w, r)
 		} else {
 			GetOrderItems(w, r)
@@ -36,14 +38,21 @@ func GetOrderItems(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetOrderItemsByOrderID(w http.ResponseWriter, r *http.Request) {
-	orderidIdStr := r.URL.Query().Get("order_id")
-	if orderidIdStr == "" {
+	filter := r.URL.Query().Get("filter")
+	if filter == "" {
 		http.Error(w, utils.ErrMsgIdMissing, http.StatusBadRequest)
 		return
 	}
 
-	// Convert string ID to integer
-	orderid, err := strconv.Atoi(orderidIdStr)
+	// Beispiel: filter = "order_id:$eq.3"
+	prefix := "order_id:$eq."
+	if !strings.HasPrefix(filter, prefix) {
+		http.Error(w, "Invalid filter format", http.StatusBadRequest)
+		return
+	}
+
+	orderidStr := strings.TrimPrefix(filter, prefix)
+	orderid, err := strconv.Atoi(orderidStr)
 	if err != nil {
 		http.Error(w, utils.ErrMsgIdInvalid, http.StatusBadRequest)
 		return

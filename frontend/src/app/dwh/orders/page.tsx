@@ -7,21 +7,19 @@ import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown, Trash2} from "lucide-react";
 import * as React from "react";
-import {deleteWithToken, fetchWithToken, handleFetchError} from "@/utils/url";
-import {OrderWithCustomer} from "@/types/custom";
-import {RoleManagementWithName} from "@/models/api";
+import {Order, OrdersService, OrderWithCustomer, RoleManagementWithName} from "@/models/api";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 import OrderDialogContent from "@/app/dwh/orders/content-dialog";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
-import {Order} from "@/types/datatables";
 import {useTranslation} from "react-i18next";
-
+import FilterManager from "@/utils/filtermanager";
 
 export default function OrderPage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
+    const filterManager = new FilterManager();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const [data, setData] = React.useState<OrderWithCustomer[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(true);
@@ -30,9 +28,10 @@ export default function OrderPage() {
     const [showCascadeDialog, setShowCascadeDialog] = React.useState(false);
     const [deleteId, setDeleteId] = React.useState<number | null>(null);
 
-    const fetchData = () => {
+    const fetchData = async () => {
         setIsLoadingData(true);
-        fetchWithToken(`/orders`)
+        const filterString = await filterManager.getFilterString();
+        OrdersService.getOrders(filterString === "" ? undefined : filterString)
             .then((orders: OrderWithCustomer[]) => {
                 setData(orders);
             })
@@ -47,19 +46,20 @@ export default function OrderPage() {
             setLoadingDeleteId(id);
         }
 
-        deleteWithToken(`/orders?id=${id}${cascade ? "&cascade=true" : ""}`, true)
-            .then(async (res) => {
-                if (res.status === 409 && !cascade) {
+        OrdersService.deleteOrder(id, cascade)
+            .then(async () => {
+                addNotification(`Order with id ${id}${cascade ? " and related data" : ""} deleted successfully`, "success");
+                await fetchData();
+                if (cascade) setShowCascadeDialog(false);
+            })
+            .catch((err) => {
+                if (err?.status === 409 && !cascade) {
                     setShowCascadeDialog(true);
                     setDeleteId(id);
                     return;
                 }
-                if (!res.ok) await handleFetchError(res, "DELETE");
-                addNotification(`Order with id ${id}${cascade ? " and related data" : ""} deleted successfully`, "success");
-                fetchData();
-                if (cascade) setShowCascadeDialog(false);
+                addNotification(`Failed to delete order${err?.message ? `: ${err.message}` : ""}`, "error")
             })
-            .catch(err => addNotification(`Failed to delete order${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => {
                 if (cascade) {
                     setIsLoadingDeleteCascade(false);
@@ -118,7 +118,7 @@ export default function OrderPage() {
 
                 return (
                     <ButtonLoading
-                        onClick={(event) => handleDelete(event, order.id)}
+                        onClick={(event) => handleDelete(event, order.id!)}
                         isLoading={loadingDeleteId === order.id}
                         className="text-black dark:text-white p-2 rounded"
                         variant="destructive"
@@ -142,8 +142,8 @@ export default function OrderPage() {
                 data={data}
                 isLoading={isLoadingData}
                 filterColumn={"customer_name"}
-                onRefresh={() => {
-                    fetchData()
+                onRefresh={async () => {
+                    await fetchData()
                 }}
                 rowDialogContent={(rowData, onClose) => (
                     <OrderDialogContent
