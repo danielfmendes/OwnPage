@@ -19,17 +19,6 @@ export interface RoleManagement {
     role: string;
 }
 
-export interface Customer {
-    id: number;
-    email: string;
-    password: string;
-    first_name: string;
-    name: string;
-    dob: string;
-    city: string;
-    project_id: number;
-}
-
 export interface Saddle {
     id: number;
     name: string;

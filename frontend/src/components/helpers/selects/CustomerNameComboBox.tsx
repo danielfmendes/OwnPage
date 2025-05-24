@@ -2,7 +2,7 @@ import React from "react";
 import {Check} from "lucide-react";
 import {fetchWithToken} from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import {Customer} from "@/types/datatables";
+import {Customer} from "@/models/api";
 import {cn} from "@/lib/utils";
 import {ComboBoxLoading} from "@/components/helpers/ComboBoxLoading";
 import {useTranslation} from "react-i18next";
@@ -49,7 +49,7 @@ export default function CustomerNameComboBox({customerID, onChange}: Props) {
                 selectedItem={selectedCustomer}
                 items={customerIdOptions}
                 onSelect={handleSelect}
-                itemKey={(c) => c.id}
+                itemKey={(c) => c.id!}
                 itemLabel={(c) => c.email}
                 isLoading={isLoading}
                 placeholder={t("placeholder.customer")}

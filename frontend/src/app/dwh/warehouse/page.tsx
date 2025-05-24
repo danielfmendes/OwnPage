@@ -171,7 +171,7 @@ export default function WareHousePage() {
                     <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
                             <DialogTitle className="text-center">
-                                {t("delete_reference.info")}
+                                {t("delete_references.info")}
                             </DialogTitle>
                         </DialogHeader>
                         <div className="grid">
@@ -189,7 +189,7 @@ export default function WareHousePage() {
                                     className="w-[40%]"
                                     variant="destructive"
                                 >
-                                    {t("delete_reference.button")}
+                                    {t("delete_references.button")}
                                 </ButtonLoading>
                             </div>
                         </div>

@@ -6,7 +6,7 @@ export type Customer = {
     /**
      * Unique identifier for the customer
      */
-    id: number;
+    id?: number;
     /**
      * Customer's email address
      */

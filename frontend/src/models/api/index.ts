@@ -7,7 +7,9 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export type { CascadeParam } from './models/CascadeParam';
 export type { Customer } from './models/Customer';
 export type { FilterParam } from './models/FilterParam';
+export type { IdParam } from './models/IdParam';
 
 export { CustomersService } from './services/CustomersService';

@@ -163,7 +163,7 @@ export default function OrderPage() {
                     <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
                             <DialogTitle className="text-center">
-                                {t("delete_reference.info")}
+                                {t("delete_references.info")}
                             </DialogTitle>
                         </DialogHeader>
                         <div className="grid">

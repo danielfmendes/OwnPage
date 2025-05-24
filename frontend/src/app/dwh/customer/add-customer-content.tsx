@@ -5,8 +5,8 @@ import {DatePicker} from "@/components/helpers/DatePicker";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
-import {fetchWithBodyAndToken} from "@/utils/url";
 import {useTranslation} from "react-i18next";
+import {CustomersService} from "@/models/api";
 
 interface Props {
     onClose: () => void;
@@ -45,7 +45,7 @@ export default function AddCustomerContent({onClose, onRefresh}: Props) {
         };
 
         setIsLoading(true);
-        fetchWithBodyAndToken("POST", "/customers", newData)
+        CustomersService.createCustomer(newData)
             .then(() => {
                 addNotification("Customer saved successfully", "success");
                 resetForm();

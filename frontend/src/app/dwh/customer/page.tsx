@@ -7,17 +7,15 @@ import * as React from "react";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {RoleManagementWithName} from "@/types/custom";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
-import {deleteWithToken, handleFetchError} from "@/utils/url";
 import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown, Trash2} from "lucide-react";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
-import {Customer} from "@/types/datatables";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import CustomerDetailContent from "@/app/dwh/customer/customer-detail-content";
 import AddCustomerContent from "@/app/dwh/customer/add-customer-content";
 import {useTranslation} from "react-i18next";
-import {CustomersService} from "@/models/api";
+import {Customer, CustomersService} from "@/models/api";
 import FilterManager from "@/utils/filtermanager";
 
 export default function CustomerPage() {
@@ -49,19 +47,20 @@ export default function CustomerPage() {
             setLoadingDeleteId(id);
         }
 
-        deleteWithToken(`/customers?id=${id}${cascade ? "&cascade=true" : ""}`, true)
-            .then(async (res) => {
-                if (res.status === 409 && !cascade) {
+        CustomersService.deleteCustomer(id, cascade)
+            .then(async () => {
+                addNotification(`Customer with id ${id}${cascade ? " and related data" : ""} deleted successfully`, "success");
+                await fetchData();
+                if (cascade) setShowCascadeDialog(false);
+            })
+            .catch((err) => {
+                if (err?.status === 409 && !cascade) {
                     setShowCascadeDialog(true);
                     setDeleteId(id);
                     return;
                 }
-                if (!res.ok) await handleFetchError(res, "DELETE");
-                addNotification(`Customer with id ${id}${cascade ? " and related data" : ""} deleted successfully`, "success");
-                fetchData();
-                if (cascade) setShowCascadeDialog(false);
+                addNotification(`Failed to delete customer: ${err?.message ?? err}`, "error");
             })
-            .catch(err => addNotification(`Failed to delete customer${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => {
                 if (cascade) {
                     setIsLoadingDeleteCascade(false);
@@ -128,7 +127,7 @@ export default function CustomerPage() {
 
                 return (
                     <ButtonLoading
-                        onClick={(event) => handleDelete(event, customer.id)}
+                        onClick={(event) => handleDelete(event, customer.id!)}
                         isLoading={loadingDeleteId === customer.id}
                         className="text-black dark:text-white p-2 rounded"
                         variant="destructive"
@@ -152,8 +151,8 @@ export default function CustomerPage() {
                 data={data}
                 isLoading={isLoadingData}
                 filterColumn={"email"}
-                onRefresh={() => {
-                    fetchData()
+                onRefresh={async () => {
+                    await fetchData();
                 }}
                 rowDialogContent={(rowData, onClose) => (
                     <CustomerDetailContent
@@ -174,7 +173,7 @@ export default function CustomerPage() {
                     <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
                             <DialogTitle className="text-center">
-                                {t("delete_reference.info")}
+                                {t("delete_references.info")}
                             </DialogTitle>
                         </DialogHeader>
                         <div className="grid">
@@ -192,7 +191,7 @@ export default function CustomerPage() {
                                     className="w-[40%]"
                                     variant="destructive"
                                 >
-                                    {t("delete_reference.button")}
+                                    {t("delete_references.button")}
                                 </ButtonLoading>
                             </div>
                         </div>

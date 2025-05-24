@@ -4,7 +4,6 @@ import {
     DialogTitle
 } from "@/components/ui/dialog"
 import {Card, CardContent} from "@/components/ui/card"
-import {Customer} from "@/types/datatables"
 import React from "react"
 import InputField from "@/components/helpers/InputField";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
@@ -18,10 +17,11 @@ import type {ColumnDef} from "@tanstack/react-table";
 import {OrderItemsWithBikeAndDate} from "@/types/custom";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown} from "lucide-react";
-import {fetchWithBodyAndToken, fetchWithToken} from "@/utils/url";
+import {fetchWithToken} from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
 import {useTranslation} from "react-i18next";
+import {Customer, CustomersService} from "@/models/api";
 
 interface Props {
     rowData: Customer,
@@ -65,7 +65,7 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
         };
 
         setIsLoadingUpdate(true);
-        fetchWithBodyAndToken("PUT", "/customers", updatedData)
+        CustomersService.updateCustomer(updatedData)
             .then(() => {
                 addNotification("Customer updated successfully", "success");
                 onClose();

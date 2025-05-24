@@ -24,6 +24,71 @@ paths:
                   $ref: '#/components/schemas/Customer'
         '401':
           description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Customers
+    delete:
+      summary: Delete a customer by ID
+      operationId: deleteCustomer
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+        - $ref: "#/components/parameters/CascadeParam"
+      responses:
+        '204':
+          description: Customer deleted successfully
+        '409':
+          description: Conflict – related data exists; use cascade=true to force delete
+        '400':
+          description: Bad request – missing or invalid ID
+        '401':
+          description: Unauthorized – missing or invalid token
+        '500':
+          description: Internal server error
+      tags:
+        - Customers
+    put:
+      summary: Update a customer
+      operationId: updateCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+      responses:
+        '200':
+          description: Customer updated successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '404':
+          description: Customer not found
+        '500':
+          description: Internal server error
+      tags:
+        - Customers
+    post:
+      summary: Create a new customer
+      operationId: createCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+      responses:
+        '201':
+          description: Customer created successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '409':
+          description: Conflict – duplicate or invalid data
         '500':
           description: Internal server error
       tags:
@@ -39,10 +104,28 @@ components:
       schema:
         type: string
 
+    IdParam:
+      name: id
+      in: query
+      description: ID of the customer to delete
+      required: true
+      schema:
+        type: integer
+        example: 123
+
+    CascadeParam:
+      name: cascade
+      in: query
+      description: Whether to delete related data as well
+      required: false
+      schema:
+        type: boolean
+        example: true
+
   schemas:
     Customer:
       type: object
-      required: [id, email, password, first_name, name, dob, city, project_id]
+      required: [ email, password, first_name, name, dob, city, project_id ]
       properties:
         id:
           type: integer
