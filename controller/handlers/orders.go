@@ -6,12 +6,14 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func OrderHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		if r.URL.Query().Get("email") != "" {
+		filter := r.URL.Query().Get("filter")
+		if strings.HasPrefix(filter, "email:$eq.") {
 			GetOrdersByEmail(w, r)
 		} else {
 			GetOrders(w, r)
@@ -42,8 +44,8 @@ func GetOrders(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetOrdersByEmail(w http.ResponseWriter, r *http.Request) {
-	email := r.URL.Query().Get("email")
-	if email == "" {
+	email, found := utils.ExtractFilterValue(r, "email")
+	if !found {
 		http.Error(w, utils.ErrMsgEmailMissing, http.StatusBadRequest)
 		return
 	}

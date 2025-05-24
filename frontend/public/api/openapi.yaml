@@ -94,6 +94,30 @@ paths:
       tags:
         - Bikes
 
+  /bikemodels:
+    get:
+      summary: Retrieve a list of bike models
+      operationId: getBikeModels
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of bike models
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BikeModel'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Bikes
+
   /customers:
     get:
       summary: Retrieve a list of customers
@@ -275,7 +299,7 @@ paths:
 
   /orders:
     get:
-      summary: Retrieve a list of orders
+      summary: Retrieve a list of orders (various response types possible)
       operationId: getOrders
       parameters:
         - $ref: "#/components/parameters/FilterParam"
@@ -285,9 +309,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/OrderWithCustomer'
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/OrderWithCustomer'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/OrderItemsWithBikeAndDate'
         '401':
           description: Unauthorized – missing or invalid token
         '403':

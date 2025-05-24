@@ -74,9 +74,11 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
     };
 
     React.useEffect(() => {
-        if (rowData) {
-            void fetchOrderItems();
-        }
+        (async () => {
+            if (rowData) {
+                await fetchOrderItems();
+            }
+        })();
     }, [rowData]);
 
     const fetchOrderItems = async () => {

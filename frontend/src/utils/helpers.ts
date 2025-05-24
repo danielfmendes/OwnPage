@@ -17,3 +17,9 @@ export const handleLogOut = (
     router.push("/login/dwh");
     addNotification(`Erfolgreich ausgeloggt`, "success");
 };
+
+export const handleFetchError = async (response: Response, method: string) => {
+    const errorMessage = await response.text();
+    const defaultMessage= `Error during the ${method}-request`
+    throw new Error(errorMessage || defaultMessage);
+};

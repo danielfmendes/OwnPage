@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Bike } from '../models/Bike';
+import type { BikeModel } from '../models/BikeModel';
 import type { BikeWithModelName } from '../models/BikeWithModelName';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -96,6 +97,28 @@ export class BikesService {
                 400: `Bad request – missing or invalid fields`,
                 401: `Unauthorized – missing or invalid token`,
                 409: `Conflict – duplicate or invalid data`,
+                500: `Internal server error`,
+            },
+        });
+    }
+    /**
+     * Retrieve a list of bike models
+     * @param filter Query filter string, e.g. project_id:$eq.1|2|3
+     * @returns BikeModel A list of bike models
+     * @throws ApiError
+     */
+    public static getBikeModels(
+        filter?: string,
+    ): CancelablePromise<Array<BikeModel>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/bikemodels',
+            query: {
+                'filter': filter,
+            },
+            errors: {
+                401: `Unauthorized – missing or invalid token`,
+                403: `Forbidden – insufficient permissions for projects`,
                 500: `Internal server error`,
             },
         });

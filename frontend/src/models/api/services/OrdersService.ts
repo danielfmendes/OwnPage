@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { Order } from '../models/Order';
 import type { OrderItem } from '../models/OrderItem';
+import type { OrderItemsWithBikeAndDate } from '../models/OrderItemsWithBikeAndDate';
 import type { OrderItemsWithBikeName } from '../models/OrderItemsWithBikeName';
 import type { OrderWithCustomer } from '../models/OrderWithCustomer';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -11,14 +12,14 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class OrdersService {
     /**
-     * Retrieve a list of orders
+     * Retrieve a list of orders (various response types possible)
      * @param filter Query filter string, e.g. project_id:$eq.1|2|3
-     * @returns OrderWithCustomer A list of orders
+     * @returns any A list of orders
      * @throws ApiError
      */
     public static getOrders(
         filter?: string,
-    ): CancelablePromise<Array<OrderWithCustomer>> {
+    ): CancelablePromise<(Array<OrderWithCustomer> | Array<OrderItemsWithBikeAndDate>)> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/orders',

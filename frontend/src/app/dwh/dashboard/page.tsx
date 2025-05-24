@@ -111,10 +111,12 @@ export default function DashboardPage() {
     };
 
     useEffect(() => {
-        void fetchGraphMetaData();
-        void fetchGraphData();
-        void fetchCityData();
-        void fetchBikeData();
+        (async () => {
+            await fetchGraphMetaData();
+            await fetchGraphData();
+            await fetchCityData();
+            await fetchBikeData();
+        })();
     }, [timeRange]);
 
     if (!sidebar) return null;

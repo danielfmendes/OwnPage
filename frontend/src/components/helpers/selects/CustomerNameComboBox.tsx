@@ -1,11 +1,11 @@
 import React from "react";
 import {Check} from "lucide-react";
-import {fetchWithToken} from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import {Customer} from "@/models/api";
+import {Customer, CustomersService} from "@/models/api";
 import {cn} from "@/lib/utils";
 import {ComboBoxLoading} from "@/components/helpers/ComboBoxLoading";
 import {useTranslation} from "react-i18next";
+import FilterManager from "@/utils/filtermanager";
 
 interface Props {
     customerID: number | null;
@@ -20,20 +20,25 @@ function formatDate(dateString: string): string {
 export default function CustomerNameComboBox({customerID, onChange}: Props) {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
+    const filterManager = new FilterManager();
     const [customerIdOptions, setCustomerIdOptions] = React.useState<Customer[]>([]);
     const [selectedCustomer, setSelectedCustomer] = React.useState<Customer | null>(null);
     const [isLoading, setIsLoading] = React.useState(false);
 
     React.useEffect(() => {
         setIsLoading(true);
-        fetchWithToken(`/customers`)
-            .then((customers: Customer[] | null) => {
-                setCustomerIdOptions(customers ?? []);
-                const selected = customers?.find(c => c.id === customerID) ?? null;
-                setSelectedCustomer(selected);
-            })
-            .catch(err => addNotification(`Failed to load customer options${err?.message ? `: ${err.message}` : ""}`, "error"))
-            .finally(() => setIsLoading(false));
+
+        (async () => {
+            const filterString = await filterManager.getFilterString();
+            CustomersService.getCustomers(filterString === "" ? undefined : filterString)
+                .then((customers: Customer[] | null) => {
+                    setCustomerIdOptions(customers ?? []);
+                    const selected = customers?.find(c => c.id === customerID) ?? null;
+                    setSelectedCustomer(selected);
+                })
+                .catch(err => addNotification(`Failed to load customer options${err?.message ? `: ${err.message}` : ""}`, "error"))
+                .finally(() => setIsLoading(false))
+        })();
     }, [customerID]);
 
     const handleSelect = (id: number) => {

@@ -16,11 +16,11 @@ import {
 import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown} from "lucide-react";
-import {fetchWithToken} from "@/utils/url";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
 import {useTranslation} from "react-i18next";
-import {Customer, CustomersService, OrderItemsWithBikeAndDate} from "@/models/api";
+import {Customer, CustomersService, OrderItemsWithBikeAndDate, OrdersService} from "@/models/api";
+import FilterManager from "@/utils/filtermanager";
 
 interface Props {
     rowData: Customer,
@@ -31,6 +31,7 @@ interface Props {
 export default function CustomerDetailContent({rowData, onClose, onRefresh}: Props) {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
+    const filterManager = new FilterManager();
     const [lastName, setLastName] = React.useState(rowData.name)
     const [city, setCity] = React.useState(rowData.city)
     const [data, setData] = React.useState<OrderItemsWithBikeAndDate[]>([]);
@@ -38,14 +39,19 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
     const [isLoadingUpdate, setIsLoadingUpdate] = React.useState(false);
 
     React.useEffect(() => {
-        fetchData();
+        (async () => {
+            await fetchData();
+        })();
     }, [rowData]);
 
-    const fetchData = () => {
+    const fetchData = async () => {
         setIsLoadingData(true);
-        fetchWithToken(`/orders?email=${rowData.email}`)
-            .then((orders: OrderItemsWithBikeAndDate[]) => {
-                setData(orders);
+        filterManager.addFilter("email", [rowData.email]);
+        const filterString = await filterManager.getFilterString();
+        OrdersService.getOrders(filterString === "" ? undefined : filterString)
+            .then((orders) => {
+                const ordersWithBikeAndDate = orders as OrderItemsWithBikeAndDate[];
+                setData(ordersWithBikeAndDate);
             })
             .catch(err => addNotification(`Failed to load orders${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingData(false));

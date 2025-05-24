@@ -32,8 +32,9 @@ export default function OrderPage() {
         setIsLoadingData(true);
         const filterString = await filterManager.getFilterString();
         OrdersService.getOrders(filterString === "" ? undefined : filterString)
-            .then((orders: OrderWithCustomer[]) => {
-                setData(orders);
+            .then((orders) => {
+                const ordersWithCustomer = orders as OrderWithCustomer[];
+                setData(ordersWithCustomer);
             })
             .catch(err => addNotification(`Failed to load orders${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingData(false));

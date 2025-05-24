@@ -1,14 +1,9 @@
 import AuthToken from "./authtoken";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
+import {handleFetchError} from "@/utils/helpers";
 
 const token = AuthToken.getAuthToken();
 const apiUrl = process.env.NEXT_PUBLIC_API_ENV || "http://localhost:8080";
-
-export const handleFetchError = async (response: Response, method: string) => {
-    const errorMessage = await response.text();
-    const defaultMessage= `Error during the ${method}-request`
-    throw new Error(errorMessage || defaultMessage);
-};
 
 export const fetchWithToken = async (endpoint: string, force = false) => {
     let finalEndpoint = endpoint;
