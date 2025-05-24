@@ -1,8 +1,8 @@
 import React from "react";
-import {Project} from "@/types/datatables";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 import {useTranslation} from "react-i18next";
+import {Project} from "@/models/api";
 
 interface Props {
     projectID: string;
@@ -51,7 +51,7 @@ export default function ProjectIDSelect({ projectID, onChange }: Props) {
                         <div className="p-2 text-sm text-gray-500">{t("placeholder.no_project")}</div>
                     ) : (
                         projectIdOptions.map((option) => (
-                            <SelectItem key={option.id} value={option.id.toString()}>
+                            <SelectItem key={option.id} value={option.id!.toString()}>
                                 {option.name}
                             </SelectItem>
                         ))

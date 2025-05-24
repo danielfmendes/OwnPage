@@ -94,6 +94,30 @@ paths:
       tags:
         - Customers
 
+  /projects:
+    post:
+      summary: Create a new project
+      operationId: createProject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Project'
+      responses:
+        '201':
+          description: Project created successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '409':
+          description: Conflict – duplicate or invalid data
+        '500':
+          description: Internal server error
+      tags:
+        - Projects
+
 components:
   parameters:
     FilterParam:
@@ -123,6 +147,18 @@ components:
         example: true
 
   schemas:
+    #  Basic Types
+    Project:
+      type: object
+      required: [ name ]
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the project
+        name:
+          type: string
+          description: Name of the project
+
     Customer:
       type: object
       required: [ email, password, first_name, name, dob, city, project_id ]

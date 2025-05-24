@@ -1,8 +1,3 @@
-export interface Project {
-    id: number;
-    name: string;
-}
-
 export interface User {
     email: string;
     password: string;

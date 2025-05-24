@@ -4,7 +4,7 @@ import {Button} from "@/components/ui/button";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import InputField from "@/components/helpers/InputField";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import {fetchWithBodyAndToken} from "@/utils/url";
+import {ProjectsService} from "@/models/api";
 import {useTranslation} from "react-i18next";
 
 interface RoleManagementProps {
@@ -24,7 +24,7 @@ export default function AddProjektDialogContent({onClose, onRefresh}: RoleManage
         };
 
         setIsLoadingAddProject(true);
-        fetchWithBodyAndToken("POST", "/projects", newData)
+        ProjectsService.createProject(newData)
             .then(() => {
                 addNotification("Project saved successfully", "success");
                 setProjectName("");
