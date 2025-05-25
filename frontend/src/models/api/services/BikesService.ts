@@ -5,6 +5,9 @@
 import type { Bike } from '../models/Bike';
 import type { BikeModel } from '../models/BikeModel';
 import type { BikeWithModelName } from '../models/BikeWithModelName';
+import type { Fork } from '../models/Fork';
+import type { Frame } from '../models/Frame';
+import type { Saddle } from '../models/Saddle';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -113,6 +116,28 @@ export class BikesService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/bikemodels',
+            query: {
+                'filter': filter,
+            },
+            errors: {
+                401: `Unauthorized – missing or invalid token`,
+                403: `Forbidden – insufficient permissions for projects`,
+                500: `Internal server error`,
+            },
+        });
+    }
+    /**
+     * Retrieve a list of bike components (saddles, frames, forks)
+     * @param filter Query filter string, e.g. project_id:$eq.1|2|3
+     * @returns any A list of bike components
+     * @throws ApiError
+     */
+    public static getBikeComponents(
+        filter?: string,
+    ): CancelablePromise<(Array<Frame> | Array<Fork> | Array<Saddle>)> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/components',
             query: {
                 'filter': filter,
             },

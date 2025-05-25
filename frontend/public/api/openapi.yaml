@@ -118,6 +118,37 @@ paths:
       tags:
         - Bikes
 
+  /components:
+    get:
+      summary: Retrieve a list of bike components (saddles, frames, forks)
+      operationId: getBikeComponents
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of bike components (saddles, frames, forks)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Frame'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Fork'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Saddle'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Bikes
+
   /customers:
     get:
       summary: Retrieve a list of customers

@@ -1,14 +1,14 @@
 import React from "react";
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {fetchWithToken} from "@/utils/url";
-import {WarehousePart, WareHousePartsService, WarehousePartWithName} from "@/models/api";
+import {BikesService, Fork, Frame, Saddle, WarehousePart, WareHousePartsService, WarehousePartWithName} from "@/models/api";
 import InputField from "@/components/helpers/InputField";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {SelectLoading} from "@/components/helpers/SelectLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
 import {useTranslation} from "react-i18next";
+import FilterManager from "@/utils/filtermanager";
 
 interface Props {
     rowData?: WarehousePartWithName;
@@ -20,22 +20,24 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
     const isEditMode = !!rowData;
     const {t} = useTranslation();
     const {addNotification} = useNotification();
+    const filterManager = new FilterManager();
 
     const [partId, setPartId] = React.useState<number | null>(rowData?.part_id || null);
     const [projectId, setProjectId] = React.useState<string>(rowData?.project_id?.toString() || "");
     const [partType, setPartType] = React.useState(rowData?.part_type || '');
     const [quantity, setQuantity] = React.useState(rowData?.quantity || 0);
     const [storageLocation, setStorageLocation] = React.useState(rowData?.storage_location || '');
-    const [partIdOptions, setPartIdOptions] = React.useState<{ id: number, name: string }[]>([]);
+    const [partIdOptions, setPartIdOptions] = React.useState<Frame[] | Fork[] | Saddle[]>([]);
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [isLoadingParts, setIsLoadingParts] = React.useState<boolean>(false);
 
     React.useEffect(() => {
         if (!isEditMode && partType) {
             setIsLoadingParts(true)
-            fetchWithToken(`/${partType}s`)
+            filterManager.addFilter("type", [`${partType}s`])
+            BikesService.getBikeComponents(filterManager.getFilterString())
                 .then(data => setPartIdOptions(data))
-                .catch(err => addNotification(`Failed to load part-id.options${err?.message ? `: ${err.message}` : ""}`, "error"))
+                .catch(err => addNotification(`Failed to load bike components${err?.message ? `: ${err.message}` : ""}`, "error"))
                 .finally(() => setIsLoadingParts(false));
         }
     }, [partType]);
@@ -114,9 +116,9 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
                                 <SelectValue placeholder={t("placeholder.part_type")}/>
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="saddle">{t("bike_parts.saddle")}</SelectItem>
                                 <SelectItem value="frame">{t("bike_parts.frame")}</SelectItem>
                                 <SelectItem value="fork">{t("bike_parts.fork")}</SelectItem>
+                                <SelectItem value="saddle">{t("bike_parts.saddle")}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
