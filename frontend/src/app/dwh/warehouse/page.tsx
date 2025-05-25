@@ -30,7 +30,7 @@ export default function WareHousePage() {
 
     const fetchData = React.useCallback(async () => {
         setIsLoadingData(true);
-        const filterString = await filterManager.getFilterString();
+        const filterString = await filterManager.getFilterStringWithProjectIds();
         BikesService.getBikes(filterString === "" ? undefined : filterString)
             .then((bikes: BikeWithModelName[]) => setData(bikes))
             .catch(err => addNotification(`Failed to load bikes${err?.message ? `: ${err.message}` : ""}`, "error"))

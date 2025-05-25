@@ -44,7 +44,7 @@ export default function DashboardPage() {
     const fetchGraphMetaData = async () => {
         setIsLoadingGraphMetaData(true);
         filterManager.addFilter("range", [timeRange]);
-        const filterString = await filterManager.getFilterString();
+        const filterString = await filterManager.getFilterStringWithProjectIds();
         DashboardsService.getGraphMeta(filterString === "" ? undefined : filterString)
             .then((data: GraphMeta[]) => {
                 const graphMeta = data[0];
@@ -75,7 +75,7 @@ export default function DashboardPage() {
     const fetchGraphData = async () => {
         setIsLoadingGraphDataData(true);
         filterManager.addFilter("range", [timeRange]);
-        const filterString = await filterManager.getFilterString();
+        const filterString = await filterManager.getFilterStringWithProjectIds();
         DashboardsService.getGraphData(filterString === "" ? undefined : filterString)
             .then((data: GraphData[]) => setGraphDataData(data))
             .catch(err => addNotification(`Failed to load graph data${err?.message ? `: ${err.message}` : ""}`, "error"))
@@ -86,7 +86,7 @@ export default function DashboardPage() {
     const fetchCityData = async () => {
         setIsLoadingCitiesData(true);
         filterManager.addFilter("range", [timeRange]);
-        const filterString = await filterManager.getFilterString();
+        const filterString = await filterManager.getFilterStringWithProjectIds();
         DashboardsService.getCityData(filterString === "" ? undefined : filterString)
             .then((data: CityData[]) => {
                 if (data) {
@@ -103,7 +103,7 @@ export default function DashboardPage() {
     const fetchBikeData = async () => {
         setIsLoadingBikeData(true);
         filterManager.addFilter("range", [timeRange]);
-        const filterString = await filterManager.getFilterString();
+        const filterString = await filterManager.getFilterStringWithProjectIds();
         DashboardsService.getBikeSales(filterString === "" ? undefined : filterString)
             .then((data: BikeSales[]) => setBikeData(data))
             .catch(err => addNotification(`Failed to load bike data${err?.message ? `: ${err.message}` : ""}`, "error"))

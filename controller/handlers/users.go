@@ -37,8 +37,8 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
-	email := r.URL.Query().Get("email")
-	if email == "" {
+	email, found := utils.ExtractFilterValue(r, "email")
+	if !found {
 		http.Error(w, utils.ErrMsgEmailMissing, http.StatusBadRequest)
 		return
 	}

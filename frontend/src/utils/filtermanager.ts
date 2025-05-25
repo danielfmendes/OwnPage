@@ -44,16 +44,7 @@ class FilterManager {
         this.filters.delete(key);
     }
 
-    // Jetzt async, damit wir getProjectIds awaiten können
-    async getFilterString(): Promise<string> {
-        // Projekt-IDs holen
-        const projectIds = await this.getProjectIds();
-
-        // Projekt-Filter setzen, falls vorhanden
-        if (projectIds.length > 0) {
-            this.filters.set("project_id", projectIds);
-        }
-
+    private buildFilterString(): string {
         const parts: string[] = [];
         for (const [key, values] of this.filters.entries()) {
             if (values.length === 0) continue;
@@ -65,6 +56,24 @@ class FilterManager {
             }
         }
         return parts.join(",");
+    }
+
+    // Jetzt async, damit wir getProjectIds awaiten können
+    async getFilterStringWithProjectIds(): Promise<string> {
+        // Projekt-IDs holen
+        const projectIds = await this.getProjectIds();
+
+        // Projekt-Filter setzen, falls vorhanden
+        if (projectIds.length > 0) {
+            this.filters.set("project_id", projectIds);
+        }
+
+        return this.buildFilterString();
+    }
+
+    // Method without project IDs (sync)
+    getFilterString(): string {
+        return this.buildFilterString();
     }
 }
 

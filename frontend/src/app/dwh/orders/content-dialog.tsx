@@ -84,7 +84,7 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
     const fetchOrderItems = async () => {
         setIsLoadingData(true);
         filterManager.addFilter("order_id", [rowData?.id]);
-        const filterString = await filterManager.getFilterString();
+        const filterString = await filterManager.getFilterStringWithProjectIds();
         OrdersService.getOrderItems(filterString === "" ? undefined : filterString)
             .then((orders: OrderItemsWithBikeName[]) => {
                 setData(orders);

@@ -25,7 +25,7 @@ export default function RoleManagementPage() {
 
     const fetchData = React.useCallback(async () => {
         setIsLoadingData(true);
-        const filterString = await filterManager.getFilterString();
+        const filterString = await filterManager.getFilterStringWithProjectIds();
         RoleManagementsService.getRoleManagements(filterString === "" ? undefined : filterString)
             .then((roles: RoleManagementWithName[]) => {
                 setData(roles ?? [])

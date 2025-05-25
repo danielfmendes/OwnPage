@@ -30,7 +30,7 @@ export default function OrderPage() {
 
     const fetchData = async () => {
         setIsLoadingData(true);
-        const filterString = await filterManager.getFilterString();
+        const filterString = await filterManager.getFilterStringWithProjectIds();
         OrdersService.getOrders(filterString === "" ? undefined : filterString)
             .then((orders) => {
                 const ordersWithCustomer = orders as OrderWithCustomer[];

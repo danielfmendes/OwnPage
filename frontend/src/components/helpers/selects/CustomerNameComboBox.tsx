@@ -29,7 +29,7 @@ export default function CustomerNameComboBox({customerID, onChange}: Props) {
         setIsLoading(true);
 
         (async () => {
-            const filterString = await filterManager.getFilterString();
+            const filterString = await filterManager.getFilterStringWithProjectIds();
             CustomersService.getCustomers(filterString === "" ? undefined : filterString)
                 .then((customers: Customer[] | null) => {
                     setCustomerIdOptions(customers ?? []);

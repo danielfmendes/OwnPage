@@ -204,6 +204,7 @@ paths:
           description: Internal server error
       tags:
         - Customers
+
   /dashboard/bikemodels:
     get:
       summary: Retrieve a list of bike sales by model
@@ -608,6 +609,28 @@ paths:
           description: Internal server error
       tags:
         - RoleManagements
+
+  /user:
+    get:
+      summary: Retrieve a user's information by email
+      operationId: getUserInfo
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: User information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request – missing or invalid email
+        '500':
+          description: Internal server error
+      tags:
+        - Users
 
   /warehouseparts:
     get:

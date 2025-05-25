@@ -43,4 +43,5 @@ export { DashboardsService } from './services/DashboardsService';
 export { OrdersService } from './services/OrdersService';
 export { ProjectsService } from './services/ProjectsService';
 export { RoleManagementsService } from './services/RoleManagementsService';
+export { UsersService } from './services/UsersService';
 export { WareHousePartsService } from './services/WareHousePartsService';

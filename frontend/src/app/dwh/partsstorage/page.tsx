@@ -26,7 +26,7 @@ export default function PartsStoragePage() {
 
     const fetchData = async () => {
         setIsLoadingData(true);
-        const filterString = await filterManager.getFilterString();
+        const filterString = await filterManager.getFilterStringWithProjectIds();
         WareHousePartsService.getWareHouseParts(filterString === "" ? undefined : filterString)
             .then((warehouseparts: WarehousePartWithName[]) => {
                 setData(warehouseparts);

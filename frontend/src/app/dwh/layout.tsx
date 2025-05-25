@@ -2,21 +2,22 @@
 import React, {useEffect} from "react";
 import AdminPanelLayout from "@/components/admin-panel/admin-panel-layout";
 import {jwtDecode} from "jwt-decode";
-import {fetchWithToken} from "@/utils/url";
 import AuthToken from "@/utils/authtoken";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useUserStore} from "@/utils/userstate";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
-import {RoleManagementsService, RoleManagementWithName} from "@/models/api";
+import {RoleManagementsService, RoleManagementWithName, UsersService} from "@/models/api";
 import {handleLogOut} from "@/utils/helpers";
 import {useRouter} from "next/navigation";
 import Language from "@/utils/language";
 import {useTranslation} from "react-i18next";
 import {OpenAPI} from "@/models/api/core/OpenAPI";
+import FilterManager from "@/utils/filtermanager";
 
 export default function DemoLayout({children}: { children: React.ReactNode }) {
     const {addNotification} = useNotification();
     const token = AuthToken.getAuthToken();
+    const filterManager = new FilterManager();
     const router = useRouter();
     const setUser = useUserStore((state) => state.setUser);
     const setIsLoadingUser = useUserStore((state) => state.setIsLoading);
@@ -51,7 +52,8 @@ export default function DemoLayout({children}: { children: React.ReactNode }) {
             const decoded = jwtDecode(token);
             if (decoded.sub) {
                 setIsLoadingUser(true);
-                fetchWithToken(`/user?email=${decoded.sub}`, true)
+                filterManager.addFilter("email", [decoded.sub]);
+                UsersService.getUserInfo(filterManager.getFilterString())
                     .then((data) => setUser(data[0]))
                     .catch(err => addNotification(`Failed to load user data${err?.message ? `: ${err.message}` : ""}`, "error"))
                     .finally(() => setIsLoadingUser(false));

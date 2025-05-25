@@ -47,7 +47,7 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
     const fetchData = async () => {
         setIsLoadingData(true);
         filterManager.addFilter("email", [rowData.email]);
-        const filterString = await filterManager.getFilterString();
+        const filterString = await filterManager.getFilterStringWithProjectIds();
         OrdersService.getOrders(filterString === "" ? undefined : filterString)
             .then((orders) => {
                 const ordersWithBikeAndDate = orders as OrderItemsWithBikeAndDate[];
