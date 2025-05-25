@@ -21,6 +21,7 @@ import {SimpleTable} from "@/components/helpers/SimpleTable";
 import {useTranslation} from "react-i18next";
 import {Customer, CustomersService, OrderItemsWithBikeAndDate, OrdersService} from "@/models/api";
 import FilterManager from "@/utils/filtermanager";
+import {isRoleUserForProject} from "@/utils/helpers";
 
 interface Props {
     rowData: Customer,
@@ -32,6 +33,8 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
     const {t} = useTranslation();
     const {addNotification} = useNotification();
     const filterManager = new FilterManager();
+    const isDisabled = isRoleUserForProject(rowData?.project_id!)
+
     const [lastName, setLastName] = React.useState(rowData.name)
     const [city, setCity] = React.useState(rowData.city)
     const [data, setData] = React.useState<OrderItemsWithBikeAndDate[]>([]);
@@ -39,6 +42,8 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
     const [isLoadingUpdate, setIsLoadingUpdate] = React.useState(false);
 
     React.useEffect(() => {
+        setLastName(rowData.name);
+        setCity(rowData.city);
         (async () => {
             await fetchData();
         })();
@@ -151,6 +156,7 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
                             isLoading={isLoadingUpdate}
                             onClick={handleUpdate}
                             loadingText={t("placeholder.please_wait")}
+                            disabled={isDisabled}
                         >
                             {t("button.update")}
                         </ButtonLoading>

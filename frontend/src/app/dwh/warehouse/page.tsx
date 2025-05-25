@@ -12,15 +12,14 @@ import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import BikeDialogContent from "@/app/dwh/warehouse/content-dialog";
 import {BikesService, BikeWithModelName, RoleManagementWithName} from "@/models/api";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
-import {useRoleStore} from "@/utils/rolemananagemetstate";
 import {useTranslation} from "react-i18next";
 import FilterManager from "@/utils/filtermanager";
+import {isRoleUserForProject} from "@/utils/helpers";
 
 export default function WareHousePage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
     const filterManager = new FilterManager();
-    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const [data, setData] = React.useState<BikeWithModelName[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(true);
     const [loadingDeleteId, setLoadingDeleteId] = React.useState<number | null>(null);
@@ -123,8 +122,6 @@ export default function WareHousePage() {
             enableHiding: false,
             cell: ({row}) => {
                 const bike: BikeWithModelName = row.original
-                const roleForProject = roles.find(role => role.project_id === bike.project_id);
-                const isDisabled = roleForProject?.role === "user";
 
                 return (
                     <ButtonLoading
@@ -132,7 +129,7 @@ export default function WareHousePage() {
                         isLoading={loadingDeleteId === bike.id}
                         className="text-black dark:text-white p-2 rounded"
                         variant="destructive"
-                        disabled={isDisabled}
+                        disabled={isRoleUserForProject(bike.project_id)}
                     >
                         <Trash2 className="w-5 h-5"/>
                     </ButtonLoading>

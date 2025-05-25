@@ -9,6 +9,7 @@ import {useNotification} from "@/components/helpers/NotificationProvider";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
 import {useTranslation} from "react-i18next";
 import FilterManager from "@/utils/filtermanager";
+import {isRoleUserForProject} from "@/utils/helpers";
 
 interface Props {
     rowData?: WarehousePartWithName;
@@ -21,15 +22,26 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
     const {t} = useTranslation();
     const {addNotification} = useNotification();
     const filterManager = new FilterManager();
+    const isDisabled = isRoleUserForProject(rowData?.project_id!)
 
-    const [partId, setPartId] = React.useState<number | null>(rowData?.part_id || null);
-    const [projectId, setProjectId] = React.useState<string>(rowData?.project_id?.toString() || "");
-    const [partType, setPartType] = React.useState(rowData?.part_type || '');
-    const [quantity, setQuantity] = React.useState(rowData?.quantity || 0);
-    const [storageLocation, setStorageLocation] = React.useState(rowData?.storage_location || '');
+    const [partId, setPartId] = React.useState<number | null>(null);
+    const [projectId, setProjectId] = React.useState<string>("");
+    const [partType, setPartType] = React.useState<string>("");
+    const [quantity, setQuantity] = React.useState<number>(0);
+    const [storageLocation, setStorageLocation] = React.useState<string>("");
     const [partIdOptions, setPartIdOptions] = React.useState<Frame[] | Fork[] | Saddle[]>([]);
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [isLoadingParts, setIsLoadingParts] = React.useState<boolean>(false);
+
+    React.useEffect(() => {
+        if (rowData) {
+            setPartId(rowData.part_id ?? null);
+            setProjectId(rowData.project_id?.toString() ?? "");
+            setPartType(rowData.part_type ?? "");
+            setQuantity(rowData.quantity ?? 0);
+            setStorageLocation(rowData.storage_location ?? "");
+        }
+    }, [rowData]);
 
     React.useEffect(() => {
         if (!isEditMode && partType) {
@@ -135,7 +147,7 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
                 </>
             )}
 
-            <div className="space-y-1">
+            <div className="space-y-2">
                 <InputField label={t("label.quantity")} value={quantity} onChange={(e) => setQuantity(Number(e.target.value))}/>
                 <InputField label={t("label.warehouse_position")}
                             value={storageLocation}
@@ -149,6 +161,7 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
                 onClick={isEditMode ? handleUpdate : handleSave}
                 className="w-full mt-4"
                 loadingText={t("placeholder.please_wait")}
+                disabled={isEditMode && isDisabled}
             >
                 {isEditMode ? t("button.update") : t("button.save")}
             </ButtonLoading>

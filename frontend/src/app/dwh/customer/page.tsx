@@ -5,7 +5,6 @@ import {useStore} from "@/hooks/use-store";
 import DataTable from "@/components/helpers/Table";
 import * as React from "react";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import {useRoleStore} from "@/utils/rolemananagemetstate";
 import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown, Trash2} from "lucide-react";
@@ -14,14 +13,14 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/
 import CustomerDetailContent from "@/app/dwh/customer/customer-detail-content";
 import AddCustomerContent from "@/app/dwh/customer/add-customer-content";
 import {useTranslation} from "react-i18next";
-import {Customer, CustomersService, RoleManagementWithName} from "@/models/api";
+import {Customer, CustomersService} from "@/models/api";
 import FilterManager from "@/utils/filtermanager";
+import {isRoleUserForProject} from "@/utils/helpers";
 
 export default function CustomerPage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
     const filterManager = new FilterManager();
-    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const [data, setData] = React.useState<Customer[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(true);
     const [loadingDeleteId, setLoadingDeleteId] = React.useState<number | null>(null);
@@ -120,8 +119,6 @@ export default function CustomerPage() {
             enableHiding: false,
             cell: ({row}) => {
                 const customer: Customer = row.original
-                const roleForProject = roles.find(role => role.project_id === customer.project_id);
-                const isDisabled = roleForProject?.role === "user";
 
                 return (
                     <ButtonLoading
@@ -129,7 +126,7 @@ export default function CustomerPage() {
                         isLoading={loadingDeleteId === customer.id}
                         className="text-black dark:text-white p-2 rounded"
                         variant="destructive"
-                        disabled={isDisabled}
+                        disabled={isRoleUserForProject(customer.project_id)}
                     >
                         <Trash2 className="w-5 h-5"/>
                     </ButtonLoading>

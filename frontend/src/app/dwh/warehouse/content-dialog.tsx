@@ -8,6 +8,7 @@ import {DatePicker} from "@/components/helpers/DatePicker";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
 import ModelNameSelect from "@/components/helpers/selects/ModelNameSelect";
 import {useTranslation} from "react-i18next";
+import {isRoleUserForProject} from "@/utils/helpers";
 
 interface Props {
     rowData?: BikeWithModelName;
@@ -19,14 +20,26 @@ export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) 
     const isEditMode = !!rowData;
     const {t} = useTranslation();
     const {addNotification} = useNotification();
+    const isDisabled = isRoleUserForProject(rowData?.project_id!)
 
-    const [projectId, setProjectId] = React.useState<string>(rowData?.project_id?.toString() || "");
-    const [modelId, setModelId] = React.useState<number | null>(rowData?.model_id ?? null);
-    const [serialNumber, setSerialNumber] = React.useState<string>(rowData?.serial_number ?? '');
+    const [projectId, setProjectId] = React.useState<string>("");
+    const [modelId, setModelId] = React.useState<number | null>(null);
+    const [serialNumber, setSerialNumber] = React.useState<string>("");
     const [productionDate, setProductionDate] = React.useState<Date | undefined>(undefined);
-    const [quantity, setQuantity] = React.useState<number>(rowData?.quantity ?? 0);
-    const [warehouseLocation, setWarehouseLocation] = React.useState<string>(rowData?.warehouse_location ?? '');
+    const [quantity, setQuantity] = React.useState<number>(0);
+    const [warehouseLocation, setWarehouseLocation] = React.useState<string>("");
     const [isLoading, setIsLoading] = React.useState(false);
+
+    React.useEffect(() => {
+        if (rowData) {
+            setProjectId(rowData.project_id?.toString() || "");
+            setModelId(rowData.model_id ?? null);
+            setSerialNumber(rowData.serial_number ?? "");
+            setProductionDate(rowData.production_date ? new Date(rowData.production_date) : undefined);
+            setQuantity(rowData.quantity ?? 0);
+            setWarehouseLocation(rowData.warehouse_location ?? "");
+        }
+    }, [rowData]);
 
     const resetForm = () => {
         setProjectId("");
@@ -148,6 +161,7 @@ export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) 
                 onClick={isEditMode ? handleUpdate : handleSave}
                 className="w-full mt-4"
                 loadingText="Please wait"
+                disabled={isEditMode && isDisabled}
             >
                 {isEditMode ? t("button.update") : t("button.save")}
             </ButtonLoading>

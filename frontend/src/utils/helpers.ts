@@ -3,6 +3,7 @@ import {useUserStore} from "@/utils/userstate";
 import {useRouter} from "next/navigation";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 import {NotificationType} from "@/components/helpers/Notification";
+import {RoleManagementWithName} from "@/models/api";
 
 export const handleLogOut = (
     router: ReturnType<typeof useRouter>,
@@ -17,3 +18,9 @@ export const handleLogOut = (
     router.push("/login/dwh");
     addNotification(`Erfolgreich ausgeloggt`, "success");
 };
+
+export const isRoleUserForProject = (projectId: number, role: string = "user") => {
+    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
+    const roleForProject = roles.find(role => role.project_id === projectId);
+    return roleForProject?.role === role;
+}

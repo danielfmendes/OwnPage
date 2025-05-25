@@ -227,7 +227,7 @@ func SendVerificationEmail(to string, token string) {
 	baseURL := utils.GetBackendBaseURL()
 	msg := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n"
 	msg += fmt.Sprintf("From: %s\nTo: %s\nSubject: %s\n\n", from, to, subject)
-	msg += fmt.Sprintf("<html><body><p>Click <a href=\"%s/auth/verify?token=%s\">hier</a>, to verify your account.</p></body></html>", baseURL, token)
+	msg += fmt.Sprintf("<html><body><p>Click <a href=\"%s/auth/verify?token=%s\">here</a>, to verify your account.</p></body></html>", baseURL, token)
 
 	err := smtp.SendMail("smtp.gmail.com:587", smtp.PlainAuth("", from, pass, "smtp.gmail.com"),
 		from, []string{to}, []byte(msg))

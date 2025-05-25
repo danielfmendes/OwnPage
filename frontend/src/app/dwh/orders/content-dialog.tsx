@@ -9,7 +9,6 @@ import {
     OrderItemsWithBikeName,
     OrdersService,
     OrderWithCustomer,
-    RoleManagementWithName
 } from "@/models/api";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
 import {DatePicker} from "@/components/helpers/DatePicker";
@@ -19,11 +18,11 @@ import {SimpleTable} from "@/components/helpers/SimpleTable";
 import type {ColumnDef} from "@tanstack/react-table";
 import {Pencil, Trash2} from "lucide-react";
 import ModelNameSelect from "@/components/helpers/selects/ModelNameSelect";
-import {useRoleStore} from "@/utils/rolemananagemetstate";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {Button} from "@/components/ui/button";
 import {useTranslation} from "react-i18next";
 import FilterManager from "@/utils/filtermanager";
+import {isRoleUserForProject} from "@/utils/helpers";
 
 interface Props {
     rowData?: OrderWithCustomer;
@@ -35,9 +34,8 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
     const {t} = useTranslation();
     const {addNotification} = useNotification();
     const filterManager = new FilterManager();
-    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const isEditMode = !!rowData;
-    const isDisabled = roles.find(role => role.project_id === rowData?.project_id)?.role === "user";
+    const isDisabled = isRoleUserForProject(rowData?.project_id!)
 
     const [projectId, setProjectId] = React.useState<string>(rowData?.project_id?.toString() || "");
     const [orderDate, setOrderDate] = React.useState<Date | undefined>(rowData?.order_date ? new Date(rowData.order_date) : undefined);
@@ -336,6 +334,7 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
                                     isLoading={isLoadingOrderItems}
                                     onClick={handleOrderItemSave}
                                     className="w-1/6"
+                                    disabled={isDisabled}
                                 >
                                     {t("button.add_item")}
                                 </ButtonLoading>

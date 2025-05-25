@@ -7,20 +7,19 @@ import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown, Trash2} from "lucide-react";
 import * as React from "react";
-import {Order, OrdersService, OrderWithCustomer, RoleManagementWithName} from "@/models/api";
+import {Order, OrdersService, OrderWithCustomer} from "@/models/api";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import {useRoleStore} from "@/utils/rolemananagemetstate";
 import OrderDialogContent from "@/app/dwh/orders/content-dialog";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {useTranslation} from "react-i18next";
 import FilterManager from "@/utils/filtermanager";
+import {isRoleUserForProject} from "@/utils/helpers";
 
 export default function OrderPage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
     const filterManager = new FilterManager();
-    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const [data, setData] = React.useState<OrderWithCustomer[]>([]);
     const [isLoadingData, setIsLoadingData] = React.useState(true);
     const [loadingDeleteId, setLoadingDeleteId] = React.useState<number | null>(null);
@@ -114,8 +113,6 @@ export default function OrderPage() {
             enableHiding: false,
             cell: ({row}) => {
                 const order: Order = row.original
-                const roleForProject = roles.find(role => role.project_id === order.project_id);
-                const isDisabled = roleForProject?.role === "user";
 
                 return (
                     <ButtonLoading
@@ -123,7 +120,7 @@ export default function OrderPage() {
                         isLoading={loadingDeleteId === order.id}
                         className="text-black dark:text-white p-2 rounded"
                         variant="destructive"
-                        disabled={isDisabled}
+                        disabled={isRoleUserForProject(order.project_id)}
                     >
                         <Trash2 className="w-5 h-5"/>
                     </ButtonLoading>
