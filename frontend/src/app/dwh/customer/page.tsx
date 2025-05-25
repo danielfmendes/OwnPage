@@ -144,7 +144,7 @@ export default function CustomerPage() {
     return (
         <ContentLayout title={t("customer.data")}>
             <DataTable
-                title={t("label.dob")}
+                title={t("customer.data")}
                 columns={columns}
                 data={data}
                 isLoading={isLoadingData}

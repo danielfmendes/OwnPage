@@ -22,14 +22,14 @@ export type User = {
     /**
      * Indicates whether the user has been verified
      */
-    is_verified: boolean;
+    is_verified?: boolean;
     /**
      * Expiration timestamp of the verification token
      */
-    verification_expires: string;
+    verification_expires?: string;
     /**
      * Token used for email verification
      */
-    verification_token: string;
+    verification_token?: string;
 };
 

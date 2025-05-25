@@ -7,6 +7,69 @@ servers:
   - url: https://api.example.com
 
 paths:
+  /auth/login:
+    post:
+      summary: User login
+      operationId: userLogin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successful login with token returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – invalid credentials
+        '500':
+          description: Internal server error
+      tags:
+        - Auths
+  /auth/register:
+    post:
+      summary: User registration
+      operationId: userRegister
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '400':
+          description: Bad request – missing or invalid fields
+        '409':
+          description: Conflict – user already exists
+        '500':
+          description: Internal server error
+      tags:
+        - Auths
+
   /bikes:
     get:
       summary: Retrieve a list of bikes
@@ -812,7 +875,7 @@ components:
           description: Name of the project
     User:
       type: object
-      required: [ email, password, username, dob, is_verified, verification_expires, verification_token ]
+      required: [ email, password, username, dob ]
       properties:
         email:
           type: string

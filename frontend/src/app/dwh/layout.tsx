@@ -27,10 +27,9 @@ export default function DemoLayout({children}: { children: React.ReactNode }) {
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const {i18n} = useTranslation();
 
-    // Set up API base + token once
+    // Set up API token
     useEffect(() => {
         if (token) {
-            OpenAPI.BASE = process.env.NEXT_PUBLIC_API_ENV || "http://localhost:8080";
             OpenAPI.TOKEN = token
         }
     }, [token]);

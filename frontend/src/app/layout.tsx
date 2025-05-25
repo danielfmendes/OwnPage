@@ -6,6 +6,7 @@ import "../../i18n";
 
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { NotificationProvider } from "@/components/helpers/NotificationProvider";
+import { OpenAPIInitializer } from "@/components/helpers/OpenAPIInitializer";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -30,6 +31,7 @@ export default function RootLayout({
       <body className={GeistSans.className}>
         <NotificationProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <OpenAPIInitializer />
             {children}
           </ThemeProvider>
         </NotificationProvider>

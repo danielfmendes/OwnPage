@@ -37,6 +37,7 @@ export type { User } from './models/User';
 export type { WarehousePart } from './models/WarehousePart';
 export type { WarehousePartWithName } from './models/WarehousePartWithName';
 
+export { AuthsService } from './services/AuthsService';
 export { BikesService } from './services/BikesService';
 export { CustomersService } from './services/CustomersService';
 export { DashboardsService } from './services/DashboardsService';

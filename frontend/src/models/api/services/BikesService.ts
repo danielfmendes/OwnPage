@@ -129,7 +129,7 @@ export class BikesService {
     /**
      * Retrieve a list of bike components (saddles, frames, forks)
      * @param filter Query filter string, e.g. project_id:$eq.1|2|3
-     * @returns any A list of bike components
+     * @returns any A list of bike components (saddles, frames, forks)
      * @throws ApiError
      */
     public static getBikeComponents(

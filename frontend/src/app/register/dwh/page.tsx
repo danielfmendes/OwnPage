@@ -6,12 +6,11 @@ import {Button} from '@/components/ui/button';
 import InputField from '@/components/helpers/InputField';
 import {Box} from 'lucide-react';
 import {DatePicker} from "@/components/helpers/DatePicker";
-import apiUrl from "@/utils/url";
-import {handleFetchError} from "@/utils/helpers";
 import AuthToken from "@/utils/authtoken";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useTranslation} from "react-i18next";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import {AuthsService} from "@/models/api";
 
 export default function RegisterCard() {
     const {t} = useTranslation();
@@ -24,27 +23,26 @@ export default function RegisterCard() {
 
     const handleSubmit = () => {
         setIsLoading(true);
-        fetch(`${apiUrl}/auth/register`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                username: name,
-                email,
-                password,
-                dob: selectedDate,
-            }),
-        })
-            .then(async res => {
-                if (!res.ok) await handleFetchError(res, "POST");
-                return res.json();
-            })
+
+        const newData = {
+            username: name,
+            email,
+            password,
+            dob: selectedDate ? selectedDate.toISOString() : "",
+        }
+
+        AuthsService.userRegister(newData)
             .then(data => {
-                AuthToken.setAuthToken(data.token);
-                window.location.href = '/dwh/dashboard';
-                addNotification(
-                    "Confirmation e-mail has been sent. Please confirm your account within 7 days (check your spam folder if necessary).",
-                    "success"
-                );
+                if (data.token) {
+                    AuthToken.setAuthToken(data.token);
+                    window.location.href = '/dwh/dashboard';
+                    addNotification(
+                        "Confirmation e-mail has been sent. Please confirm your account within 7 days (check your spam folder if necessary).",
+                        "success"
+                    );
+                } else {
+                    addNotification("Registration failed: Token not provided", "error");
+                }
             })
             .catch(err => addNotification(`Registration error${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoading(false));

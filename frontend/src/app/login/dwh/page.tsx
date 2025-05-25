@@ -6,12 +6,11 @@ import {Button} from '@/components/ui/button';
 import InputField from '@/components/helpers/InputField';
 import {ArrowRight, Box} from 'lucide-react';
 import {useRouter} from 'next/navigation';
-import apiUrl from "@/utils/url";
-import {handleFetchError} from "@/utils/helpers";
 import AuthToken from "@/utils/authtoken";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useTranslation} from "react-i18next";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import {AuthsService} from "@/models/api";
 
 export default function LoginCard() {
     const {t} = useTranslation();
@@ -42,18 +41,19 @@ export default function LoginCard() {
         const setLoading = demo ? setIsLoadingDemo : setIsLoading;
         setLoading(true);
 
-        fetch(`${apiUrl}/auth/login`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({email: loginEmail, password: loginPassword}),
-        })
-            .then(async res => {
-                if (!res.ok) await handleFetchError(res, "POST");
-                return res.json();
-            })
+        const newData = {
+            email: loginEmail,
+            password: loginPassword,
+        }
+
+        AuthsService.userLogin(newData)
             .then(data => {
-                AuthToken.setAuthToken(data.token);
-                if (redirect) window.location.href = '/dwh/dashboard';
+                if (data.token) {
+                    AuthToken.setAuthToken(data.token);
+                    if (redirect) window.location.href = '/dwh/dashboard';
+                } else {
+                    addNotification("Login failed: Token not provided", "error");
+                }
             })
             .catch(err => {
                 setErrorMessagePassword(t("error.login"));
