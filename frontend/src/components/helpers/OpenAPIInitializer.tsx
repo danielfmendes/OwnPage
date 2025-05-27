@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect } from "react";
+import {useEffect} from "react";
 import {OpenAPI} from "@/models/api";
+import apiUrl from "@/utils/helpers";
 
 export const OpenAPIInitializer = () => {
     useEffect(() => {
@@ -12,7 +13,7 @@ export const OpenAPIInitializer = () => {
             path.startsWith("/register") ||
             path.startsWith("/dwh")
         ) {
-            OpenAPI.BASE = process.env.NEXT_PUBLIC_API_ENV || "http://localhost:8080";
+            OpenAPI.BASE = apiUrl;
         }
     }, []);
 

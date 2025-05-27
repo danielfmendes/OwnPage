@@ -24,3 +24,6 @@ export const isRoleUserForProject = (projectId: number, role: string = "user") =
     const roleForProject = roles.find(role => role.project_id === projectId);
     return roleForProject?.role === role;
 }
+
+const apiUrl = process.env.NEXT_PUBLIC_API_ENV || "http://localhost:8080";
+export default apiUrl;
