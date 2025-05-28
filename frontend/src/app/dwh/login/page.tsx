@@ -72,7 +72,7 @@ export default function LoginCard() {
     };
 
     const handleRegister = () => {
-        router.push('/register/dwh');
+        router.push('/dwh/register');
     };
 
     const handleDemo = () => {

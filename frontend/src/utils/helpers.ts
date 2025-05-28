@@ -15,7 +15,7 @@ export const handleLogOut = (
     useRoleStore.getState().clearRoles();
     useRoleStore.getState().setIsLoading(false);
 
-    router.push("/login/dwh");
+    router.push("/dwh/login");
     addNotification(`Erfolgreich ausgeloggt`, "success");
 };
 

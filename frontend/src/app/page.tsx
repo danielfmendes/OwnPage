@@ -44,7 +44,7 @@ export default function Home() {
             </div>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <Link href="/login/dwh" >
+            <Link href="/dwh/login" >
               <Button
                   size="lg"
                   className="w-full group transition-all"

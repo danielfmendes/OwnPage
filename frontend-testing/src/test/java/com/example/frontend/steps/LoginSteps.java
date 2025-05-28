@@ -31,7 +31,7 @@ public class LoginSteps {
 
     @Given("ich bin auf der Login-Seite")
     public void ichBinAufDerLoginSeite() {
-        driver.get(WebDriverUtils.getBaseUrl() + "/login/dwh");
+        driver.get(WebDriverUtils.getBaseUrl() + "/dwh/login");
         WebDriverUtils.takeScreenshot("screenshots/login/login_page.png");
     }
 

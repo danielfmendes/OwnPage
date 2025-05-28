@@ -8,13 +8,19 @@ import {useUserStore} from "@/utils/userstate";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 import {RoleManagementsService, RoleManagementWithName, UsersService} from "@/models/api";
 import {handleLogOut} from "@/utils/helpers";
-import {useRouter} from "next/navigation";
+import {usePathname, useRouter} from "next/navigation";
 import Language from "@/utils/language";
 import {useTranslation} from "react-i18next";
 import {OpenAPI} from "@/models/api/core/OpenAPI";
 import FilterManager from "@/utils/filtermanager";
 
 export default function DemoLayout({children}: { children: React.ReactNode }) {
+    const pathname = usePathname();
+    const hideSidebar = ['/dwh/login', '/dwh/register'].includes(pathname);
+
+    // Early rendering for login/register
+    if (hideSidebar) return <>{children}</>;
+
     const {addNotification} = useNotification();
     const token = AuthToken.getAuthToken();
     const filterManager = new FilterManager();

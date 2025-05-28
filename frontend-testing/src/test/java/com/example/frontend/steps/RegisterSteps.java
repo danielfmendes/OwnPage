@@ -32,7 +32,7 @@ public class RegisterSteps {
 
     @Given("ich bin auf der Login-Seite zum Registrieren")
     public void ichBinAufDerLoginSeiteZumRegistrieren() {
-        driver.get(WebDriverUtils.getBaseUrl() + "/login/dwh");
+        driver.get(WebDriverUtils.getBaseUrl() + "/dwh/login");
         WebDriverUtils.takeScreenshot("screenshots/register/login_page.png");
     }
 
@@ -44,7 +44,7 @@ public class RegisterSteps {
 
     @When("ich gebe {string}, {string} und {string} ein")
     public void ichGebeEmailPasswortUndNameEin(String email, String password, String name) {
-        String expectedUrl = WebDriverUtils.getBaseUrl() + "/register/dwh";
+        String expectedUrl = WebDriverUtils.getBaseUrl() + "/dwh/register";
         wait.until(ExpectedConditions.urlToBe(expectedUrl));
         assertEquals("Die URL nach dem Klicken des Registrier-Buttons ist nicht korrekt.", expectedUrl, driver.getCurrentUrl());
 
