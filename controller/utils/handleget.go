@@ -14,46 +14,47 @@ type Scanner interface {
 	Scan(dest ...any) error
 }
 
-func HandleGet(w http.ResponseWriter, r *http.Request, query string, scanFunc func(Scanner) (any, error), args ...interface{}) {
-	_, err := ValidateToken(w, r)
-	if err != nil {
-		return
-	}
-
-	conn, err := ConnectToDB(w)
-	if err != nil {
-		return
-	}
-
-	// Übergib die args (Parameter) an die Query
-	rows, err := conn.Query(query, args...)
-	if err != nil {
-		HandleError(w, err, ErrMsgDBQueryFailed)
-		return
-	}
-	defer rows.Close()
-
-	var results []any
-	for rows.Next() {
-		item, err := scanFunc(rows)
-		if err != nil {
-			HandleError(w, err, ErrMsgScanFailed)
-			return
-		}
-		results = append(results, item)
-	}
-
-	if err := rows.Err(); err != nil {
-		HandleError(w, err, ErrMsgRowsReadFailed)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(results)
+func HandleGet(
+	w http.ResponseWriter,
+	r *http.Request,
+	query string,
+	scanFunc func(Scanner) (any, error),
+	args ...interface{},
+) {
+	fetchData(w, r, query, false, false, false, scanFunc, args...)
 }
 
-func HandleGetWithProjectIDs(w http.ResponseWriter, r *http.Request, baseQuery string, scanFunc func(Scanner) (any, error), args ...interface{}) {
-	userEmail, err := ValidateToken(w, r)
+func HandleGetWithProjectIDs(
+	w http.ResponseWriter,
+	r *http.Request,
+	query string,
+	scanFunc func(Scanner) (any, error),
+	args ...interface{},
+) {
+	fetchData(w, r, query, true, false, false, scanFunc, args...)
+}
+
+func HandleGetWithProjectIDsWithPagination(
+	w http.ResponseWriter,
+	r *http.Request,
+	query string,
+	scanFunc func(Scanner) (any, error),
+	args ...interface{},
+) {
+	fetchData(w, r, query, true, true, true, scanFunc, args...)
+}
+
+func fetchData(
+	w http.ResponseWriter,
+	r *http.Request,
+	query string,
+	filterWithProjectIDs bool,
+	applyPagination bool,
+	includeTotalCount bool,
+	scanFunc func(Scanner) (any, error),
+	args ...interface{},
+) {
+	_, err := ValidateToken(w, r)
 	if err != nil {
 		return
 	}
@@ -64,22 +65,46 @@ func HandleGetWithProjectIDs(w http.ResponseWriter, r *http.Request, baseQuery s
 	}
 	defer conn.Close()
 
-	// Hole alle zulässigen Projekt-IDs für den Benutzer
-	userProjectIDs, err := GetAllProjectsIDsForUser(conn, userEmail, "user")
-	if err != nil {
-		HandleError(w, err, ErrMsgNoProjectAccess)
-		return
+	finalQuery := query
+	finalArgs := args
+
+	if filterWithProjectIDs {
+		userEmail, err := ValidateToken(w, r)
+		if err != nil {
+			return
+		}
+
+		userProjectIDs, err := GetAllProjectsIDsForUser(conn, userEmail, "user")
+		if err != nil {
+			HandleError(w, err, ErrMsgNoProjectAccess)
+			return
+		}
+
+		effectiveProjectIDs, err := filterProjectIDs(r, userProjectIDs)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
+		}
+
+		finalQuery, finalArgs = injectProjectIDFilter(query, args, effectiveProjectIDs)
 	}
 
-	// Effektive Projekt-IDs basierend auf URL-Parameter und Berechtigungen
-	effectiveProjectIDs, err := filterProjectIDs(r, userProjectIDs)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusForbidden)
-		return
+	var totalCount int
+	if includeTotalCount {
+		countQuery := fmt.Sprintf("SELECT COUNT(*) FROM (%s) AS count_sub", finalQuery)
+		if err := conn.QueryRow(countQuery, finalArgs...).Scan(&totalCount); err != nil {
+			HandleError(w, err, "Failed to count total items")
+			return
+		}
 	}
 
-	// Final Query zusammenbauen
-	finalQuery, finalArgs := injectProjectIDFilter(baseQuery, args, effectiveProjectIDs)
+	if applyPagination {
+		finalQuery, err = applyPaginationAndSorting(finalQuery, r)
+		if err != nil {
+			HandleError(w, err, "Invalid pagination or sorting parameters")
+			return
+		}
+	}
 
 	rows, err := conn.Query(finalQuery, finalArgs...)
 	if err != nil {
@@ -97,14 +122,52 @@ func HandleGetWithProjectIDs(w http.ResponseWriter, r *http.Request, baseQuery s
 		}
 		results = append(results, item)
 	}
-
 	if err := rows.Err(); err != nil {
 		HandleError(w, err, ErrMsgRowsReadFailed)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(results)
+	if includeTotalCount {
+		json.NewEncoder(w).Encode(map[string]any{
+			"totalCount": totalCount,
+			"items":      results,
+		})
+	} else {
+		json.NewEncoder(w).Encode(results)
+	}
+}
+
+func applyPaginationAndSorting(baseQuery string, r *http.Request) (string, error) {
+	// Pagination Defaults
+	pageSize := 25
+	page := 0
+
+	// Query Params lesen
+	if ps := r.URL.Query().Get("pageSize"); ps != "" {
+		if v, err := strconv.Atoi(ps); err == nil && v > 0 && v <= 1000 {
+			pageSize = v
+		}
+	}
+	if p := r.URL.Query().Get("page"); p != "" {
+		if v, err := strconv.Atoi(p); err == nil && v >= 0 {
+			page = v
+		}
+	}
+
+	orderBy := r.URL.Query().Get("orderBy")
+	orderClause := ""
+	if orderBy != "" {
+		orderBy = strings.ReplaceAll(orderBy, "=", " ")   // z.B. "customer_name=asc" -> "customer_name asc"
+		orderBy = strings.ReplaceAll(orderBy, "%20", " ") // URL decoded space fallback (optional)
+		orderClause = " ORDER BY " + orderBy
+	}
+
+	limitOffsetClause := fmt.Sprintf(" LIMIT %d OFFSET %d", pageSize, page*pageSize)
+
+	finalQuery := baseQuery + orderClause + limitOffsetClause
+
+	return finalQuery, nil
 }
 
 func filterProjectIDs(r *http.Request, allowedIDs []int) ([]int, error) {

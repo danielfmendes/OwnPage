@@ -36,7 +36,7 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 func GetOrders(w http.ResponseWriter, r *http.Request) {
 	query := utils.MustReadSQLFile("selects/orderselect.sql")
 
-	utils.HandleGetWithProjectIDs(w, r, query, func(scanner utils.Scanner) (any, error) {
+	utils.HandleGetWithProjectIDsWithPagination(w, r, query, func(scanner utils.Scanner) (any, error) {
 		var order models.OrderWithCustomer
 		err := scanner.Scan(&order.ID, &order.OrderDate, &order.ProjectID, &order.CustomerID, &order.CustomerName, &order.CustomerEmail)
 		return order, err

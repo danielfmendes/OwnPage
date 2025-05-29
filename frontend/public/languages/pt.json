@@ -172,5 +172,9 @@
     "single": "1 ancestral",
     "multiple": "{{count}} ancestrais",
     "chosen": "Escolhido"
+  },
+  "pagination": {
+    "info": "{{from}}-{{to}} de {{total}}",
+    "page": "Itens por página"
   }
 }

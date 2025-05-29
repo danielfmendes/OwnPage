@@ -398,19 +398,34 @@ paths:
       operationId: getOrders
       parameters:
         - $ref: "#/components/parameters/FilterParam"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/OrderBy"
       responses:
         '200':
-          description: A list of orders
+          description: A list of orders with total count
           content:
             application/json:
               schema:
                 oneOf:
-                  - type: array
-                    items:
-                      $ref: '#/components/schemas/OrderWithCustomer'
-                  - type: array
-                    items:
-                      $ref: '#/components/schemas/OrderItemsWithBikeAndDate'
+                  - type: object
+                    properties:
+                      totalCount:
+                        type: integer
+                        example: 42
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/OrderWithCustomer'
+                  - type: object
+                    properties:
+                      totalCount:
+                        type: integer
+                        example: 42
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/OrderItemsWithBikeAndDate'
         '401':
           description: Unauthorized – missing or invalid token
         '403':
@@ -812,6 +827,29 @@ paths:
 
 components:
   parameters:
+    PageSize:
+      name: pageSize
+      in: query
+      description: Specifying the size of the result set.
+      required: false
+      allowEmptyValue: false
+      example: 100
+      schema:
+        type: integer
+        format: integer
+        minimum: 1
+        maximum: 500
+    PageParam:
+      name: page
+      in: query
+      description: Specifying the page of the result set.
+      required: false
+      allowEmptyValue: false
+      example: 0 or 1
+      schema:
+        type: integer
+        format: integer
+        minimum: 0
     FilterParam:
       name: filter
       in: query
@@ -819,6 +857,16 @@ components:
       required: false
       schema:
         type: string
+    OrderBy:
+      name: orderBy
+      in: query
+      description: Specifying the sort order. The sort definition can use the keywords 'asc' for ascending and 'desc' for descending sort order.
+      required: false
+      allowEmptyValue: false
+      example: id desc
+      schema:
+        type: string
+        description: Comma seperated list of sort definitions
     GetIdParam:
       name: id
       in: path
@@ -862,6 +910,15 @@ components:
         example: true
 
   schemas:
+    Page:
+      properties:
+        page:
+          description: Number is the current page of the server response
+          type: integer
+        pageSize:
+          description: Size is the size of the current page of the server response
+          type: integer
+      type: object
     #  Basic Types
     Project:
       type: object

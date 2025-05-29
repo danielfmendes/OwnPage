@@ -5,7 +5,7 @@ import {useStore} from "@/hooks/use-store";
 import DataTable from "@/components/helpers/Table";
 import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
-import {ArrowUpDown, Trash2} from "lucide-react";
+import {Trash2} from "lucide-react";
 import * as React from "react";
 import {Order, OrdersService, OrderWithCustomer} from "@/models/api";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
@@ -15,29 +15,43 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/
 import {useTranslation} from "react-i18next";
 import FilterManager from "@/utils/filtermanager";
 import {isRoleUserForProject} from "@/utils/helpers";
+import {ItemsLoaderOptions} from "@/models/datatable/itemsLoader";
+import {defaultPageSize, Pagination} from "@/models/datatable/pagination";
+import {Sort} from "@/models/datatable/sort";
 
 export default function OrderPage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
     const filterManager = new FilterManager();
     const [data, setData] = React.useState<OrderWithCustomer[]>([]);
-    const [isLoadingData, setIsLoadingData] = React.useState(true);
+    const [totalCount, setTotalCount] = React.useState<number>(0);
     const [loadingDeleteId, setLoadingDeleteId] = React.useState<number | null>(null);
     const [isLoadingDeleteCascade, setIsLoadingDeleteCascade] = React.useState(false);
     const [showCascadeDialog, setShowCascadeDialog] = React.useState(false);
     const [deleteId, setDeleteId] = React.useState<number | null>(null);
 
-    const fetchData = async () => {
-        setIsLoadingData(true);
+    const refreshData = React.useCallback(() => {
+        return itemsLoader({
+            pagination: new Pagination(0, defaultPageSize),
+            sort: new Sort(),
+        });
+    }, []);
+
+    async function itemsLoader(options: ItemsLoaderOptions): Promise<any> {
         const filterString = await filterManager.getFilterStringWithProjectIds();
-        OrdersService.getOrders(filterString === "" ? undefined : filterString)
+        const sortString = options.sort.toCallOpts().join(",");
+        OrdersService.getOrders(
+            filterString === "" ? undefined : filterString,
+            options.pagination.itemsPerPage,
+            options.pagination.page,
+            sortString === "" ? undefined : sortString
+        )
             .then((orders) => {
-                const ordersWithCustomer = orders as OrderWithCustomer[];
+                const ordersWithCustomer = orders.items as OrderWithCustomer[];
                 setData(ordersWithCustomer);
+                setTotalCount(orders.totalCount ?? 0)
             })
-            .catch(err => addNotification(`Failed to load orders${err?.message ? `: ${err.message}` : ""}`, "error"))
-            .finally(() => setIsLoadingData(false));
-    };
+    }
 
     const deleteOrder = (id: number, cascade: boolean = false) => {
         if (cascade) {
@@ -49,7 +63,7 @@ export default function OrderPage() {
         OrdersService.deleteOrder(id, cascade)
             .then(async () => {
                 addNotification(`Order with id ${id}${cascade ? " and related data" : ""} deleted successfully`, "success");
-                await fetchData();
+                await refreshData();
                 if (cascade) setShowCascadeDialog(false);
             })
             .catch((err) => {
@@ -95,14 +109,7 @@ export default function OrderPage() {
         },
         {
             accessorKey: "order_date",
-            header: ({column}) => (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    {t("label.order_date")}<ArrowUpDown className="ml-2 h-4 w-4"/>
-                </Button>
-            ),
+            header: t("label.order_date"),
             cell: ({row}) => {
                 const date = new Date(row.getValue("order_date"))
                 return date.toLocaleDateString()
@@ -138,22 +145,20 @@ export default function OrderPage() {
                 title={t("menu.orders")}
                 columns={columns}
                 data={data}
-                isLoading={isLoadingData}
+                itemsLoader={itemsLoader}
+                totalCount={totalCount}
                 filterColumn={"customer_name"}
-                onRefresh={async () => {
-                    await fetchData()
-                }}
                 rowDialogContent={(rowData, onClose) => (
                     <OrderDialogContent
                         rowData={rowData}
                         onClose={onClose}
-                        onRefresh={fetchData}
+                        onRefresh={refreshData}
                     />
                 )}
                 addDialogContent={(onClose) => (
                     <OrderDialogContent
                         onClose={onClose}
-                        onRefresh={fetchData}
+                        onRefresh={refreshData}
                     />
                 )}
             />

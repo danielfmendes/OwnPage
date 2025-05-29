@@ -172,5 +172,9 @@
     "single": "1 Ancestor",
     "multiple": "{{count}} Ancestors",
     "chosen": "Chosen"
+  },
+  "pagination": {
+    "info": "{{from}}-{{to}} of {{total}}",
+    "page": "Items Per Page"
   }
 }

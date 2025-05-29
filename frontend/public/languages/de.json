@@ -172,5 +172,9 @@
     "single": "1 Projekt",
     "multiple": "{{count}} Projekte",
     "chosen": "Ausgewählt"
+  },
+  "pagination": {
+    "info": "{{from}}-{{to}} von {{total}}",
+    "page": "Elemente pro Seite"
   }
 }
