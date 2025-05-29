@@ -28,7 +28,7 @@ func CustomerHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetCustomers(w http.ResponseWriter, r *http.Request) {
-	utils.HandleGetWithProjectIDs(w, r, "SELECT * FROM customers", func(scanner utils.Scanner) (any, error) {
+	utils.HandleGetWithProjectIDsWithPagination(w, r, "SELECT * FROM customers", func(scanner utils.Scanner) (any, error) {
 		var b models.Customer
 		err := scanner.Scan(&b.ID, &b.Email, &b.Password, &b.FirstName, &b.Name, &b.Dob, &b.City, &b.ProjectID)
 		return b, err

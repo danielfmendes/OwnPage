@@ -30,7 +30,7 @@ func BikeHandler(w http.ResponseWriter, r *http.Request) {
 func GetBikes(w http.ResponseWriter, r *http.Request) {
 	query := utils.MustReadSQLFile("selects/bikesselect.sql")
 
-	utils.HandleGetWithProjectIDs(w, r, query, func(scanner utils.Scanner) (any, error) {
+	utils.HandleGetWithProjectIDsWithPagination(w, r, query, func(scanner utils.Scanner) (any, error) {
 		var p models.BikeWithModelName
 		err := scanner.Scan(&p.ID, &p.ModelID, &p.SerialNumber, &p.ProductionDate, &p.Quantity, &p.WarehouseLocation, &p.ProjectID, &p.ModelName)
 		return p, err

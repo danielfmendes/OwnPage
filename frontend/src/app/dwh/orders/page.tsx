@@ -13,16 +13,14 @@ import {useNotification} from "@/components/helpers/NotificationProvider";
 import OrderDialogContent from "@/app/dwh/orders/content-dialog";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {useTranslation} from "react-i18next";
-import FilterManager from "@/utils/filtermanager";
-import {isRoleUserForProject} from "@/utils/helpers";
+import {genericItemsLoader, isRoleUserForProject, useRefreshData} from "@/utils/helpers";
 import {ItemsLoaderOptions} from "@/models/datatable/itemsLoader";
-import {defaultPageSize, Pagination} from "@/models/datatable/pagination";
-import {Sort} from "@/models/datatable/sort";
 
 export default function OrderPage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
-    const filterManager = new FilterManager();
+    const refreshData = useRefreshData(itemsLoader);
+
     const [data, setData] = React.useState<OrderWithCustomer[]>([]);
     const [totalCount, setTotalCount] = React.useState<number>(0);
     const [loadingDeleteId, setLoadingDeleteId] = React.useState<number | null>(null);
@@ -30,27 +28,13 @@ export default function OrderPage() {
     const [showCascadeDialog, setShowCascadeDialog] = React.useState(false);
     const [deleteId, setDeleteId] = React.useState<number | null>(null);
 
-    const refreshData = React.useCallback(() => {
-        return itemsLoader({
-            pagination: new Pagination(0, defaultPageSize),
-            sort: new Sort(),
-        });
-    }, []);
-
-    async function itemsLoader(options: ItemsLoaderOptions): Promise<any> {
-        const filterString = await filterManager.getFilterStringWithProjectIds();
-        const sortString = options.sort.toCallOpts().join(",");
-        OrdersService.getOrders(
-            filterString === "" ? undefined : filterString,
-            options.pagination.itemsPerPage,
-            options.pagination.page,
-            sortString === "" ? undefined : sortString
-        )
-            .then((orders) => {
-                const ordersWithCustomer = orders.items as OrderWithCustomer[];
-                setData(ordersWithCustomer);
-                setTotalCount(orders.totalCount ?? 0)
-            })
+    async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
+        return genericItemsLoader<OrderWithCustomer>(
+            options,
+            OrdersService.getOrders,
+            setData,
+            setTotalCount
+        );
     }
 
     const deleteOrder = (id: number, cascade: boolean = false) => {

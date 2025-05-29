@@ -65,8 +65,8 @@ export default function DemoLayout({children}: { children: React.ReactNode }) {
             }
             setIsLoadingRole(true);
             RoleManagementsService.getRoleManagements()
-                .then((roles: RoleManagementWithName[]) => {
-                    setRoles(roles || []);
+                .then((roles) => {
+                    setRoles(roles.items || []);
                 })
                 .catch(err => addNotification(`Failed to load role management${err?.message ? `: ${err.message}` : ""}`, "error"))
                 .finally(() => setIsLoadingRole(false));

@@ -24,6 +24,16 @@ func HandleGet(
 	fetchData(w, r, query, false, false, false, scanFunc, args...)
 }
 
+func HandleGetWithPagination(
+	w http.ResponseWriter,
+	r *http.Request,
+	query string,
+	scanFunc func(Scanner) (any, error),
+	args ...interface{},
+) {
+	fetchData(w, r, query, false, true, true, scanFunc, args...)
+}
+
 func HandleGetWithProjectIDs(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -139,6 +149,18 @@ func fetchData(
 }
 
 func applyPaginationAndSorting(baseQuery string, r *http.Request) (string, error) {
+	queryParams := r.URL.Query()
+
+	// Check if any relevant params are set
+	hasPageSize := queryParams.Has("pageSize")
+	hasPage := queryParams.Has("page")
+	hasOrderBy := queryParams.Has("orderBy")
+
+	// If nothing is set, return the original baseQuery unchanged
+	if !hasPageSize && !hasPage && !hasOrderBy {
+		return baseQuery, nil
+	}
+
 	// Pagination Defaults
 	pageSize := 25
 	page := 0
@@ -164,7 +186,6 @@ func applyPaginationAndSorting(baseQuery string, r *http.Request) (string, error
 	}
 
 	limitOffsetClause := fmt.Sprintf(" LIMIT %d OFFSET %d", pageSize, page*pageSize)
-
 	finalQuery := baseQuery + orderClause + limitOffsetClause
 
 	return finalQuery, nil

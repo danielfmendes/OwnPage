@@ -44,7 +44,7 @@ export function SimpleTable<TData>({
     });
 
     const visibleRows = tableReact.getRowModel().rows;
-    const shouldScroll = data.length > showFixedItems;
+    const shouldScroll = (data?.length ?? 0) > showFixedItems;
 
     const scrollRef = React.useRef<HTMLDivElement>(null);
 

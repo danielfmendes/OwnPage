@@ -4,35 +4,32 @@ import {useSidebar} from "@/hooks/use-sidebar";
 import {useStore} from "@/hooks/use-store";
 import DataTable from "@/components/helpers/Table";
 import type {ColumnDef} from "@tanstack/react-table";
-import {Button} from "@/components/ui/button";
-import {ArrowUpDown, Trash2} from "lucide-react";
+import {Trash2} from "lucide-react";
 import * as React from "react";
 import WarehousePartDialogContent from "@/app/dwh/partsstorage/content-dialog";
 import {WareHousePartsService, WarehousePartWithName} from "@/models/api";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useTranslation} from "react-i18next";
-import FilterManager from "@/utils/filtermanager";
-import {isRoleUserForProject} from "@/utils/helpers";
+import {genericItemsLoader, isRoleUserForProject, useRefreshData} from "@/utils/helpers";
+import {ItemsLoaderOptions} from "@/models/datatable/itemsLoader";
 
 export default function PartsStoragePage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
-    const filterManager = new FilterManager();
+    const refreshData = useRefreshData(itemsLoader);
     const [data, setData] = React.useState<WarehousePartWithName[]>([]);
-    const [isLoadingData, setIsLoadingData] = React.useState(true);
+    const [totalCount, setTotalCount] = React.useState<number>(0);
     const [loadingDeleteId, setLoadingDeleteId] = React.useState<number | null>(null);
 
-    const fetchData = async () => {
-        setIsLoadingData(true);
-        const filterString = await filterManager.getFilterStringWithProjectIds();
-        WareHousePartsService.getWareHouseParts(filterString === "" ? undefined : filterString)
-            .then((warehouseparts: WarehousePartWithName[]) => {
-                setData(warehouseparts);
-            })
-            .catch(err => addNotification(`Failed to load warehouseparts${err?.message ? `: ${err.message}` : ""}`, "error"))
-            .finally(() => setIsLoadingData(false));
-    };
+    async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
+        return genericItemsLoader<WarehousePartWithName>(
+            options,
+            WareHousePartsService.getWareHouseParts,
+            setData,
+            setTotalCount
+        );
+    }
 
     const handleDelete = (event: React.MouseEvent, id: number) => {
         event.stopPropagation();
@@ -40,7 +37,7 @@ export default function PartsStoragePage() {
         WareHousePartsService.deleteWareHousePart(id)
             .then(async () => {
                 addNotification(`Warehousepart with id ${id} successfully deleted`, "success");
-                await fetchData();
+                await refreshData();
             })
             .catch(err => addNotification(`Failed to delete warehousepart${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setLoadingDeleteId(null));
@@ -53,14 +50,7 @@ export default function PartsStoragePage() {
         },
         {
             accessorKey: "part_type",
-            header: ({column}) => (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    {t("label.part_type")}<ArrowUpDown className="ml-2 h-4 w-4"/>
-                </Button>
-            ),
+            header: t("label.part_type"),
         },
         {
             accessorKey: "part_name",
@@ -104,22 +94,20 @@ export default function PartsStoragePage() {
                 title={t("menu.parts_storage")}
                 columns={columns}
                 data={data}
-                isLoading={isLoadingData}
+                itemsLoader={itemsLoader}
+                totalCount={totalCount}
                 filterColumn={"storage_location"}
-                onRefresh={async () => {
-                    await fetchData()
-                }}
                 rowDialogContent={(rowData, onClose) => (
                     <WarehousePartDialogContent
                         rowData={rowData}
                         onClose={onClose}
-                        onRefresh={fetchData}
+                        onRefresh={refreshData}
                     />
                 )}
                 addDialogContent={(onClose) => (
                     <WarehousePartDialogContent
                         onClose={onClose}
-                        onRefresh={fetchData}
+                        onRefresh={refreshData}
                     />
                 )}
             />

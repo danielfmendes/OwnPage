@@ -10,17 +10,29 @@ export class CustomersService {
     /**
      * Retrieve a list of customers
      * @param filter Query filter string, e.g. project_id:$eq.1|2|3
-     * @returns Customer A list of customers
+     * @param pageSize Specifying the size of the result set.
+     * @param page Specifying the page of the result set.
+     * @param orderBy Specifying the sort order. The sort definition can use the keywords 'asc' for ascending and 'desc' for descending sort order.
+     * @returns any A list of customers with total count
      * @throws ApiError
      */
     public static getCustomers(
         filter?: string,
-    ): CancelablePromise<Array<Customer>> {
+        pageSize?: number,
+        page?: number,
+        orderBy?: string,
+    ): CancelablePromise<{
+        totalCount?: number;
+        items?: Array<Customer>;
+    }> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/customers',
             query: {
                 'filter': filter,
+                'pageSize': pageSize,
+                'page': page,
+                'orderBy': orderBy,
             },
             errors: {
                 401: `Unauthorized – missing or invalid token`,

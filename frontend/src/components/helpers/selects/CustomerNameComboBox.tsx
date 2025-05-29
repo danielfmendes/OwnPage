@@ -31,9 +31,9 @@ export default function CustomerNameComboBox({customerID, onChange}: Props) {
         (async () => {
             const filterString = await filterManager.getFilterStringWithProjectIds();
             CustomersService.getCustomers(filterString === "" ? undefined : filterString)
-                .then((customers: Customer[] | null) => {
-                    setCustomerIdOptions(customers ?? []);
-                    const selected = customers?.find(c => c.id === customerID) ?? null;
+                .then((customers) => {
+                    setCustomerIdOptions(customers.items ?? []);
+                    const selected = customers.items?.find(c => c.id === customerID) ?? null;
                     setSelectedCustomer(selected);
                 })
                 .catch(err => addNotification(`Failed to load customer options${err?.message ? `: ${err.message}` : ""}`, "error"))

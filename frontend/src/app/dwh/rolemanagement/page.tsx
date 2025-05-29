@@ -3,46 +3,43 @@ import DataTable from "@/components/helpers/Table";
 import * as React from "react";
 import type {ColumnDef} from "@tanstack/react-table";
 import {RoleManagementsService, RoleManagementWithName} from "@/models/api";
-import {useNotification} from "@/components/helpers/NotificationProvider";
 import {ContentLayout} from "@/components/admin-panel/content-layout";
 import {Button} from "@/components/ui/button";
 import RoleManagementDialogContent from "@/app/dwh/rolemanagement/manage-dialog";
 import {Dialog} from "@/components/ui/dialog";
-import {useRoleStore} from "@/utils/rolemananagemetstate";
 import AddProjektDialogContent from "@/app/dwh/rolemanagement/add-project-dialog";
 import {useTranslation} from "react-i18next";
-import FilterManager from "@/utils/filtermanager";
+import {ItemsLoaderOptions} from "@/models/datatable/itemsLoader";
+import {genericItemsLoader, useRefreshData} from "@/utils/helpers";
 
 export default function RoleManagementPage() {
     const {t} = useTranslation();
-    const {addNotification} = useNotification();
-    const filterManager = new FilterManager();
+    const refreshData = useRefreshData(itemsLoader);
+
     const [data, setData] = React.useState<RoleManagementWithName[]>([]);
-    const isLoadingData = useRoleStore((state) => state.isLoading);
-    const setIsLoadingData = useRoleStore((state) => state.setIsLoading);
+    const [totalCount, setTotalCount] = React.useState<number>(0);
     const [showDialog, setShowDialog] = React.useState(false);
     const [manageId, setManageId] = React.useState<number | null>(null);
 
-    const fetchData = React.useCallback(async () => {
-        setIsLoadingData(true);
-        const filterString = await filterManager.getFilterStringWithProjectIds();
-        RoleManagementsService.getRoleManagements(filterString === "" ? undefined : filterString)
-            .then((roles: RoleManagementWithName[]) => {
-                setData(roles ?? [])
-                useRoleStore.getState().setRoles(roles ?? [])
-            })
-            .catch(err => addNotification(`Failed to load rolemanagement${err?.message ? `: ${err.message}` : ""}`, "error"))
-            .finally(() => setIsLoadingData(false));
-    }, []);
+    async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
+        return genericItemsLoader<RoleManagementWithName>(
+            options,
+            RoleManagementsService.getRoleManagements,
+            setData,
+            setTotalCount
+        );
+    }
 
     const columns: ColumnDef<RoleManagementWithName>[] = [
         {
             accessorKey: "project_name",
-            header: t("label.project_name")
+            header: t("label.project_name"),
+            enableSorting: false
         },
         {
             accessorKey: "role",
-            header: t("label.role")
+            header: t("label.role"),
+            enableSorting: false
         },
         {
             id: "actions",
@@ -77,15 +74,13 @@ export default function RoleManagementPage() {
                 title={t("menu.role_management")}
                 columns={columns}
                 data={data}
-                isLoading={isLoadingData}
+                itemsLoader={itemsLoader}
+                totalCount={totalCount}
                 filterColumn={"project_name"}
-                onRefresh={async () => {
-                    await fetchData()
-                }}
                 addDialogContent={(onClose) => (
                     <AddProjektDialogContent
                         onClose={onClose}
-                        onRefresh={fetchData}
+                        onRefresh={refreshData}
                     />
                 )}
             />

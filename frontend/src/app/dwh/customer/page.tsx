@@ -7,35 +7,36 @@ import * as React from "react";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import type {ColumnDef} from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
-import {ArrowUpDown, Trash2} from "lucide-react";
+import {Trash2} from "lucide-react";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import CustomerDetailContent from "@/app/dwh/customer/customer-detail-content";
 import AddCustomerContent from "@/app/dwh/customer/add-customer-content";
 import {useTranslation} from "react-i18next";
 import {Customer, CustomersService} from "@/models/api";
-import FilterManager from "@/utils/filtermanager";
-import {isRoleUserForProject} from "@/utils/helpers";
+import {genericItemsLoader, isRoleUserForProject, useRefreshData} from "@/utils/helpers";
+import {ItemsLoaderOptions} from "@/models/datatable/itemsLoader";
 
 export default function CustomerPage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
-    const filterManager = new FilterManager();
+    const refreshData = useRefreshData(itemsLoader);
+
     const [data, setData] = React.useState<Customer[]>([]);
-    const [isLoadingData, setIsLoadingData] = React.useState(true);
+    const [totalCount, setTotalCount] = React.useState<number>(0);
     const [loadingDeleteId, setLoadingDeleteId] = React.useState<number | null>(null);
     const [isLoadingDeleteCascade, setIsLoadingDeleteCascade] = React.useState(false);
     const [showCascadeDialog, setShowCascadeDialog] = React.useState(false);
     const [deleteId, setDeleteId] = React.useState<number | null>(null);
 
-    const fetchData = React.useCallback(async () => {
-        setIsLoadingData(true);
-        const filterString = await filterManager.getFilterStringWithProjectIds();
-        CustomersService.getCustomers(filterString === "" ? undefined : filterString)
-            .then((customers: Customer[]) => setData(customers))
-            .catch(err => addNotification(`Failed to load customer${err?.message ? `: ${err.message}` : ""}`, "error"))
-            .finally(() => setIsLoadingData(false));
-    }, [addNotification]);
+    async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
+        return genericItemsLoader<Customer>(
+            options,
+            CustomersService.getCustomers,
+            setData,
+            setTotalCount
+        );
+    }
 
     const deleteCustomer = (id: number, cascade: boolean = false) => {
         if (cascade) {
@@ -47,7 +48,7 @@ export default function CustomerPage() {
         CustomersService.deleteCustomer(id, cascade)
             .then(async () => {
                 addNotification(`Customer with id ${id}${cascade ? " and related data" : ""} deleted successfully`, "success");
-                await fetchData();
+                await refreshData();
                 if (cascade) setShowCascadeDialog(false);
             })
             .catch((err) => {
@@ -93,18 +94,11 @@ export default function CustomerPage() {
         },
         {
             accessorKey: "email",
-            header: ({column}) => (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    {t("label.email")} <ArrowUpDown className="ml-2 h-4 w-4"/>
-                </Button>
-            ),
+            header: t("label.email"),
         },
         {
             accessorKey: "dob",
-            header: t("dob"),
+            header: t("label.dob"),
             cell: ({row}) => {
                 const date = new Date(row.getValue("dob"))
                 return date.toLocaleDateString()
@@ -144,22 +138,20 @@ export default function CustomerPage() {
                 title={t("customer.data")}
                 columns={columns}
                 data={data}
-                isLoading={isLoadingData}
+                itemsLoader={itemsLoader}
+                totalCount={totalCount}
                 filterColumn={"email"}
-                onRefresh={async () => {
-                    await fetchData();
-                }}
                 rowDialogContent={(rowData, onClose) => (
                     <CustomerDetailContent
                         rowData={rowData}
                         onClose={onClose}
-                        onRefresh={fetchData}
+                        onRefresh={refreshData}
                     />
                 )}
                 addDialogContent={(onClose) => (
                     <AddCustomerContent
                         onClose={onClose}
-                        onRefresh={fetchData}
+                        onRefresh={refreshData}
                     />
                 )}
             />

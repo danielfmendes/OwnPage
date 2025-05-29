@@ -76,15 +76,24 @@ paths:
       operationId: getBikes
       parameters:
         - $ref: "#/components/parameters/FilterParam"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/OrderBy"
       responses:
         '200':
-          description: A list of bikes
+          description: A list of bikes with total count
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/BikeWithModelName'
+                type: object
+                properties:
+                  totalCount:
+                    type: integer
+                    example: 42
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BikeWithModelName'
         '401':
           description: Unauthorized – missing or invalid token
         '403':
@@ -218,15 +227,24 @@ paths:
       operationId: getCustomers
       parameters:
         - $ref: "#/components/parameters/FilterParam"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/OrderBy"
       responses:
         '200':
-          description: A list of customers
+          description: A list of customers with total count
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Customer'
+                type: object
+                properties:
+                  totalCount:
+                    type: integer
+                    example: 42
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Customer'
         '401':
           description: Unauthorized – missing or invalid token
         '403':
@@ -612,15 +630,24 @@ paths:
       operationId: getRoleManagements
       parameters:
         - $ref: "#/components/parameters/FilterParam"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/OrderBy"
       responses:
         '200':
-          description: A list of role managements with project names
+          description: A list of role managements with project names with total count
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/RoleManagementWithName'
+                type: object
+                properties:
+                  totalCount:
+                    type: integer
+                    example: 42
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RoleManagementWithName'
         '401':
           description: Unauthorized – missing or invalid token
         '403':
@@ -747,15 +774,24 @@ paths:
       operationId: getWareHouseParts
       parameters:
         - $ref: "#/components/parameters/FilterParam"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/OrderBy"
       responses:
         '200':
-          description: A list of warehouse parts
+          description: A list of warehouse parts with total count
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/WarehousePartWithName'
+                type: object
+                properties:
+                  totalCount:
+                    type: integer
+                    example: 42
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WarehousePartWithName'
         '401':
           description: Unauthorized – missing or invalid token
         '403':

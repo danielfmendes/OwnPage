@@ -14,8 +14,6 @@ import {
     TabsTrigger
 } from "@/components/ui/tabs"
 import type {ColumnDef} from "@tanstack/react-table";
-import {Button} from "@/components/ui/button";
-import {ArrowUpDown} from "lucide-react";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
 import {useTranslation} from "react-i18next";
@@ -88,14 +86,7 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
     const columns: ColumnDef<OrderItemsWithBikeAndDate>[] = [
         {
             accessorKey: "order_date",
-            header: ({column}) => (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    {t("label.order_date")}<ArrowUpDown className="ml-2 h-4 w-4"/>
-                </Button>
-            ),
+            header: t("label.order_date"),
             cell: ({row}) => {
                 const date = new Date(row.getValue("order_date"))
                 return date.toLocaleDateString()

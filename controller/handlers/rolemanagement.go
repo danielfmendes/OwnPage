@@ -54,7 +54,7 @@ func GetRoleManagement(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.HandleGet(w, r, `
+	utils.HandleGetWithPagination(w, r, `
 		SELECT useremail, project_id, role, name
 		FROM role_management
 		JOIN public.projects p ON p.id = role_management.project_id
