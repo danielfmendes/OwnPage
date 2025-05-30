@@ -27,7 +27,6 @@
   "label": {
     "id": "ID",
     "email": "E-Mail",
-    "user_email": "Benutzer E-Mail",
     "password": "Passwort",
     "name": "Name",
     "first_name": "Vorname",

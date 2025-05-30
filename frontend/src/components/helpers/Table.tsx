@@ -1,7 +1,6 @@
 import * as React from "react";
 import {Dialog} from "@/components/ui/dialog";
 import {
-    type ColumnDef,
     type ColumnFiltersState,
     type SortingState,
     type VisibilityState,
@@ -37,10 +36,11 @@ import {Sort, SortDirection} from "@/models/datatable/sort";
 import {ItemsLoaderOptions} from "@/models/datatable/itemsLoader";
 import {useRouter, useSearchParams} from "next/navigation";
 import {useNotification} from "@/components/helpers/NotificationProvider";
+import {CustomColumnDef} from "@/models/datatable/column";
 
 interface DataTableProps<TData> {
     title?: string;
-    columns: ColumnDef<TData>[];
+    columns: CustomColumnDef<TData>[];
     data: TData[];
     itemsLoader: (opts: ItemsLoaderOptions) => Promise<void>;
     totalCount: number;
@@ -192,6 +192,9 @@ export default function DataTable<TData>({
                                     return (
                                         <TableHead
                                             key={header.id}
+                                            style={{
+                                                width: `${column.columnDef.widthPercent ?? (100 / table.getVisibleFlatColumns().length)}%`,
+                                            }}
                                             onClick={() => canSort && handleSortToggle(key)}
                                             className={canSort ? "cursor-pointer select-none" : ""}
                                         >

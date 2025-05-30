@@ -3,7 +3,7 @@ import {ContentLayout} from "@/components/admin-panel/content-layout";
 import {useSidebar} from "@/hooks/use-sidebar";
 import {useStore} from "@/hooks/use-store";
 import DataTable from "@/components/helpers/Table";
-import type {ColumnDef} from "@tanstack/react-table";
+import {CustomColumnDef} from "@/models/datatable/column";
 import {Button} from "@/components/ui/button";
 import {Trash2} from "lucide-react";
 import * as React from "react";
@@ -82,22 +82,26 @@ export default function WareHousePage() {
         setShowCascadeDialog(false);
     };
 
-    const columns: ColumnDef<BikeWithModelName>[] = [
+    const columns: CustomColumnDef<BikeWithModelName>[] = [
         {
             accessorKey: "id",
             header: t("label.id"),
+            widthPercent: 5,
         },
         {
             accessorKey: "model_name",
             header: t("label.model_name"),
+            widthPercent: 25,
         },
         {
             accessorKey: "serial_number",
             header: t("label.serial_number"),
+            widthPercent: 15,
         },
         {
             accessorKey: "production_date",
             header: t("label.production_date"),
+            widthPercent: 20,
             cell: ({row}) => {
                 const date = new Date(row.getValue("production_date"))
                 return date.toLocaleDateString()
@@ -106,14 +110,17 @@ export default function WareHousePage() {
         {
             accessorKey: "quantity",
             header: t("label.quantity"),
+            widthPercent: 10,
         },
         {
             accessorKey: "warehouse_location",
             header: t("menu.warehouse"),
+            widthPercent: 20,
         },
         {
             id: "actions",
             enableHiding: false,
+            widthPercent: 5,
             cell: ({row}) => {
                 const bike: BikeWithModelName = row.original
 

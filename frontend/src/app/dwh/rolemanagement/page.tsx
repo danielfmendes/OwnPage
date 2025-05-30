@@ -1,7 +1,7 @@
 "use client";
 import DataTable from "@/components/helpers/Table";
 import * as React from "react";
-import type {ColumnDef} from "@tanstack/react-table";
+import {CustomColumnDef} from "@/models/datatable/column";
 import {RoleManagementsService, RoleManagementWithName} from "@/models/api";
 import {ContentLayout} from "@/components/admin-panel/content-layout";
 import {Button} from "@/components/ui/button";
@@ -30,19 +30,22 @@ export default function RoleManagementPage() {
         );
     }
 
-    const columns: ColumnDef<RoleManagementWithName>[] = [
+    const columns: CustomColumnDef<RoleManagementWithName>[] = [
         {
             accessorKey: "project_name",
             header: t("label.project_name"),
-            enableSorting: false
+            enableSorting: false,
+            widthPercent: 40,
         },
         {
             accessorKey: "role",
             header: t("label.role"),
-            enableSorting: false
+            enableSorting: false,
+            widthPercent: 40,
         },
         {
             id: "actions",
+            widthPercent: 10,
             enableHiding: false,
             cell: ({row}) => {
                 const roleman: RoleManagementWithName = row.original

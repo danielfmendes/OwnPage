@@ -3,7 +3,7 @@ import {ContentLayout} from "@/components/admin-panel/content-layout";
 import {useSidebar} from "@/hooks/use-sidebar";
 import {useStore} from "@/hooks/use-store";
 import DataTable from "@/components/helpers/Table";
-import type {ColumnDef} from "@tanstack/react-table";
+import {CustomColumnDef} from "@/models/datatable/column";
 import {Button} from "@/components/ui/button";
 import {Trash2} from "lucide-react";
 import * as React from "react";
@@ -82,18 +82,21 @@ export default function OrderPage() {
         setShowCascadeDialog(false);
     };
 
-    const columns: ColumnDef<Order>[] = [
+    const columns: CustomColumnDef<Order>[] = [
         {
             accessorKey: "customer_name",
             header: t("label.customer_name"),
+            widthPercent: 30,
         },
         {
             accessorKey: "customer_email",
             header: t("label.email"),
+            widthPercent: 40,
         },
         {
             accessorKey: "order_date",
             header: t("label.order_date"),
+            widthPercent: 25,
             cell: ({row}) => {
                 const date = new Date(row.getValue("order_date"))
                 return date.toLocaleDateString()
@@ -101,6 +104,7 @@ export default function OrderPage() {
         },
         {
             id: "actions",
+            widthPercent: 5,
             enableHiding: false,
             cell: ({row}) => {
                 const order: Order = row.original

@@ -3,7 +3,7 @@ import {ContentLayout} from "@/components/admin-panel/content-layout";
 import {useSidebar} from "@/hooks/use-sidebar";
 import {useStore} from "@/hooks/use-store";
 import DataTable from "@/components/helpers/Table";
-import type {ColumnDef} from "@tanstack/react-table";
+import {CustomColumnDef} from "@/models/datatable/column";
 import {Trash2} from "lucide-react";
 import * as React from "react";
 import WarehousePartDialogContent from "@/app/dwh/partsstorage/content-dialog";
@@ -43,30 +43,36 @@ export default function PartsStoragePage() {
             .finally(() => setLoadingDeleteId(null));
     };
 
-    const columns: ColumnDef<WarehousePartWithName>[] = [
+    const columns: CustomColumnDef<WarehousePartWithName>[] = [
         {
             accessorKey: "id",
             header: t("label.id"),
+            widthPercent: 5,
         },
         {
             accessorKey: "part_type",
             header: t("label.part_type"),
+            widthPercent: 18,
         },
         {
             accessorKey: "part_name",
             header: t("label.part_name"),
+            widthPercent: 32,
         },
         {
             accessorKey: "quantity",
             header: t("label.quantity"),
+            widthPercent: 15,
         },
         {
             accessorKey: "storage_location",
             header: t("label.warehouse_position"),
+            widthPercent: 25,
         },
         {
             id: "actions",
             enableHiding: false,
+            widthPercent: 5,
             cell: ({row}) => {
                 const warehousePart: WarehousePartWithName = row.original
 

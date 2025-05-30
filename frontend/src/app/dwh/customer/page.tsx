@@ -5,7 +5,7 @@ import {useStore} from "@/hooks/use-store";
 import DataTable from "@/components/helpers/Table";
 import * as React from "react";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import type {ColumnDef} from "@tanstack/react-table";
+import {CustomColumnDef} from "@/models/datatable/column";
 import {Button} from "@/components/ui/button";
 import {Trash2} from "lucide-react";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
@@ -83,18 +83,21 @@ export default function CustomerPage() {
         setShowCascadeDialog(false);
     };
 
-    const columns: ColumnDef<Customer>[] = [
+    const columns: CustomColumnDef<Customer>[] = [
         {
             accessorKey: "first_name",
             header: t("label.first_name"),
+            widthPercent: 15,
         },
         {
             accessorKey: "name",
             header: t("label.name"),
+            widthPercent: 15,
         },
         {
             accessorKey: "email",
             header: t("label.email"),
+            widthPercent: 30,
         },
         {
             accessorKey: "dob",
@@ -103,14 +106,17 @@ export default function CustomerPage() {
                 const date = new Date(row.getValue("dob"))
                 return date.toLocaleDateString()
             },
+            widthPercent: 20,
         },
         {
             accessorKey: "city",
             header: t("label.city"),
+            widthPercent: 15,
         },
         {
             id: "actions",
             enableHiding: false,
+            widthPercent: 5,
             cell: ({row}) => {
                 const customer: Customer = row.original
 

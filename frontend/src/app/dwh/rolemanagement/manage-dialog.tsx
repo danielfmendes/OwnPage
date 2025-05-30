@@ -9,7 +9,7 @@ import {RoleManagement, RoleManagementsService} from "@/models/api";
 import {Select, SelectTrigger, SelectValue, SelectContent, SelectItem} from "@/components/ui/select";
 import {Check, Trash2} from "lucide-react";
 import {Input} from "@/components/ui/input";
-import type {ColumnDef} from "@tanstack/react-table";
+import {CustomColumnDef} from "@/models/datatable/column";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useTranslation} from "react-i18next";
@@ -129,14 +129,16 @@ export default function ManageDialogContent({manageId}: ManageProps) {
         </Select>
     );
 
-    const columns: ColumnDef<RoleManagement>[] = [
+    const columns: CustomColumnDef<RoleManagement>[] = [
         {
             accessorKey: "user_email",
-            header: t("label.user_email"),
+            header: t("label.email"),
+            widthPercent: 40,
         },
         {
             accessorKey: "role",
             header: t("label.role"),
+            widthPercent: 40,
             cell: ({row}) => {
                 const email = row.original.user_email;
                 const value = row.original.role;
@@ -148,6 +150,7 @@ export default function ManageDialogContent({manageId}: ManageProps) {
         {
             id: "actions",
             header: "",
+            widthPercent: 20,
             cell: ({row}) => {
                 const email = row.original.user_email;
                 const currentRole = row.original.role;

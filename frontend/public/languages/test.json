@@ -27,7 +27,6 @@
   "label": {
     "id": "Test",
     "email": "Test",
-    "user_email": "Test",
     "password": "Test",
     "name": "Test",
     "first_name": "Test",
@@ -171,5 +170,9 @@
     "single": "Test",
     "multiple": "Test",
     "chosen": "Test"
+  },
+  "pagination": {
+    "info": "Test",
+    "page": "Test"
   }
 }

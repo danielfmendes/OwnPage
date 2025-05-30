@@ -15,7 +15,7 @@ import {DatePicker} from "@/components/helpers/DatePicker";
 import CustomerNameComboBox from "@/components/helpers/selects/CustomerNameComboBox";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
-import type {ColumnDef} from "@tanstack/react-table";
+import {CustomColumnDef} from "@/models/datatable/column";
 import {Pencil, Trash2} from "lucide-react";
 import ModelNameSelect from "@/components/helpers/selects/ModelNameSelect";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
@@ -179,25 +179,25 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
             .finally(() => setLoadingDeleteID(null));
     };
 
-    const columns: ColumnDef<OrderItemsWithBikeName>[] = [
+    const columns: CustomColumnDef<OrderItemsWithBikeName>[] = [
         {
             accessorKey: "model_name",
             header: t("label.bike_name"),
-            cell: ({getValue}) => <div className="min-w-[230px]">{getValue() as string}</div>,
+            widthPercent: 30,
         },
         {
             accessorKey: "number",
             header: t("label.number"),
-            cell: ({getValue}) => <div className="min-w-[100px]">{getValue() as number}</div>,
+            widthPercent: 25,
         },
         {
             accessorKey: "price",
             header: t("label.price"),
-            cell: ({getValue}) => <div className="min-w-[100px]">{getValue() as number}</div>,
+            widthPercent: 25,
         },
         {
             id: "actions",
-            header: "",
+            widthPercent: 20,
             cell: ({row}) => {
                 const orderItem = row.original;
                 const [localEditNumber, setLocalEditNumber] = React.useState<number>(orderItem.number);
@@ -205,7 +205,7 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
                 const hasChanges = localEditNumber !== orderItem.number || localEditPrice !== orderItem.price;
 
                 return (
-                    <div className="flex justify-end gap-2 min-w-[160px]">
+                    <div className="flex justify-end gap-2">
                         <ButtonLoading
                             onClick={() => handleDeleteOrderItems(orderItem.id!)}
                             isLoading={loadingDeleteID === orderItem.id}

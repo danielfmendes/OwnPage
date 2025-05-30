@@ -13,7 +13,7 @@ import {
     TabsList,
     TabsTrigger
 } from "@/components/ui/tabs"
-import type {ColumnDef} from "@tanstack/react-table";
+import {CustomColumnDef} from "@/models/datatable/column";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
 import {useTranslation} from "react-i18next";
@@ -83,10 +83,11 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
             .finally(() => setIsLoadingUpdate(false));
     };
 
-    const columns: ColumnDef<OrderItemsWithBikeAndDate>[] = [
+    const columns: CustomColumnDef<OrderItemsWithBikeAndDate>[] = [
         {
             accessorKey: "order_date",
             header: t("label.order_date"),
+            widthPercent: 30,
             cell: ({row}) => {
                 const date = new Date(row.getValue("order_date"))
                 return date.toLocaleDateString()
@@ -95,14 +96,17 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
         {
             accessorKey: "model_name",
             header: t("label.bike_name"),
+            widthPercent: 40,
         },
         {
             accessorKey: "number",
             header: t("label.number"),
+            widthPercent: 15,
         },
         {
             accessorKey: "price",
             header: t("label.price"),
+            widthPercent: 15,
         },
     ]
 
@@ -158,7 +162,7 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
                     <Card className="mt-4">
                         <CardContent className="pt-4">
                             <h3 className="text-lg font-semibold mb-4">{t("orders.history")}</h3>
-                            <SimpleTable data={data} columns={columns} isLoading={isLoadingData}/>
+                            <SimpleTable data={data} columns={columns} isLoading={isLoadingData} maxHeight={300}/>
                         </CardContent>
                     </Card>
                 </TabsContent>

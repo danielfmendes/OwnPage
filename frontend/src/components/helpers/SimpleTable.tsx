@@ -2,7 +2,6 @@ import {
     useReactTable,
     getCoreRowModel,
     flexRender,
-    ColumnDef,
 } from "@tanstack/react-table";
 import {
     Table,
@@ -15,15 +14,16 @@ import {
 import {Skeleton} from "@/components/ui/skeleton";
 import * as React from "react";
 import {useTranslation} from "react-i18next";
+import {CustomColumnDef} from "@/models/datatable/column";
 
 interface SimpleTableProps<TData> {
     data: TData[];
-    columns: ColumnDef<TData>[];
+    columns: CustomColumnDef<TData>[];
     onRowClick?: (row: any) => void;
     isLoading?: boolean;
     headers?: React.ReactNode;
     table?: any;
-    showFixedItems?: number;
+    maxHeight?: number;
 }
 
 export function SimpleTable<TData>({
@@ -33,7 +33,7 @@ export function SimpleTable<TData>({
                                        isLoading = false,
                                        headers,
                                        table,
-                                       showFixedItems = 10,
+                                       maxHeight,
                                    }: SimpleTableProps<TData>) {
     const {t} = useTranslation();
 
@@ -44,9 +44,9 @@ export function SimpleTable<TData>({
     });
 
     const visibleRows = tableReact.getRowModel().rows;
-    const shouldScroll = (data?.length ?? 0) > showFixedItems;
 
     const scrollRef = React.useRef<HTMLDivElement>(null);
+    const visibleColumnCount = tableReact.getVisibleFlatColumns().length;
 
     // Scroll beim Ändern von data nach oben setzen
     React.useEffect(() => {
@@ -66,7 +66,12 @@ export function SimpleTable<TData>({
                             tableReact.getHeaderGroups().map((headerGroup: any) => (
                                 <TableRow key={headerGroup.id} className="border-zinc-900 dark:border-zinc-500">
                                     {headerGroup.headers.map((header: any) => (
-                                        <TableHead key={header.id}>
+                                        <TableHead
+                                            key={header.id}
+                                            style={{
+                                                width: `${header.column.columnDef.widthPercent ?? (100 / visibleColumnCount)}%`,
+                                            }}
+                                        >
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(header.column.columnDef.header, header.getContext())}
@@ -80,15 +85,22 @@ export function SimpleTable<TData>({
             </div>
 
             <div ref={scrollRef}
-                 className={`w-full overflow-x-auto ${shouldScroll ? "max-h-[529px] overflow-y-auto" : ""}`}>
+                 className="w-full overflow-x-auto overflow-y-auto"
+                 style={{ maxHeight: `${maxHeight ?? 529}px` }}
+            >
                 <Table>
                     <TableBody>
                         {isLoading ? (
-                            Array.from({length: showFixedItems}).map((_, index) => (
+                            Array.from({length: 10}).map((_, index) => (
                                 <TableRow key={index}
                                           className="cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 border-zinc-900 dark:border-zinc-500">
                                     {columns.map((_, colIndex) => (
-                                        <TableCell key={colIndex}>
+                                        <TableCell
+                                            key={colIndex}
+                                            style={{
+                                                width: `${columns[colIndex].widthPercent ?? (100 / visibleColumnCount)}%`,
+                                            }}
+                                        >
                                             <Skeleton className="h-6 w-full"/>
                                         </TableCell>
                                     ))}
@@ -103,7 +115,12 @@ export function SimpleTable<TData>({
                                     className="cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 border-zinc-900 dark:border-zinc-500"
                                 >
                                     {row.getVisibleCells().map((cell: any) => (
-                                        <TableCell key={cell.id}>
+                                        <TableCell
+                                            key={cell.id}
+                                            style={{
+                                                width: `${cell.column.columnDef.widthPercent ?? (100 / visibleColumnCount)}%`,
+                                            }}
+                                        >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
