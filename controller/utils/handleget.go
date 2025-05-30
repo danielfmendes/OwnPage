@@ -139,6 +139,11 @@ func fetchData(
 
 	w.Header().Set("Content-Type", "application/json")
 	if includeTotalCount {
+		if results == nil || len(results) == 0 {
+			http.Error(w, "No results found", http.StatusNotFound)
+			return
+		}
+
 		json.NewEncoder(w).Encode(map[string]any{
 			"totalCount": totalCount,
 			"items":      results,
@@ -163,7 +168,7 @@ func applyPaginationAndSorting(baseQuery string, r *http.Request) (string, error
 
 	// Pagination Defaults
 	pageSize := 25
-	page := 0
+	page := 1 // <- Default page = 1 (1-basiert)
 
 	// Query Params lesen
 	if ps := r.URL.Query().Get("pageSize"); ps != "" {
@@ -172,7 +177,7 @@ func applyPaginationAndSorting(baseQuery string, r *http.Request) (string, error
 		}
 	}
 	if p := r.URL.Query().Get("page"); p != "" {
-		if v, err := strconv.Atoi(p); err == nil && v >= 0 {
+		if v, err := strconv.Atoi(p); err == nil && v >= 1 {
 			page = v
 		}
 	}
@@ -185,7 +190,8 @@ func applyPaginationAndSorting(baseQuery string, r *http.Request) (string, error
 		orderClause = " ORDER BY " + orderBy
 	}
 
-	limitOffsetClause := fmt.Sprintf(" LIMIT %d OFFSET %d", pageSize, page*pageSize)
+	offset := (page - 1) * pageSize
+	limitOffsetClause := fmt.Sprintf(" LIMIT %d OFFSET %d", pageSize, offset)
 	finalQuery := baseQuery + orderClause + limitOffsetClause
 
 	return finalQuery, nil

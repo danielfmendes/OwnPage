@@ -15,16 +15,16 @@ export class BikesService {
     /**
      * Retrieve a list of bikes
      * @param filter Query filter string, e.g. project_id:$eq.1|2|3
-     * @param pageSize Specifying the size of the result set.
      * @param page Specifying the page of the result set.
+     * @param pageSize Specifying the size of the result set.
      * @param orderBy Specifying the sort order. The sort definition can use the keywords 'asc' for ascending and 'desc' for descending sort order.
      * @returns any A list of bikes with total count
      * @throws ApiError
      */
     public static getBikes(
         filter?: string,
-        pageSize?: number,
         page?: number,
+        pageSize?: number,
         orderBy?: string,
     ): CancelablePromise<{
         totalCount?: number;
@@ -35,8 +35,8 @@ export class BikesService {
             url: '/bikes',
             query: {
                 'filter': filter,
-                'pageSize': pageSize,
                 'page': page,
+                'pageSize': pageSize,
                 'orderBy': orderBy,
             },
             errors: {

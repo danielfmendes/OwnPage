@@ -76,8 +76,8 @@ paths:
       operationId: getBikes
       parameters:
         - $ref: "#/components/parameters/FilterParam"
-        - $ref: "#/components/parameters/PageSize"
         - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSize"
         - $ref: "#/components/parameters/OrderBy"
       responses:
         '200':
@@ -227,8 +227,8 @@ paths:
       operationId: getCustomers
       parameters:
         - $ref: "#/components/parameters/FilterParam"
-        - $ref: "#/components/parameters/PageSize"
         - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSize"
         - $ref: "#/components/parameters/OrderBy"
       responses:
         '200':
@@ -416,8 +416,8 @@ paths:
       operationId: getOrders
       parameters:
         - $ref: "#/components/parameters/FilterParam"
-        - $ref: "#/components/parameters/PageSize"
         - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSize"
         - $ref: "#/components/parameters/OrderBy"
       responses:
         '200':
@@ -630,8 +630,8 @@ paths:
       operationId: getRoleManagements
       parameters:
         - $ref: "#/components/parameters/FilterParam"
-        - $ref: "#/components/parameters/PageSize"
         - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSize"
         - $ref: "#/components/parameters/OrderBy"
       responses:
         '200':
@@ -774,8 +774,8 @@ paths:
       operationId: getWareHouseParts
       parameters:
         - $ref: "#/components/parameters/FilterParam"
-        - $ref: "#/components/parameters/PageSize"
         - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSize"
         - $ref: "#/components/parameters/OrderBy"
       responses:
         '200':

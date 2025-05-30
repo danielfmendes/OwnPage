@@ -35,6 +35,8 @@ import {defaultPageSize, Pagination} from "@/models/datatable/pagination";
 import {TableHead, TableRow} from "@/components/ui/table";
 import {Sort, SortDirection} from "@/models/datatable/sort";
 import {ItemsLoaderOptions} from "@/models/datatable/itemsLoader";
+import {useRouter, useSearchParams} from "next/navigation";
+import {useNotification} from "@/components/helpers/NotificationProvider";
 
 interface DataTableProps<TData> {
     title?: string;
@@ -58,6 +60,9 @@ export default function DataTable<TData>({
                                              addDialogContent,
                                          }: DataTableProps<TData>) {
     const {t} = useTranslation();
+    const {addNotification} = useNotification();
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -67,31 +72,35 @@ export default function DataTable<TData>({
     const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false);
     const [selectedRow, setSelectedRow] = React.useState<any>(null);
     const [isLoading, setIsLoading] = React.useState(false);
-    const [sort, setSort] = React.useState(new Sort());
-
-    const table = useReactTable({
-        data,
-        columns,
-        onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
-        onColumnVisibilityChange: setColumnVisibility,
-        onRowSelectionChange: setRowSelection,
-        getCoreRowModel: getCoreRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        state: {sorting, columnFilters, columnVisibility, rowSelection},
-    });
 
     const paginationOptions = [10, 25, 50, 100];
-    const [pagination, setPagination] = React.useState(() => new Pagination());
-
-    const {page, itemsPerPage} = pagination;
-    const maxPage = Math.floor((totalCount - 1) / itemsPerPage);
+    const [pagination, setPagination] = React.useState(() => Pagination.fromQueryParams(searchParams));
+    const [sort, setSort] = React.useState(() => Sort.fromQueryParams(searchParams));
+    const maxPage = Math.ceil(totalCount / pagination.itemsPerPage);
 
     React.useEffect(() => {
         setIsLoading(true);
-        itemsLoader({pagination, sort}).finally(() => setIsLoading(false));
+
+        itemsLoader({pagination, sort})
+            .then(() => {
+                updateUrl(pagination, sort);
+            })
+            .catch(err => {
+                addNotification(`Error loading the data${err?.message ? `: ${err.message}` : ""}`, "error");
+            })
+            .finally(() => setIsLoading(false));
     }, [pagination.page, pagination.itemsPerPage, sort]);
+
+    const updateUrl = (pagination: Pagination, sort: Sort) => {
+        const params = new URLSearchParams();
+        const pagParams = pagination.toQueryParams();
+        const sortParams = sort.toQueryParams();
+
+        Object.entries(pagParams).forEach(([k, v]) => params.set(k, v));
+        Object.entries(sortParams).forEach(([k, v]) => params.set(k, v));
+
+        router.push(`?${params.toString()}`);
+    };
 
     const handleRowClick = (row: any) => {
         if (rowDialogContent) {
@@ -110,7 +119,7 @@ export default function DataTable<TData>({
         setPagination(prev => new Pagination(newPage, prev.itemsPerPage));
 
     const updateItemsPerPage = (newSize: number) =>
-        setPagination(new Pagination(0, newSize));
+        setPagination(new Pagination(1, newSize));
 
     const handleSortToggle = (key: string) => {
         const index = sort.items.findIndex(item => item.key === key);
@@ -126,8 +135,21 @@ export default function DataTable<TData>({
         }
 
         setSort(new Sort(updated));
-        setPagination(new Pagination(0, defaultPageSize));
+        setPagination(new Pagination(1, defaultPageSize));
     };
+
+    const table = useReactTable({
+        data,
+        columns,
+        onSortingChange: setSorting,
+        onColumnFiltersChange: setColumnFilters,
+        onColumnVisibilityChange: setColumnVisibility,
+        onRowSelectionChange: setRowSelection,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        state: {sorting, columnFilters, columnVisibility, rowSelection},
+    });
 
     return (
         <div className="mt-2 w-full p-4 border rounded-lg border-zinc-900 dark:border-zinc-50">
@@ -195,39 +217,38 @@ export default function DataTable<TData>({
 
             <div className="flex justify-end items-center gap-4 py-4">
                 <span className="text-sm text-muted-foreground">{t("pagination.page")}:</span>
+                        <Select value={String(pagination.itemsPerPage)} onValueChange={(v) => updateItemsPerPage(parseInt(v))}>
+                            <SelectTrigger className="w-[80px] border-zinc-900 dark:border-zinc-50">
+                                <SelectValue placeholder={pagination.itemsPerPage.toString()}/>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {paginationOptions.map((option) => (
+                                    <SelectItem key={option} value={String(option)}>
+                                        {option}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
 
-                <Select value={String(itemsPerPage)} onValueChange={(v) => updateItemsPerPage(parseInt(v))}>
-                    <SelectTrigger className="w-[80px] border-zinc-900 dark:border-zinc-50">
-                        <SelectValue placeholder={itemsPerPage.toString()}/>
-                    </SelectTrigger>
-                    <SelectContent>
-                        {paginationOptions.map((option) => (
-                            <SelectItem key={option} value={String(option)}>
-                                {option}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-
-                <span className="text-sm text-muted-foreground">
-          {t("pagination.info", {
-              from: totalCount === 0 ? 0 : page * itemsPerPage + 1,
-              to: Math.min(totalCount, (page + 1) * itemsPerPage),
-              total: totalCount,
-          })}
-        </span>
+                        <span className="text-sm text-muted-foreground">
+                  {t("pagination.info", {
+                      from: totalCount === 0 ? 0 : (pagination.page - 1) * pagination.itemsPerPage + 1,
+                      to: Math.min(totalCount, pagination.page * pagination.itemsPerPage),
+                      total: totalCount,
+                  })}
+                </span>
 
                 <div className="space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => updatePage(0)} disabled={page === 0}>
+                    <Button variant="outline" size="sm" onClick={() => updatePage(1)} disabled={pagination.page === 1}>
                         <ChevronsLeft className="w-4 h-4"/>
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => updatePage(page - 1)} disabled={page === 0}>
+                    <Button variant="outline" size="sm" onClick={() => updatePage(pagination.page - 1)} disabled={pagination.page === 1}>
                         <ChevronLeft className="w-4 h-4"/>
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => updatePage(page + 1)} disabled={page >= maxPage}>
+                    <Button variant="outline" size="sm" onClick={() => updatePage(pagination.page + 1)} disabled={pagination.page >= maxPage}>
                         <ChevronRight className="w-4 h-4"/>
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => updatePage(maxPage)} disabled={page >= maxPage}>
+                    <Button variant="outline" size="sm" onClick={() => updatePage(maxPage)} disabled={pagination.page >= maxPage}>
                         <ChevronsRight className="w-4 h-4"/>
                     </Button>
                 </div>

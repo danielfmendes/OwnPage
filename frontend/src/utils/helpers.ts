@@ -43,8 +43,8 @@ export async function genericItemsLoader<T>(
     options: ItemsLoaderOptions,
     fetchFunction: (
         filter: string | undefined,
-        pageSize: number,
         page: number,
+        pageSize: number,
         sort: string | undefined
     ) => CancelablePromise<any>,
     setData: (items: T[]) => void,
@@ -56,8 +56,8 @@ export async function genericItemsLoader<T>(
 
     const result = await fetchFunction(
         filterString === "" ? undefined : filterString,
-        options.pagination.itemsPerPage,
         options.pagination.page,
+        options.pagination.itemsPerPage,
         sortString === "" ? undefined : sortString
     );
 

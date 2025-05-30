@@ -5,7 +5,7 @@ export enum SortDirection {
 
 export interface SortItem {
     key: string;
-    order: string
+    order: string;
 }
 
 export class Sort {
@@ -23,14 +23,27 @@ export class Sort {
         return this._items;
     }
 
-    restoreSelection(sort: SortItem[]) {
-        this.items = sort;
+    static fromQueryParams(searchParams: URLSearchParams): Sort {
+        const orderBy = searchParams.get("orderBy");
+        if (!orderBy) return new Sort();
+
+        const items = orderBy.split(",").map((item) => {
+            const [key, dir] = item.split("=");
+            return {key, order: dir ?? SortDirection.ASC};
+        });
+
+        return new Sort(items);
+    }
+
+    toQueryParams(): Record<string, string> {
+        if (this._items.length === 0) return {};
+        const value = this._items.map(e => `${e.key}=${e.order}`).join(",");
+        return {orderBy: value};
     }
 
     toCallOpts() {
         return this._items.map(
             (e) => `${e.key}=${e.order ?? SortDirection.ASC}`
-        );
+        )
     }
 }
-
