@@ -74,7 +74,9 @@
     "filter": "Filtrar",
     "no_results": "Nenhum resultado encontrado.",
     "loading": "Carregando...",
-    "search": "Pesquisar...",
+    "search": "Pesquisar",
+    "selected": "selecionados",
+    "more": "Mais",
     "please_wait": "Por favor, aguarde...",
     "warehouse_position": "ex.: WH-A1",
     "enter": {

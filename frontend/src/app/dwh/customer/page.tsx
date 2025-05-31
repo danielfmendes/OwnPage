@@ -14,8 +14,10 @@ import CustomerDetailContent from "@/app/dwh/customer/customer-detail-content";
 import AddCustomerContent from "@/app/dwh/customer/add-customer-content";
 import {useTranslation} from "react-i18next";
 import {Customer, CustomersService} from "@/models/api";
-import {genericItemsLoader, isRoleUserForProject, useRefreshData} from "@/utils/helpers";
-import {ItemsLoaderOptions} from "@/models/datatable/itemsLoader";
+import {isRoleUserForProject} from "@/utils/helpers";
+import {genericItemsLoader, ItemsLoaderOptions, useRefreshData} from "@/models/datatable/itemsLoader";
+import {createCustomerFilterItemLoader} from "@/models/datatable/filterItemsLoader";
+import {FilterDefinition} from "@/components/helpers/FilterBar";
 
 export default function CustomerPage() {
     const {t} = useTranslation();
@@ -28,8 +30,10 @@ export default function CustomerPage() {
     const [isLoadingDeleteCascade, setIsLoadingDeleteCascade] = React.useState(false);
     const [showCascadeDialog, setShowCascadeDialog] = React.useState(false);
     const [deleteId, setDeleteId] = React.useState<number | null>(null);
+    const [itemsLoaderOptions, setItemsLoaderOptions] = React.useState<ItemsLoaderOptions | null>(null);
 
     async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
+        setItemsLoaderOptions(options)
         return genericItemsLoader<Customer>(
             options,
             CustomersService.getCustomers,
@@ -135,6 +139,19 @@ export default function CustomerPage() {
         },
     ]
 
+    const filters: FilterDefinition[] = React.useMemo(() => {
+        if (!itemsLoaderOptions) return [];
+        const customerFilterLoader = createCustomerFilterItemLoader(itemsLoaderOptions);
+
+        return [
+            customerFilterLoader("first_name", {pinned: false, type: "search"}),
+            customerFilterLoader("name", {pinned: false, type: "search"}),
+            customerFilterLoader("email", {type: "search"}),
+            customerFilterLoader("city"),
+            customerFilterLoader("dob", {type: "search"}),
+        ];
+    }, [itemsLoaderOptions]);
+
     const sidebar = useStore(useSidebar, (x) => x);
     if (!sidebar) return null;
 
@@ -146,7 +163,7 @@ export default function CustomerPage() {
                 data={data}
                 itemsLoader={itemsLoader}
                 totalCount={totalCount}
-                filterColumn={"email"}
+                filterDefinition={filters}
                 rowDialogContent={(rowData, onClose) => (
                     <CustomerDetailContent
                         rowData={rowData}

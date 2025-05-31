@@ -27,7 +27,6 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
 import {useTranslation} from "react-i18next";
 import {defaultPageSize, Pagination} from "@/models/datatable/pagination";
@@ -37,14 +36,16 @@ import {ItemsLoaderOptions} from "@/models/datatable/itemsLoader";
 import {useRouter, useSearchParams} from "next/navigation";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {CustomColumnDef} from "@/models/datatable/column";
+import {FilterBar, FilterDefinition} from "./FilterBar";
+import FilterManager from "@/utils/filtermanager";
 
 interface DataTableProps<TData> {
-    title?: string;
+    title: string;
     columns: CustomColumnDef<TData>[];
     data: TData[];
     itemsLoader: (opts: ItemsLoaderOptions) => Promise<void>;
     totalCount: number;
-    filterColumn: string;
+    filterDefinition?: FilterDefinition[];
     rowDialogContent?: (row: any, onClose: () => void) => React.ReactNode;
     addDialogContent?: (onClose: () => void) => React.ReactNode;
 }
@@ -55,7 +56,7 @@ export default function DataTable<TData>({
                                              data,
                                              itemsLoader,
                                              totalCount,
-                                             filterColumn,
+                                             filterDefinition,
                                              rowDialogContent,
                                              addDialogContent,
                                          }: DataTableProps<TData>) {
@@ -74,28 +75,38 @@ export default function DataTable<TData>({
     const [isLoading, setIsLoading] = React.useState(false);
 
     const paginationOptions = [10, 25, 50, 100];
+    const [filterManager, setFilterManager] = React.useState<FilterManager>(() => FilterManager.fromQueryParams(searchParams));
     const [pagination, setPagination] = React.useState(() => Pagination.fromQueryParams(searchParams));
     const [sort, setSort] = React.useState(() => Sort.fromQueryParams(searchParams));
     const maxPage = Math.ceil(totalCount / pagination.itemsPerPage);
 
     React.useEffect(() => {
         setIsLoading(true);
-
-        itemsLoader({pagination, sort})
-            .then(() => {
-                updateUrl(pagination, sort);
+        itemsLoader({filterManager, pagination, sort})
+            .then(async () => {
+                await updateUrl(filterManager, pagination, sort);
             })
-            .catch(err => {
-                addNotification(`Error loading the data${err?.message ? `: ${err.message}` : ""}`, "error");
+            .catch((err) => {
+                addNotification(
+                    `Error loading the data${err?.message ? `: ${err.message}` : ""}`,
+                    "error"
+                );
             })
             .finally(() => setIsLoading(false));
-    }, [pagination.page, pagination.itemsPerPage, sort]);
+    }, [pagination.page, pagination.itemsPerPage, sort, filterManager.getFilterString()]);
 
-    const updateUrl = (pagination: Pagination, sort: Sort) => {
+    const updateUrl = async (
+        filterManager: FilterManager,
+        pagination: Pagination,
+        sort: Sort
+    ) => {
         const params = new URLSearchParams();
+
+        const filterParams = await filterManager.toQueryParams();
         const pagParams = pagination.toQueryParams();
         const sortParams = sort.toQueryParams();
 
+        Object.entries(filterParams).forEach(([k, v]) => params.set(k, v));
         Object.entries(pagParams).forEach(([k, v]) => params.set(k, v));
         Object.entries(sortParams).forEach(([k, v]) => params.set(k, v));
 
@@ -153,14 +164,19 @@ export default function DataTable<TData>({
 
     return (
         <div className="mt-2 w-full p-4 border rounded-lg border-zinc-900 dark:border-zinc-50">
-            {title}
-            <div className="flex items-center py-4">
-                <Input
-                    placeholder={`${t("placeholder.filter")} ${filterColumn.replace(/_/g, " ")} ...`}
-                    value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ""}
-                    onChange={(e) => table.getColumn(filterColumn)?.setFilterValue(e.target.value)}
-                    className="max-w-sm border-zinc-900 dark:border-zinc-50"
-                />
+            <h2 className="font-bold text-lg">{title}</h2>
+            <div className="flex items-center pt-3 pb-2">
+                {filterDefinition && (
+                    <FilterBar
+                        filters={filterDefinition}
+                        filterManager={filterManager}
+                        onChange={(key, selected) => {
+                            const updated = new FilterManager(filterManager.getFilters());
+                            updated.addFilter(key, selected);
+                            setFilterManager(updated);
+                        }}
+                    />
+                )}
                 <Button
                     onClick={handleAddClick}
                     className="ml-auto bg-zinc-300 dark:bg-zinc-800 hover:bg-zinc-400 dark:hover:bg-zinc-600 text-zinc-800 dark:text-white"
@@ -220,20 +236,20 @@ export default function DataTable<TData>({
 
             <div className="flex justify-end items-center gap-4 py-4">
                 <span className="text-sm text-muted-foreground">{t("pagination.page")}:</span>
-                        <Select value={String(pagination.itemsPerPage)} onValueChange={(v) => updateItemsPerPage(parseInt(v))}>
-                            <SelectTrigger className="w-[80px] border-zinc-900 dark:border-zinc-50">
-                                <SelectValue placeholder={pagination.itemsPerPage.toString()}/>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {paginationOptions.map((option) => (
-                                    <SelectItem key={option} value={String(option)}>
-                                        {option}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                <Select value={String(pagination.itemsPerPage)} onValueChange={(v) => updateItemsPerPage(parseInt(v))}>
+                    <SelectTrigger className="w-[80px] border-zinc-900 dark:border-zinc-50">
+                        <SelectValue placeholder={pagination.itemsPerPage.toString()}/>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {paginationOptions.map((option) => (
+                            <SelectItem key={option} value={String(option)}>
+                                {option}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
 
-                        <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-muted-foreground">
                   {t("pagination.info", {
                       from: totalCount === 0 ? 0 : (pagination.page - 1) * pagination.itemsPerPage + 1,
                       to: Math.min(totalCount, pagination.page * pagination.itemsPerPage),
@@ -245,13 +261,16 @@ export default function DataTable<TData>({
                     <Button variant="outline" size="sm" onClick={() => updatePage(1)} disabled={pagination.page === 1}>
                         <ChevronsLeft className="w-4 h-4"/>
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => updatePage(pagination.page - 1)} disabled={pagination.page === 1}>
+                    <Button variant="outline" size="sm" onClick={() => updatePage(pagination.page - 1)}
+                            disabled={pagination.page === 1}>
                         <ChevronLeft className="w-4 h-4"/>
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => updatePage(pagination.page + 1)} disabled={pagination.page >= maxPage}>
+                    <Button variant="outline" size="sm" onClick={() => updatePage(pagination.page + 1)}
+                            disabled={pagination.page >= maxPage}>
                         <ChevronRight className="w-4 h-4"/>
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => updatePage(maxPage)} disabled={pagination.page >= maxPage}>
+                    <Button variant="outline" size="sm" onClick={() => updatePage(maxPage)}
+                            disabled={pagination.page >= maxPage}>
                         <ChevronsRight className="w-4 h-4"/>
                     </Button>
                 </div>

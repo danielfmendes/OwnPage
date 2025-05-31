@@ -13,8 +13,8 @@ import {useNotification} from "@/components/helpers/NotificationProvider";
 import OrderDialogContent from "@/app/dwh/orders/content-dialog";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {useTranslation} from "react-i18next";
-import {genericItemsLoader, isRoleUserForProject, useRefreshData} from "@/utils/helpers";
-import {ItemsLoaderOptions} from "@/models/datatable/itemsLoader";
+import {isRoleUserForProject} from "@/utils/helpers";
+import {genericItemsLoader, ItemsLoaderOptions, useRefreshData} from "@/models/datatable/itemsLoader";
 
 export default function OrderPage() {
     const {t} = useTranslation();
@@ -135,7 +135,6 @@ export default function OrderPage() {
                 data={data}
                 itemsLoader={itemsLoader}
                 totalCount={totalCount}
-                filterColumn={"customer_name"}
                 rowDialogContent={(rowData, onClose) => (
                     <OrderDialogContent
                         rowData={rowData}

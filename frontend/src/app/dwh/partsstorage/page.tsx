@@ -11,8 +11,8 @@ import {WareHousePartsService, WarehousePartWithName} from "@/models/api";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useTranslation} from "react-i18next";
-import {genericItemsLoader, isRoleUserForProject, useRefreshData} from "@/utils/helpers";
-import {ItemsLoaderOptions} from "@/models/datatable/itemsLoader";
+import {isRoleUserForProject} from "@/utils/helpers";
+import {genericItemsLoader, ItemsLoaderOptions, useRefreshData} from "@/models/datatable/itemsLoader";
 
 export default function PartsStoragePage() {
     const {t} = useTranslation();
@@ -102,7 +102,6 @@ export default function PartsStoragePage() {
                 data={data}
                 itemsLoader={itemsLoader}
                 totalCount={totalCount}
-                filterColumn={"storage_location"}
                 rowDialogContent={(rowData, onClose) => (
                     <WarehousePartDialogContent
                         rowData={rowData}

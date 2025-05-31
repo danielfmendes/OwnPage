@@ -26,7 +26,7 @@ func WarehousePartHandler(w http.ResponseWriter, r *http.Request) {
 func GetWareHouseParts(w http.ResponseWriter, r *http.Request) {
 	query := utils.MustReadSQLFile("selects/warehousepartsselect.sql")
 
-	utils.HandleGetWithProjectIDsWithPagination(w, r, query, func(scanner utils.Scanner) (any, error) {
+	utils.HandleGetForDataTable(w, r, query, func(scanner utils.Scanner) (any, error) {
 		var p models.WarehousePartWithName
 		err := scanner.Scan(&p.ID, &p.PartType, &p.PartID, &p.PartName, &p.Quantity, &p.StorageLocation, &p.ProjectID)
 		return p, err

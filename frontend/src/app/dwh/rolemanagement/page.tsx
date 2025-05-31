@@ -9,8 +9,7 @@ import RoleManagementDialogContent from "@/app/dwh/rolemanagement/manage-dialog"
 import {Dialog} from "@/components/ui/dialog";
 import AddProjektDialogContent from "@/app/dwh/rolemanagement/add-project-dialog";
 import {useTranslation} from "react-i18next";
-import {ItemsLoaderOptions} from "@/models/datatable/itemsLoader";
-import {genericItemsLoader, useRefreshData} from "@/utils/helpers";
+import {genericItemsLoader, ItemsLoaderOptions, useRefreshData} from "@/models/datatable/itemsLoader";
 
 export default function RoleManagementPage() {
     const {t} = useTranslation();
@@ -79,7 +78,6 @@ export default function RoleManagementPage() {
                 data={data}
                 itemsLoader={itemsLoader}
                 totalCount={totalCount}
-                filterColumn={"project_name"}
                 addDialogContent={(onClose) => (
                     <AddProjektDialogContent
                         onClose={onClose}

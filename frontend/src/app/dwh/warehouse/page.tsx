@@ -13,8 +13,8 @@ import BikeDialogContent from "@/app/dwh/warehouse/content-dialog";
 import {BikesService, BikeWithModelName} from "@/models/api";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {useTranslation} from "react-i18next";
-import {genericItemsLoader, isRoleUserForProject, useRefreshData} from "@/utils/helpers";
-import {ItemsLoaderOptions} from "@/models/datatable/itemsLoader";
+import {isRoleUserForProject} from "@/utils/helpers";
+import {genericItemsLoader, ItemsLoaderOptions, useRefreshData} from "@/models/datatable/itemsLoader";
 
 export default function WareHousePage() {
     const {t} = useTranslation();
@@ -150,7 +150,6 @@ export default function WareHousePage() {
                 data={data}
                 itemsLoader={itemsLoader}
                 totalCount={totalCount}
-                filterColumn={"serial_number"}
                 rowDialogContent={(rowData, onClose) => (
                     <BikeDialogContent
                         rowData={rowData}

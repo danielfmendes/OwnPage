@@ -21,7 +21,7 @@ func HandleGet(
 	scanFunc func(Scanner) (any, error),
 	args ...interface{},
 ) {
-	fetchData(w, r, query, false, false, false, scanFunc, args...)
+	fetchData(w, r, query, false, false, scanFunc, args...)
 }
 
 func HandleGetWithPagination(
@@ -31,7 +31,7 @@ func HandleGetWithPagination(
 	scanFunc func(Scanner) (any, error),
 	args ...interface{},
 ) {
-	fetchData(w, r, query, false, true, true, scanFunc, args...)
+	fetchData(w, r, query, false, true, scanFunc, args...)
 }
 
 func HandleGetWithProjectIDs(
@@ -41,17 +41,34 @@ func HandleGetWithProjectIDs(
 	scanFunc func(Scanner) (any, error),
 	args ...interface{},
 ) {
-	fetchData(w, r, query, true, false, false, scanFunc, args...)
+	fetchData(w, r, query, true, false, scanFunc, args...)
 }
 
-func HandleGetWithProjectIDsWithPagination(
+func HandleGetForDataTable(
 	w http.ResponseWriter,
 	r *http.Request,
 	query string,
 	scanFunc func(Scanner) (any, error),
 	args ...interface{},
 ) {
-	fetchData(w, r, query, true, true, true, scanFunc, args...)
+	countBy := r.URL.Query().Get("countBy")
+	if countBy != "" {
+		scanFuncCount := func(scanner Scanner) (any, error) {
+			var value string
+			var count int
+			err := scanner.Scan(&value, &count)
+			if err != nil {
+				return nil, err
+			}
+			return map[string]any{
+				"value": value,
+				"count": count,
+			}, nil
+		}
+		fetchData(w, r, query, true, false, scanFuncCount, args...)
+	} else {
+		fetchData(w, r, query, true, true, scanFunc, args...)
+	}
 }
 
 func fetchData(
@@ -59,8 +76,7 @@ func fetchData(
 	r *http.Request,
 	query string,
 	filterWithProjectIDs bool,
-	applyPagination bool,
-	includeTotalCount bool,
+	applyAllDataFeatures bool,
 	scanFunc func(Scanner) (any, error),
 	args ...interface{},
 ) {
@@ -78,6 +94,7 @@ func fetchData(
 	finalQuery := query
 	finalArgs := args
 
+	// Project ID Filter, wenn aktiviert
 	if filterWithProjectIDs {
 		userEmail, err := ValidateToken(w, r)
 		if err != nil {
@@ -96,9 +113,65 @@ func fetchData(
 			return
 		}
 
-		finalQuery, finalArgs = injectProjectIDFilter(query, args, effectiveProjectIDs)
+		finalQuery, finalArgs = injectProjectIDFilter(finalQuery, finalArgs, effectiveProjectIDs)
 	}
 
+	// Generic Filter immer anwenden, wenn countBy gesetzt ist oder applyAllDataFeatures true ist
+	countBy := r.URL.Query().Get("countBy")
+	if countBy != "" || applyAllDataFeatures {
+		finalQuery, finalArgs, err = applyGenericFilters(r, finalQuery, finalArgs)
+		if err != nil {
+			http.Error(w, "Invalid filter parameters: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+	}
+
+	if countBy != "" {
+		re := regexp.MustCompile(`^[a-zA-Z0-9_]+$`)
+		if !re.MatchString(countBy) {
+			http.Error(w, "Invalid countBy parameter", http.StatusBadRequest)
+			return
+		}
+
+		countByQuery := fmt.Sprintf(
+			"SELECT %s AS value, COUNT(*) AS count FROM (%s) AS subquery GROUP BY %s ORDER BY count DESC",
+			countBy, finalQuery, countBy,
+		)
+
+		rows, err := conn.Query(countByQuery, finalArgs...)
+		if err != nil {
+			HandleError(w, err, ErrMsgDBQueryFailed)
+			return
+		}
+		defer rows.Close()
+
+		var results []any
+		for rows.Next() {
+			item, err := scanFunc(rows)
+			if err != nil {
+				HandleError(w, err, ErrMsgScanFailed)
+				return
+			}
+			results = append(results, item)
+		}
+		if err := rows.Err(); err != nil {
+			HandleError(w, err, ErrMsgRowsReadFailed)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(results)
+		return
+	}
+
+	applyPagination := false
+	includeTotalCount := false
+	if applyAllDataFeatures {
+		applyPagination = true
+		includeTotalCount = true
+	}
+
+	// Total Count abfragen, wenn gewünscht
 	var totalCount int
 	if includeTotalCount {
 		countQuery := fmt.Sprintf("SELECT COUNT(*) FROM (%s) AS count_sub", finalQuery)
@@ -108,6 +181,7 @@ func fetchData(
 		}
 	}
 
+	// Pagination & Sorting anwenden, wenn aktiviert
 	if applyPagination {
 		finalQuery, err = applyPaginationAndSorting(finalQuery, r)
 		if err != nil {
@@ -116,6 +190,7 @@ func fetchData(
 		}
 	}
 
+	// Query ausführen
 	rows, err := conn.Query(finalQuery, finalArgs...)
 	if err != nil {
 		HandleError(w, err, ErrMsgDBQueryFailed)
@@ -143,7 +218,6 @@ func fetchData(
 			http.Error(w, "No results found", http.StatusNotFound)
 			return
 		}
-
 		json.NewEncoder(w).Encode(map[string]any{
 			"totalCount": totalCount,
 			"items":      results,
@@ -195,6 +269,53 @@ func applyPaginationAndSorting(baseQuery string, r *http.Request) (string, error
 	finalQuery := baseQuery + orderClause + limitOffsetClause
 
 	return finalQuery, nil
+}
+
+func applyGenericFilters(r *http.Request, baseQuery string, args []interface{}) (string, []interface{}, error) {
+	filter := r.URL.Query().Get("filter")
+	if filter == "" {
+		return baseQuery, args, nil
+	}
+
+	parts := strings.Split(filter, ",")
+	var filters []string
+	var newArgs = args
+
+	for _, part := range parts {
+		if strings.HasPrefix(part, "project_id:") {
+			// project_id wird separat behandelt
+			continue
+		}
+
+		if strings.HasPrefix(part, "$") {
+			continue // ungültiger Schlüsselname
+		}
+
+		if strings.Contains(part, ":$eq.") {
+			key := strings.Split(part, ":$eq.")[0]
+			val := strings.TrimPrefix(part, key+":$eq.")
+			filters = append(filters, fmt.Sprintf(`%s = $%d`, key, len(newArgs)+1))
+			newArgs = append(newArgs, val)
+		} else if strings.Contains(part, ":$in.") {
+			key := strings.Split(part, ":$in.")[0]
+			rawVals := strings.TrimPrefix(part, key+":$in.")
+			splitVals := strings.Split(rawVals, "|")
+			filters = append(filters, fmt.Sprintf(`%s = ANY($%d)`, key, len(newArgs)+1))
+			newArgs = append(newArgs, pq.Array(splitVals))
+		} else {
+			return "", nil, fmt.Errorf("unsupported filter format: %s", part)
+		}
+	}
+
+	if len(filters) == 0 {
+		return baseQuery, args, nil
+	}
+
+	// Wrap in subquery
+	filterClause := " WHERE " + strings.Join(filters, " AND ")
+	finalQuery := fmt.Sprintf("SELECT * FROM (%s) AS subquery%s", baseQuery, filterClause)
+
+	return finalQuery, newArgs, nil
 }
 
 func filterProjectIDs(r *http.Request, allowedIDs []int) ([]int, error) {

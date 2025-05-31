@@ -2,7 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { CountByResult } from '../models/CountByResult';
 import type { Customer } from '../models/Customer';
+import type { CustomerListResponse } from '../models/CustomerListResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -13,7 +15,8 @@ export class CustomersService {
      * @param page Specifying the page of the result set.
      * @param pageSize Specifying the size of the result set.
      * @param orderBy Specifying the sort order. The sort definition can use the keywords 'asc' for ascending and 'desc' for descending sort order.
-     * @returns any A list of customers with total count
+     * @param countBy Returns the count for that column
+     * @returns any Returns either a paginated list of customers or grouped counts by field
      * @throws ApiError
      */
     public static getCustomers(
@@ -21,10 +24,8 @@ export class CustomersService {
         page?: number,
         pageSize?: number,
         orderBy?: string,
-    ): CancelablePromise<{
-        totalCount?: number;
-        items?: Array<Customer>;
-    }> {
+        countBy?: string,
+    ): CancelablePromise<(CustomerListResponse | Array<CountByResult>)> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/customers',
@@ -33,6 +34,7 @@ export class CustomersService {
                 'page': page,
                 'pageSize': pageSize,
                 'orderBy': orderBy,
+                'countBy': countBy,
             },
             errors: {
                 401: `Unauthorized – missing or invalid token`,

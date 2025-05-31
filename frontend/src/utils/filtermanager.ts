@@ -15,6 +15,29 @@ class FilterManager {
         }
     }
 
+    getFilters(): Record<string, any[]> {
+        const result: Record<string, any[]> = {};
+        this.filters.forEach((value, key) => {
+            result[key] = value;
+        });
+        return result;
+    }
+
+    addFilter(key: string, values: any[]) {
+        if (!key || !Array.isArray(values)) {
+            throw new Error("Key must be string and values must be array");
+        }
+        this.filters.set(key, values);
+    }
+
+    removeFilter(key: string) {
+        this.filters.delete(key);
+    }
+
+    hasFilter(key: string): boolean {
+        return this.filters.has(key);
+    }
+
     private async getProjectIds(maxWaitMs = 1000, intervalMs = 100): Promise<number[]> {
         const waitForRoles = async (): Promise<void> => {
             const start = Date.now();
@@ -31,17 +54,6 @@ class FilterManager {
             return selectedRoles.map((role) => role.project_id);
         }
         return [];
-    }
-
-    addFilter(key: string, values: any[]) {
-        if (!key || !Array.isArray(values)) {
-            throw new Error("Key must be string and values must be array");
-        }
-        this.filters.set(key, values);
-    }
-
-    removeFilter(key: string) {
-        this.filters.delete(key);
     }
 
     private buildFilterString(): string {
@@ -69,6 +81,40 @@ class FilterManager {
         }
 
         return this.buildFilterString();
+    }
+
+    async toQueryParams(): Promise<Record<string, string>> {
+        const filterString = await this.getFilterStringWithProjectIds();
+        if (filterString) {
+            return {filter: filterString};
+        }
+        return {};
+    }
+
+    static fromQueryParams(searchParams: URLSearchParams): FilterManager {
+        const filterParam = searchParams.get("filter");
+        const filters: Record<string, any[]> = {};
+
+        if (filterParam) {
+            const parts = filterParam.split(",");
+            for (const part of parts) {
+                if (part.includes(":$eq.")) {
+                    const [key, value] = part.split(":$eq.");
+                    if (key && value !== undefined) {
+                        filters[key] = [value];
+                    }
+                } else if (part.includes(":$in.")) {
+                    const [key, value] = part.split(":$in.");
+                    if (key && value !== undefined) {
+                        filters[key] = value.split("|");
+                    }
+                } else {
+                    console.warn(`Unknown filter format: ${part}`);
+                }
+            }
+        }
+
+        return new FilterManager(filters);
     }
 
     // Method without project IDs (sync)

@@ -230,21 +230,18 @@ paths:
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/PageSize"
         - $ref: "#/components/parameters/OrderBy"
+        - $ref: "#/components/parameters/CountBy"
       responses:
         '200':
-          description: A list of customers with total count
+          description: Returns either a paginated list of customers or grouped counts by field
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  totalCount:
-                    type: integer
-                    example: 42
-                  items:
-                    type: array
+                oneOf:
+                  - $ref: '#/components/schemas/CustomerListResponse'
+                  - type: array
                     items:
-                      $ref: '#/components/schemas/Customer'
+                      $ref: '#/components/schemas/CountByResult'
         '401':
           description: Unauthorized – missing or invalid token
         '403':
@@ -903,6 +900,15 @@ components:
       schema:
         type: string
         description: Comma seperated list of sort definitions
+    CountBy:
+      name: countBy
+      in: query
+      description: Returns the count for that column
+      required: false
+      allowEmptyValue: false
+      example: first_name
+      schema:
+        type: string
     GetIdParam:
       name: id
       in: path
@@ -955,6 +961,26 @@ components:
           description: Size is the size of the current page of the server response
           type: integer
       type: object
+    CountByResult:
+      type: object
+      properties:
+        value:
+          type: string
+          example: Anna
+        count:
+          type: integer
+          example: 1
+    # Data Tables
+    CustomerListResponse:
+      type: object
+      properties:
+        totalCount:
+          type: integer
+          example: 7
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Customer'
     #  Basic Types
     Project:
       type: object
