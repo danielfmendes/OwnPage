@@ -4,7 +4,7 @@ import {Bike, BikesService, BikeWithModelName} from "@/models/api";
 import InputField from "@/components/helpers/InputField";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import {DatePicker} from "@/components/helpers/DatePicker";
+import {DatePicker} from "@/components/helpers/datepicker/DatePicker";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
 import ModelNameSelect from "@/components/helpers/selects/ModelNameSelect";
 import {useTranslation} from "react-i18next";

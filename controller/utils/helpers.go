@@ -84,7 +84,11 @@ func ExtractFilterValue(r *http.Request, key string) (string, bool) {
 		return "", false
 	}
 	parts := strings.Split(filter, ",")
-	prefixes := []string{key + ":$eq.", key + ":$in."}
+	prefixes := []string{
+		key + ":$eq.",
+		key + ":$in.",
+		key + ":$between.",
+	}
 
 	for _, part := range parts {
 		for _, prefix := range prefixes {

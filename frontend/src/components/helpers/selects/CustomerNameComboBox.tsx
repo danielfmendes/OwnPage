@@ -1,7 +1,7 @@
 import React from "react";
 import {Check} from "lucide-react";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import {Customer, CustomersService} from "@/models/api";
+import {Customer, CustomerListResponse, CustomersService} from "@/models/api";
 import {cn} from "@/lib/utils";
 import {ComboBoxLoading} from "@/components/helpers/ComboBoxLoading";
 import {useTranslation} from "react-i18next";
@@ -32,8 +32,9 @@ export default function CustomerNameComboBox({customerID, onChange}: Props) {
             const filterString = await filterManager.getFilterStringWithProjectIds();
             CustomersService.getCustomers(filterString === "" ? undefined : filterString)
                 .then((customers) => {
-                    setCustomerIdOptions(customers.items ?? []);
-                    const selected = customers.items?.find(c => c.id === customerID) ?? null;
+                    const customerList = customers as CustomerListResponse;
+                    setCustomerIdOptions(customerList.items ?? []);
+                    const selected = customerList.items?.find(c => c.id === customerID) ?? null;
                     setSelectedCustomer(selected);
                 })
                 .catch(err => addNotification(`Failed to load customer options${err?.message ? `: ${err.message}` : ""}`, "error"))

@@ -302,6 +302,17 @@ func applyGenericFilters(r *http.Request, baseQuery string, args []interface{}) 
 			splitVals := strings.Split(rawVals, "|")
 			filters = append(filters, fmt.Sprintf(`%s = ANY($%d)`, key, len(newArgs)+1))
 			newArgs = append(newArgs, pq.Array(splitVals))
+		} else if strings.Contains(part, ":$between.") {
+			key := strings.Split(part, ":$between.")[0]
+			vals := strings.TrimPrefix(part, key+":$between.")
+			splitVals := strings.Split(vals, "|")
+			if len(splitVals) != 2 {
+				return "", nil, fmt.Errorf("invalid $between format: %s", part)
+			}
+			from := splitVals[0]
+			to := splitVals[1]
+			filters = append(filters, fmt.Sprintf(`%s BETWEEN $%d AND $%d`, key, len(newArgs)+1, len(newArgs)+2))
+			newArgs = append(newArgs, from, to)
 		} else {
 			return "", nil, fmt.Errorf("unsupported filter format: %s", part)
 		}

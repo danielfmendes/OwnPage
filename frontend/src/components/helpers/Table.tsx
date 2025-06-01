@@ -170,9 +170,9 @@ export default function DataTable<TData>({
                     <FilterBar
                         filters={filterDefinition}
                         filterManager={filterManager}
-                        onChange={(key, selected) => {
+                        onChange={(key, selected, type) => {
                             const updated = new FilterManager(filterManager.getFilters());
-                            updated.addFilter(key, selected);
+                            updated.addFilter(key, selected, type);
                             setFilterManager(updated);
                         }}
                     />

@@ -11,7 +11,7 @@ import {
     OrderWithCustomer,
 } from "@/models/api";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
-import {DatePicker} from "@/components/helpers/DatePicker";
+import {DatePicker} from "@/components/helpers/datepicker/DatePicker";
 import CustomerNameComboBox from "@/components/helpers/selects/CustomerNameComboBox";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {SimpleTable} from "@/components/helpers/SimpleTable";

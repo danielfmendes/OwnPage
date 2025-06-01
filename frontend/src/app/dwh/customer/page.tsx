@@ -148,7 +148,7 @@ export default function CustomerPage() {
             customerFilterLoader("name", {pinned: false, type: "search"}),
             customerFilterLoader("email", {type: "search"}),
             customerFilterLoader("city"),
-            customerFilterLoader("dob", {type: "search"}),
+            customerFilterLoader("dob", {type: "date"}),
         ];
     }, [itemsLoaderOptions]);
 

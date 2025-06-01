@@ -100,7 +100,7 @@ export function ComboBoxLoading<T>({
                         onWheel={(e) => {
                             const {currentTarget, deltaY} = e;
                             currentTarget.scrollBy({
-                                top: deltaY * 2,
+                                top: deltaY * 3,
                                 behavior: 'smooth'
                             });
                         }}

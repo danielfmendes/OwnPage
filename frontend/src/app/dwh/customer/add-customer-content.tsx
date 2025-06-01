@@ -1,7 +1,7 @@
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import InputField from "@/components/helpers/InputField";
 import React from "react";
-import {DatePicker} from "@/components/helpers/DatePicker";
+import {DatePicker} from "@/components/helpers/datepicker/DatePicker";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";

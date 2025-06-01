@@ -5,7 +5,7 @@ import {Card, CardContent, CardHeader} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import InputField from '@/components/helpers/InputField';
 import {Box} from 'lucide-react';
-import {DatePicker} from "@/components/helpers/DatePicker";
+import {DatePicker} from "@/components/helpers/datepicker/DatePicker";
 import AuthToken from "@/utils/authtoken";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useTranslation} from "react-i18next";
