@@ -6,7 +6,12 @@ import AuthToken from "@/utils/authtoken";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useUserStore} from "@/utils/userstate";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
-import {RoleManagementsService, RoleManagementWithName, UsersService} from "@/models/api";
+import {
+    RoleManagementListResponse,
+    RoleManagementsService,
+    RoleManagementWithName,
+    UsersService
+} from "@/models/api";
 import {handleLogOut} from "@/utils/helpers";
 import {usePathname, useRouter} from "next/navigation";
 import Language from "@/utils/language";
@@ -66,7 +71,8 @@ export default function DemoLayout({children}: { children: React.ReactNode }) {
             setIsLoadingRole(true);
             RoleManagementsService.getRoleManagements()
                 .then((roles) => {
-                    setRoles(roles.items || []);
+                    const roleManagementList = roles as RoleManagementListResponse;
+                    setRoles(roleManagementList.items || []);
                 })
                 .catch(err => addNotification(`Failed to load role management${err?.message ? `: ${err.message}` : ""}`, "error"))
                 .finally(() => setIsLoadingRole(false));

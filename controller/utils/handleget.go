@@ -224,10 +224,6 @@ func fetchData(
 
 	w.Header().Set("Content-Type", "application/json")
 	if includeTotalCount {
-		if results == nil || len(results) == 0 {
-			http.Error(w, "No results found", http.StatusNotFound)
-			return
-		}
 		json.NewEncoder(w).Encode(map[string]any{
 			"totalCount": totalCount,
 			"items":      results,
