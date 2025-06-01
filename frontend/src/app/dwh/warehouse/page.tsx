@@ -15,6 +15,8 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/
 import {useTranslation} from "react-i18next";
 import {isRoleUserForProject} from "@/utils/helpers";
 import {genericItemsLoader, ItemsLoaderOptions, useRefreshData} from "@/models/datatable/itemsLoader";
+import {FilterDefinition} from "@/components/helpers/FilterBar";
+import {createBikeFilterItemLoader} from "@/models/datatable/filterItemsLoader";
 
 export default function WareHousePage() {
     const {t} = useTranslation();
@@ -27,8 +29,10 @@ export default function WareHousePage() {
     const [isLoadingDeleteCascade, setIsLoadingDeleteCascade] = React.useState(false);
     const [showCascadeDialog, setShowCascadeDialog] = React.useState(false);
     const [deleteId, setDeleteId] = React.useState<number | null>(null);
+    const [itemsLoaderOptions, setItemsLoaderOptions] = React.useState<ItemsLoaderOptions | null>(null);
 
     async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
+        setItemsLoaderOptions(options);
         return genericItemsLoader<BikeWithModelName>(
             options,
             BikesService.getBikes,
@@ -114,7 +118,7 @@ export default function WareHousePage() {
         },
         {
             accessorKey: "warehouse_location",
-            header: t("menu.warehouse"),
+            header: t("label.warehouse_location"),
             widthPercent: 20,
         },
         {
@@ -139,6 +143,20 @@ export default function WareHousePage() {
         },
     ]
 
+    const filters: FilterDefinition[] = React.useMemo(() => {
+        if (!itemsLoaderOptions) return [];
+        const bikeFilterLoader = createBikeFilterItemLoader(itemsLoaderOptions);
+
+        return [
+            bikeFilterLoader("id", {pinned: false, type: "search"}),
+            bikeFilterLoader("model_name", {type: "search"}),
+            bikeFilterLoader("serial_number", {type: "search"}),
+            bikeFilterLoader("production_date", {type: "date"}),
+            bikeFilterLoader("quantity", {pinned: false, type: "search"}),
+            bikeFilterLoader("warehouse_location", {type: "search"}),
+        ];
+    }, [itemsLoaderOptions]);
+
     const sidebar = useStore(useSidebar, (x) => x);
     if (!sidebar) return null;
 
@@ -150,6 +168,7 @@ export default function WareHousePage() {
                 data={data}
                 itemsLoader={itemsLoader}
                 totalCount={totalCount}
+                filterDefinition={filters}
                 rowDialogContent={(rowData, onClose) => (
                     <BikeDialogContent
                         rowData={rowData}

@@ -79,21 +79,18 @@ paths:
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/PageSize"
         - $ref: "#/components/parameters/OrderBy"
+        - $ref: "#/components/parameters/CountBy"
       responses:
         '200':
           description: A list of bikes with total count
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  totalCount:
-                    type: integer
-                    example: 42
-                  items:
-                    type: array
+                oneOf:
+                  - $ref: '#/components/schemas/BikeListResponse'
+                  - type: array
                     items:
-                      $ref: '#/components/schemas/BikeWithModelName'
+                      $ref: '#/components/schemas/CountByResult'
         '401':
           description: Unauthorized – missing or invalid token
         '403':
@@ -416,6 +413,7 @@ paths:
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/PageSize"
         - $ref: "#/components/parameters/OrderBy"
+        - $ref: "#/components/parameters/CountBy"
       responses:
         '200':
           description: A list of orders with total count
@@ -423,6 +421,9 @@ paths:
             application/json:
               schema:
                 oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/CountByResult'
                   - type: object
                     properties:
                       totalCount:
@@ -630,21 +631,18 @@ paths:
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/PageSize"
         - $ref: "#/components/parameters/OrderBy"
+        - $ref: "#/components/parameters/CountBy"
       responses:
         '200':
           description: A list of role managements with project names with total count
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  totalCount:
-                    type: integer
-                    example: 42
-                  items:
-                    type: array
+                oneOf:
+                  - $ref: '#/components/schemas/RoleManagementListResponse'
+                  - type: array
                     items:
-                      $ref: '#/components/schemas/RoleManagementWithName'
+                      $ref: '#/components/schemas/CountByResult'
         '401':
           description: Unauthorized – missing or invalid token
         '403':
@@ -774,21 +772,18 @@ paths:
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/PageSize"
         - $ref: "#/components/parameters/OrderBy"
+        - $ref: "#/components/parameters/CountBy"
       responses:
         '200':
           description: A list of warehouse parts with total count
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  totalCount:
-                    type: integer
-                    example: 42
-                  items:
-                    type: array
+                oneOf:
+                  - $ref: '#/components/schemas/PartStorageListResponse'
+                  - type: array
                     items:
-                      $ref: '#/components/schemas/WarehousePartWithName'
+                      $ref: '#/components/schemas/CountByResult'
         '401':
           description: Unauthorized – missing or invalid token
         '403':
@@ -981,6 +976,36 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Customer'
+    BikeListResponse:
+      type: object
+      properties:
+        totalCount:
+          type: integer
+          example: 7
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BikeWithModelName'
+    PartStorageListResponse:
+      type: object
+      properties:
+        totalCount:
+          type: integer
+          example: 42
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/WarehousePartWithName'
+    RoleManagementListResponse:
+      type: object
+      properties:
+        totalCount:
+          type: integer
+          example: 42
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleManagementWithName'
     #  Basic Types
     Project:
       type: object

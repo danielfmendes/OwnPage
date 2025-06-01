@@ -149,7 +149,7 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
 
             <div className="space-y-2">
                 <InputField label={t("label.quantity")} value={quantity} onChange={(e) => setQuantity(Number(e.target.value))}/>
-                <InputField label={t("label.warehouse_position")}
+                <InputField label={t("label.storage_location")}
                             value={storageLocation}
                             onChange={(e) => setStorageLocation(e.target.value)}
                             placeholder={t("placeholder.warehouse_position")}/>

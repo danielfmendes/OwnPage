@@ -13,6 +13,8 @@ import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useTranslation} from "react-i18next";
 import {isRoleUserForProject} from "@/utils/helpers";
 import {genericItemsLoader, ItemsLoaderOptions, useRefreshData} from "@/models/datatable/itemsLoader";
+import {FilterDefinition} from "@/components/helpers/FilterBar";
+import {createWareHousePartsFilterItemLoader} from "@/models/datatable/filterItemsLoader";
 
 export default function PartsStoragePage() {
     const {t} = useTranslation();
@@ -21,8 +23,10 @@ export default function PartsStoragePage() {
     const [data, setData] = React.useState<WarehousePartWithName[]>([]);
     const [totalCount, setTotalCount] = React.useState<number>(0);
     const [loadingDeleteId, setLoadingDeleteId] = React.useState<number | null>(null);
+    const [itemsLoaderOptions, setItemsLoaderOptions] = React.useState<ItemsLoaderOptions | null>(null);
 
     async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
+        setItemsLoaderOptions(options);
         return genericItemsLoader<WarehousePartWithName>(
             options,
             WareHousePartsService.getWareHouseParts,
@@ -66,7 +70,7 @@ export default function PartsStoragePage() {
         },
         {
             accessorKey: "storage_location",
-            header: t("label.warehouse_position"),
+            header: t("label.storage_location"),
             widthPercent: 25,
         },
         {
@@ -91,6 +95,19 @@ export default function PartsStoragePage() {
         },
     ]
 
+    const filters: FilterDefinition[] = React.useMemo(() => {
+        if (!itemsLoaderOptions) return [];
+        const warehouseFilterLoader = createWareHousePartsFilterItemLoader(itemsLoaderOptions);
+
+        return [
+            warehouseFilterLoader("id", {pinned: false, type: "search"}),
+            warehouseFilterLoader("part_type", {type: "search"}),
+            warehouseFilterLoader("part_name", {type: "search"}),
+            warehouseFilterLoader("quantity", {pinned: false, type: "search"}),
+            warehouseFilterLoader("storage_location", {type: "search"}),
+        ];
+    }, [itemsLoaderOptions]);
+
     const sidebar = useStore(useSidebar, (x) => x);
     if (!sidebar) return null;
 
@@ -102,6 +119,7 @@ export default function PartsStoragePage() {
                 data={data}
                 itemsLoader={itemsLoader}
                 totalCount={totalCount}
+                filterDefinition={filters}
                 rowDialogContent={(rowData, onClose) => (
                     <WarehousePartDialogContent
                         rowData={rowData}

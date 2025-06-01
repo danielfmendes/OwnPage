@@ -3,8 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Bike } from '../models/Bike';
+import type { BikeListResponse } from '../models/BikeListResponse';
 import type { BikeModel } from '../models/BikeModel';
-import type { BikeWithModelName } from '../models/BikeWithModelName';
+import type { CountByResult } from '../models/CountByResult';
 import type { Fork } from '../models/Fork';
 import type { Frame } from '../models/Frame';
 import type { Saddle } from '../models/Saddle';
@@ -18,6 +19,7 @@ export class BikesService {
      * @param page Specifying the page of the result set.
      * @param pageSize Specifying the size of the result set.
      * @param orderBy Specifying the sort order. The sort definition can use the keywords 'asc' for ascending and 'desc' for descending sort order.
+     * @param countBy Returns the count for that column
      * @returns any A list of bikes with total count
      * @throws ApiError
      */
@@ -26,10 +28,8 @@ export class BikesService {
         page?: number,
         pageSize?: number,
         orderBy?: string,
-    ): CancelablePromise<{
-        totalCount?: number;
-        items?: Array<BikeWithModelName>;
-    }> {
+        countBy?: string,
+    ): CancelablePromise<(BikeListResponse | Array<CountByResult>)> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/bikes',
@@ -38,6 +38,7 @@ export class BikesService {
                 'page': page,
                 'pageSize': pageSize,
                 'orderBy': orderBy,
+                'countBy': countBy,
             },
             errors: {
                 401: `Unauthorized – missing or invalid token`,

@@ -2,8 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { CountByResult } from '../models/CountByResult';
 import type { RoleManagement } from '../models/RoleManagement';
-import type { RoleManagementWithName } from '../models/RoleManagementWithName';
+import type { RoleManagementListResponse } from '../models/RoleManagementListResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -14,6 +15,7 @@ export class RoleManagementsService {
      * @param page Specifying the page of the result set.
      * @param pageSize Specifying the size of the result set.
      * @param orderBy Specifying the sort order. The sort definition can use the keywords 'asc' for ascending and 'desc' for descending sort order.
+     * @param countBy Returns the count for that column
      * @returns any A list of role managements with project names with total count
      * @throws ApiError
      */
@@ -22,10 +24,8 @@ export class RoleManagementsService {
         page?: number,
         pageSize?: number,
         orderBy?: string,
-    ): CancelablePromise<{
-        totalCount?: number;
-        items?: Array<RoleManagementWithName>;
-    }> {
+        countBy?: string,
+    ): CancelablePromise<(RoleManagementListResponse | Array<CountByResult>)> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/rolemanagements',
@@ -34,6 +34,7 @@ export class RoleManagementsService {
                 'page': page,
                 'pageSize': pageSize,
                 'orderBy': orderBy,
+                'countBy': countBy,
             },
             errors: {
                 401: `Unauthorized – missing or invalid token`,

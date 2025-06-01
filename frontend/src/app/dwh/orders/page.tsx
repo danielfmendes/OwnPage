@@ -15,6 +15,8 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/
 import {useTranslation} from "react-i18next";
 import {isRoleUserForProject} from "@/utils/helpers";
 import {genericItemsLoader, ItemsLoaderOptions, useRefreshData} from "@/models/datatable/itemsLoader";
+import {FilterDefinition} from "@/components/helpers/FilterBar";
+import {createOrdersFilterItemLoader} from "@/models/datatable/filterItemsLoader";
 
 export default function OrderPage() {
     const {t} = useTranslation();
@@ -27,8 +29,10 @@ export default function OrderPage() {
     const [isLoadingDeleteCascade, setIsLoadingDeleteCascade] = React.useState(false);
     const [showCascadeDialog, setShowCascadeDialog] = React.useState(false);
     const [deleteId, setDeleteId] = React.useState<number | null>(null);
+    const [itemsLoaderOptions, setItemsLoaderOptions] = React.useState<ItemsLoaderOptions | null>(null);
 
     async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
+        setItemsLoaderOptions(options);
         return genericItemsLoader<OrderWithCustomer>(
             options,
             OrdersService.getOrders,
@@ -90,7 +94,7 @@ export default function OrderPage() {
         },
         {
             accessorKey: "customer_email",
-            header: t("label.email"),
+            header: t("label.customer_email"),
             widthPercent: 40,
         },
         {
@@ -124,6 +128,17 @@ export default function OrderPage() {
         },
     ]
 
+    const filters: FilterDefinition[] = React.useMemo(() => {
+        if (!itemsLoaderOptions) return [];
+        const orderFilterLoader = createOrdersFilterItemLoader(itemsLoaderOptions);
+
+        return [
+            orderFilterLoader("customer_name", {pinned: false, type: "search"}),
+            orderFilterLoader("customer_email", {type: "search"}),
+            orderFilterLoader("order_date", {type: "date"}),
+        ];
+    }, [itemsLoaderOptions]);
+
     const sidebar = useStore(useSidebar, (x) => x);
     if (!sidebar) return null;
 
@@ -135,6 +150,7 @@ export default function OrderPage() {
                 data={data}
                 itemsLoader={itemsLoader}
                 totalCount={totalCount}
+                filterDefinition={filters}
                 rowDialogContent={(rowData, onClose) => (
                     <OrderDialogContent
                         rowData={rowData}

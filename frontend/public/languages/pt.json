@@ -27,6 +27,7 @@
   "label": {
     "id": "ID",
     "email": "E-mail",
+    "customer_email": "E-mail do cliente",
     "password": "Senha",
     "name": "Nome",
     "first_name": "Primeiro nome",
@@ -49,7 +50,8 @@
     "total_revenue": "Receita total",
     "quantity": "Quantidade",
     "role": "Função",
-    "warehouse_position": "Posição no armazém",
+    "storage_location": "Posição no armazém",
+    "warehouse_location": "Localização do armazém",
     "number_of_sales": "Número de vendas",
     "birthday": "Aniversário",
     "dob": "Data de nascimento"

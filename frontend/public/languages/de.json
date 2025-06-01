@@ -27,6 +27,7 @@
   "label": {
     "id": "ID",
     "email": "E-Mail",
+    "customer_email": "Kunden E-Mail",
     "password": "Passwort",
     "name": "Name",
     "first_name": "Vorname",
@@ -49,7 +50,8 @@
     "total_revenue": "Gesamtumsatz",
     "quantity": "Menge",
     "role": "Rolle",
-    "warehouse_position": "Lagerposition",
+    "storage_location": "Lagerposition",
+    "warehouse_location": "Lagerstandort",
     "number_of_sales": "Anzahl der Verkäufe",
     "birthday": "Geburtstag",
     "dob": "Geburtsdatum"

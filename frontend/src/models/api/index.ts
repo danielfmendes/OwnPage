@@ -8,6 +8,7 @@ export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { Bike } from './models/Bike';
+export type { BikeListResponse } from './models/BikeListResponse';
 export type { BikeModel } from './models/BikeModel';
 export type { BikeSales } from './models/BikeSales';
 export type { BikeWithModelName } from './models/BikeWithModelName';
@@ -36,8 +37,10 @@ export type { Page } from './models/Page';
 export type { PageParam } from './models/PageParam';
 export type { PageSize } from './models/PageSize';
 export type { PartCost } from './models/PartCost';
+export type { PartStorageListResponse } from './models/PartStorageListResponse';
 export type { Project } from './models/Project';
 export type { RoleManagement } from './models/RoleManagement';
+export type { RoleManagementListResponse } from './models/RoleManagementListResponse';
 export type { RoleManagementWithName } from './models/RoleManagementWithName';
 export type { Saddle } from './models/Saddle';
 export type { User } from './models/User';

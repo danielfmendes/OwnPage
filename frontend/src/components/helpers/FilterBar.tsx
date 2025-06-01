@@ -94,7 +94,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({filters, filterManager, onC
     }, [lastChangedKey]);
 
     const loadItemsForKey = async (key: string, loader: () => Promise<FilterItem[]>) => {
-        if (getLoadedItems(context, key)) return;
+        // if (getLoadedItems(context, key)) return;
         setLoadingKeys((prev) => [...prev, key]);
         try {
             const items = await loader();
@@ -177,6 +177,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({filters, filterManager, onC
                             ? [range.from.toISOString(), range.to.toISOString()]
                             : []
                     }));
+                    setLastChangedKey(key);
                 };
                 return (
                     <Popover

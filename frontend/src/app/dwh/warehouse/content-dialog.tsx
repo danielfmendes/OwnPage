@@ -149,7 +149,7 @@ export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) 
                     onChange={(e) => setQuantity(Number(e.target.value))}
                 />
                 <InputField
-                    label={t("label.warehouse_position")}
+                    label={t("label.storage_location")}
                     placeholder={t("placeholder.warehouse_position")}
                     value={warehouseLocation}
                     onChange={(e) => setWarehouseLocation(e.target.value)}

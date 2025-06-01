@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { CountByResult } from '../models/CountByResult';
 import type { Order } from '../models/Order';
 import type { OrderItem } from '../models/OrderItem';
 import type { OrderItemsWithBikeAndDate } from '../models/OrderItemsWithBikeAndDate';
@@ -17,6 +18,7 @@ export class OrdersService {
      * @param page Specifying the page of the result set.
      * @param pageSize Specifying the size of the result set.
      * @param orderBy Specifying the sort order. The sort definition can use the keywords 'asc' for ascending and 'desc' for descending sort order.
+     * @param countBy Returns the count for that column
      * @returns any A list of orders with total count
      * @throws ApiError
      */
@@ -25,7 +27,8 @@ export class OrdersService {
         page?: number,
         pageSize?: number,
         orderBy?: string,
-    ): CancelablePromise<({
+        countBy?: string,
+    ): CancelablePromise<(Array<CountByResult> | {
         totalCount?: number;
         items?: Array<OrderWithCustomer>;
     } | {
@@ -40,6 +43,7 @@ export class OrdersService {
                 'page': page,
                 'pageSize': pageSize,
                 'orderBy': orderBy,
+                'countBy': countBy,
             },
             errors: {
                 401: `Unauthorized – missing or invalid token`,

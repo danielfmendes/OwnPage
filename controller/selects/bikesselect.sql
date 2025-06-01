@@ -5,6 +5,6 @@ SELECT b.id,
        b.quantity,
        b.warehouse_location,
        b.project_id,
-       bm.name
+       bm.name as model_name
 FROM bikes b
          join public.bike_models bm on b.model_id = bm.id

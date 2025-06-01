@@ -10,6 +10,8 @@ import {Dialog} from "@/components/ui/dialog";
 import AddProjektDialogContent from "@/app/dwh/rolemanagement/add-project-dialog";
 import {useTranslation} from "react-i18next";
 import {genericItemsLoader, ItemsLoaderOptions, useRefreshData} from "@/models/datatable/itemsLoader";
+import {FilterDefinition} from "@/components/helpers/FilterBar";
+import {createRoleManagementFilterItemLoader} from "@/models/datatable/filterItemsLoader";
 
 export default function RoleManagementPage() {
     const {t} = useTranslation();
@@ -19,8 +21,10 @@ export default function RoleManagementPage() {
     const [totalCount, setTotalCount] = React.useState<number>(0);
     const [showDialog, setShowDialog] = React.useState(false);
     const [manageId, setManageId] = React.useState<number | null>(null);
+    const [itemsLoaderOptions, setItemsLoaderOptions] = React.useState<ItemsLoaderOptions | null>(null);
 
     async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
+        setItemsLoaderOptions(options);
         return genericItemsLoader<RoleManagementWithName>(
             options,
             RoleManagementsService.getRoleManagements,
@@ -70,6 +74,17 @@ export default function RoleManagementPage() {
             },
         },
     ]
+
+    const filters: FilterDefinition[] = React.useMemo(() => {
+        if (!itemsLoaderOptions) return [];
+        const roleManagementFilterLoader = createRoleManagementFilterItemLoader(itemsLoaderOptions);
+
+        return [
+            roleManagementFilterLoader("project_name", {type: "search"}),
+            roleManagementFilterLoader("role"),
+        ];
+    }, [itemsLoaderOptions]);
+
     return (
         <ContentLayout title={t("menu.role_management")}>
             <DataTable
@@ -78,6 +93,7 @@ export default function RoleManagementPage() {
                 data={data}
                 itemsLoader={itemsLoader}
                 totalCount={totalCount}
+                filterDefinition={filters}
                 addDialogContent={(onClose) => (
                     <AddProjektDialogContent
                         onClose={onClose}

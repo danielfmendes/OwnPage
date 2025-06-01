@@ -31,7 +31,7 @@ func HandleGetWithPagination(
 	scanFunc func(Scanner) (any, error),
 	args ...interface{},
 ) {
-	fetchData(w, r, query, false, true, scanFunc, args...)
+	handleFetchWithOptionalCountBy(w, r, query, false, scanFunc, args...)
 }
 
 func HandleGetWithProjectIDs(
@@ -51,13 +51,23 @@ func HandleGetForDataTable(
 	scanFunc func(Scanner) (any, error),
 	args ...interface{},
 ) {
+	handleFetchWithOptionalCountBy(w, r, query, true, scanFunc, args...)
+}
+
+func handleFetchWithOptionalCountBy(
+	w http.ResponseWriter,
+	r *http.Request,
+	query string,
+	withProjectIDs bool,
+	defaultScan func(Scanner) (any, error),
+	args ...interface{},
+) {
 	countBy := r.URL.Query().Get("countBy")
 	if countBy != "" {
 		scanFuncCount := func(scanner Scanner) (any, error) {
 			var value string
 			var count int
-			err := scanner.Scan(&value, &count)
-			if err != nil {
+			if err := scanner.Scan(&value, &count); err != nil {
 				return nil, err
 			}
 			return map[string]any{
@@ -65,9 +75,9 @@ func HandleGetForDataTable(
 				"count": count,
 			}, nil
 		}
-		fetchData(w, r, query, true, false, scanFuncCount, args...)
+		fetchData(w, r, query, withProjectIDs, false, scanFuncCount, args...)
 	} else {
-		fetchData(w, r, query, true, true, scanFunc, args...)
+		fetchData(w, r, query, withProjectIDs, true, defaultScan, args...)
 	}
 }
 

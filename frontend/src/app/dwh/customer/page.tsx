@@ -33,7 +33,7 @@ export default function CustomerPage() {
     const [itemsLoaderOptions, setItemsLoaderOptions] = React.useState<ItemsLoaderOptions | null>(null);
 
     async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
-        setItemsLoaderOptions(options)
+        setItemsLoaderOptions(options);
         return genericItemsLoader<Customer>(
             options,
             CustomersService.getCustomers,
