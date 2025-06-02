@@ -12,7 +12,7 @@ import {
     RoleManagementWithName,
     UsersService
 } from "@/models/api";
-import {handleLogOut} from "@/utils/helpers";
+import apiUrl, {handleLogOut} from "@/utils/helpers";
 import {usePathname, useRouter} from "next/navigation";
 import Language from "@/utils/language";
 import {useTranslation} from "react-i18next";
@@ -22,6 +22,10 @@ import FilterManager from "@/utils/filtermanager";
 export default function DemoLayout({children}: { children: React.ReactNode }) {
     const pathname = usePathname();
     const hideSidebar = ['/dwh/login', '/dwh/register'].includes(pathname);
+
+    useEffect(() => {
+        OpenAPI.BASE = apiUrl;
+    }, []);
 
     // Early rendering for login/register
     if (hideSidebar) return <>{children}</>;
