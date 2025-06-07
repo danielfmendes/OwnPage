@@ -1,5 +1,6 @@
 .idea
-backend/info.txt
+backend/info.md
 controller/.env.local
 frontend-testing/target
 frontend-testing/screenshots
+ToDo_Current.md
