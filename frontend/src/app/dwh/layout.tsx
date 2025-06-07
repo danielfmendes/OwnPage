@@ -19,16 +19,13 @@ import {useTranslation} from "react-i18next";
 import {OpenAPI} from "@/models/api/core/OpenAPI";
 import FilterManager from "@/utils/filtermanager";
 
-export default function DemoLayout({children}: { children: React.ReactNode }) {
+export default function DWHLayout({children}: { children: React.ReactNode }) {
     const pathname = usePathname();
     const hideSidebar = ['/dwh/login', '/dwh/register'].includes(pathname);
 
     useEffect(() => {
         OpenAPI.BASE = apiUrl;
     }, []);
-
-    // Early rendering for login/register
-    if (hideSidebar) return <>{children}</>;
 
     const {addNotification} = useNotification();
     const token = AuthToken.getAuthToken();
@@ -58,7 +55,9 @@ export default function DemoLayout({children}: { children: React.ReactNode }) {
 
     useEffect(() => {
         if (!token) {
-            handleLogOut(router, addNotification);
+            if(!hideSidebar) {
+                handleLogOut(router, addNotification);
+            }
             return;
         }
 
@@ -102,5 +101,8 @@ export default function DemoLayout({children}: { children: React.ReactNode }) {
         }
     }, [roles, setSelectedRoles]);
 
+    // Early rendering for login/register
+    if (hideSidebar) return <>{children}</>;
+    
     return <AdminPanelLayout>{children}</AdminPanelLayout>;
 }
