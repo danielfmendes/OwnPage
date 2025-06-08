@@ -101,10 +101,9 @@ export function MetricStats({
                             {t("no_data_to_display")}
                         </p>
                     ) : (
-                        <ChartContainer config={chartConfig} className="h-[80px] w-full mt-2">
+                        <ChartContainer config={chartConfig} className="h-[80px] w-full mt-2 mb-5 md:mb-2.5">
                             <LineChart
                                 data={graphData}
-                                margin={{top: 5, right: 10, left: 10, bottom: 0}}
                             >
                                 <Line
                                     type="monotone"

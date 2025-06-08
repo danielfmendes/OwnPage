@@ -123,30 +123,38 @@ export default function DashboardPage() {
 
     return (
         <ContentLayout title={t("menu.dashboard")}>
-            <div className="flex flex-row items-center justify-between gap-4 mb-4">
-                <Breadcrumb>
-                    <BreadcrumbList>
-                        <BreadcrumbItem>
-                            <BreadcrumbLink asChild>
-                                <Link href="/">{t("home")}</Link>
-                            </BreadcrumbLink>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator/>
-                        <BreadcrumbItem>
-                            <BreadcrumbPage>{t("menu.dashboard")}</BreadcrumbPage>
-                        </BreadcrumbItem>
-                    </BreadcrumbList>
-                </Breadcrumb>
-
-                <Tabs value={timeRange} onValueChange={setTimeRange}>
-                    <TabsList className="gap-1">
-                        {["1d", "1w", "1m", "1y", "max"].map((value) => (
-                            <TabsTrigger key={value} value={value}>
-                                {value.toUpperCase()}
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
-                </Tabs>
+            <div className="flex flex-col gap-2 sm:gap-4 mb-4">
+                <div className="flex flex-row items-center justify-between gap-2">
+                    {/* Mobile: show dashboard text; Desktop: hide because it's in breadcrumb */}
+                    <div className="block sm:hidden text-lg font-semibold">
+                        {t("menu.dashboard")}
+                    </div>
+                    {/* Desktop: Full breadcrumb */}
+                    <div className="hidden sm:block">
+                        <Breadcrumb>
+                            <BreadcrumbList>
+                                <BreadcrumbItem>
+                                    <BreadcrumbLink asChild>
+                                        <Link href="/">{t("home")}</Link>
+                                    </BreadcrumbLink>
+                                </BreadcrumbItem>
+                                <BreadcrumbSeparator/>
+                                <BreadcrumbItem>
+                                    <BreadcrumbPage>{t("menu.dashboard")}</BreadcrumbPage>
+                                </BreadcrumbItem>
+                            </BreadcrumbList>
+                        </Breadcrumb>
+                    </div>
+                    <Tabs value={timeRange} onValueChange={setTimeRange}>
+                        <TabsList className="gap-1">
+                            {["1d", "1w", "1m", "1y", "max"].map((value) => (
+                                <TabsTrigger key={value} value={value}>
+                                    {value.toUpperCase()}
+                                </TabsTrigger>
+                            ))}
+                        </TabsList>
+                    </Tabs>
+                </div>
             </div>
             <div className="grid gap-4">
                 <MetricStats
@@ -162,11 +170,11 @@ export default function DashboardPage() {
                     isLoadingGraphDataData={isLoadingGraphDataData}
                 />
 
-                <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-10">
-                    <div className="sm:col-span-1 md:col-span-5 lg:col-span-6 xl:col-span-7">
+                <div className="grid gap-4 grid-cols-1 md:grid-cols-10">
+                    <div className="col-span-1 md:col-span-6 lg:col-span-6 xl:col-span-7">
                         <BikeModels bikeData={bikeData} isLoading={isLoadingBikeData}/>
                     </div>
-                    <div className="sm:col-span-1 md:col-span-5 lg:col-span-4 xl:col-span-3">
+                    <div className="col-span-1 md:col-span-4 lg:col-span-4 xl:col-span-3">
                         <CitiesList citiesData={citiesData} isLoading={isLoadingCitiesData}/>
                     </div>
                 </div>

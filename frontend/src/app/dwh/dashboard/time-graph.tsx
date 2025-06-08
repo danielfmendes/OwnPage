@@ -100,8 +100,8 @@ export function BikeModels({bikeData, isLoading}: Props) {
     );
 
     return (
-        <Card className="h-[440px] flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <Card className="h-[500px] md:h-[440px] flex flex-col">
+            <CardHeader className="space-y-4">
                 <div>
                     <CardTitle>
                         {metric === "revenue"
@@ -115,7 +115,8 @@ export function BikeModels({bikeData, isLoading}: Props) {
                     </CardDescription>
                 </div>
 
-                <div className="flex items-center space-x-4">
+                {/* Controls: switch + filter (in a single row, below title) */}
+                <div className="flex flex-wrap items-center justify-between gap-2">
                     {!isLoading && (
                         <div className="flex items-center space-x-1">
                             <span
@@ -178,6 +179,7 @@ export function BikeModels({bikeData, isLoading}: Props) {
                     )}
                 </div>
             </CardHeader>
+
             <CardContent className="pb-4 flex-grow">
                 {isLoading ? (
                     <Skeleton className="w-full h-[300px]"/>
