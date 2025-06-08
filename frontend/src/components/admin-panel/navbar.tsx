@@ -7,6 +7,7 @@ import {useRoleStore} from "@/utils/rolemananagemetstate";
 import {RoleManagementWithName} from "@/models/api";
 import {SheetMenu} from "@/components/admin-panel/sheet-menu";
 import {useTranslation} from "react-i18next";
+import {Folder} from "lucide-react";
 
 interface NavbarProps {
     title: string;
@@ -32,8 +33,15 @@ export function Navbar({title}: NavbarProps) {
                     <SheetMenu/>
                     <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
-                            <Button variant="outline" className="mr-2" onClick={() => setOpen(true)}>
-                                {dynamicTitle}
+                            <Button
+                                variant="outline"
+                                className="mr-2 flex items-center gap-2"
+                                onClick={() => setOpen(true)}
+                                aria-label={dynamicTitle}
+                            >
+                                <Folder className="w-5 h-5" aria-hidden="true"/>
+                                <span className="block md:hidden text-sm font-medium">{roles.length}</span>
+                                <span className="hidden md:block">{dynamicTitle}</span>
                             </Button>
                         </DialogTrigger>
                         <DialogContent>
