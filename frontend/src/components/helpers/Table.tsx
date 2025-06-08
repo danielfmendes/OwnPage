@@ -234,30 +234,28 @@ export default function DataTable<TData>({
                 />
             </div>
 
-            <div className="flex justify-end items-center gap-4 py-4">
-                <span className="text-sm text-muted-foreground">{t("pagination.page")}:</span>
-                <Select value={String(pagination.itemsPerPage)} onValueChange={(v) => updateItemsPerPage(parseInt(v))}>
-                    <SelectTrigger className="w-[80px] border-zinc-900 dark:border-zinc-50">
-                        <SelectValue placeholder={pagination.itemsPerPage.toString()}/>
-                    </SelectTrigger>
-                    <SelectContent>
-                        {paginationOptions.map((option) => (
-                            <SelectItem key={option} value={String(option)}>
-                                {option}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-4 md:gap-0 py-4 w-full">
 
-                <span className="text-sm text-muted-foreground">
-                  {t("pagination.info", {
-                      from: totalCount === 0 ? 0 : (pagination.page - 1) * pagination.itemsPerPage + 1,
-                      to: Math.min(totalCount, pagination.page * pagination.itemsPerPage),
-                      total: totalCount,
-                  })}
-                </span>
+                {/* Pagination page label + select */}
+                <div className="flex justify-center md:justify-start items-center gap-4 w-full md:w-auto">
+                    <span className="text-sm text-muted-foreground">{t("pagination.page")}:</span>
+                    <Select value={String(pagination.itemsPerPage)} onValueChange={(v) => updateItemsPerPage(parseInt(v))}>
+                        <SelectTrigger className="w-[80px] border-zinc-900 dark:border-zinc-50">
+                            <SelectValue placeholder={pagination.itemsPerPage.toString()}/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {paginationOptions.map((option) => (
+                                <SelectItem key={option} value={String(option)}>
+                                    {option}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
 
-                <div className="space-x-2">
+                {/* Buttons and pagination info container */}
+                <div className="flex items-center w-full md:w-auto justify-center md:justify-end gap-2 px-2">
+
                     <Button variant="outline" size="sm" onClick={() => updatePage(1)} disabled={pagination.page === 1}>
                         <ChevronsLeft className="w-4 h-4"/>
                     </Button>
@@ -265,6 +263,15 @@ export default function DataTable<TData>({
                             disabled={pagination.page === 1}>
                         <ChevronLeft className="w-4 h-4"/>
                     </Button>
+
+                    <span className="text-sm text-muted-foreground whitespace-nowrap text-center">
+                      {t("pagination.info", {
+                          from: totalCount === 0 ? 0 : (pagination.page - 1) * pagination.itemsPerPage + 1,
+                          to: Math.min(totalCount, pagination.page * pagination.itemsPerPage),
+                          total: totalCount,
+                      })}
+                    </span>
+
                     <Button variant="outline" size="sm" onClick={() => updatePage(pagination.page + 1)}
                             disabled={pagination.page >= maxPage}>
                         <ChevronRight className="w-4 h-4"/>

@@ -156,7 +156,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({filters, filterManager, onC
     };
 
     return (
-        <div className="flex flex-wrap gap-3">
+        <div
+            className="flex gap-3 whitespace-nowrap mr-2
+             overflow-x-auto scrollbar-thin scrollbar-thumb-muted-foreground
+             md:flex-wrap md:overflow-visible md:scrollbar-none md:whitespace-normal"
+        >
             {pinnedFilters.map(({title, key, itemsLoader, type = "default"}) => {
                 const items = getLoadedItems(context, key);
                 const search = searchTexts[key] ?? "";
