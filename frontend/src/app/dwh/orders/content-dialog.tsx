@@ -37,9 +37,9 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
     const isEditMode = !!rowData;
     const isDisabled = isRoleUserForProject(rowData?.project_id!)
 
-    const [projectId, setProjectId] = React.useState<string>(rowData?.project_id?.toString() || "");
-    const [orderDate, setOrderDate] = React.useState<Date | undefined>(rowData?.order_date ? new Date(rowData.order_date) : undefined);
-    const [customerId, setCustomerId] = React.useState<number>(rowData?.customer_id ?? 0);
+    const [projectId, setProjectId] = React.useState<string>("");
+    const [orderDate, setOrderDate] = React.useState<Date | undefined>(undefined);
+    const [customerId, setCustomerId] = React.useState<number>(0);
 
     const [data, setData] = React.useState<OrderItemsWithBikeName[]>([]);
     const [modelId, setModelId] = React.useState<number | null>(null);
@@ -53,6 +53,12 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
     const [isLoadingOrderItems, setIsLoadingOrderItems] = React.useState(false);
     const [loadingEditID, setLoadingEditID] = React.useState<number | null>(null);
     const [loadingDeleteID, setLoadingDeleteID] = React.useState<number | null>(null);
+
+    const loadRowData = () => {
+        setProjectId(rowData?.project_id?.toString() ?? "");
+        setOrderDate(rowData?.order_date ? new Date(rowData.order_date) : undefined);
+        setCustomerId(rowData?.customer_id ?? 0);
+    };
 
     const handleEdit = (orderItem: OrderItemsWithBikeName | null) => {
         setEditItem(orderItem);
@@ -72,6 +78,7 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
     };
 
     React.useEffect(() => {
+        loadRowData();
         (async () => {
             if (rowData) {
                 await fetchOrderItems();
