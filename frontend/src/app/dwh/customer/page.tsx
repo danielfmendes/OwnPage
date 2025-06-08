@@ -102,6 +102,7 @@ export default function CustomerPage() {
             accessorKey: "email",
             header: t("label.email"),
             widthPercent: 30,
+            mobileTitle: true,
         },
         {
             accessorKey: "dob",

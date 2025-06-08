@@ -96,6 +96,7 @@ export default function OrderPage() {
             accessorKey: "customer_email",
             header: t("label.customer_email"),
             widthPercent: 40,
+            mobileTitle: true,
         },
         {
             accessorKey: "order_date",

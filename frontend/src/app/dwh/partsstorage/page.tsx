@@ -57,6 +57,7 @@ export default function PartsStoragePage() {
             accessorKey: "part_type",
             header: t("label.part_type"),
             widthPercent: 18,
+            mobileTitle: true,
         },
         {
             accessorKey: "part_name",

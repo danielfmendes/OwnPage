@@ -39,6 +39,7 @@ export default function RoleManagementPage() {
             header: t("label.project_name"),
             enableSorting: false,
             widthPercent: 40,
+            mobileTitle: true,
         },
         {
             accessorKey: "role",

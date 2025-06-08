@@ -101,6 +101,7 @@ export default function WareHousePage() {
             accessorKey: "serial_number",
             header: t("label.serial_number"),
             widthPercent: 15,
+            mobileTitle: true,
         },
         {
             accessorKey: "production_date",
