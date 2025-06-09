@@ -1,0 +1,183 @@
+{
+  "button": {
+    "send": "Enviar",
+    "save": "Salvar",
+    "apply": "Aplicar",
+    "sign_out": "Sair",
+    "update": "Atualizar",
+    "cancel": "Cancelar",
+    "back": "Voltar",
+    "delete_ref": "Excluir referências",
+    "register": "Registrar",
+    "manage": "Gerenciar",
+    "add": "Adicionar",
+    "add_item": "Adicionar item",
+    "previous": "Anterior",
+    "next": "Próximo",
+    "select_all": "Selecionar tudo",
+    "deselect_all": "Desmarcar tudo",
+    "clear_selection": "Limpar seleção"
+  },
+  "switch_theme": "Trocar tema",
+  "error": {
+    "email": "Por favor, insira um endereço de e-mail.",
+    "password": "Por favor, insira uma senha.",
+    "login": "Senha ou e-mail incorretos."
+  },
+  "label": {
+    "id": "ID",
+    "email": "E-mail",
+    "customer_email": "E-mail do cliente",
+    "password": "Senha",
+    "name": "Nome",
+    "first_name": "Primeiro nome",
+    "last_name": "Sobrenome",
+    "bike_name": "Nome da bicicleta",
+    "customer_name": "Nome do cliente",
+    "number": "Número",
+    "price": "Preço",
+    "order_date": "Data do pedido",
+    "production_date": "Data de produção",
+    "city": "Cidade",
+    "sales": "Vendas",
+    "revenue": "Receita",
+    "project": "Projeto",
+    "project_name": "Nome do projeto",
+    "model_name": "Nome do modelo",
+    "part_type": "Tipo de peça",
+    "part_name": "Nome da peça",
+    "serial_number": "Número de série",
+    "total_revenue": "Receita total",
+    "quantity": "Quantidade",
+    "role": "Função",
+    "storage_location": "Posição no armazém",
+    "warehouse_location": "Localização do armazém",
+    "number_of_sales": "Número de vendas",
+    "birthday": "Aniversário",
+    "dob": "Data de nascimento"
+  },
+  "placeholder": {
+    "email": "ex.: teste@exemplo.com",
+    "name": "ex.: Griffin",
+    "first_name": "ex.: Peter",
+    "city": "ex.: Hamburgo",
+    "pick_date": "Escolha uma data",
+    "part_type": "Selecione o tipo de peça",
+    "part_name": "Selecione primeiro um tipo de peça",
+    "role": "Selecione a função",
+    "part": "Selecione uma peça",
+    "customer": "Selecione o cliente",
+    "model_name": "Selecione o nome do modelo",
+    "language": "Selecione o idioma",
+    "project": "Selecione um projeto",
+    "no_project": "Nenhum projeto disponível",
+    "project_name": "ex.: projeto padrão",
+    "serial_number": "ex.: SN1001",
+    "filter": "Filtrar",
+    "no_results": "Nenhum resultado encontrado.",
+    "loading": "Carregando...",
+    "search": "Pesquisar",
+    "selected": "selecionados",
+    "more": "Mais",
+    "please_wait": "Por favor, aguarde...",
+    "warehouse_position": "ex.: WH-A1",
+    "enter": {
+      "email": "Adicionar e-mail do usuário",
+      "number": "Inserir número",
+      "number_short": "Inserir Qtd",
+      "price": "Inserir preço"
+    }
+  },
+  "go_to_register": "Ainda não tem uma conta? Registre-se",
+  "demo": "Demonstração",
+  "customer": {
+    "add": "Adicionar cliente",
+    "details": "Detalhes do cliente",
+    "info": "Informações do cliente",
+    "data": "Dados do cliente"
+  },
+  "cities_list_title": "Top 5 cidades por receita",
+  "project_title": "Adicionar projeto",
+  "loading_cities": "Carregando cidades...",
+  "sales_to_cities": "Você fez vendas para {{count}} cidades diferentes",
+  "no_sales_data": "Nenhum dado de vendas disponível para cidades.",
+  "no_data_to_display": "Nenhum dado para exibir.",
+  "up_percentage": "Aumento de {{value}}%",
+  "down_percentage": "Redução de {{value}}%",
+  "table_selection": "{{selected}} de {{total}} linha(s) selecionadas.",
+  "menu": {
+    "dashboard": "Painel",
+    "orders": "Pedidos",
+    "customer": "Cliente",
+    "warehouse": "Armazém",
+    "parts_storage": "Estoque de peças",
+    "role_management": "Gestão de funções",
+    "profile": "Perfil"
+  },
+  "home": "Início",
+  "from_time_period": "{{change}} desde {{time}}",
+  "time": {
+    "yesterday": "ontem",
+    "last_week": "semana passada",
+    "last_month": "mês passado",
+    "last_year": "ano passado"
+  },
+  "bike_models": {
+    "title": {
+      "sales": "Vendas por modelo de bicicleta",
+      "revenue": "Receita por modelo de bicicleta"
+    },
+    "description": {
+      "sales": "Vendas por modelo ao longo do tempo. Selecione modelos para visualizar.",
+      "revenue": "Receita por modelo ao longo do tempo. Selecione modelos para visualizar."
+    },
+    "filter_models": "Filtrar modelos"
+  },
+  "orders": {
+    "edit": "Editar pedido",
+    "add": "Adicionar novo pedido",
+    "edit_item": "Editar item do pedido",
+    "info": "Informações do pedido",
+    "items": "Itens do pedido",
+    "history": "Histórico do pedido"
+  },
+  "partsstorage": {
+    "edit": "Editar estoque de peças",
+    "add": "Adicionar novas peças"
+  },
+  "bike_parts": {
+    "saddle": "Selim",
+    "frame": "Quadro",
+    "fork": "Garfo"
+  },
+  "rolemanagement": {
+    "edit": "Editar permissões",
+    "add": "Adicionar usuário",
+    "role": {
+      "creator": "Criador",
+      "admin": "Administrador",
+      "user": "Usuário"
+    }
+  },
+  "warehouse": {
+    "add": "Adicionar novo item",
+    "edit": "Editar inventário"
+  },
+  "delete_references": {
+    "info": "Deseja também excluir os valores referenciados?",
+    "button": "Excluir referências"
+  },
+  "ancestorDialog": {
+    "title": "Escopo do ancestral",
+    "description": "A plataforma exibirá exclusivamente informações relevantes aos projetos que você selecionar.",
+    "refine": "Refinar ancestrais",
+    "open": "Abrir diálogo de ancestrais",
+    "single": "1 ancestral",
+    "multiple": "{{count}} ancestrais",
+    "chosen": "Escolhido"
+  },
+  "pagination": {
+    "info": "{{from}}-{{to}} de {{total}}",
+    "page": "Itens por página"
+  }
+}

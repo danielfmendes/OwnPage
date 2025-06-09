@@ -1,0 +1,1361 @@
+openapi: 3.0.3
+info:
+  title: Nebula DW API
+  version: 1.0.0
+  description: API for managing nebula data warehouse operations, including bikes, customers, projects, and role management.
+servers:
+  - url: https://api.example.com
+
+paths:
+  /auth/login:
+    post:
+      summary: User login
+      operationId: userLogin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successful login with token returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – invalid credentials
+        '500':
+          description: Internal server error
+      tags:
+        - Auths
+  /auth/register:
+    post:
+      summary: User registration
+      operationId: userRegister
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '400':
+          description: Bad request – missing or invalid fields
+        '409':
+          description: Conflict – user already exists
+        '500':
+          description: Internal server error
+      tags:
+        - Auths
+
+  /bikes:
+    get:
+      summary: Retrieve a list of bikes
+      operationId: getBikes
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/OrderBy"
+        - $ref: "#/components/parameters/CountBy"
+      responses:
+        '200':
+          description: A list of bikes with total count
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/BikeListResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/CountByResult'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Bikes
+    delete:
+      summary: Delete a bike by ID
+      operationId: deleteBike
+      parameters:
+        - $ref: "#/components/parameters/DeleteIdParam"
+        - $ref: "#/components/parameters/DeleteCascadeParam"
+      responses:
+        '204':
+          description: Bike deleted successfully
+        '409':
+          description: Conflict – related data exists; use cascade=true to force delete
+        '400':
+          description: Bad request – missing or invalid ID
+        '401':
+          description: Unauthorized – missing or invalid token
+        '500':
+          description: Internal server error
+      tags:
+        - Bikes
+    put:
+      summary: Update a bike
+      operationId: updateBike
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Bike'
+      responses:
+        '200':
+          description: Bike updated successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '404':
+          description: Bike not found
+        '500':
+          description: Internal server error
+      tags:
+        - Bikes
+    post:
+      summary: Create a new bike
+      operationId: createBike
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Bike'
+      responses:
+        '201':
+          description: Bike created successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '409':
+          description: Conflict – duplicate or invalid data
+        '500':
+          description: Internal server error
+      tags:
+        - Bikes
+
+  /bikemodels:
+    get:
+      summary: Retrieve a list of bike models
+      operationId: getBikeModels
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of bike models
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BikeModel'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Bikes
+
+  /components:
+    get:
+      summary: Retrieve a list of bike components (saddles, frames, forks)
+      operationId: getBikeComponents
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of bike components (saddles, frames, forks)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Frame'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Fork'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Saddle'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Bikes
+
+  /customers:
+    get:
+      summary: Retrieve a list of customers
+      operationId: getCustomers
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/OrderBy"
+        - $ref: "#/components/parameters/CountBy"
+      responses:
+        '200':
+          description: Returns either a paginated list of customers or grouped counts by field
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/CustomerListResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/CountByResult'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Customers
+    delete:
+      summary: Delete a customer by ID
+      operationId: deleteCustomer
+      parameters:
+        - $ref: "#/components/parameters/DeleteIdParam"
+        - $ref: "#/components/parameters/DeleteCascadeParam"
+      responses:
+        '204':
+          description: Customer deleted successfully
+        '409':
+          description: Conflict – related data exists; use cascade=true to force delete
+        '400':
+          description: Bad request – missing or invalid ID
+        '401':
+          description: Unauthorized – missing or invalid token
+        '500':
+          description: Internal server error
+      tags:
+        - Customers
+    put:
+      summary: Update a customer
+      operationId: updateCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+      responses:
+        '200':
+          description: Customer updated successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '404':
+          description: Customer not found
+        '500':
+          description: Internal server error
+      tags:
+        - Customers
+    post:
+      summary: Create a new customer
+      operationId: createCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+      responses:
+        '201':
+          description: Customer created successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '409':
+          description: Conflict – duplicate or invalid data
+        '500':
+          description: Internal server error
+      tags:
+        - Customers
+
+  /dashboard/bikemodels:
+    get:
+      summary: Retrieve a list of bike sales by model
+      operationId: getBikeSales
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of bike sales by model and date
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BikeSales'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Dashboards
+  /dashboard/citydata:
+    get:
+      summary: Retrieve a list of city data
+      operationId: getCityData
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of city data (current and previous revenue from top 5 cities)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CityData'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Dashboards
+  /dashboard/graphdata:
+    get:
+      summary: Retrieve a list of graph data
+      operationId: getGraphData
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of graph data (time buckets with revenue and sales)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GraphData'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Dashboards
+  /dashboard/graphmeta:
+    get:
+      summary: Retrieve a list of graph meta
+      operationId: getGraphMeta
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of graph meta (current and previous revenue/sales)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GraphMeta'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Dashboards
+
+  /orders:
+    get:
+      summary: Retrieve a list of orders (various response types possible)
+      operationId: getOrders
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/OrderBy"
+        - $ref: "#/components/parameters/CountBy"
+      responses:
+        '200':
+          description: A list of orders with total count
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/CountByResult'
+                  - type: object
+                    properties:
+                      totalCount:
+                        type: integer
+                        example: 42
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/OrderWithCustomer'
+                  - type: object
+                    properties:
+                      totalCount:
+                        type: integer
+                        example: 42
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/OrderItemsWithBikeAndDate'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Orders
+    delete:
+      summary: Delete a order by ID
+      operationId: deleteOrder
+      parameters:
+        - $ref: "#/components/parameters/DeleteIdParam"
+        - $ref: "#/components/parameters/DeleteCascadeParam"
+      responses:
+        '204':
+          description: Order deleted successfully
+        '409':
+          description: Conflict – related data exists; use cascade=true to force delete
+        '400':
+          description: Bad request – missing or invalid ID
+        '401':
+          description: Unauthorized – missing or invalid token
+        '500':
+          description: Internal server error
+      tags:
+        - Orders
+    put:
+      summary: Update a order
+      operationId: updateOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses:
+        '200':
+          description: Order updated successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '404':
+          description: Order not found
+        '500':
+          description: Internal server error
+      tags:
+        - Orders
+    post:
+      summary: Create a new order
+      operationId: createOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses:
+        '201':
+          description: Order created successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '409':
+          description: Conflict – duplicate or invalid data
+        '500':
+          description: Internal server error
+      tags:
+        - Orders
+
+  /orderitems:
+    get:
+      summary: Retrieve a list of order items
+      operationId: getOrderItems
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: A list of order items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderItemsWithBikeName'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - Orders
+    put:
+      summary: Update a order item
+      operationId: updateOrderItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderItem'
+      responses:
+        '200':
+          description: Order item updated successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '404':
+          description: Order not found
+        '500':
+          description: Internal server error
+      tags:
+        - Orders
+    post:
+      summary: Create a new order item
+      operationId: createOrderItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderItem'
+      responses:
+        '201':
+          description: Order item created successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '409':
+          description: Conflict – duplicate or invalid data
+        '500':
+          description: Internal server error
+      tags:
+        - Orders
+    delete:
+      summary: Delete a order item by ID
+      operationId: deleteOrderItem
+      parameters:
+        - $ref: "#/components/parameters/DeleteIdParam"
+      responses:
+        '204':
+          description: Order item deleted successfully
+        '400':
+          description: Bad request – missing or invalid ID
+        '401':
+          description: Unauthorized – missing or invalid token
+        '500':
+          description: Internal server error
+      tags:
+        - Orders
+
+  /projects:
+    post:
+      summary: Create a new project
+      operationId: createProject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Project'
+      responses:
+        '201':
+          description: Project created successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '409':
+          description: Conflict – duplicate or invalid data
+        '500':
+          description: Internal server error
+      tags:
+        - Projects
+
+  /rolemanagements:
+    get:
+      summary: Retrieve a list of role managements with project names
+      operationId: getRoleManagements
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/OrderBy"
+        - $ref: "#/components/parameters/CountBy"
+      responses:
+        '200':
+          description: A list of role managements with project names with total count
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/RoleManagementListResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/CountByResult'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - RoleManagements
+    delete:
+      summary: Delete a role management by email and project ID
+      operationId: deleteRoleManagementByEmailAndProjectId
+      parameters:
+        - $ref: "#/components/parameters/DeleteEmailParam"
+        - $ref: "#/components/parameters/DeleteProjectIdParam"
+      responses:
+        '204':
+          description: Role management deleted successfully
+        '400':
+          description: Bad request – missing or invalid ID
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – with current permissions not allowed to delete
+        '500':
+          description: Internal server error
+      tags:
+        - RoleManagements
+    put:
+      summary: Update a role management
+      operationId: updateRoleManagement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleManagement'
+      responses:
+        '200':
+          description: Role management updated successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '404':
+          description: Role management not found
+        '500':
+          description: Internal server error
+      tags:
+        - RoleManagements
+    post:
+      summary: Create a new role management
+      operationId: createRoleManagement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleManagement'
+      responses:
+        '201':
+          description: Role management created successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '409':
+          description: Conflict – duplicate or invalid data
+        '500':
+          description: Internal server error
+      tags:
+        - RoleManagements
+
+  /rolemanagements/{id}:
+    get:
+      summary: Retrieve a list of role managements for a given ID
+      operationId: getRoleManagementsById
+      parameters:
+        - $ref: "#/components/parameters/GetIdParam"
+      responses:
+        '200':
+          description: A list of role management entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoleManagement'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions
+        '404':
+          description: Not Found – no role managements for the given ID
+        '500':
+          description: Internal server error
+      tags:
+        - RoleManagements
+
+  /user:
+    get:
+      summary: Retrieve a user's information by email
+      operationId: getUserInfo
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+      responses:
+        '200':
+          description: User information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request – missing or invalid email
+        '500':
+          description: Internal server error
+      tags:
+        - Users
+
+  /warehouseparts:
+    get:
+      summary: Retrieve a list of warehouse parts
+      operationId: getWareHouseParts
+      parameters:
+        - $ref: "#/components/parameters/FilterParam"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/OrderBy"
+        - $ref: "#/components/parameters/CountBy"
+      responses:
+        '200':
+          description: A list of warehouse parts with total count
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PartStorageListResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/CountByResult'
+        '401':
+          description: Unauthorized – missing or invalid token
+        '403':
+          description: Forbidden – insufficient permissions for projects
+        '500':
+          description: Internal server error
+      tags:
+        - WareHouseParts
+    delete:
+      summary: Delete a warehouse part by ID
+      operationId: deleteWareHousePart
+      parameters:
+        - $ref: "#/components/parameters/DeleteIdParam"
+      responses:
+        '204':
+          description: Warehouse part deleted successfully
+        '400':
+          description: Bad request – missing or invalid ID
+        '401':
+          description: Unauthorized – missing or invalid token
+        '500':
+          description: Internal server error
+      tags:
+        - WareHouseParts
+    put:
+      summary: Update a warehouse part
+      operationId: updateWareHousePart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WarehousePart'
+      responses:
+        '200':
+          description: WareHousePart updated successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '404':
+          description: WareHousePart not found
+        '500':
+          description: Internal server error
+      tags:
+        - WareHouseParts
+    post:
+      summary: Create a new warehouse part
+      operationId: createWareHousePart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WarehousePart'
+      responses:
+        '201':
+          description: WareHousePart created successfully
+        '400':
+          description: Bad request – missing or invalid fields
+        '401':
+          description: Unauthorized – missing or invalid token
+        '409':
+          description: Conflict – duplicate or invalid data
+        '500':
+          description: Internal server error
+      tags:
+        - WareHouseParts
+
+components:
+  parameters:
+    PageSize:
+      name: pageSize
+      in: query
+      description: Specifying the size of the result set.
+      required: false
+      allowEmptyValue: false
+      example: 100
+      schema:
+        type: integer
+        format: integer
+        minimum: 1
+        maximum: 500
+    PageParam:
+      name: page
+      in: query
+      description: Specifying the page of the result set.
+      required: false
+      allowEmptyValue: false
+      example: 0 or 1
+      schema:
+        type: integer
+        format: integer
+        minimum: 0
+    FilterParam:
+      name: filter
+      in: query
+      description: Query filter string, e.g. project_id:$eq.1|2|3
+      required: false
+      schema:
+        type: string
+    OrderBy:
+      name: orderBy
+      in: query
+      description: Specifying the sort order. The sort definition can use the keywords 'asc' for ascending and 'desc' for descending sort order.
+      required: false
+      allowEmptyValue: false
+      example: id desc
+      schema:
+        type: string
+        description: Comma seperated list of sort definitions
+    CountBy:
+      name: countBy
+      in: query
+      description: Returns the count for that column
+      required: false
+      allowEmptyValue: false
+      example: first_name
+      schema:
+        type: string
+    GetIdParam:
+      name: id
+      in: path
+      required: true
+      description: ID of the primary key to retrieve
+      schema:
+        type: integer
+        example: 123
+    DeleteIdParam:
+      name: id
+      in: query
+      description: ID of the primary key to delete
+      required: true
+      schema:
+        type: integer
+        example: 123
+    DeleteProjectIdParam:
+      name: project_id
+      in: query
+      description: Project ID of the primary key to delete
+      required: true
+      schema:
+        type: integer
+        example: 123
+    DeleteEmailParam:
+      name: email
+      in: query
+      description: Email address of the user to retrieve or modify
+      required: true
+      schema:
+        type: string
+        format: email
+        example: user@example.com
+    DeleteCascadeParam:
+      name: cascade
+      in: query
+      description: Whether to delete related data as well
+      required: false
+      schema:
+        type: boolean
+        example: true
+
+  schemas:
+    Page:
+      properties:
+        page:
+          description: Number is the current page of the server response
+          type: integer
+        pageSize:
+          description: Size is the size of the current page of the server response
+          type: integer
+      type: object
+    CountByResult:
+      type: object
+      properties:
+        value:
+          type: string
+          example: Anna
+        count:
+          type: integer
+          example: 1
+    # Data Tables
+    CustomerListResponse:
+      type: object
+      properties:
+        totalCount:
+          type: integer
+          example: 7
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Customer'
+    BikeListResponse:
+      type: object
+      properties:
+        totalCount:
+          type: integer
+          example: 7
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BikeWithModelName'
+    PartStorageListResponse:
+      type: object
+      properties:
+        totalCount:
+          type: integer
+          example: 42
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/WarehousePartWithName'
+    RoleManagementListResponse:
+      type: object
+      properties:
+        totalCount:
+          type: integer
+          example: 42
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleManagementWithName'
+    #  Basic Types
+    Project:
+      type: object
+      required: [ name ]
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the project
+        name:
+          type: string
+          description: Name of the project
+    User:
+      type: object
+      required: [ email, password, username, dob ]
+      properties:
+        email:
+          type: string
+          description: User's email address
+        password:
+          type: string
+          description: Hashed user password
+        username:
+          type: string
+          description: Username chosen by the user
+        dob:
+          type: string
+          format: date
+          description: Date of birth in YYYY-MM-DD format
+        is_verified:
+          type: boolean
+          description: Indicates whether the user has been verified
+        verification_expires:
+          type: string
+          format: date-time
+          description: Expiration timestamp of the verification token
+        verification_token:
+          type: string
+          description: Token used for email verification
+    RoleManagement:
+      required: [ user_email, project_id, role ]
+      type: object
+      properties:
+        user_email:
+          type: string
+          description: Email of the user
+        project_id:
+          type: integer
+          description: Associated project ID
+        role:
+          type: string
+          description: Role assigned to the user in the project
+    Customer:
+      type: object
+      required: [ email, password, first_name, name, dob, city, project_id ]
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the customer
+        email:
+          type: string
+          description: Customer's email address
+        password:
+          type: string
+          description: Hashed password for authentication
+        first_name:
+          type: string
+          description: Customer's given name
+        name:
+          type: string
+          description: Customer's family name
+        dob:
+          type: string
+          format: date
+          description: Date of birth (YYYY-MM-DD)
+        city:
+          type: string
+          description: City of residence
+        project_id:
+          type: integer
+          description: Project ID associated with the customer
+    Saddle:
+      type: object
+      required: [ id, name ]
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the saddle
+        name:
+          type: string
+          description: Name of the saddle
+    Frame:
+      type: object
+      required: [ id, name ]
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the frame
+        name:
+          type: string
+          description: Name of the frame
+    Fork:
+      type: object
+      required: [ id, name ]
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the fork
+        name:
+          type: string
+          description: Name of the fork
+    BikeModel:
+      type: object
+      required: [ id, name, saddle_id, frame_id, fork_id ]
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the bike model
+        name:
+          type: string
+          description: Name of the bike model
+        saddle_id:
+          type: integer
+          description: ID of the associated saddle
+        frame_id:
+          type: integer
+          description: ID of the associated frame
+        fork_id:
+          type: integer
+          description: ID of the associated fork
+    Bike:
+      type: object
+      required: [ model_id, serial_number, production_date, quantity, warehouse_location, project_id ]
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the bike
+        model_id:
+          type: integer
+          description: ID of the bike model
+        serial_number:
+          type: string
+          description: Serial number of the bike
+        production_date:
+          type: string
+          format: date
+          description: Date when the bike was produced
+        quantity:
+          type: integer
+          description: Quantity produced or available
+        warehouse_location:
+          type: string
+          description: Location in the warehouse
+        project_id:
+          type: integer
+          description: ID of the associated project
+    WarehousePart:
+      type: object
+      required: [ part_type, part_id, quantity, storage_location, project_id ]
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the part in the warehouse
+        part_type:
+          type: string
+          description: Type/category of the part
+        part_id:
+          type: integer
+          description: ID of the specific part
+        quantity:
+          type: integer
+          description: Quantity available in stock
+        storage_location:
+          type: string
+          description: Location of the part in the warehouse
+        project_id:
+          type: integer
+          description: Associated project ID
+    Order:
+      type: object
+      required: [ customer_id, order_date, project_id ]
+      properties:
+        id:
+          type: integer
+          description: Unique order ID
+        customer_id:
+          type: integer
+          description: ID of the customer who placed the order
+        order_date:
+          type: string
+          format: date
+          description: Date when the order was placed
+        project_id:
+          type: integer
+          description: Associated project ID
+    OrderItem:
+      type: object
+      required: [ order_id, bike_id, number, price ]
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the order item
+        order_id:
+          type: integer
+          description: ID of the related order
+        bike_id:
+          type: integer
+          description: ID of the ordered bike
+        number:
+          type: integer
+          description: Quantity of bikes in this item
+        price:
+          type: number
+          format: float
+          description: Price per unit of the bike
+    PartCost:
+      type: object
+      required: [ part_type, part_id, cost, project_id ]
+      properties:
+        part_type:
+          type: string
+          description: Type/category of the part
+        part_id:
+          type: integer
+          description: ID of the part
+        cost:
+          type: number
+          format: float
+          description: Cost of the part
+        project_id:
+          type: integer
+          description: ID of the project the part cost belongs to
+
+    # Extended Types
+    WarehousePartWithName:
+      allOf:
+        - $ref: '#/components/schemas/WarehousePart'
+        - type: object
+          required: [ part_name ]
+          properties:
+            part_name:
+              type: string
+              description: Human-readable name of the warehouse part
+    BikeWithModelName:
+      allOf:
+        - $ref: '#/components/schemas/Bike'
+        - type: object
+          required: [ model_name ]
+          properties:
+            model_name:
+              type: string
+              description: Name of the bike model
+    RoleManagementWithName:
+      allOf:
+        - $ref: '#/components/schemas/RoleManagement'
+        - type: object
+          required: [ project_name ]
+          properties:
+            project_name:
+              type: string
+              description: Name of the associated project
+    OrderWithCustomer:
+      allOf:
+        - $ref: '#/components/schemas/Order'
+        - type: object
+          required: [ customer_name, customer_email ]
+          properties:
+            customer_name:
+              type: string
+              description: Full name of the customer
+            customer_email:
+              type: string
+              description: Email address of the customer
+    OrderItemsWithBikeName:
+      allOf:
+        - $ref: '#/components/schemas/OrderItem'
+        - type: object
+          required: [ model_name ]
+          properties:
+            model_name:
+              type: string
+              description: Name of the bike model in the order item
+    OrderItemsWithBikeAndDate:
+      allOf:
+        - $ref: '#/components/schemas/OrderItem'
+        - type: object
+          required: [ model_name, order_date ]
+          properties:
+            model_name:
+              type: string
+              description: Bike model name
+            order_date:
+              type: string
+              format: date
+              description: Date when the order was placed
+    GraphMeta:
+      type: object
+      required: [ current_revenue, previous_revenue, current_sales, previous_sales ]
+      properties:
+        current_revenue:
+          type: number
+          description: Revenue in the current time period
+        previous_revenue:
+          type: number
+          description: Revenue in the previous time period
+        current_sales:
+          type: number
+          description: Number of sales in the current time period
+        previous_sales:
+          type: number
+          description: Number of sales in the previous time period
+    GraphData:
+      type: object
+      required: [ bucket, revenue, sales_no ]
+      properties:
+        bucket:
+          type: string
+          description: Time bucket (e.g., week, month)
+        revenue:
+          type: number
+          description: Revenue for the bucket
+        sales_no:
+          type: number
+          description: Number of sales in the bucket
+    CityData:
+      type: object
+      required: [ city, current_revenue, previous_revenue ]
+      properties:
+        city:
+          type: string
+          description: Name of the city
+        current_revenue:
+          type: number
+          description: Current revenue for this city
+        previous_revenue:
+          type: number
+          description: Revenue for the previous period in this city
+    BikeSales:
+      type: object
+      required: [ bike_model, order_date, total_sales, revenue ]
+      properties:
+        bike_model:
+          type: string
+          description: Name of the bike model
+        order_date:
+          type: string
+          format: date
+          description: Date of the sale
+        total_sales:
+          type: number
+          description: Total number of bikes sold
+        revenue:
+          type: number
+          description: Total revenue generated by this model
