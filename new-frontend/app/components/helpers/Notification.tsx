@@ -3,7 +3,7 @@ import {Alert, AlertDescription} from "@/components/ui/alert";
 import {Button} from "@/components/ui/button";
 import {Progress} from "@/components/ui/progress";
 import {X} from "lucide-react";
-import {cn} from "~/utils/utils";
+import {cn} from "@/utils/utils";
 
 export type NotificationType = "success" | "warning" | "error" | "info";
 

@@ -18,7 +18,7 @@ import (
 func GetAllowedOrigins() []string {
 	connStr := os.Getenv("DATABASE_PUBLIC_URL")
 	if connStr == "" {
-		return []string{"http://localhost:3000"}
+		return []string{"http://localhost:3000", "http://localhost:5173"}
 	}
 	return []string{"https://www.danielfreiremendes.com"}
 }

@@ -1,7 +1,7 @@
-import {Button} from "~/components/ui/button";
-import {Dialog, DialogContent, DialogTrigger} from "~/components/ui/dialog";
+import {Button} from "@/components/ui/button";
+import {Dialog, DialogContent, DialogTrigger} from "@/components/ui/dialog";
 import {type ReactNode, useState} from "react";
-import type {RoleManagementWithName} from "~/models/api";
+import type {RoleManagementWithName} from "@/models/api";
 import {useTranslation} from "react-i18next";
 import {Folder} from "lucide-react";
 import {useRoleStore} from "@/utils/rolemananagemetstate";

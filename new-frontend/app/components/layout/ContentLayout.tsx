@@ -1,11 +1,11 @@
 import Cookies from "js-cookie";
 import {useState, useEffect} from "react";
-import {SidebarProvider, useSidebar} from "~/components/ui/sidebar";
-import {DwhSidebar} from "~/components/layout/DwhSidebar";
-import {Navbar} from "~/components/layout/Navbar";
-import {Button} from "~/components/ui/button";
+import {SidebarProvider, useSidebar} from "@/components/ui/sidebar";
+import {DwhSidebar} from "@/components/layout/DwhSidebar";
+import {Navbar} from "@/components/layout/Navbar";
+import {Button} from "@/components/ui/button";
 import {ChevronLeft, ChevronRight, Menu} from "lucide-react";
-import {useIsMobile} from "~/utils/use-mobile";
+import {useIsMobile} from "@/utils/use-mobile";
 
 const SIDEBAR_COOKIE_KEY = "sidebar_state";
 

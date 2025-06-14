@@ -7,7 +7,7 @@ import {
     LogOut,
     Box,
 } from "lucide-react";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {
     Sidebar,
     SidebarContent,
@@ -18,16 +18,19 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-} from "~/components/ui/sidebar";
+} from "@/components/ui/sidebar";
 import {
     Tooltip,
     TooltipTrigger,
     TooltipContent,
     TooltipProvider,
-} from "~/components/ui/tooltip";
-import {Button} from "~/components/ui/button";
-import {cn} from "~/utils/utils";
+} from "@/components/ui/tooltip";
+import {Button} from "@/components/ui/button";
+import {cn} from "@/utils/utils";
 import {useTranslation} from "react-i18next";
+import * as React from "react";
+import {handleLogOut} from "@/utils/helpers";
+import {useNotification} from "~/components/helpers/NotificationProvider";
 
 interface DwhSidebarProps {
     isOpen: boolean | undefined;
@@ -35,10 +38,15 @@ interface DwhSidebarProps {
 
 export function DwhSidebar({isOpen}: DwhSidebarProps) {
     const {t} = useTranslation();
+    const {addNotification} = useNotification();
+    const navigate = useNavigate();
     // Extrahiere die project_id aus der aktuellen URL
     const urlParams = new URLSearchParams(window.location.search);
     const currentQuery = urlParams.get('project_id') ? `?project_id=${urlParams.get('project_id')}` : "";
 
+    const handleLogout = () => {
+        handleLogOut(navigate, addNotification);
+    };
     const items = [
         {href: `/dwh/dashboard${currentQuery}`, label: t("menu.dashboard"), icon: Gauge},
         {href: `/dwh/orders${currentQuery}`, label: t("menu.orders"), icon: PackageCheck},
@@ -91,7 +99,8 @@ export function DwhSidebar({isOpen}: DwhSidebarProps) {
                         <TooltipTrigger asChild>
                             <Button
                                 variant="outline"
-                                className="w-full justify-center min-h-[44px] mt-5 flex items-center"
+                                className="w-full justify-center min-h-[44px] mt-5 flex items-center hover:cursor-pointer"
+                                onClick={handleLogout}
                             >
                                 <span className={cn(isOpen ? "mr-3" : "")}>
                                   <LogOut className="w-5 h-5"/>
@@ -102,7 +111,7 @@ export function DwhSidebar({isOpen}: DwhSidebarProps) {
                                         !isOpen && "opacity-0 hidden"
                                     )}
                                 >
-                                    Sign Out
+                                    {t("button.sign_out")}
                                 </p>
                             </Button>
                         </TooltipTrigger>

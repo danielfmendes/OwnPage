@@ -132,3 +132,12 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  div[role="dialog"]:not(:has(nav)) {
+    /* Your styles here */
+    @apply sm:w-full max-w-lg rounded;
+    width: calc(100% - 2rem);
+  }
+
+}
