@@ -164,7 +164,7 @@ export default function DataTable<TData>({
     });
 
     return (
-        <div className="mt-2 w-full p-4 border rounded-lg border-zinc-900 dark:border-zinc-50">
+        <div className="mt-2 w-[380px] sm:w-full p-4 border rounded-lg border-zinc-900 dark:border-zinc-50">
             <h2 className="font-bold text-lg">{title}</h2>
             <div className="flex items-center pt-3 pb-2">
                 {filterDefinition && (

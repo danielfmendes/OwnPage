@@ -1,3 +1,4 @@
+import {useTheme} from "next-themes";
 import {Bar, BarChart, Line, LineChart} from "recharts";
 import {
     Card,
@@ -31,6 +32,8 @@ export function MetricStats({
                                 isLoadingGraphDataData,
                             }: Props) {
     const {t} = useTranslation();
+    const {theme} = useTheme();
+    const chartColor = theme === "dark" ? "white" : "black";
 
     const chartConfig = {
         revenue: {
@@ -71,7 +74,7 @@ export function MetricStats({
                         {t("label.total_revenue")}
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="pb-0">
+                <CardContent className="-mt-5 pb-0">
                     {isLoadingGraphMetaData ? (
                         <>
                             <Skeleton className="h-6 w-32 mb-1"/>
@@ -100,14 +103,12 @@ export function MetricStats({
                         </p>
                     ) : (
                         <ChartContainer config={chartConfig} className="h-[80px] w-full mt-2 mb-5 md:mb-2.5">
-                            <LineChart
-                                data={graphData}
-                            >
+                            <LineChart data={graphData}>
                                 <Line
                                     type="monotone"
                                     strokeWidth={2}
                                     dataKey="revenue"
-                                    stroke="var(--color-revenue)"
+                                    stroke={chartColor}
                                     activeDot={{r: 6}}
                                 />
                             </LineChart>
@@ -123,7 +124,7 @@ export function MetricStats({
                         {t("label.number_of_sales")}
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="-mt-5 pb-0">
                     {isLoadingGraphMetaData ? (
                         <>
                             <Skeleton className="h-6 w-24 mb-1"/>
@@ -155,7 +156,7 @@ export function MetricStats({
                             <BarChart data={graphData}>
                                 <Bar
                                     dataKey="sales_no"
-                                    fill="var(--color-sales_no)"
+                                    fill={chartColor}
                                     radius={4}
                                 />
                             </BarChart>

@@ -83,7 +83,7 @@ function LayoutContent({title, isOpen, setIsOpen, children}: LayoutContentProps)
                     <Button
                         onClick={handleToggleSidebar}
                         aria-label="Toggle Sidebar"
-                        className="absolute top-4 -translate-x-1/2 rounded-md border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 w-8 h-8 flex items-center justify-center"
+                        className="absolute top-10 -translate-x-1/2 rounded-md border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 w-8 h-8 flex items-center justify-center"
                         style={{zIndex: 50, left: `${leftPosition}px`}}
                         variant="outline"
                         size="icon"

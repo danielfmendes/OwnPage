@@ -152,7 +152,7 @@ export function SimpleTable<TData>({
                         return (
                             <Card key={row.id} onClick={() => onRowClick?.({ original: row })}
                                   className="rounded-none border-b last:border-0">
-                                <CardContent className="p-4 space-y-2">
+                                <CardContent>
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2 w-full">
                                             <Button

@@ -26,7 +26,7 @@ export const links: Route.LinksFunction = () => [
 export function Layout({ children }: { children: React.ReactNode }) {
   const isDark = true; // ideally this comes from server-side user prefs
   return (
-      <html lang="en" className={isDark ? "dark" : ""} style={{ colorScheme: isDark ? "dark" : "light" }}>
+      <html lang="en" suppressHydrationWarning className={isDark ? "dark" : ""} style={{ colorScheme: isDark ? "dark" : "light" }}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
