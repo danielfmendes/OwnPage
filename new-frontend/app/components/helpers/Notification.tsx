@@ -67,7 +67,7 @@ export const Notification = ({
                 "border-2 shadow-lg p-4 pr-8 overflow-hidden mb-2",
                 typeStyles[message.type]
             )}>
-                <AlertDescription className="font-medium">
+                <AlertDescription className="font-medium text-white">
                     {message.message}
                 </AlertDescription>
                 <Progress

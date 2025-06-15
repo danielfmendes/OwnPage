@@ -15,11 +15,13 @@ import type {FilterDefinition} from "@/components/helpers/FilterBar";
 import ContentLayout from "@/components/layout/ContentLayout";
 import CustomerDetailContent from "@/pages/dwh/customer/customer-detail-content";
 import AddCustomerContent from "@/pages/dwh/customer/add-customer-content";
+import {useReloadedData} from "@/models/datatable/reloadState";
 
 export default function CustomerPage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
     const refreshData = useRefreshData(itemsLoader);
+    useReloadedData(itemsLoader, "customer");
 
     const [data, setData] = React.useState<Customer[]>([]);
     const [totalCount, setTotalCount] = React.useState<number>(0);

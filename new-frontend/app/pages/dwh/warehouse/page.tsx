@@ -14,11 +14,13 @@ import {type FilterDefinition} from "@/components/helpers/FilterBar";
 import {createBikeFilterItemLoader} from "@/models/datatable/filterItemsLoader";
 import ContentLayout from "@/components/layout/ContentLayout";
 import BikeDialogContent from "@/pages/dwh/warehouse/content-dialog";
+import {useReloadedData} from "@/models/datatable/reloadState";
 
 export default function WareHousePage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
     const refreshData = useRefreshData(itemsLoader);
+    useReloadedData(itemsLoader, "warehouse");
 
     const [data, setData] = React.useState<BikeWithModelName[]>([]);
     const [totalCount, setTotalCount] = React.useState<number>(0);

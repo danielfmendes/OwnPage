@@ -167,14 +167,14 @@
     "info": "Do you also want to delete the referenced values?",
     "button": "Delete references"
   },
-  "ancestorDialog": {
-    "title": "Ancestor Scope",
+  "projectDialog": {
+    "title": "Project Scope",
     "description": "The platform will exclusively present information relevant to the projects you select.",
-    "refine": "Refine ancestors",
-    "open": "Open Ancestor Dialog",
-    "single": "1 Ancestor",
-    "multiple": "{{count}} Ancestors",
-    "chosen": "Chosen"
+    "refine": "Refine projects",
+    "open": "Open project dialog",
+    "single": "1 project",
+    "multiple": "{{count}} projects",
+    "chosen": "Selected"
   },
   "pagination": {
     "info": "{{from}}-{{to}} of {{total}}",

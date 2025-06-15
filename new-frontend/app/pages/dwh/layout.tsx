@@ -15,13 +15,16 @@ import Language from "@/utils/language";
 import {useTranslation} from "react-i18next";
 import {OpenAPI} from "@/models/api/core/OpenAPI";
 import FilterManager from "@/utils/filtermanager";
-import {useNavigate, Outlet} from "react-router-dom";
+import {useNavigate, useLocation, Outlet} from "react-router-dom";
 
 export default function DWHLayout() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const hideSidebar = ['/dwh/login', '/dwh/register'].includes(location.pathname);
     const {addNotification} = useNotification();
     const token = AuthToken.getAuthToken();
     const filterManager = new FilterManager();
+
     const setUser = useUserStore((state) => state.setUser);
     const setIsLoadingUser = useUserStore((state) => state.setIsLoading);
     const setRoles = useRoleStore((state) => state.setRoles);
@@ -47,7 +50,9 @@ export default function DWHLayout() {
 
     useEffect(() => {
         if (!token) {
-            handleLogOut(navigate, addNotification);
+            if (!hideSidebar) {
+                handleLogOut(navigate, addNotification);
+            }
             return;
         }
 

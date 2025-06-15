@@ -167,7 +167,7 @@
     "info": "Möchten Sie auch die referenzierten Werte löschen?",
     "button": "Referenzen löschen"
   },
-  "ancestorDialog": {
+  "projectDialog": {
     "title": "Projektbereich",
     "description": "Die Plattform zeigt ausschließlich Informationen zu den Projekten an, die Sie auswählen.",
     "refine": "Projekte verfeinern",

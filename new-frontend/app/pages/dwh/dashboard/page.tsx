@@ -18,11 +18,14 @@ import ContentLayout from "@/components/layout/ContentLayout";
 import {MetricStats} from "@/pages/dwh/dashboard/revenue-graph";
 import {BikeModels} from "@/pages/dwh/dashboard/time-graph";
 import CitiesList from "@/pages/dwh/dashboard/cities-list";
+import {useReloadStore} from "@/models/datatable/reloadState";
 
 export default function DashboardPage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
     const filterManager = new FilterManager();
+    const reloadKey = useReloadStore((state) => state.reloadKeys["dashboard"]);
+
     const [timeRange, setTimeRange] = useState("1m");
     const [revenueChangePct, setRevenueChangePct] = useState(100);
     const [salesChangePct, setSalesChangePct] = useState(100);
@@ -113,8 +116,7 @@ export default function DashboardPage() {
             await fetchCityData();
             await fetchBikeData();
         })();
-    }, [timeRange]);
-
+    }, [timeRange, reloadKey]);
 
     return (
         <ContentLayout title={t("menu.dashboard")}>

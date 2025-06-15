@@ -6,7 +6,7 @@ import {useTranslation} from "react-i18next";
 import {Folder} from "lucide-react";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 import {UserNav} from "@/components/layout/UserNav";
-import {AncestorDialog} from "@/components/layout/AncestorDialog";
+import {ProjectDialog} from "@/components/layout/ProjectDialog";
 
 type NavbarProps = {
     title: string;
@@ -20,10 +20,10 @@ export function Navbar({title, children}: NavbarProps) {
 
     const dynamicTitle =
         roles.length === 0
-            ? t("ancestorDialog.open")
+            ? t("projectDialog.open")
             : roles.length === 1
-                ? t("ancestorDialog.single", {count: 1})
-                : t("ancestorDialog.multiple", {count: roles.length});
+                ? t("projectDialog.single", {count: 1})
+                : t("projectDialog.multiple", {count: roles.length});
 
     return (
         <header
@@ -45,7 +45,7 @@ export function Navbar({title, children}: NavbarProps) {
                             </Button>
                         </DialogTrigger>
                         <DialogContent>
-                            <AncestorDialog onClose={() => setOpen(false)}/>
+                            <ProjectDialog onClose={() => setOpen(false)}/>
                         </DialogContent>
                     </Dialog>
                     <h1 className="font-bold">{title}</h1>

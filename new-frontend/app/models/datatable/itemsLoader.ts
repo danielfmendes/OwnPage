@@ -10,9 +10,9 @@ export declare interface ItemsLoaderOptions {
     sort: Sort;
 }
 
-export declare type ItemsLoader = (_: ItemsLoaderOptions) => Promise<any[]>;
+export declare type ItemsLoader = (_: ItemsLoaderOptions) => Promise<void>;
 
-export function useRefreshData(itemsLoader: (options: ItemsLoaderOptions) => Promise<void>) {
+export function useRefreshData(itemsLoader: ItemsLoader) {
     return useCallback(() => {
         return itemsLoader({
             filterManager: new FilterManager(),

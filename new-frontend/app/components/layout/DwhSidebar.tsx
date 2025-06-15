@@ -18,19 +18,12 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import {
-    Tooltip,
-    TooltipTrigger,
-    TooltipContent,
-    TooltipProvider,
-} from "@/components/ui/tooltip";
-import {Button} from "@/components/ui/button";
 import {cn} from "@/utils/utils";
 import {useTranslation} from "react-i18next";
 import * as React from "react";
 import {handleLogOut} from "@/utils/helpers";
-import {useNotification} from "~/components/helpers/NotificationProvider";
-import {Collapsible, CollapsibleTrigger} from "~/components/ui/collapsible";
+import {useNotification} from "@/components/helpers/NotificationProvider";
+import {Collapsible, CollapsibleTrigger} from "@/components/ui/collapsible";
 
 interface DwhSidebarProps {
     isOpen: boolean | undefined;
@@ -132,30 +125,28 @@ export function DwhSidebar({isOpen}: DwhSidebarProps) {
             </SidebarContent>
 
             <SidebarFooter>
-                <TooltipProvider disableHoverableContent>
-                    <Tooltip delayDuration={100}>
-                        <TooltipTrigger asChild>
-                            <Button
-                                variant="outline"
-                                className="w-full justify-center min-h-[44px] mt-5 flex items-center hover:cursor-pointer"
-                                onClick={handleLogout}
-                            >
-                <span className={cn(isOpen ? "mr-3" : "")}>
-                  <LogOut className="w-5 h-5"/>
-                </span>
-                                <p
-                                    className={cn(
-                                        "text-sm font-medium transition-opacity duration-200",
-                                        !isOpen && "opacity-0 hidden"
-                                    )}
-                                >
-                                    {t("button.sign_out")}
-                                </p>
-                            </Button>
-                        </TooltipTrigger>
-                        {!isOpen && <TooltipContent side="right">{t("button.sign_out")}</TooltipContent>}
-                    </Tooltip>
-                </TooltipProvider>
+                <SidebarMenuButton
+                    tooltip={t("button.sign_out")}
+                    onClick={handleLogout}
+                    className={cn(
+                        "flex gap-3 items-center transition-all duration-200 ease-in-out border-2",
+                        isOpen ? "justify-center w-full px-3 py-2 min-h-[44px] rounded-md" : ""
+                    )}
+                    style={{borderColor: "var(--secondary)"}}
+                >
+                    <LogOut
+                        className={cn("w-5 shrink-0", isOpen ? "h-7" : "h-5")}
+                        aria-hidden="true"
+                    />
+                    <span
+                        className={cn(
+                            "text-sm font-medium truncate transition-opacity duration-200",
+                            !isOpen && "opacity-0 w-0 overflow-hidden"
+                        )}
+                    >
+                      {t("button.sign_out")}
+                    </span>
+                </SidebarMenuButton>
             </SidebarFooter>
         </Sidebar>
     );

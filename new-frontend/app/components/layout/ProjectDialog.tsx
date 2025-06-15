@@ -1,28 +1,20 @@
 import {useState} from "react";
-import {
-    Accordion,
-    AccordionItem,
-    AccordionTrigger,
-    AccordionContent,
-} from "@/components/ui/accordion";
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
 import {Button} from "@/components/ui/button";
 import {Checkbox} from "@/components/ui/checkbox";
 import {ScrollArea} from "@/components/ui/scroll-area";
-import {
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from "@/components/ui/dialog";
+import {DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Trash, X} from "lucide-react";
 import type {RoleManagementWithName} from "@/models/api";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 import {useTranslation} from "react-i18next";
+import {triggerReload} from "@/models/datatable/reloadState";
 
 interface Props {
     onClose: () => void;
 }
 
-export function AncestorDialog({onClose}: Props) {
+export function ProjectDialog({onClose}: Props) {
     const {t} = useTranslation();
     const projects: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const applySelected = useRoleStore((state) => state.setSelectedRoles);
@@ -44,6 +36,21 @@ export function AncestorDialog({onClose}: Props) {
     const removeSelection = (project: RoleManagementWithName) =>
         setSelected((prev) => prev.filter((p) => p.project_id !== project.project_id));
 
+    function updateProjectIdsInUrl(projectIds: string) {
+        const url = new URL(window.location.href);
+        const params = url.searchParams;
+        params.set("project_id", projectIds);
+
+        const entries: string[] = [];
+        entries.push(`project_id=${encodeURIComponent(projectIds)}`);
+        for (const [key, value] of params.entries()) {
+            if (key !== "project_id") {
+                entries.push(`${key}=${encodeURIComponent(value)}`);
+            }
+        }
+        return `${url.pathname}?${entries.join("&")}`;
+    }
+
     const handleApply = () => {
         // IDs der ausgewählten Projekte extrahieren
         const projectIds = selected
@@ -51,7 +58,8 @@ export function AncestorDialog({onClose}: Props) {
             .sort((a, b) => a - b)
             .join("|");
 
-        const newUrl = `${window.location.pathname}?project_id=${projectIds}`;
+        triggerReload();
+        const newUrl = updateProjectIdsInUrl(projectIds);
         window.history.pushState({}, "", newUrl);
         onClose();
         applySelected(selected);
@@ -62,6 +70,7 @@ export function AncestorDialog({onClose}: Props) {
         applySelected([]);
         onClose();
         // Clear the URL parameter
+        triggerReload();
         const cleanUrl = window.location.pathname;
         window.history.pushState({}, "", cleanUrl);
     };
@@ -70,13 +79,13 @@ export function AncestorDialog({onClose}: Props) {
     return (
         <div className="space-y-4">
             <DialogHeader>
-                <DialogTitle>{t("ancestorDialog.title")}</DialogTitle>
-                <DialogDescription>{t("ancestorDialog.description")}</DialogDescription>
+                <DialogTitle>{t("projectDialog.title")}</DialogTitle>
+                <DialogDescription>{t("projectDialog.description")}</DialogDescription>
             </DialogHeader>
 
             <Accordion type="single" collapsible className="w-full space-y-4">
                 <AccordionItem value="refine">
-                    <AccordionTrigger>{t("ancestorDialog.refine")}</AccordionTrigger>
+                    <AccordionTrigger>{t("projectDialog.refine")}</AccordionTrigger>
                     <AccordionContent>
                         <div className="flex justify-end mb-2">
                             <Button variant="ghost" size="sm" onClick={selectAll}>
@@ -110,7 +119,7 @@ export function AncestorDialog({onClose}: Props) {
                 </AccordionItem>
 
                 <AccordionItem value="chosen">
-                    <AccordionTrigger>{t("ancestorDialog.chosen")} ({selected.length})</AccordionTrigger>
+                    <AccordionTrigger>{t("projectDialog.chosen")} ({selected.length})</AccordionTrigger>
                     <AccordionContent>
                         <div className="flex justify-end mb-2">
                             <Button variant="ghost" size="sm" onClick={deselectAll}>

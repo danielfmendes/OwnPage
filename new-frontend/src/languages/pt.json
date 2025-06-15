@@ -167,14 +167,14 @@
     "info": "Deseja também excluir os valores referenciados?",
     "button": "Excluir referências"
   },
-  "ancestorDialog": {
-    "title": "Escopo do ancestral",
+  "projectDialog": {
+    "title": "Escopo do projeto",
     "description": "A plataforma exibirá exclusivamente informações relevantes aos projetos que você selecionar.",
-    "refine": "Refinar ancestrais",
-    "open": "Abrir diálogo de ancestrais",
-    "single": "1 ancestral",
-    "multiple": "{{count}} ancestrais",
-    "chosen": "Escolhido"
+    "refine": "Refinar projetos",
+    "open": "Abrir diálogo de projetos",
+    "single": "1 projeto",
+    "multiple": "{{count}} projetos",
+    "chosen": "Selecionado"
   },
   "pagination": {
     "info": "{{from}}-{{to}} de {{total}}",

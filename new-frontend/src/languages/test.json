@@ -27,6 +27,7 @@
   "label": {
     "id": "Test",
     "email": "Test",
+    "customer_email": "Test",
     "password": "Test",
     "name": "Test",
     "first_name": "Test",
@@ -49,7 +50,8 @@
     "total_revenue": "Test",
     "quantity": "Test",
     "role": "Test",
-    "warehouse_position": "Test",
+    "storage_location": "Test",
+    "warehouse_location": "Test",
     "number_of_sales": "Test",
     "birthday": "Test",
     "dob": "Test"
@@ -61,11 +63,12 @@
     "city": "Test",
     "pick_date": "Test",
     "part_type": "Test",
+    "part_name": "Test",
     "role": "Test",
     "part": "Test",
     "customer": "Test",
-    "language": "Test",
     "model_name": "Test",
+    "language": "Test",
     "project": "Test",
     "no_project": "Test",
     "project_name": "Test",
@@ -74,6 +77,8 @@
     "no_results": "Test",
     "loading": "Test",
     "search": "Test",
+    "selected": "Test",
+    "more": "Test",
     "please_wait": "Test",
     "warehouse_position": "Test",
     "enter": {
@@ -162,7 +167,7 @@
     "info": "Test",
     "button": "Test"
   },
-  "ancestorDialog": {
+  "projectDialog": {
     "title": "Test",
     "description": "Test",
     "refine": "Test",
