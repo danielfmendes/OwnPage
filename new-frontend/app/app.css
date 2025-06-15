@@ -134,7 +134,7 @@ body {
 }
 
 @layer components {
-  div[role="dialog"]:not(:has(nav)) {
+  div[role="dialog"] {
     /* Your styles here */
     @apply sm:w-full max-w-lg rounded;
     width: calc(100% - 1rem);

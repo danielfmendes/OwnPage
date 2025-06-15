@@ -38,6 +38,7 @@ import {type CustomColumnDef} from "@/models/datatable/column";
 import {FilterBar, type  FilterDefinition} from "./FilterBar";
 import FilterManager from "@/utils/filtermanager";
 import {useLocation, useNavigate} from "react-router-dom";
+import {useReloadedData} from "@/models/datatable/reloadState";
 
 interface DataTableProps<TData> {
     title: string;
@@ -45,12 +46,14 @@ interface DataTableProps<TData> {
     data: TData[];
     itemsLoader: (opts: ItemsLoaderOptions) => Promise<void>;
     totalCount: number;
+    url?: string;
     filterDefinition?: FilterDefinition[];
     rowDialogContent?: (row: any, onClose: () => void) => React.ReactNode;
     addDialogContent?: (onClose: () => void) => React.ReactNode;
 }
 
 export default function DataTable<TData>({
+                                             url,
                                              title,
                                              columns,
                                              data,
@@ -80,6 +83,10 @@ export default function DataTable<TData>({
     const [pagination, setPagination] = React.useState(() => Pagination.fromQueryParams(searchParams));
     const [sort, setSort] = React.useState(() => Sort.fromQueryParams(searchParams));
     const maxPage = Math.ceil(totalCount / pagination.itemsPerPage);
+
+    if (url) {
+        useReloadedData(itemsLoader, url);
+    }
 
     React.useEffect(() => {
         setIsLoading(true);

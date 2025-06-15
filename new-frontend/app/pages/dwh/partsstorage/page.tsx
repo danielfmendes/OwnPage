@@ -12,13 +12,11 @@ import {type FilterDefinition} from "@/components/helpers/FilterBar";
 import {createWareHousePartsFilterItemLoader} from "@/models/datatable/filterItemsLoader";
 import ContentLayout from "@/components/layout/ContentLayout";
 import WarehousePartDialogContent from "@/pages/dwh/partsstorage/content-dialog";
-import {useReloadedData} from "@/models/datatable/reloadState";
 
 export default function PartsStoragePage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
     const refreshData = useRefreshData(itemsLoader);
-    useReloadedData(itemsLoader, "partsstorage");
 
     const [data, setData] = React.useState<WarehousePartWithName[]>([]);
     const [totalCount, setTotalCount] = React.useState<number>(0);
@@ -112,6 +110,7 @@ export default function PartsStoragePage() {
     return (
         <ContentLayout title={t("menu.parts_storage")}>
             <DataTable
+                url="partsstorage"
                 title={t("menu.parts_storage")}
                 columns={columns}
                 data={data}

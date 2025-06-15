@@ -8,7 +8,6 @@ import {Trash, X} from "lucide-react";
 import type {RoleManagementWithName} from "@/models/api";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 import {useTranslation} from "react-i18next";
-import {triggerReload} from "@/models/datatable/reloadState";
 
 interface Props {
     onClose: () => void;
@@ -58,7 +57,6 @@ export function ProjectDialog({onClose}: Props) {
             .sort((a, b) => a - b)
             .join("|");
 
-        triggerReload();
         const newUrl = updateProjectIdsInUrl(projectIds);
         window.history.pushState({}, "", newUrl);
         onClose();
@@ -70,7 +68,6 @@ export function ProjectDialog({onClose}: Props) {
         applySelected([]);
         onClose();
         // Clear the URL parameter
-        triggerReload();
         const cleanUrl = window.location.pathname;
         window.history.pushState({}, "", cleanUrl);
     };

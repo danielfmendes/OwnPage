@@ -16,6 +16,7 @@ import {useTranslation} from "react-i18next";
 import {OpenAPI} from "@/models/api/core/OpenAPI";
 import FilterManager from "@/utils/filtermanager";
 import {useNavigate, useLocation, Outlet} from "react-router-dom";
+import {triggerReload} from "@/models/datatable/reloadState";
 
 export default function DWHLayout() {
     const navigate = useNavigate();
@@ -29,6 +30,7 @@ export default function DWHLayout() {
     const setIsLoadingUser = useUserStore((state) => state.setIsLoading);
     const setRoles = useRoleStore((state) => state.setRoles);
     const setIsLoadingRole = useRoleStore((state) => state.setIsLoading);
+    const selectedRoles = useRoleStore((state) => state.selectedRoles);
     const setSelectedRoles = useRoleStore((state) => state.setSelectedRoles);
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const {i18n} = useTranslation();
@@ -47,6 +49,10 @@ export default function DWHLayout() {
             i18n.changeLanguage(savedLang);
         }
     }, [i18n]);
+
+    useEffect(() => {
+        triggerReload();
+    }, [selectedRoles]);
 
     useEffect(() => {
         if (!token) {

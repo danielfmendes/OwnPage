@@ -14,13 +14,11 @@ import {type FilterDefinition} from "@/components/helpers/FilterBar";
 import {createOrdersFilterItemLoader} from "@/models/datatable/filterItemsLoader";
 import ContentLayout from "@/components/layout/ContentLayout";
 import OrderDialogContent from "@/pages/dwh/orders/content-dialog";
-import {useReloadedData} from "@/models/datatable/reloadState";
 
 export default function OrderPage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
     const refreshData = useRefreshData(itemsLoader);
-    useReloadedData(itemsLoader, "orders");
 
     const [data, setData] = React.useState<OrderWithCustomer[]>([]);
     const [totalCount, setTotalCount] = React.useState<number>(0);
@@ -143,6 +141,7 @@ export default function OrderPage() {
     return (
         <ContentLayout title={t("menu.orders")}>
             <DataTable
+                url="orders"
                 title={t("menu.orders")}
                 columns={columns}
                 data={data}
