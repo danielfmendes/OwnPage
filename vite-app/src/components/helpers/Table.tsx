@@ -1,4 +1,4 @@
-import * as React from "react";
+import {useEffect, useMemo, useState, type ReactNode} from "react";
 import {Dialog} from "@/components/ui/dialog";
 import {
     type ColumnFiltersState,
@@ -48,8 +48,8 @@ interface DataTableProps<TData> {
     totalCount: number;
     url?: string;
     filterDefinition?: FilterDefinition[];
-    rowDialogContent?: (row: any, onClose: () => void) => React.ReactNode;
-    addDialogContent?: (onClose: () => void) => React.ReactNode;
+    rowDialogContent?: (row: any, onClose: () => void) => ReactNode;
+    addDialogContent?: (onClose: () => void) => ReactNode;
 }
 
 export default function DataTable<TData>({
@@ -67,28 +67,28 @@ export default function DataTable<TData>({
     const {addNotification} = useNotification();
     const location = useLocation();
     const navigate = useNavigate();
-    const searchParams = React.useMemo(() => new URLSearchParams(location.search), [location.search]);
+    const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
-    const [sorting, setSorting] = React.useState<SortingState>([]);
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-    const [rowSelection, setRowSelection] = React.useState({});
-    const [isRowDialogOpen, setIsRowDialogOpen] = React.useState(false);
-    const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false);
-    const [selectedRow, setSelectedRow] = React.useState<any>(null);
-    const [isLoading, setIsLoading] = React.useState(false);
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+    const [rowSelection, setRowSelection] = useState({});
+    const [isRowDialogOpen, setIsRowDialogOpen] = useState(false);
+    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+    const [selectedRow, setSelectedRow] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const paginationOptions = [10, 25, 50, 100];
-    const [filterManager, setFilterManager] = React.useState<FilterManager>(() => FilterManager.fromQueryParams(searchParams));
-    const [pagination, setPagination] = React.useState(() => Pagination.fromQueryParams(searchParams));
-    const [sort, setSort] = React.useState(() => Sort.fromQueryParams(searchParams));
+    const [filterManager, setFilterManager] = useState<FilterManager>(() => FilterManager.fromQueryParams(searchParams));
+    const [pagination, setPagination] = useState(() => Pagination.fromQueryParams(searchParams));
+    const [sort, setSort] = useState(() => Sort.fromQueryParams(searchParams));
     const maxPage = Math.ceil(totalCount / pagination.itemsPerPage);
 
     if (url) {
         useReloadedData(itemsLoader, url);
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         setIsLoading(true);
         itemsLoader({filterManager, pagination, sort})
             .then(async () => {

@@ -1,7 +1,7 @@
+import {useMemo, useState, type MouseEvent} from "react";
 import DataTable from "@/components/helpers/Table";
 import {type CustomColumnDef} from "@/models/datatable/column";
 import {Trash2} from "lucide-react";
-import * as React from "react";
 import {WareHousePartsService, type WarehousePartWithName} from "@/models/api";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
@@ -18,10 +18,10 @@ export default function PartsStoragePage() {
     const {addNotification} = useNotification();
     const refreshData = useRefreshData(itemsLoader);
 
-    const [data, setData] = React.useState<WarehousePartWithName[]>([]);
-    const [totalCount, setTotalCount] = React.useState<number>(0);
-    const [loadingDeleteId, setLoadingDeleteId] = React.useState<number | null>(null);
-    const [itemsLoaderOptions, setItemsLoaderOptions] = React.useState<ItemsLoaderOptions | null>(null);
+    const [data, setData] = useState<WarehousePartWithName[]>([]);
+    const [totalCount, setTotalCount] = useState<number>(0);
+    const [loadingDeleteId, setLoadingDeleteId] = useState<number | null>(null);
+    const [itemsLoaderOptions, setItemsLoaderOptions] = useState<ItemsLoaderOptions | null>(null);
 
     async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
         setItemsLoaderOptions(options);
@@ -33,7 +33,7 @@ export default function PartsStoragePage() {
         );
     }
 
-    const handleDelete = (event: React.MouseEvent, id: number) => {
+    const handleDelete = (event: MouseEvent, id: number) => {
         event.stopPropagation();
         setLoadingDeleteId(id);
         WareHousePartsService.deleteWareHousePart(id)
@@ -94,7 +94,7 @@ export default function PartsStoragePage() {
         },
     ]
 
-    const filters: FilterDefinition[] = React.useMemo(() => {
+    const filters: FilterDefinition[] = useMemo(() => {
         if (!itemsLoaderOptions) return [];
         const warehouseFilterLoader = createWareHousePartsFilterItemLoader(itemsLoaderOptions);
 

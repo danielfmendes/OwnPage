@@ -1,4 +1,4 @@
-import React from "react";
+import {useState} from "react";
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
@@ -15,8 +15,8 @@ interface RoleManagementProps {
 export default function AddProjektDialogContent({onClose, onRefresh}: RoleManagementProps) {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
-    const [isLoadingAddProject, setIsLoadingAddProject] = React.useState(false);
-    const [projectName, setProjectName] = React.useState<string>('');
+    const [isLoadingAddProject, setIsLoadingAddProject] = useState(false);
+    const [projectName, setProjectName] = useState<string>('');
 
     const handleSave = () => {
         const newData = {

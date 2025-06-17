@@ -1,6 +1,6 @@
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import InputField from "@/components/helpers/InputField";
-import React from "react";
+import {useState} from "react";
 import {DatePicker} from "@/components/helpers/datepicker/DatePicker";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
@@ -16,13 +16,13 @@ interface Props {
 export default function AddCustomerContent({onClose, onRefresh}: Props) {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
-    const [firstName, setFirstName] = React.useState<string>('');
-    const [name, setName] = React.useState<string>('');
-    const [email, setEmail] = React.useState<string>('');
-    const [dob, setDob] = React.useState<Date | undefined>(undefined);
-    const [city, setCity] = React.useState<string>('');
-    const [projectId, setProjectId] = React.useState<string>("");
-    const [isLoading, setIsLoading] = React.useState(false);
+    const [firstName, setFirstName] = useState<string>('');
+    const [name, setName] = useState<string>('');
+    const [email, setEmail] = useState<string>('');
+    const [dob, setDob] = useState<Date | undefined>(undefined);
+    const [city, setCity] = useState<string>('');
+    const [projectId, setProjectId] = useState<string>("");
+    const [isLoading, setIsLoading] = useState(false);
 
     const resetForm = () => {
         setProjectId("");

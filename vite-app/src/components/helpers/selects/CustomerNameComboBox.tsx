@@ -1,4 +1,4 @@
-import React from "react";
+import {useEffect, useState} from "react";
 import {Check} from "lucide-react";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {type Customer, type CustomerListResponse, CustomersService} from "@/models/api";
@@ -21,11 +21,11 @@ export default function CustomerNameComboBox({customerID, onChange}: Props) {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
     const filterManager = new FilterManager();
-    const [customerIdOptions, setCustomerIdOptions] = React.useState<Customer[]>([]);
-    const [selectedCustomer, setSelectedCustomer] = React.useState<Customer | null>(null);
-    const [isLoading, setIsLoading] = React.useState(false);
+    const [customerIdOptions, setCustomerIdOptions] = useState<Customer[]>([]);
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         setIsLoading(true);
 
         (async () => {

@@ -1,3 +1,4 @@
+import {useState} from "react";
 import {Link, useNavigate} from "react-router-dom";
 import {BookA, Check, ChevronDown, ChevronRight, LogOut, User as UserIcon} from "lucide-react";
 import {Button} from "@/components/ui/button";
@@ -19,7 +20,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {useTheme} from "next-themes";
 import {MoonIcon, SunIcon} from "lucide-react";
-import * as React from "react";
 import {Loader2} from "lucide-react";
 import {useUserStore} from "@/utils/userstate";
 import {handleLogOut} from "@/utils/helpers";
@@ -41,7 +41,7 @@ export function UserNav() {
         handleLogOut(navigate, addNotification);
     };
 
-    const [showLanguageCard, setShowLanguageCard] = React.useState(false)
+    const [showLanguageCard, setShowLanguageCard] = useState(false)
     const currentLang = i18n.language.toUpperCase();
 
     // See flags here: https://github.com/HatScripts/circle-flags/tree/gh-pages/flags

@@ -1,4 +1,4 @@
-import React from "react";
+import {useEffect, useState} from "react";
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {type Bike, BikesService, type BikeWithModelName} from "@/models/api";
 import InputField from "@/components/helpers/InputField";
@@ -22,15 +22,15 @@ export default function BikeDialogContent({rowData, onClose, onRefresh}: Props) 
     const {addNotification} = useNotification();
     const isDisabled = isRoleUserForProject(rowData?.project_id!)
 
-    const [projectId, setProjectId] = React.useState<string>("");
-    const [modelId, setModelId] = React.useState<number | null>(null);
-    const [serialNumber, setSerialNumber] = React.useState<string>("");
-    const [productionDate, setProductionDate] = React.useState<Date | undefined>(undefined);
-    const [quantity, setQuantity] = React.useState<number>(0);
-    const [warehouseLocation, setWarehouseLocation] = React.useState<string>("");
-    const [isLoading, setIsLoading] = React.useState(false);
+    const [projectId, setProjectId] = useState<string>("");
+    const [modelId, setModelId] = useState<number | null>(null);
+    const [serialNumber, setSerialNumber] = useState<string>("");
+    const [productionDate, setProductionDate] = useState<Date | undefined>(undefined);
+    const [quantity, setQuantity] = useState<number>(0);
+    const [warehouseLocation, setWarehouseLocation] = useState<string>("");
+    const [isLoading, setIsLoading] = useState(false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (rowData) {
             setProjectId(rowData.project_id?.toString() || "");
             setModelId(rowData.model_id ?? null);

@@ -1,5 +1,5 @@
+import {useMemo, useState} from "react";
 import DataTable from "@/components/helpers/Table";
-import * as React from "react";
 import {type CustomColumnDef} from "@/models/datatable/column";
 import {RoleManagementsService, type RoleManagementWithName} from "@/models/api";
 import {Button} from "@/components/ui/button";
@@ -16,11 +16,11 @@ export default function RoleManagementPage() {
     const {t} = useTranslation();
     const refreshData = useRefreshData(itemsLoader);
 
-    const [data, setData] = React.useState<RoleManagementWithName[]>([]);
-    const [totalCount, setTotalCount] = React.useState<number>(0);
-    const [showDialog, setShowDialog] = React.useState(false);
-    const [manageId, setManageId] = React.useState<number | null>(null);
-    const [itemsLoaderOptions, setItemsLoaderOptions] = React.useState<ItemsLoaderOptions | null>(null);
+    const [data, setData] = useState<RoleManagementWithName[]>([]);
+    const [totalCount, setTotalCount] = useState<number>(0);
+    const [showDialog, setShowDialog] = useState(false);
+    const [manageId, setManageId] = useState<number | null>(null);
+    const [itemsLoaderOptions, setItemsLoaderOptions] = useState<ItemsLoaderOptions | null>(null);
 
     async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
         setItemsLoaderOptions(options);
@@ -75,7 +75,7 @@ export default function RoleManagementPage() {
         },
     ]
 
-    const filters: FilterDefinition[] = React.useMemo(() => {
+    const filters: FilterDefinition[] = useMemo(() => {
         if (!itemsLoaderOptions) return [];
         const roleManagementFilterLoader = createRoleManagementFilterItemLoader(itemsLoaderOptions);
 

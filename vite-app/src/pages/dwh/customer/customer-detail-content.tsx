@@ -4,7 +4,7 @@ import {
     DialogTitle
 } from "@/components/ui/dialog"
 import {Card, CardContent} from "@/components/ui/card"
-import React from "react"
+import {useEffect, useState} from "react"
 import InputField from "@/components/helpers/InputField";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {
@@ -33,13 +33,13 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
     const filterManager = new FilterManager();
     const isDisabled = isRoleUserForProject(rowData?.project_id!)
 
-    const [lastName, setLastName] = React.useState(rowData.name)
-    const [city, setCity] = React.useState(rowData.city)
-    const [data, setData] = React.useState<OrderItemsWithBikeAndDate[]>([]);
-    const [isLoadingData, setIsLoadingData] = React.useState(false);
-    const [isLoadingUpdate, setIsLoadingUpdate] = React.useState(false);
+    const [lastName, setLastName] = useState(rowData.name)
+    const [city, setCity] = useState(rowData.city)
+    const [data, setData] = useState<OrderItemsWithBikeAndDate[]>([]);
+    const [isLoadingData, setIsLoadingData] = useState(false);
+    const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         setLastName(rowData.name);
         setCity(rowData.city);
         (async () => {

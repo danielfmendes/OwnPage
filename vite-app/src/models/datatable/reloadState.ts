@@ -1,4 +1,4 @@
-import React from "react";
+import {useEffect} from "react";
 import {create} from "zustand";
 import {useRefreshData, type ItemsLoader} from "@/models/datatable/itemsLoader";
 
@@ -26,7 +26,7 @@ export function useReloadedData(itemsLoader: ItemsLoader, key: string) {
     const reloadKey = useReloadStore((state) => state.reloadKeys[key]);
     const refreshData = useRefreshData(itemsLoader);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (reloadKey) {
             refreshData();
         }

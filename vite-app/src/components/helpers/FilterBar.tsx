@@ -1,4 +1,4 @@
-import * as React from "react";
+import {type FC, type ReactNode, useEffect, useMemo, useState} from "react";
 import {Popover, PopoverContent, PopoverTrigger,} from "@/components/ui/popover";
 import {Button} from "@/components/ui/button";
 import {Checkbox} from "@/components/ui/checkbox";
@@ -18,7 +18,7 @@ import {DatePickerDisplayName} from "@/components/helpers/datepicker/DatePickerD
 export interface FilterItem {
     value: string;
     count: number;
-    icon?: React.ReactNode;
+    icon?: ReactNode;
 }
 
 export interface FilterDefinition {
@@ -35,28 +35,28 @@ export interface FilterBarProps {
     onChange: (key: string, selected: string[], type: FilterType) => void;
 }
 
-export const FilterBar: React.FC<FilterBarProps> = ({filters, filterManager, onChange}) => {
+export const FilterBar: FC<FilterBarProps> = ({filters, filterManager, onChange}) => {
     const locale = i18n.language;
     const {t} = useTranslation();
     const {addNotification} = useNotification();
-    const context = React.useMemo(() => window.location.pathname.replace(/^\/|\/$/g, ""), []);
+    const context = useMemo(() => window.location.pathname.replace(/^\/|\/$/g, ""), []);
 
     const getLoadedItems = useFilterStore((state) => state.getLoadedItems);
     const setLoadedItems = useFilterStore((state) => state.setLoadedItems);
 
-    const [lastChangedKey, setLastChangedKey] = React.useState<string | null>(null);
-    const [filterDefs, setFilterDefs] = React.useState(() => filters.map(f => ({...f, pinned: f.pinned !== false})));
-    const [selectedValues, setSelectedValues] = React.useState(() => filterManager.getSelectedValues());
-    const [dateRanges, setDateRanges] = React.useState(() => filterManager.getDateRanges());
-    const [openKey, setOpenKey] = React.useState<string | null>(null);
-    const [loadingKeys, setLoadingKeys] = React.useState<string[]>([]);
-    const [searchTexts, setSearchTexts] = React.useState<Record<string, string>>({});
-    const [moreOpen, setMoreOpen] = React.useState(false);
+    const [lastChangedKey, setLastChangedKey] = useState<string | null>(null);
+    const [filterDefs, setFilterDefs] = useState(() => filters.map(f => ({...f, pinned: f.pinned !== false})));
+    const [selectedValues, setSelectedValues] = useState(() => filterManager.getSelectedValues());
+    const [dateRanges, setDateRanges] = useState(() => filterManager.getDateRanges());
+    const [openKey, setOpenKey] = useState<string | null>(null);
+    const [loadingKeys, setLoadingKeys] = useState<string[]>([]);
+    const [searchTexts, setSearchTexts] = useState<Record<string, string>>({});
+    const [moreOpen, setMoreOpen] = useState(false);
 
-    const pinnedFilters = React.useMemo(() => filterDefs.filter(f => f.pinned), [filterDefs]);
-    const unpinnedFilters = React.useMemo(() => filterDefs.filter(f => !f.pinned), [filterDefs]);
+    const pinnedFilters = useMemo(() => filterDefs.filter(f => f.pinned), [filterDefs]);
+    const unpinnedFilters = useMemo(() => filterDefs.filter(f => !f.pinned), [filterDefs]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         setFilterDefs(filters.map(f => ({...f, pinned: f.pinned !== false})));
 
         // loads items for every key with values
@@ -71,7 +71,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({filters, filterManager, onC
     }, [filters]);
 
     // unpinned => pinned, when selectedValues > 0
-    React.useEffect(() => {
+    useEffect(() => {
         setFilterDefs((prev) =>
             prev.map((filter) => {
                 const hasSelected = (selectedValues[filter.key]?.length ?? 0) > 0;
@@ -84,7 +84,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({filters, filterManager, onC
     }, [selectedValues, filters]);
 
     // updated only clicked key
-    React.useEffect(() => {
+    useEffect(() => {
         if (!lastChangedKey) return;
 
         const filterType = filters.find(f => f.key === lastChangedKey)?.type ?? "default";

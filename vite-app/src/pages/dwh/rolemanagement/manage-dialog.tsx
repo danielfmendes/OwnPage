@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import {useEffect, useState} from "react";
 import {
     DialogContent,
     DialogHeader,
@@ -27,12 +27,12 @@ interface ManageProps {
 export default function ManageDialogContent({manageId}: ManageProps) {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
-    const [data, setData] = React.useState<RoleManagement[]>([]);
-    const [originalData, setOriginalData] = React.useState<Record<string, string>>({});
-    const [isLoadingData, setIsLoadingData] = React.useState(true);
-    const [isLoadingAdd, setIsLoadingAdd] = React.useState(false);
-    const [loadingDeleteEmail, setLoadingDeleteEmail] = React.useState<string | null>(null);
-    const [loadingEditEmail, setLoadingEditEmail] = React.useState<string | null>(null);
+    const [data, setData] = useState<RoleManagement[]>([]);
+    const [originalData, setOriginalData] = useState<Record<string, string>>({});
+    const [isLoadingData, setIsLoadingData] = useState(true);
+    const [isLoadingAdd, setIsLoadingAdd] = useState(false);
+    const [loadingDeleteEmail, setLoadingDeleteEmail] = useState<string | null>(null);
+    const [loadingEditEmail, setLoadingEditEmail] = useState<string | null>(null);
     const [newEmail, setNewEmail] = useState<string>("");
     const [newRole, setNewRole] = useState<string>("");
 
@@ -56,7 +56,7 @@ export default function ManageDialogContent({manageId}: ManageProps) {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchData();
     }, [manageId]);
 

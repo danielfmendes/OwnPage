@@ -1,5 +1,5 @@
+import {useMemo, useState, type MouseEvent} from "react";
 import DataTable from "@/components/helpers/Table";
-import * as React from "react";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import type {CustomColumnDef} from "@/models/datatable/column";
 import {Button} from "@/components/ui/button";
@@ -21,13 +21,13 @@ export default function CustomerPage() {
     const {addNotification} = useNotification();
     const refreshData = useRefreshData(itemsLoader);
 
-    const [data, setData] = React.useState<Customer[]>([]);
-    const [totalCount, setTotalCount] = React.useState<number>(0);
-    const [loadingDeleteId, setLoadingDeleteId] = React.useState<number | null>(null);
-    const [isLoadingDeleteCascade, setIsLoadingDeleteCascade] = React.useState(false);
-    const [showCascadeDialog, setShowCascadeDialog] = React.useState(false);
-    const [deleteId, setDeleteId] = React.useState<number | null>(null);
-    const [itemsLoaderOptions, setItemsLoaderOptions] = React.useState<ItemsLoaderOptions | null>(null);
+    const [data, setData] = useState<Customer[]>([]);
+    const [totalCount, setTotalCount] = useState<number>(0);
+    const [loadingDeleteId, setLoadingDeleteId] = useState<number | null>(null);
+    const [isLoadingDeleteCascade, setIsLoadingDeleteCascade] = useState(false);
+    const [showCascadeDialog, setShowCascadeDialog] = useState(false);
+    const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [itemsLoaderOptions, setItemsLoaderOptions] = useState<ItemsLoaderOptions | null>(null);
 
     async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
         setItemsLoaderOptions(options);
@@ -69,7 +69,7 @@ export default function CustomerPage() {
             });
     };
 
-    const handleDelete = (event: React.MouseEvent, id: number) => {
+    const handleDelete = (event: MouseEvent, id: number) => {
         event.stopPropagation();
         deleteCustomer(id);
     };
@@ -137,7 +137,7 @@ export default function CustomerPage() {
         },
     ]
 
-    const filters: FilterDefinition[] = React.useMemo(() => {
+    const filters: FilterDefinition[] = useMemo(() => {
         if (!itemsLoaderOptions) return [];
         const customerFilterLoader = createCustomerFilterItemLoader(itemsLoaderOptions);
 

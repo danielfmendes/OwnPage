@@ -1,4 +1,4 @@
-import * as React from "react";
+import {useEffect, useMemo, useState} from "react";
 import {format, eachMonthOfInterval, startOfYear, endOfYear} from "date-fns";
 import type {DateRange} from "react-day-picker";
 
@@ -20,25 +20,25 @@ interface DatePickerContentProps {
 }
 
 export function DatePickerCalender({
-                                      mode,
-                                      date,
-                                      setDate,
-                                      numberOfMonths = 1,
-                                      endYear,
-                                  }: DatePickerContentProps) {
+                                       mode,
+                                       date,
+                                       setDate,
+                                       numberOfMonths = 1,
+                                       endYear,
+                                   }: DatePickerContentProps) {
     const isRange = mode === "range";
 
     const dateObj = !isRange ? (date as Date | undefined) : undefined;
     const range = isRange ? (date as DateRange | undefined) : undefined;
 
-    const [month, setMonth] = React.useState<number>(
+    const [month, setMonth] = useState<number>(
         dateObj?.getMonth() ?? range?.from?.getMonth() ?? new Date().getMonth()
     );
-    const [year, setYear] = React.useState<number>(
+    const [year, setYear] = useState<number>(
         dateObj?.getFullYear() ?? range?.from?.getFullYear() ?? new Date().getFullYear()
     );
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (dateObj) {
             setMonth(dateObj.getMonth());
             setYear(dateObj.getFullYear());
@@ -48,13 +48,13 @@ export function DatePickerCalender({
         }
     }, [dateObj, range]);
 
-    const years = React.useMemo(() => {
+    const years = useMemo(() => {
         const currentYear = new Date().getFullYear();
         const finalEndYear = endYear ?? currentYear;
         return Array.from({length: finalEndYear - 1950 + 1}, (_, i) => finalEndYear - i);
     }, [endYear]);
 
-    const months = React.useMemo(() => {
+    const months = useMemo(() => {
         return eachMonthOfInterval({
             start: startOfYear(new Date(year, 0, 1)),
             end: endOfYear(new Date(year, 0, 1)),

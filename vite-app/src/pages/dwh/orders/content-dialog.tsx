@@ -1,4 +1,4 @@
-import React from "react";
+import {useEffect, useState} from "react";
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
@@ -37,22 +37,22 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
     const isEditMode = !!rowData;
     const isDisabled = isRoleUserForProject(rowData?.project_id!)
 
-    const [projectId, setProjectId] = React.useState<string>("");
-    const [orderDate, setOrderDate] = React.useState<Date | undefined>(undefined);
-    const [customerId, setCustomerId] = React.useState<number>(0);
+    const [projectId, setProjectId] = useState<string>("");
+    const [orderDate, setOrderDate] = useState<Date | undefined>(undefined);
+    const [customerId, setCustomerId] = useState<number>(0);
 
-    const [data, setData] = React.useState<OrderItemsWithBikeName[]>([]);
-    const [modelId, setModelId] = React.useState<number | null>(null);
-    const [number, setNumber] = React.useState<number | null>(null);
-    const [price, setPrice] = React.useState<number | null>(null);
-    const [editItem, setEditItem] = React.useState<OrderItemsWithBikeName | null>(null);
-    const [openPopoverId, setOpenPopoverId] = React.useState<number | null>(null);
+    const [data, setData] = useState<OrderItemsWithBikeName[]>([]);
+    const [modelId, setModelId] = useState<number | null>(null);
+    const [number, setNumber] = useState<number | null>(null);
+    const [price, setPrice] = useState<number | null>(null);
+    const [editItem, setEditItem] = useState<OrderItemsWithBikeName | null>(null);
+    const [openPopoverId, setOpenPopoverId] = useState<number | null>(null);
 
-    const [isLoadingOrder, setIsLoadingOrder] = React.useState(false);
-    const [isLoadingData, setIsLoadingData] = React.useState(false);
-    const [isLoadingOrderItems, setIsLoadingOrderItems] = React.useState(false);
-    const [loadingEditID, setLoadingEditID] = React.useState<number | null>(null);
-    const [loadingDeleteID, setLoadingDeleteID] = React.useState<number | null>(null);
+    const [isLoadingOrder, setIsLoadingOrder] = useState(false);
+    const [isLoadingData, setIsLoadingData] = useState(false);
+    const [isLoadingOrderItems, setIsLoadingOrderItems] = useState(false);
+    const [loadingEditID, setLoadingEditID] = useState<number | null>(null);
+    const [loadingDeleteID, setLoadingDeleteID] = useState<number | null>(null);
 
     const loadRowData = () => {
         setProjectId(rowData?.project_id?.toString() ?? "");
@@ -77,7 +77,7 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
         setPrice(null);
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         loadRowData();
         (async () => {
             if (rowData) {
@@ -207,8 +207,8 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
             widthPercent: 20,
             cell: ({row}) => {
                 const orderItem = row.original;
-                const [localEditNumber, setLocalEditNumber] = React.useState<number>(orderItem.number);
-                const [localEditPrice, setLocalEditPrice] = React.useState<number>(orderItem.price);
+                const [localEditNumber, setLocalEditNumber] = useState<number>(orderItem.number);
+                const [localEditPrice, setLocalEditPrice] = useState<number>(orderItem.price);
                 const hasChanges = localEditNumber !== orderItem.number || localEditPrice !== orderItem.price;
 
                 return (

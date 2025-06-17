@@ -1,4 +1,4 @@
-import React from "react";
+import {useEffect, useState} from "react";
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {
@@ -32,16 +32,16 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
     const filterManager = new FilterManager();
     const isDisabled = isRoleUserForProject(rowData?.project_id!)
 
-    const [partId, setPartId] = React.useState<number | null>(null);
-    const [projectId, setProjectId] = React.useState<string>("");
-    const [partType, setPartType] = React.useState<string>("");
-    const [quantity, setQuantity] = React.useState<number>(0);
-    const [storageLocation, setStorageLocation] = React.useState<string>("");
-    const [partIdOptions, setPartIdOptions] = React.useState<Frame[] | Fork[] | Saddle[]>([]);
-    const [isLoading, setIsLoading] = React.useState<boolean>(false);
-    const [isLoadingParts, setIsLoadingParts] = React.useState<boolean>(false);
+    const [partId, setPartId] = useState<number | null>(null);
+    const [projectId, setProjectId] = useState<string>("");
+    const [partType, setPartType] = useState<string>("");
+    const [quantity, setQuantity] = useState<number>(0);
+    const [storageLocation, setStorageLocation] = useState<string>("");
+    const [partIdOptions, setPartIdOptions] = useState<Frame[] | Fork[] | Saddle[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isLoadingParts, setIsLoadingParts] = useState<boolean>(false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (rowData) {
             setPartId(rowData.part_id ?? null);
             setProjectId(rowData.project_id?.toString() ?? "");
@@ -51,7 +51,7 @@ export default function WarehousePartDialogContent({rowData, onClose, onRefresh}
         }
     }, [rowData]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (!isEditMode && partType) {
             setIsLoadingParts(true)
             filterManager.addFilter("type", [`${partType}s`])

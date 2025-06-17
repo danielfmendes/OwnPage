@@ -1,4 +1,4 @@
-import React from "react";
+import {useEffect, useState} from "react";
 import {SelectLoading} from "@/components/helpers/SelectLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useTranslation} from "react-i18next";
@@ -14,11 +14,11 @@ export default function ModelNameSelect({modelID, onChange}: Props) {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
     const filterManager = new FilterManager();
-    const [modelId, setModelId] = React.useState<number | null>(modelID);
-    const [modelIdOptions, setModelIdOptions] = React.useState<{ id: number, name: string }[]>([]);
-    const [isLoadingModels, setIsLoadingModels] = React.useState(false);
+    const [modelId, setModelId] = useState<number | null>(modelID);
+    const [modelIdOptions, setModelIdOptions] = useState<{ id: number, name: string }[]>([]);
+    const [isLoadingModels, setIsLoadingModels] = useState(false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         setIsLoadingModels(true);
         (async () => {
             const filterString = await filterManager.getFilterStringWithProjectIds();
