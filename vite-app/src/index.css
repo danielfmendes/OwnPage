@@ -118,3 +118,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  div[role="dialog"] {
+    /* Your styles here */
+    @apply sm:w-full max-w-lg rounded;
+    width: calc(100% - 1rem);
+  }
+}
+
+@layer components {
+  button {
+    @apply cursor-pointer;
+  }
+}

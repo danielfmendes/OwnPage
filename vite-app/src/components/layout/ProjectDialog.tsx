@@ -1,0 +1,165 @@
+import {useState} from "react";
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
+import {Button} from "@/components/ui/button";
+import {Checkbox} from "@/components/ui/checkbox";
+import {ScrollArea} from "@/components/ui/scroll-area";
+import {DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import {Trash, X} from "lucide-react";
+import type {RoleManagementWithName} from "@/models/api";
+import {useRoleStore} from "@/utils/rolemananagemetstate";
+import {useTranslation} from "react-i18next";
+
+interface Props {
+    onClose: () => void;
+}
+
+export function ProjectDialog({onClose}: Props) {
+    const {t} = useTranslation();
+    const projects: RoleManagementWithName[] = useRoleStore((state) => state.roles);
+    const applySelected = useRoleStore((state) => state.setSelectedRoles);
+    const [selected, setSelected] = useState<RoleManagementWithName[]>(useRoleStore((state) => state.selectedRoles));
+
+    const isSelected = (project: RoleManagementWithName) =>
+        selected.some((p) => p.project_id === project.project_id);
+
+    const toggleSelection = (project: RoleManagementWithName) => {
+        setSelected((prev) =>
+            isSelected(project)
+                ? prev.filter((p) => p.project_id !== project.project_id)
+                : [...prev, project]
+        );
+    };
+
+    const selectAll = () => setSelected(projects);
+    const deselectAll = () => setSelected([]);
+    const removeSelection = (project: RoleManagementWithName) =>
+        setSelected((prev) => prev.filter((p) => p.project_id !== project.project_id));
+
+    function updateProjectIdsInUrl(projectIds: string) {
+        const url = new URL(window.location.href);
+        const params = url.searchParams;
+        params.set("project_id", projectIds);
+
+        const entries: string[] = [];
+        entries.push(`project_id=${encodeURIComponent(projectIds)}`);
+        for (const [key, value] of params.entries()) {
+            if (key !== "project_id") {
+                entries.push(`${key}=${encodeURIComponent(value)}`);
+            }
+        }
+        return `${url.pathname}?${entries.join("&")}`;
+    }
+
+    const handleApply = () => {
+        // IDs der ausgewählten Projekte extrahieren
+        const projectIds = selected
+            .map((project) => project.project_id)
+            .sort((a, b) => a - b)
+            .join("|");
+
+        const newUrl = updateProjectIdsInUrl(projectIds);
+        window.history.pushState({}, "", newUrl);
+        onClose();
+        applySelected(selected);
+    };
+
+    const clearSelection = () => {
+        setSelected([]);
+        applySelected([]);
+        onClose();
+        // Clear the URL parameter
+        const cleanUrl = window.location.pathname;
+        window.history.pushState({}, "", cleanUrl);
+    };
+
+
+    return (
+        <div className="space-y-4">
+            <DialogHeader>
+                <DialogTitle>{t("projectDialog.title")}</DialogTitle>
+                <DialogDescription>{t("projectDialog.description")}</DialogDescription>
+            </DialogHeader>
+
+            <Accordion type="single" collapsible className="w-full space-y-4">
+                <AccordionItem value="refine">
+                    <AccordionTrigger>{t("projectDialog.refine")}</AccordionTrigger>
+                    <AccordionContent>
+                        <div className="flex justify-end mb-2">
+                            <Button variant="ghost" size="sm" onClick={selectAll}>
+                                {t("button.select_all")}
+                            </Button>
+                        </div>
+                        <ScrollArea className="h-48 pr-2">
+                            <ul className="space-y-1">
+                                {projects.map((project) => (
+                                    <li
+                                        key={project.project_id}
+                                        className="flex items-center gap-2 px-2 py-1 rounded hover:bg-muted cursor-pointer"
+                                        onClick={() => toggleSelection(project)}
+                                    >
+                                        <Checkbox
+                                            checked={isSelected(project)}
+                                            onClick={(e) => e.stopPropagation()}
+                                            onCheckedChange={() => toggleSelection(project)}
+                                        />
+                                        <div>
+                                            <div>{project.project_name}</div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {t("label.role")}: {project.role}
+                                            </div>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        </ScrollArea>
+                    </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="chosen">
+                    <AccordionTrigger>{t("projectDialog.chosen")} ({selected.length})</AccordionTrigger>
+                    <AccordionContent>
+                        <div className="flex justify-end mb-2">
+                            <Button variant="ghost" size="sm" onClick={deselectAll}>
+                                {t("button.deselect_all")}
+                            </Button>
+                        </div>
+                        <ScrollArea className="h-32 pr-2">
+                            <ul className="space-y-1">
+                                {selected.map((project) => (
+                                    <li
+                                        key={project.project_id}
+                                        className="flex items-center justify-between px-2 py-1 rounded hover:bg-muted"
+                                    >
+                                        <span>{project.project_name}</span>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-5 w-5"
+                                            onClick={() => removeSelection(project)}
+                                        >
+                                            <X className="h-4 w-4"/>
+                                        </Button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </ScrollArea>
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
+
+            <div className="flex justify-between gap-2">
+                <Button variant="ghost" onClick={clearSelection} className="flex items-center gap-2">
+                    <Trash className="w-4 h-4"/>
+                    {t("button.clear_selection")}
+                </Button>
+
+                <div className="flex gap-2">
+                    <Button variant="ghost" onClick={onClose}>{t("button.cancel")}</Button>
+                    <Button disabled={selected.length === 0} onClick={handleApply}>
+                        {t("button.apply")}
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
+}
