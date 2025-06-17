@@ -23,7 +23,7 @@ import {ChartContainer, type ChartConfig} from "@/components/ui/chart";
 import {Switch} from "@/components/ui/switch";
 import {Skeleton} from "@/components/ui/skeleton";
 import {type BikeSales} from "@/models/api";
-import {cn} from "@/utils/utils";
+import {cn} from "@/lib/utils";
 import {useTranslation} from "react-i18next";
 
 interface Props {
