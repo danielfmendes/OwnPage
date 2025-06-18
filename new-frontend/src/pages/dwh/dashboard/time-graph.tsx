@@ -101,22 +101,23 @@ export function BikeModels({bikeData, isLoading}: Props) {
 
     return (
         <Card className="h-[500px] md:h-[440px] flex flex-col">
-            <CardHeader className="space-y-4">
+            <CardHeader className="space-y-4 flex items-start justify-between">
+                {/* Title + Description (links auf Desktop) */}
                 <div>
                     <CardTitle>
                         {metric === "revenue"
                             ? t("bike_models.title.revenue")
                             : t("bike_models.title.sales")}
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="mt-2 xl:mt-1">
                         {metric === "revenue"
                             ? t("bike_models.description.revenue")
                             : t("bike_models.description.sales")}
                     </CardDescription>
                 </div>
 
-                {/* Controls: switch + filter (in a single row, below title) */}
-                <div className="flex flex-wrap items-center justify-between gap-2">
+                {/* Controls: switch + filter (rechts auf Desktop, unten auf Mobile) */}
+                <div className="flex flex-col-reverse xl:flex-row flex-wrap items-center justify-end gap-2">
                     {!isLoading && (
                         <div className="flex items-center space-x-1">
                             <span

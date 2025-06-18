@@ -23,6 +23,7 @@ import {Button} from "@/components/ui/button";
 import {useTranslation} from "react-i18next";
 import FilterManager from "@/utils/filtermanager";
 import {isRoleUserForProject} from "@/utils/helpers";
+import {useIsMobile} from "@/utils/use-mobile.ts";
 
 interface Props {
     rowData?: OrderWithCustomer;
@@ -36,6 +37,7 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
     const filterManager = new FilterManager();
     const isEditMode = !!rowData;
     const isDisabled = isRoleUserForProject(rowData?.project_id!)
+    const isMobile = useIsMobile();
 
     const [projectId, setProjectId] = useState<string>("");
     const [orderDate, setOrderDate] = useState<Date | undefined>(undefined);
@@ -318,8 +320,9 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
                             </div>
                         </TabsContent>
                         <TabsContent value="orders">
-                            <div className="mb-2 flex gap-2 items-center">
-                                <div className="w-[80%]">
+                            <div
+                                className={`mb-2 flex gap-2 items-center ${isMobile ? "flex-col items-stretch" : "flex-row"}`}>
+                                <div className={isMobile ? "w-full" : "w-[80%]"}>
                                     <ModelNameSelect
                                         modelID={modelId}
                                         onChange={(value) => setModelId(value)}
@@ -329,16 +332,18 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
                                     placeholder={t("placeholder.enter.number_short")}
                                     value={number}
                                     onChange={(e) => setNumber(Number(e.target.value))}
+                                    className={isMobile ? "w-full" : ""}
                                 />
                                 <InputField
                                     placeholder={t("placeholder.enter.price")}
                                     value={price}
                                     onChange={(e) => setPrice(Number(e.target.value))}
+                                    className={isMobile ? "w-full" : ""}
                                 />
                                 <ButtonLoading
                                     isLoading={isLoadingOrderItems}
                                     onClick={handleOrderItemSave}
-                                    className="w-1/6"
+                                    className={isMobile ? "w-full" : "w-1/6"}
                                     disabled={isDisabled}
                                 >
                                     {t("button.add_item")}

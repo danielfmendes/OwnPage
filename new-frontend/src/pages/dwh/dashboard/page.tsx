@@ -117,7 +117,7 @@ export default function DashboardPage() {
     };
 
     useEffect(() => {
-        // TODO imrpove: temporary
+        // TODO improve: temporary
         if (OpenAPI.BASE == apiUrl) {
             fetchGraphMetaData();
             fetchGraphData();

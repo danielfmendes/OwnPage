@@ -71,7 +71,7 @@ export function DwhSidebar({isOpen}: DwhSidebarProps) {
             </SidebarHeader>
 
             <SidebarContent className={isOpen ? "mt-2" : "mt-4"}>
-                <SidebarGroup>
+                <SidebarGroup className={isOpen ? "gap-1" : "gap-2"}>
                     {items.map(({href, label, icon: Icon}) => {
                         const itemPath = href.split("?")[0];
                         const isActive = location.pathname === itemPath;
@@ -104,8 +104,8 @@ export function DwhSidebar({isOpen}: DwhSidebarProps) {
                                         isActive && "text-sidebar-primary-foreground"
                                     )}
                                 >
-                                                        {label}
-                                                      </span>
+                                    {label}
+                                </span>
                             </SidebarMenuButton>
                         );
                     })}
@@ -117,10 +117,10 @@ export function DwhSidebar({isOpen}: DwhSidebarProps) {
                     tooltip={t("button.sign_out")}
                     onClick={handleLogout}
                     className={cn(
-                        "flex gap-3 items-center transition-all duration-200 ease-in-out border-2",
+                        "flex gap-3 items-center transition-all duration-200 ease-in-out",
                         isOpen ? "justify-center w-full px-3 py-2 min-h-[44px] rounded-md" : ""
                     )}
-                    style={{borderColor: "var(--secondary)"}}
+                    style={{boxShadow: "inset 0 0 0 2px var(--secondary)"}}
                 >
                     <LogOut
                         className={cn("w-5 shrink-0", isOpen ? "h-7" : "h-5")}

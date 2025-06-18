@@ -110,7 +110,6 @@ export default function PartsStoragePage() {
     return (
         <ContentLayout title={t("menu.parts_storage")}>
             <DataTable
-                url="partsstorage"
                 title={t("menu.parts_storage")}
                 columns={columns}
                 data={data}

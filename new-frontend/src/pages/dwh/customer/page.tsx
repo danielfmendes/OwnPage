@@ -153,7 +153,6 @@ export default function CustomerPage() {
     return (
         <ContentLayout title={t("customer.data")}>
             <DataTable
-                url="customer"
                 title={t("customer.data")}
                 columns={columns}
                 data={data}

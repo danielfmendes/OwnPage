@@ -141,7 +141,6 @@ export default function OrderPage() {
     return (
         <ContentLayout title={t("menu.orders")}>
             <DataTable
-                url="orders"
                 title={t("menu.orders")}
                 columns={columns}
                 data={data}

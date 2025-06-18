@@ -60,15 +60,19 @@ class FilterManager {
         return result;
     }
 
-    addFilter(key: string, values: any[], type: FilterType = "default") {
-        if (!key || !Array.isArray(values)) {
-            throw new Error("Key must be string and values must be array");
-        }
+    private updateFilter(key: string, values: any[], type: FilterType = "default") {
         if (values.length === 0) {
             this.filters.delete(key);
         } else {
             this.filters.set(key, {values, type});
         }
+    }
+
+    addFilter(key: string, values: any[], type: FilterType = "default") {
+        if (!key || !Array.isArray(values)) {
+            throw new Error("Key must be string and values must be array");
+        }
+        this.updateFilter(key, values, type);
     }
 
     removeFilter(key: string) {
@@ -114,12 +118,13 @@ class FilterManager {
     }
 
     getFilterStringWithProjectIds(): string {
+        const roles = useRoleStore.getState().roles;
         const projectIds = this.getProjectIdsFromStore();
+
         if (projectIds.length > 0) {
             this.filters.set("project_id", {values: projectIds, type: "default"});
-        } else {
-            console.log("this.projectIds", projectIds)
-            console.log("this.filters", this.filters)
+        } else if (roles.length > 0) {
+            this.filters.delete("project_id");
         }
 
         return this.buildFilterString();

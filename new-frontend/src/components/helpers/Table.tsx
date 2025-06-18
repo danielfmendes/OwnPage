@@ -1,4 +1,4 @@
-import {useEffect, useState, type ReactNode} from "react";
+import {useEffect, useState, type ReactNode, useMemo} from "react";
 import {Dialog} from "@/components/ui/dialog";
 import {
     type ColumnFiltersState,
@@ -46,7 +46,6 @@ interface DataTableProps<TData> {
     data: TData[];
     itemsLoader: (opts: ItemsLoaderOptions) => Promise<void>;
     totalCount: number;
-    url?: string;
     filterDefinition?: FilterDefinition[];
     rowDialogContent?: (row: any, onClose: () => void) => ReactNode;
     addDialogContent?: (onClose: () => void) => ReactNode;
@@ -75,9 +74,6 @@ export default function DataTable<TData>({
     const [selectedRow, setSelectedRow] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    //TODO: add to pageSize to options if not already set => in useEffect
-    const paginationOptions = [10, 25, 50, 100];
-
     const {
         filterManager,
         pagination,
@@ -88,6 +84,14 @@ export default function DataTable<TData>({
         toItemsLoaderOptions,
         toQueryParams,
     } = useDataTableStore();
+
+    const paginationOptions = useMemo(() => {
+        const baseOptions = [10, 25, 50, 100];
+        if (pagination.itemsPerPage && !baseOptions.includes(pagination.itemsPerPage)) {
+            return [...baseOptions, pagination.itemsPerPage].sort((a, b) => a - b);
+        }
+        return baseOptions;
+    }, [pagination.itemsPerPage]);
     const maxPage = Math.ceil(totalCount / pagination.itemsPerPage);
 
     useEffect(() => {
@@ -188,7 +192,7 @@ export default function DataTable<TData>({
                     onClick={handleAddClick}
                     className="ml-auto bg-zinc-300 dark:bg-zinc-800 hover:bg-zinc-400 dark:hover:bg-zinc-600 text-zinc-800 dark:text-white"
                 >
-                    <Plus className="mr-2 h-4 w-4"/>
+                    <Plus className="h-4 w-4"/>
                     {t("button.add")}
                 </Button>
             </div>

@@ -158,7 +158,6 @@ export default function WareHousePage() {
     return (
         <ContentLayout title={t("menu.warehouse")}>
             <DataTable
-                url="warehouse"
                 title={t("menu.warehouse")}
                 columns={columns}
                 data={data}
