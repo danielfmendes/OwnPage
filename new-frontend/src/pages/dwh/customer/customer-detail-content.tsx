@@ -42,15 +42,13 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
     useEffect(() => {
         setLastName(rowData.name);
         setCity(rowData.city);
-        (async () => {
-            await fetchData();
-        })();
+        fetchData();
     }, [rowData]);
 
-    const fetchData = async () => {
+    const fetchData = () => {
         setIsLoadingData(true);
         filterManager.addFilter("email", [rowData.email]);
-        const filterString = await filterManager.getFilterStringWithProjectIds();
+        const filterString = filterManager.getFilterStringWithProjectIds();
         OrdersService.getOrders(filterString === "" ? undefined : filterString)
             .then((orders) => {
                 const ordersWithBikeAndDate = orders as OrderItemsWithBikeAndDate[];

@@ -16,7 +16,7 @@ interface Props {
 export function ProjectDialog({onClose}: Props) {
     const {t} = useTranslation();
     const projects: RoleManagementWithName[] = useRoleStore((state) => state.roles);
-    const applySelected = useRoleStore((state) => state.setSelectedRoles);
+    const setSelectedStore = useRoleStore((state) => state.setSelectedRoles);
     const [selected, setSelected] = useState<RoleManagementWithName[]>(useRoleStore((state) => state.selectedRoles));
 
     const isSelected = (project: RoleManagementWithName) =>
@@ -35,43 +35,16 @@ export function ProjectDialog({onClose}: Props) {
     const removeSelection = (project: RoleManagementWithName) =>
         setSelected((prev) => prev.filter((p) => p.project_id !== project.project_id));
 
-    function updateProjectIdsInUrl(projectIds: string) {
-        const url = new URL(window.location.href);
-        const params = url.searchParams;
-        params.set("project_id", projectIds);
-
-        const entries: string[] = [];
-        entries.push(`project_id=${encodeURIComponent(projectIds)}`);
-        for (const [key, value] of params.entries()) {
-            if (key !== "project_id") {
-                entries.push(`${key}=${encodeURIComponent(value)}`);
-            }
-        }
-        return `${url.pathname}?${entries.join("&")}`;
-    }
-
     const handleApply = () => {
-        // IDs der ausgewählten Projekte extrahieren
-        const projectIds = selected
-            .map((project) => project.project_id)
-            .sort((a, b) => a - b)
-            .join("|");
-
-        const newUrl = updateProjectIdsInUrl(projectIds);
-        window.history.pushState({}, "", newUrl);
+        setSelectedStore(selected);
         onClose();
-        applySelected(selected);
     };
 
     const clearSelection = () => {
         setSelected([]);
-        applySelected([]);
+        setSelectedStore([]);
         onClose();
-        // Clear the URL parameter
-        const cleanUrl = window.location.pathname;
-        window.history.pushState({}, "", cleanUrl);
     };
-
 
     return (
         <div className="space-y-4">

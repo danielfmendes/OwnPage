@@ -10,20 +10,28 @@ import {
 } from "@/components/ui/breadcrumb";
 import {useEffect, useState} from "react";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import {type BikeSales, type CityData, DashboardsService, type GraphData, type GraphMeta} from "@/models/api";
+import {
+    type BikeSales,
+    type CityData,
+    DashboardsService,
+    type GraphData,
+    type GraphMeta, OpenAPI,
+    type RoleManagementWithName
+} from "@/models/api";
 import {useTranslation} from "react-i18next";
 import FilterManager from "@/utils/filtermanager";
 import ContentLayout from "@/components/layout/ContentLayout";
 import {MetricStats} from "@/pages/dwh/dashboard/revenue-graph";
 import {BikeModels} from "@/pages/dwh/dashboard/time-graph";
 import CitiesList from "@/pages/dwh/dashboard/cities-list";
-import {useReloadStore} from "@/models/datatable/reloadState";
+import {useRoleStore} from "@/utils/rolemananagemetstate.ts";
+import apiUrl from "@/utils/helpers.ts";
 
 export default function DashboardPage() {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
     const filterManager = new FilterManager();
-    const reloadKey = useReloadStore((state) => state.reloadKeys["dashboard"]);
+    const roles: RoleManagementWithName[] = useRoleStore((state) => state.selectedRoles);
 
     const [timeRange, setTimeRange] = useState("1m");
     const [revenueChangePct, setRevenueChangePct] = useState(100);
@@ -39,10 +47,10 @@ export default function DashboardPage() {
     const [isLoadingBikeData, setIsLoadingBikeData] = useState(false);
 
     // Fetch graph meta data and calculate revenue and sales change percentage
-    const fetchGraphMetaData = async () => {
+    const fetchGraphMetaData = () => {
         setIsLoadingGraphMetaData(true);
         filterManager.addFilter("range", [timeRange]);
-        const filterString = await filterManager.getFilterStringWithProjectIds();
+        const filterString = filterManager.getFilterStringWithProjectIds();
         DashboardsService.getGraphMeta(filterString === "" ? undefined : filterString)
             .then((data: GraphMeta[]) => {
                 const graphMeta = data[0];
@@ -70,10 +78,10 @@ export default function DashboardPage() {
     };
 
     // Fetch graph data
-    const fetchGraphData = async () => {
+    const fetchGraphData = () => {
         setIsLoadingGraphDataData(true);
         filterManager.addFilter("range", [timeRange]);
-        const filterString = await filterManager.getFilterStringWithProjectIds();
+        const filterString = filterManager.getFilterStringWithProjectIds();
         DashboardsService.getGraphData(filterString === "" ? undefined : filterString)
             .then((data: GraphData[]) => setGraphDataData(data))
             .catch(err => addNotification(`Failed to load graph data${err?.message ? `: ${err.message}` : ""}`, "error"))
@@ -81,10 +89,10 @@ export default function DashboardPage() {
     };
 
     // Fetch city data
-    const fetchCityData = async () => {
+    const fetchCityData = () => {
         setIsLoadingCitiesData(true);
         filterManager.addFilter("range", [timeRange]);
-        const filterString = await filterManager.getFilterStringWithProjectIds();
+        const filterString = filterManager.getFilterStringWithProjectIds();
         DashboardsService.getCityData(filterString === "" ? undefined : filterString)
             .then((data: CityData[]) => {
                 if (data) {
@@ -98,10 +106,10 @@ export default function DashboardPage() {
     };
 
     // Fetch bike data
-    const fetchBikeData = async () => {
+    const fetchBikeData = () => {
         setIsLoadingBikeData(true);
         filterManager.addFilter("range", [timeRange]);
-        const filterString = await filterManager.getFilterStringWithProjectIds();
+        const filterString = filterManager.getFilterStringWithProjectIds();
         DashboardsService.getBikeSales(filterString === "" ? undefined : filterString)
             .then((data: BikeSales[]) => setBikeData(data))
             .catch(err => addNotification(`Failed to load bike data${err?.message ? `: ${err.message}` : ""}`, "error"))
@@ -109,13 +117,14 @@ export default function DashboardPage() {
     };
 
     useEffect(() => {
-        (async () => {
-            await fetchGraphMetaData();
-            await fetchGraphData();
-            await fetchCityData();
-            await fetchBikeData();
-        })();
-    }, [timeRange, reloadKey]);
+        // TODO imrpove: temporary
+        if (OpenAPI.BASE == apiUrl) {
+            fetchGraphMetaData();
+            fetchGraphData();
+            fetchCityData();
+            fetchBikeData();
+        }
+    }, [timeRange, roles]);
 
     return (
         <ContentLayout title={t("menu.dashboard")}>

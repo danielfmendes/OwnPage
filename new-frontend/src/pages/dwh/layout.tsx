@@ -8,7 +8,6 @@ import {
     RoleManagementsService,
     UsersService,
     type RoleManagementListResponse,
-    type RoleManagementWithName
 } from "@/models/api";
 import apiUrl, {handleLogOut} from "@/utils/helpers";
 import Language from "@/utils/language";
@@ -16,7 +15,7 @@ import {useTranslation} from "react-i18next";
 import {OpenAPI} from "@/models/api/core/OpenAPI";
 import FilterManager from "@/utils/filtermanager";
 import {useNavigate, useLocation, Outlet} from "react-router-dom";
-import {triggerReload} from "@/models/datatable/reloadState";
+import {useDataTableStore} from "@/models/datatable/dataTableStore.ts";
 
 export default function DWHLayout() {
     const navigate = useNavigate();
@@ -28,12 +27,13 @@ export default function DWHLayout() {
 
     const setUser = useUserStore((state) => state.setUser);
     const setIsLoadingUser = useUserStore((state) => state.setIsLoading);
+    const roles = useRoleStore((state) => state.roles);
     const setRoles = useRoleStore((state) => state.setRoles);
     const setIsLoadingRole = useRoleStore((state) => state.setIsLoading);
     const selectedRoles = useRoleStore((state) => state.selectedRoles);
     const setSelectedRoles = useRoleStore((state) => state.setSelectedRoles);
-    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const {i18n} = useTranslation();
+    const {toQueryParams, fromQueryParams, filterManager: globalFilterManager} = useDataTableStore();
 
     useEffect(() => {
         OpenAPI.BASE = apiUrl;
@@ -51,8 +51,33 @@ export default function DWHLayout() {
     }, [i18n]);
 
     useEffect(() => {
-        triggerReload();
-    }, [selectedRoles]);
+        fromQueryParams(new URLSearchParams(location.search));
+    }, [location.search]);
+
+    // Storer befüllen
+    useEffect(() => {
+        const filters = globalFilterManager.getFilters();
+        const projectIds = filters.project_id?.values.map(String) || [];
+
+        if (roles.length !== 0 && projectIds.length > 0) {
+            const selectedRoles = roles.filter(role =>
+                projectIds.includes(role.project_id?.toString())
+            );
+            setSelectedRoles(selectedRoles);
+        }
+    }, [roles, JSON.stringify(globalFilterManager.getFilters().project_id?.values)]);
+
+    // Updates url if project filter changes
+    useEffect(() => {
+        if (roles.length > 0) {
+            const queryParams = toQueryParams();
+            const newSearch = `?${queryParams.toString()}`;
+
+            if (location.search !== newSearch) {
+                navigate(newSearch, {replace: true});
+            }
+        }
+    }, [roles, selectedRoles]);
 
     useEffect(() => {
         if (!token) {
@@ -98,19 +123,6 @@ export default function DWHLayout() {
             setIsLoadingRole(false);
         }
     }, [token, setUser]);
-
-    useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const projectIds = urlParams.get("project_id");
-
-        if (projectIds) {
-            const selectedIds = projectIds.split("|").map((id) => parseInt(id, 10));
-            const selectedProjects = roles.filter((p) =>
-                selectedIds.includes(p.project_id)
-            );
-            setSelectedRoles(selectedProjects);
-        }
-    }, [roles, setSelectedRoles]);
 
     return (
         <div>

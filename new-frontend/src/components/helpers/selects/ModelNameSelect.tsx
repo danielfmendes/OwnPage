@@ -20,13 +20,12 @@ export default function ModelNameSelect({modelID, onChange}: Props) {
 
     useEffect(() => {
         setIsLoadingModels(true);
-        (async () => {
-            const filterString = await filterManager.getFilterStringWithProjectIds();
-            BikesService.getBikeModels(filterString === "" ? undefined : filterString)
-                .then(setModelIdOptions)
-                .catch(err => addNotification(`Failed to load model options${err?.message ? `: ${err.message}` : ""}`, "error"))
-                .finally(() => setIsLoadingModels(false));
-        })();
+
+        const filterString = filterManager.getFilterStringWithProjectIds();
+        BikesService.getBikeModels(filterString === "" ? undefined : filterString)
+            .then(setModelIdOptions)
+            .catch(err => addNotification(`Failed to load model options${err?.message ? `: ${err.message}` : ""}`, "error"))
+            .finally(() => setIsLoadingModels(false));
     }, []);
 
     const handleChange = (value: number) => {

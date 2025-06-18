@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState, type ReactNode} from "react";
+import {useEffect, useState, type ReactNode} from "react";
 import {Dialog} from "@/components/ui/dialog";
 import {
     type ColumnFiltersState,
@@ -36,9 +36,9 @@ import {type ItemsLoaderOptions} from "@/models/datatable/itemsLoader";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {type CustomColumnDef} from "@/models/datatable/column";
 import {FilterBar, type  FilterDefinition} from "./FilterBar";
-import FilterManager from "@/utils/filtermanager";
-import {useLocation, useNavigate} from "react-router-dom";
-import {useReloadedData} from "@/models/datatable/reloadState";
+import FilterManager, {type FilterType} from "@/utils/filtermanager";
+import {useNavigate} from "react-router-dom";
+import {useDataTableStore} from "@/models/datatable/dataTableStore.ts";
 
 interface DataTableProps<TData> {
     title: string;
@@ -53,7 +53,6 @@ interface DataTableProps<TData> {
 }
 
 export default function DataTable<TData>({
-                                             url,
                                              title,
                                              columns,
                                              data,
@@ -65,9 +64,7 @@ export default function DataTable<TData>({
                                          }: DataTableProps<TData>) {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
-    const location = useLocation();
     const navigate = useNavigate();
-    const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -78,48 +75,46 @@ export default function DataTable<TData>({
     const [selectedRow, setSelectedRow] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
 
+    //TODO: add to pageSize to options if not already set => in useEffect
     const paginationOptions = [10, 25, 50, 100];
-    const [filterManager, setFilterManager] = useState<FilterManager>(() => FilterManager.fromQueryParams(searchParams));
-    const [pagination, setPagination] = useState(() => Pagination.fromQueryParams(searchParams));
-    const [sort, setSort] = useState(() => Sort.fromQueryParams(searchParams));
-    const maxPage = Math.ceil(totalCount / pagination.itemsPerPage);
 
-    if (url) {
-        useReloadedData(itemsLoader, url);
-    }
+    const {
+        filterManager,
+        pagination,
+        sort,
+        setFilterManager,
+        setPagination,
+        setSort,
+        toItemsLoaderOptions,
+        toQueryParams,
+    } = useDataTableStore();
+    const maxPage = Math.ceil(totalCount / pagination.itemsPerPage);
 
     useEffect(() => {
         setIsLoading(true);
-        itemsLoader({filterManager, pagination, sort})
-            .then(async () => {
-                await updateUrl(filterManager, pagination, sort);
-            })
-            .catch((err) => {
+
+        const loadData = async () => {
+            try {
+                await itemsLoader(toItemsLoaderOptions());
+                const queryParams = toQueryParams();
+                navigate(`?${queryParams.toString()}`);
+            } catch (err: any) {
                 addNotification(
                     `Error loading the data${err?.message ? `: ${err.message}` : ""}`,
                     "error"
                 );
-            })
-            .finally(() => setIsLoading(false));
-    }, [pagination.page, pagination.itemsPerPage, sort, filterManager.getFilterString()]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-    const updateUrl = async (
-        filterManager: FilterManager,
-        pagination: Pagination,
-        sort: Sort
-    ) => {
-        const params = new URLSearchParams();
-
-        const filterParams = await filterManager.toQueryParams();
-        const pagParams = pagination.toQueryParams();
-        const sortParams = sort.toQueryParams();
-
-        Object.entries(filterParams).forEach(([k, v]) => params.set(k, v));
-        Object.entries(pagParams).forEach(([k, v]) => params.set(k, v));
-        Object.entries(sortParams).forEach(([k, v]) => params.set(k, v));
-
-        navigate(`?${params.toString()}`);
-    };
+        loadData();
+    }, [
+        pagination.page,
+        pagination.itemsPerPage,
+        sort.items.map(item => `${item.key}=${item.order}`).join(","),
+        filterManager.getFilterString(),
+    ]);
 
     const handleRowClick = (row: any) => {
         if (rowDialogContent) {
@@ -134,11 +129,13 @@ export default function DataTable<TData>({
         }
     };
 
-    const updatePage = (newPage: number) =>
-        setPagination(prev => new Pagination(newPage, prev.itemsPerPage));
+    const updatePage = (newPage: number) => {
+        setPagination(new Pagination(newPage, pagination.itemsPerPage));
+    };
 
-    const updateItemsPerPage = (newSize: number) =>
+    const updateItemsPerPage = (newSize: number) => {
         setPagination(new Pagination(1, newSize));
+    };
 
     const handleSortToggle = (key: string) => {
         const index = sort.items.findIndex(item => item.key === key);
@@ -155,6 +152,12 @@ export default function DataTable<TData>({
 
         setSort(new Sort(updated));
         setPagination(new Pagination(1, defaultPageSize));
+    };
+
+    const onFilterChange = (key: string, selected: any[], type: FilterType) => {
+        const newManager = new FilterManager(filterManager.getFilters());
+        newManager.addFilter(key, selected, type);
+        setFilterManager(newManager);
     };
 
     const table = useReactTable({
@@ -178,11 +181,7 @@ export default function DataTable<TData>({
                     <FilterBar
                         filters={filterDefinition}
                         filterManager={filterManager}
-                        onChange={(key, selected, type) => {
-                            const updated = new FilterManager(filterManager.getFilters());
-                            updated.addFilter(key, selected, type);
-                            setFilterManager(updated);
-                        }}
+                        onChange={onFilterChange}
                     />
                 )}
                 <Button
@@ -265,7 +264,8 @@ export default function DataTable<TData>({
                 {/* Buttons and pagination info container */}
                 <div className="flex items-center w-full md:w-auto justify-center md:justify-end gap-2 px-2">
 
-                    <Button variant="outline" size="sm" onClick={() => updatePage(1)} disabled={pagination.page === 1}>
+                    <Button variant="outline" size="sm" onClick={() => updatePage(1)}
+                            disabled={pagination.page === 1}>
                         <ChevronsLeft className="w-4 h-4"/>
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => updatePage(pagination.page - 1)}

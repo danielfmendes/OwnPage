@@ -193,16 +193,21 @@ export const FilterBar: FC<FilterBarProps> = ({filters, filterManager, onChange}
                         }}
                     >
                         <PopoverTrigger asChild>
-                            <ButtonLoading
-                                isLoading={loadingKeys.includes(key)}
-                                loadingText={getDisplayLabel(key, t(title))}
-                                variant={(selectedValues[key]?.length ?? 0) > 0 ? "default" : "outline"}
-                                className="rounded-full text-sm flex items-center gap-2"
-                            >
-                                {renderDisplayLabelWithDate(key, title, type, dateRange)}
+                            <div className="relative">
+                                <ButtonLoading
+                                    isLoading={loadingKeys.includes(key)}
+                                    loadingText={getDisplayLabel(key, t(title))}
+                                    variant={(selectedValues[key]?.length ?? 0) > 0 ? "default" : "outline"}
+                                    className={`rounded-full text-sm flex items-center gap-2 ${
+                                        (selectedValues[key]?.length ?? 0) > 0 ? "pr-7" : ""
+                                    }`}
+                                >
+                                    {renderDisplayLabelWithDate(key, title, type, dateRange)}
+                                </ButtonLoading>
+
                                 {(selectedValues[key]?.length ?? 0) > 0 && (
                                     <X
-                                        className="w-4 h-4 text-muted-foreground hover:text-red-600"
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground hover:text-red-600 cursor-pointer"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setSelectedValues(prev => {
@@ -213,7 +218,7 @@ export const FilterBar: FC<FilterBarProps> = ({filters, filterManager, onChange}
                                         }}
                                     />
                                 )}
-                            </ButtonLoading>
+                            </div>
                         </PopoverTrigger>
 
                         <PopoverContent align="start" className="p-2 w-auto min-w-[220px]">

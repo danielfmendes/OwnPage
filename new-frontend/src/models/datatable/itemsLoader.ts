@@ -33,7 +33,7 @@ export async function genericItemsLoader<T>(
     setData: (items: T[]) => void,
     setTotalCount: (count: number) => void,
 ): Promise<void> {
-    const filterString = await options.filterManager.getFilterStringWithProjectIds();
+    const filterString = options.filterManager.getFilterStringWithProjectIds();
     const sortString = options.sort.toCallOpts().join(",");
 
     const result = await fetchFunction(

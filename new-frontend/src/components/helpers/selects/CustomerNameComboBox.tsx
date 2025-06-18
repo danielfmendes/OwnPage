@@ -28,18 +28,16 @@ export default function CustomerNameComboBox({customerID, onChange}: Props) {
     useEffect(() => {
         setIsLoading(true);
 
-        (async () => {
-            const filterString = await filterManager.getFilterStringWithProjectIds();
-            CustomersService.getCustomers(filterString === "" ? undefined : filterString)
-                .then((customers) => {
-                    const customerList = customers as CustomerListResponse;
-                    setCustomerIdOptions(customerList.items ?? []);
-                    const selected = customerList.items?.find(c => c.id === customerID) ?? null;
-                    setSelectedCustomer(selected);
-                })
-                .catch(err => addNotification(`Failed to load customer options${err?.message ? `: ${err.message}` : ""}`, "error"))
-                .finally(() => setIsLoading(false))
-        })();
+        const filterString = filterManager.getFilterStringWithProjectIds();
+        CustomersService.getCustomers(filterString === "" ? undefined : filterString)
+            .then((customers) => {
+                const customerList = customers as CustomerListResponse;
+                setCustomerIdOptions(customerList.items ?? []);
+                const selected = customerList.items?.find(c => c.id === customerID) ?? null;
+                setSelectedCustomer(selected);
+            })
+            .catch(err => addNotification(`Failed to load customer options${err?.message ? `: ${err.message}` : ""}`, "error"))
+            .finally(() => setIsLoading(false))
     }, [customerID]);
 
     const handleSelect = (id: number) => {

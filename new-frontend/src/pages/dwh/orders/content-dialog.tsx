@@ -79,17 +79,15 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
 
     useEffect(() => {
         loadRowData();
-        (async () => {
-            if (rowData) {
-                await fetchOrderItems();
-            }
-        })();
+        if (rowData) {
+            fetchOrderItems();
+        }
     }, [rowData]);
 
-    const fetchOrderItems = async () => {
+    const fetchOrderItems = () => {
         setIsLoadingData(true);
         filterManager.addFilter("order_id", [rowData?.id]);
-        const filterString = await filterManager.getFilterStringWithProjectIds();
+        const filterString = filterManager.getFilterStringWithProjectIds();
         OrdersService.getOrderItems(filterString === "" ? undefined : filterString)
             .then((orders: OrderItemsWithBikeName[]) => {
                 setData(orders);
@@ -146,10 +144,10 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
 
         setIsLoadingOrderItems(true);
         OrdersService.createOrderItem(newData)
-            .then(async () => {
+            .then(() => {
                 addNotification("Orderitem saved successfully", "success");
                 resetFormOrderItems();
-                await fetchOrderItems();
+                fetchOrderItems();
             })
             .catch(err => addNotification(`Failed to save orderitem${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingOrderItems(false));
@@ -166,9 +164,9 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
         setLoadingEditID(updatedData.id!);
 
         OrdersService.updateOrderItem(updatedData)
-            .then(async () => {
+            .then(() => {
                 addNotification("OrderItem updated successfully", "success");
-                await fetchOrderItems();
+                fetchOrderItems();
                 handleEdit(null);
             })
             .catch(err => addNotification(`Failed to update orderitem${err?.message ? `: ${err.message}` : ""}`, "error"))
@@ -178,9 +176,9 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
     const handleDeleteOrderItems = (id: number) => {
         setLoadingDeleteID(id);
         OrdersService.deleteOrderItem(id)
-            .then(async () => {
+            .then(() => {
                 addNotification(`Order item mit id ${id} erfolgreich gelöscht`, "success");
-                await fetchOrderItems();
+                fetchOrderItems();
             })
             .catch(err => addNotification(`Failed to delete orderitem${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setLoadingDeleteID(null));

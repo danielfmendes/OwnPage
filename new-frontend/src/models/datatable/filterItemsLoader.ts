@@ -24,7 +24,7 @@ const createFilterItemLoaderWithManager = (
     key,
     title: `label.${key}`,
     itemsLoader: async (): Promise<FilterItem[]> => {
-        const filterString = await itemsLoaderOptions.filterManager.getFilterStringWithProjectIds();
+        const filterString = itemsLoaderOptions.filterManager.getFilterStringWithProjectIds();
         const response = await loader(
             filterString || undefined,
             undefined,
