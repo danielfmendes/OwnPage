@@ -2,9 +2,9 @@ import {useMemo, useState, type MouseEvent} from "react";
 import DataTable from "@/components/helpers/Table";
 import {type CustomColumnDef} from "@/models/datatable/column";
 import {Button} from "@/components/ui/button";
-import {Trash2} from "lucide-react";
 import {type Order, OrdersService, type OrderWithCustomer} from "@/models/api";
-import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
+import {DeleteButton} from "@/components/helpers/buttons/DeleteButton";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {useTranslation} from "react-i18next";
@@ -112,15 +112,11 @@ export default function OrderPage() {
                 const order: Order = row.original
 
                 return (
-                    <ButtonLoading
+                    <DeleteButton
                         onClick={(event) => handleDelete(event, order.id!)}
                         isLoading={loadingDeleteId === order.id}
-                        className="text-black dark:text-white p-2 rounded"
-                        variant="destructive"
                         disabled={isRoleUserForProject(order.project_id)}
-                    >
-                        <Trash2 className="w-5 h-5"/>
-                    </ButtonLoading>
+                    />
                 )
             },
         },

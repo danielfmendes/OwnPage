@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
-import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
+import {DeleteButton} from "@/components/helpers/buttons/DeleteButton";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import InputField from "@/components/helpers/InputField";
 import {
@@ -16,7 +17,7 @@ import CustomerNameComboBox from "@/components/helpers/selects/CustomerNameCombo
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
 import {type CustomColumnDef} from "@/models/datatable/column";
-import {Pencil, Trash2} from "lucide-react";
+import {Pencil} from "lucide-react";
 import ModelNameSelect from "@/components/helpers/selects/ModelNameSelect";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {Button} from "@/components/ui/button";
@@ -213,15 +214,11 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
 
                 return (
                     <div className="flex justify-end gap-2">
-                        <ButtonLoading
+                        <DeleteButton
                             onClick={() => handleDeleteOrderItems(orderItem.id!)}
                             isLoading={loadingDeleteID === orderItem.id}
-                            className="text-black dark:text-white p-2 rounded"
-                            variant="destructive"
                             disabled={isDisabled}
-                        >
-                            <Trash2 className="w-5 h-5"/>
-                        </ButtonLoading>
+                        />
                         <Popover
                             open={openPopoverId === orderItem.id}
                             onOpenChange={(open) => {

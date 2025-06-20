@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
-import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
 import InputField from "@/components/helpers/InputField";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {ProjectsService} from "@/models/api";

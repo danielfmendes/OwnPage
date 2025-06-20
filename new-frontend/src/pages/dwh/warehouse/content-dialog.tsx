@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {type Bike, BikesService, type BikeWithModelName} from "@/models/api";
 import InputField from "@/components/helpers/InputField";
-import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {DatePicker} from "@/components/helpers/datepicker/DatePicker";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";

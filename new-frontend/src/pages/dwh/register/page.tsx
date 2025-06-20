@@ -7,7 +7,7 @@ import {DatePicker} from "@/components/helpers/datepicker/DatePicker";
 import AuthToken from "@/utils/authtoken";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useTranslation} from "react-i18next";
-import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
 import {AuthsService} from "@/models/api";
 
 export default function RegisterCard() {

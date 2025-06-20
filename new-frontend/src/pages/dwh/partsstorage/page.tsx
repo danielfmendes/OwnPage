@@ -1,9 +1,7 @@
 import {useMemo, useState, type MouseEvent} from "react";
 import DataTable from "@/components/helpers/Table";
 import {type CustomColumnDef} from "@/models/datatable/column";
-import {Trash2} from "lucide-react";
 import {WareHousePartsService, type WarehousePartWithName} from "@/models/api";
-import {ButtonLoading} from "@/components/helpers/ButtonLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useTranslation} from "react-i18next";
 import {isRoleUserForProject} from "@/utils/helpers";
@@ -12,6 +10,7 @@ import {type FilterDefinition} from "@/components/helpers/FilterBar";
 import {createWareHousePartsFilterItemLoader} from "@/models/datatable/filterItemsLoader";
 import ContentLayout from "@/components/layout/ContentLayout";
 import WarehousePartDialogContent from "@/pages/dwh/partsstorage/content-dialog";
+import {DeleteButton} from "@/components/helpers/buttons/DeleteButton";
 
 export default function PartsStoragePage() {
     const {t} = useTranslation();
@@ -80,15 +79,11 @@ export default function PartsStoragePage() {
                 const warehousePart: WarehousePartWithName = row.original
 
                 return (
-                    <ButtonLoading
+                    <DeleteButton
                         onClick={(event) => handleDelete(event, warehousePart.id!)}
                         isLoading={loadingDeleteId === warehousePart.id}
-                        className="text-black dark:text-white p-2 rounded"
-                        variant="destructive"
                         disabled={isRoleUserForProject(warehousePart.project_id)}
-                    >
-                        <Trash2 className="w-5 h-5"/>
-                    </ButtonLoading>
+                    />
                 )
             },
         },

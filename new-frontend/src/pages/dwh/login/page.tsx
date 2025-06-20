@@ -6,7 +6,7 @@ import {ArrowRight, Box} from 'lucide-react';
 import AuthToken from "@/utils/authtoken";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useTranslation} from "react-i18next";
-import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
 import {AuthsService} from "@/models/api";
 import {useNavigate} from "react-router-dom";
 

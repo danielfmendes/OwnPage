@@ -9,7 +9,7 @@ import {useTranslation} from "react-i18next";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import i18n from "i18next";
 import FilterManager, {type FilterType} from "@/utils/filtermanager";
-import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
 import {useFilterStore} from "@/utils/filterstate";
 import type {DateRange} from "react-day-picker";
 import {DatePickerCalender} from "@/components/helpers/datepicker/DatePickerCalender";

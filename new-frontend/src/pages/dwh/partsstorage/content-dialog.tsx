@@ -11,7 +11,7 @@ import {
     type WarehousePartWithName
 } from "@/models/api";
 import InputField from "@/components/helpers/InputField";
-import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
 import {SelectLoading} from "@/components/helpers/SelectLoading";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";

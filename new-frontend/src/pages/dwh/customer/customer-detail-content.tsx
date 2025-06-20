@@ -6,7 +6,7 @@ import {
 import {Card, CardContent} from "@/components/ui/card"
 import {useEffect, useState} from "react"
 import InputField from "@/components/helpers/InputField";
-import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
 import {
     Tabs,
     TabsContent,

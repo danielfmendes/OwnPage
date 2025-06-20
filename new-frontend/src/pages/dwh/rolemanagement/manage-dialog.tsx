@@ -7,11 +7,12 @@ import {
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {type RoleManagement, RoleManagementsService} from "@/models/api";
 import {Select, SelectTrigger, SelectValue, SelectContent, SelectItem} from "@/components/ui/select";
-import {Check, Trash2} from "lucide-react";
+import {Check} from "lucide-react";
 import {Input} from "@/components/ui/input";
 import {type CustomColumnDef} from "@/models/datatable/column";
 import {SimpleTable} from "@/components/helpers/SimpleTable";
-import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
+import {DeleteButton} from "@/components/helpers/buttons/DeleteButton";
 import {useTranslation} from "react-i18next";
 
 interface RoleSelectProps {
@@ -168,14 +169,10 @@ export default function ManageDialogContent({manageId}: ManageProps) {
                         >
                             <Check className="w-4 h-4"/>
                         </ButtonLoading>
-                        <ButtonLoading
+                        <DeleteButton
                             onClick={() => handleDelete(email)}
                             isLoading={loadingDeleteEmail === email}
-                            className="text-black dark:text-white p-2 rounded"
-                            variant="destructive"
-                        >
-                            <Trash2 className="w-5 h-5"/>
-                        </ButtonLoading>
+                        />
                     </div>
                 );
             },
