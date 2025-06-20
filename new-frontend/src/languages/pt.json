@@ -6,6 +6,8 @@
     "sign_out": "Sair",
     "update": "Atualizar",
     "cancel": "Cancelar",
+    "reset": "Reiniciar",
+    "close": "Fechar",
     "back": "Voltar",
     "delete_ref": "Excluir referências",
     "register": "Registrar",
@@ -179,5 +181,14 @@
   "pagination": {
     "info": "{{from}}-{{to}} de {{total}}",
     "page": "Itens por página"
+  },
+  "filterBar": {
+    "sort": "Ordenar por",
+    "filters": "Filtros",
+    "unsorted": "Sem ordenação",
+    "asc": "Asc",
+    "desc": "Desc",
+    "title": "Filtros e Ordenação",
+    "subtitle": "Refine seus resultados aplicando filtros e ordenação"
   }
 }

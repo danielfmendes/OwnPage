@@ -33,9 +33,10 @@ export interface FilterBarProps {
     filters: FilterDefinition[];
     filterManager: FilterManager;
     onChange: (key: string, selected: string[], type: FilterType) => void;
+    isMobile?: boolean
 }
 
-export const FilterBar: FC<FilterBarProps> = ({filters, filterManager, onChange}) => {
+export const FilterBar: FC<FilterBarProps> = ({filters, filterManager, onChange, isMobile = false}) => {
     const locale = i18n.language;
     const {t} = useTranslation();
     const {addNotification} = useNotification();
@@ -111,7 +112,8 @@ export const FilterBar: FC<FilterBarProps> = ({filters, filterManager, onChange}
         const items = getLoadedItems(context, key) || [];
         const labels = values.map((v) => items.find((i) => i.value === v)?.value).filter(Boolean);
         if (labels.length === 0) return title;
-        return labels.length < 3 ? `${title}: ${labels.join(", ")}` : `${title}: ${labels.length}+ ${t("placeholder.selected")}`;
+        const threshold = isMobile ? 2 : 3;
+        return labels.length < threshold ? `${title}: ${labels.join(", ")}` : `${title}: ${labels.length}+ ${t("placeholder.selected")}`;
     };
 
     const calculateHeight = (items: FilterItem[] | undefined) => {
@@ -156,11 +158,7 @@ export const FilterBar: FC<FilterBarProps> = ({filters, filterManager, onChange}
     };
 
     return (
-        <div
-            className="flex gap-3 whitespace-nowrap mr-2
-             overflow-x-auto scrollbar-thin scrollbar-thumb-muted-foreground
-             md:flex-wrap md:overflow-visible md:scrollbar-none md:whitespace-normal"
-        >
+        <div className="flex flex-wrap gap-3 mr-2">
             {pinnedFilters.map(({title, key, itemsLoader, type = "default"}) => {
                 const items = getLoadedItems(context, key);
                 const search = searchTexts[key] ?? "";

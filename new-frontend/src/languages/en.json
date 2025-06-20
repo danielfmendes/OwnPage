@@ -6,6 +6,8 @@
     "sign_out": "Sign out",
     "update": "Update",
     "cancel": "Cancel",
+    "reset": "Reset",
+    "close": "Close",
     "back": "Back",
     "delete_ref": "Delete references",
     "register": "Register",
@@ -179,5 +181,14 @@
   "pagination": {
     "info": "{{from}}-{{to}} of {{total}}",
     "page": "Items Per Page"
+  },
+  "filterBar": {
+    "sort": "Sort By",
+    "filters": "Filters",
+    "unsorted": "Unsorted",
+    "asc": "Asc",
+    "desc": "Desc",
+    "title": "Filters & Sorting",
+    "subtitle": "Refine your results by applying filters and sorting"
   }
 }

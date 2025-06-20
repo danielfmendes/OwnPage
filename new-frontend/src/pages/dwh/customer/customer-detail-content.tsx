@@ -160,7 +160,7 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
                     <Card className="mt-4">
                         <CardContent className="pt-4">
                             <h3 className="text-lg font-semibold mb-4">{t("orders.history")}</h3>
-                            <SimpleTable data={data} columns={columns} isLoading={isLoadingData} maxHeight={300}/>
+                            <SimpleTable data={data} columns={columns} isLoading={isLoadingData} maxHeight={300} singleData={true}/>
                         </CardContent>
                     </Card>
                 </TabsContent>

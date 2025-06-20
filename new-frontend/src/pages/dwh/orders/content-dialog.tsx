@@ -346,7 +346,7 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
                                     {t("button.add_item")}
                                 </ButtonLoading>
                             </div>
-                            <SimpleTable data={data} columns={columns} isLoading={isLoadingData}/>
+                            <SimpleTable data={data} columns={columns} isLoading={isLoadingData} singleData={true}/>
                         </TabsContent>
                     </Tabs>
                 </>
