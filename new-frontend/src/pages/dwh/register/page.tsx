@@ -22,12 +22,19 @@ export default function RegisterCard() {
     const handleSubmit = () => {
         setIsLoading(true);
 
+        let stillLoading = true;
+        const loadingTimeout = setTimeout(() => {
+            if (stillLoading) {
+                addNotification("Render is still starting up - it may take a few seconds...", "info");
+            }
+        }, 5000);
+
         const newData = {
             username: name,
             email,
             password,
             dob: selectedDate ? selectedDate.toISOString() : "",
-        }
+        };
 
         AuthsService.userRegister(newData)
             .then(data => {
@@ -43,7 +50,11 @@ export default function RegisterCard() {
                 }
             })
             .catch(err => addNotification(`Registration error${err?.message ? `: ${err.message}` : ""}`, "error"))
-            .finally(() => setIsLoading(false));
+            .finally(() => {
+                stillLoading = false;
+                clearTimeout(loadingTimeout);
+                setIsLoading(false);
+            });
     };
 
     const handleBack = () => {

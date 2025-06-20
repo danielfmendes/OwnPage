@@ -39,10 +39,17 @@ export default function LoginCard() {
         const setLoading = demo ? setIsLoadingDemo : setIsLoading;
         setLoading(true);
 
+        let stillLoading = true;
+        const loadingTimeout = setTimeout(() => {
+            if (stillLoading) {
+                addNotification("Render is still starting up - it may take a few seconds...", "info");
+            }
+        }, 5000);
+
         const newData = {
             email: loginEmail,
             password: loginPassword,
-        }
+        };
 
         AuthsService.userLogin(newData)
             .then(data => {
@@ -57,7 +64,11 @@ export default function LoginCard() {
                 setErrorMessagePassword(t("error.login"));
                 addNotification(`Login error${err?.message ? `: ${err.message}` : ""}`, "error");
             })
-            .finally(() => setLoading(false));
+            .finally(() => {
+                stillLoading = false;
+                clearTimeout(loadingTimeout);
+                setLoading(false);
+            });
     };
 
     const handleSubmit = (e: FormEvent) => {
