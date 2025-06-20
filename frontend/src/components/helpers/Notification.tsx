@@ -62,7 +62,7 @@ export const Notification = ({
 
     return (
         <div className={cn(
-            "relative w-full max-w-md mx-auto transition-all animate-in fade-in-80 slide-in-from-top-4",
+            "relative w-[60%] max-w-md mx-auto transition-all animate-in fade-in-80 slide-in-from-top-4 sm:w-full",
             className
         )}>
             <Alert className={cn(
