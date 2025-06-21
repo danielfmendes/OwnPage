@@ -58,7 +58,7 @@ export default function DashboardPage() {
             fetchCityData();
             fetchBikeData();
         }
-    }, [timeRange, roles]);
+    }, [timeRange, roles, OpenAPI.BASE]);
 
     useEffect(() => {
         const measure = () => {

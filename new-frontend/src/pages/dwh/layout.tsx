@@ -21,6 +21,7 @@ export default function DWHLayout() {
     const navigate = useNavigate();
     const location = useLocation();
     const hideSidebar = ['/dwh/login', '/dwh/register'].includes(location.pathname);
+    const hasDataTable = ['/dwh/orders', '/dwh/customers', '/dwh/warehouse', '/dwh/partsstorage', '/dwh/rolemanagement'].includes(location.pathname);
     const {addNotification} = useNotification();
     const token = AuthToken.getAuthToken();
     const filterManager = new FilterManager();
@@ -70,7 +71,7 @@ export default function DWHLayout() {
     // Updates url if project filter changes
     useEffect(() => {
         if (roles.length > 0) {
-            const queryParams = toQueryParams();
+            const queryParams = hasDataTable ? toQueryParams() : globalFilterManager.getFilterStringWithProjectIds(true);
             const newSearch = `?${queryParams.toString()}`;
 
             if (location.search !== newSearch) {

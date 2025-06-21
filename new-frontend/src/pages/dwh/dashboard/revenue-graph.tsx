@@ -106,7 +106,7 @@ export function MetricStats({
                     {isLoadingGraphDataData ? (
                         <Skeleton style={dynamicHeightStyle} className="mt-4"/>
                     ) : isNoRevenueData ? (
-                        <p className="text-sm text-muted-foreground mt-4">
+                        <p style={dynamicHeightStyle} className="text-sm text-muted-foreground mt-4">
                             {t("no_data_to_display")}
                         </p>
                     ) : (
@@ -160,7 +160,7 @@ export function MetricStats({
                     {isLoadingGraphDataData ? (
                         <Skeleton style={dynamicHeightStyle} className="mt-4"/>
                     ) : isNoSalesData ? (
-                        <p className="text-sm text-muted-foreground mt-4">
+                        <p style={dynamicHeightStyle} className="text-sm text-muted-foreground mt-4">
                             {t("no_data_to_display")}
                         </p>
                     ) : (

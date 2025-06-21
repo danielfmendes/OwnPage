@@ -88,7 +88,7 @@ class FilterManager {
         return selectedRoles.map((r) => r.project_id);
     }
 
-    private buildFilterString(): string {
+    private buildFilterString(ignoreOthers: boolean = false): string {
         const parts: string[] = [];
 
         const formatFilter = (key: string, filterData: FilterData) => {
@@ -109,15 +109,17 @@ class FilterManager {
             formatFilter("project_id", projectFilter);
         }
 
-        for (const [key, filterData] of this.filters.entries()) {
-            if (key === "project_id") continue;
-            formatFilter(key, filterData);
+        if (!ignoreOthers) {
+            for (const [key, filterData] of this.filters.entries()) {
+                if (key === "project_id") continue;
+                formatFilter(key, filterData);
+            }
         }
 
         return parts.join(",");
     }
 
-    getFilterStringWithProjectIds(): string {
+    getFilterStringWithProjectIds(ignoreOthers: boolean = false): string {
         const roles = useRoleStore.getState().roles;
         const projectIds = this.getProjectIdsFromStore();
 
@@ -127,7 +129,7 @@ class FilterManager {
             this.filters.delete("project_id");
         }
 
-        return this.buildFilterString();
+        return this.buildFilterString(ignoreOthers);
     }
 
     getFilterString(): string {

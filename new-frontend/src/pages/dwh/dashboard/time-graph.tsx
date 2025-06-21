@@ -192,7 +192,7 @@ export function BikeModels({bikeData, isLoading, maxHeight}: Props) {
                 {isLoading ? (
                     <Skeleton style={dynamicHeightStyle}/>
                 ) : isNoSalesData ? (
-                    <p className="text-sm text-muted-foreground mt-4">
+                    <p style={dynamicHeightStyle} className="text-sm text-muted-foreground">
                         {t("no_data_to_display")}
                     </p>
                 ) : (
