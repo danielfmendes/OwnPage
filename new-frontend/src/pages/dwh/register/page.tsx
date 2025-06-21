@@ -25,7 +25,7 @@ export default function RegisterCard() {
         let stillLoading = true;
         const loadingTimeout = setTimeout(() => {
             if (stillLoading) {
-                addNotification("Render is still starting up - it may take a few seconds...", "info");
+                addNotification("Render is still starting up - it may take a few seconds...", "info", 10000);
             }
         }, 5000);
 

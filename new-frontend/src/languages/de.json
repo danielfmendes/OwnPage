@@ -98,7 +98,7 @@
     "info": "Kundeninfo",
     "data": "Kundendaten"
   },
-  "cities_list_title": "Top 5 Städte nach Umsatz",
+  "cities_list_title": "Top {{count}} Städte nach Umsatz",
   "project_title": "Projekt hinzufügen",
   "loading_cities": "Lädt Städte...",
   "sales_to_cities": "Sie haben Verkäufe in {{count}} vers. Städten gemacht",

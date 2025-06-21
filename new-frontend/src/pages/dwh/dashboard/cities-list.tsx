@@ -10,14 +10,31 @@ import {Skeleton} from "@/components/ui/skeleton";
 import {Building2} from "lucide-react";
 import type {CityData} from "@/models/api";
 import {useTranslation} from "react-i18next";
+import {useMemo} from "react";
+import {useIsMobile} from "@/utils/use-mobile.ts";
 
 interface Props {
     citiesData: CityData[];
     isLoading: boolean;
+    maxHeight: number;
 }
 
-export default function CitiesList({citiesData, isLoading}: Props) {
+export default function CitiesList({citiesData, isLoading, maxHeight}: Props) {
     const {t} = useTranslation();
+    const isMobile = useIsMobile();
+
+    const visibleCount = useMemo(() => {
+        if (isMobile) {
+            return 5;
+        }
+        const heightTitle = 100;
+        const itemHeight = 64;
+        return maxHeight ? Math.floor((maxHeight - heightTitle) / itemHeight) : 0;
+    }, [maxHeight, isMobile]);
+
+    const visibleCities = useMemo(() => {
+        return citiesData.slice(0, visibleCount);
+    }, [citiesData, visibleCount]);
 
     function calculatePercentageChange(current: number, previous: number): number | undefined {
         if (previous === 0) {
@@ -27,22 +44,22 @@ export default function CitiesList({citiesData, isLoading}: Props) {
     }
 
     return (
-        <Card className="col-span-3 h-[440px] flex flex-col">
+        <Card className="col-span-3 flex flex-col h-full">
             <CardHeader>
-                <CardTitle>{t("cities_list_title")}</CardTitle>
+                <CardTitle>{t("cities_list_title", {count: visibleCities.length})}</CardTitle>
                 <CardDescription>
                     {isLoading
                         ? t("loading_cities")
-                        : citiesData.length > 0
-                            ? t("sales_to_cities", {count: citiesData.length})
+                        : visibleCities.length > 0
+                            ? t("sales_to_cities", {count: visibleCities.length})
                             : t("no_sales_data")}
                 </CardDescription>
             </CardHeader>
             <CardContent className="flex-grow overflow-auto">
-                <div className="space-y-7">
+                <div className="space-y-6">
                     {isLoading ? (
-                        // Show 5 skeleton items while loading
-                        Array.from({length: 5}).map((_, index) => (
+                        // Show as many skeleton items as fit
+                        Array.from({length: visibleCount}).map((_, index) => (
                             <div key={index} className="flex items-center space-x-4">
                                 <Skeleton className="w-10 h-10 rounded-full"/>
                                 <div className="flex-1 space-y-2">
@@ -52,10 +69,10 @@ export default function CitiesList({citiesData, isLoading}: Props) {
                                 <Skeleton className="h-4 w-16 ml-auto"/>
                             </div>
                         ))
-                    ) : citiesData.length === 0 ? (
+                    ) : visibleCities.length === 0 ? (
                         <p className="text-sm text-muted-foreground">{t("no_data_to_display")}</p>
                     ) : (
-                        citiesData.map((cityData, index) => {
+                        visibleCities.map((cityData, index) => {
                             const percentageChange = calculatePercentageChange(
                                 cityData.current_revenue,
                                 cityData.previous_revenue

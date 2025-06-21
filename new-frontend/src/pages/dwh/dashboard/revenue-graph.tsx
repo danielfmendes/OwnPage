@@ -10,6 +10,7 @@ import {type ChartConfig, ChartContainer} from "@/components/ui/chart";
 import type {GraphData} from "@/models/api";
 import {Skeleton} from "@/components/ui/skeleton";
 import {useTranslation} from "react-i18next";
+import {useIsMobile} from "@/utils/use-mobile.ts";
 
 interface Props {
     graphData: GraphData[];
@@ -22,6 +23,7 @@ interface Props {
     timeRange: string;
     isLoadingGraphMetaData: boolean;
     isLoadingGraphDataData: boolean;
+    maxHeight: number;
 }
 
 export function MetricStats({
@@ -30,10 +32,16 @@ export function MetricStats({
                                 timeRange,
                                 isLoadingGraphMetaData,
                                 isLoadingGraphDataData,
+                                maxHeight,
                             }: Props) {
     const {t} = useTranslation();
     const {theme} = useTheme();
     const chartColor = theme === "dark" ? "white" : "black";
+    const isMobile = useIsMobile();
+    const dynamicHeightStyle = {
+        height: isMobile ? 80 : maxHeight - 146,
+        width: "100%",
+    };
 
     const chartConfig = {
         revenue: {
@@ -76,10 +84,10 @@ export function MetricStats({
                 </CardHeader>
                 <CardContent className="-mt-5 pb-0">
                     {isLoadingGraphMetaData ? (
-                        <>
-                            <Skeleton className="h-6 w-32 mb-1"/>
-                            {timeLabel && <Skeleton className="h-4 w-40"/>}
-                        </>
+                        <div className="space-y-1.5">
+                            <Skeleton className="h-[30px] w-40"/>
+                            {timeLabel && <Skeleton className="h-[12px] w-48"/>}
+                        </div>
                     ) : (
                         <>
                             <div className="text-2xl font-bold">
@@ -96,13 +104,17 @@ export function MetricStats({
                         </>
                     )}
                     {isLoadingGraphDataData ? (
-                        <Skeleton className="h-[80px] w-full mt-4"/>
+                        <Skeleton style={dynamicHeightStyle} className="mt-4"/>
                     ) : isNoRevenueData ? (
                         <p className="text-sm text-muted-foreground mt-4">
                             {t("no_data_to_display")}
                         </p>
                     ) : (
-                        <ChartContainer config={chartConfig} className="h-[80px] w-full mt-2 mb-5 md:mb-2.5">
+                        <ChartContainer
+                            config={chartConfig}
+                            style={dynamicHeightStyle}
+                            className="mt-4"
+                        >
                             <LineChart data={graphData}>
                                 <Line
                                     type="monotone"
@@ -126,10 +138,10 @@ export function MetricStats({
                 </CardHeader>
                 <CardContent className="-mt-5 pb-0">
                     {isLoadingGraphMetaData ? (
-                        <>
-                            <Skeleton className="h-6 w-24 mb-1"/>
-                            {timeLabel && <Skeleton className="h-4 w-40"/>}
-                        </>
+                        <div className="space-y-1.5">
+                            <Skeleton className="h-[30px] w-40"/>
+                            {timeLabel && <Skeleton className="h-[12px] w-48"/>}
+                        </div>
                     ) : (
                         <>
                             <div className="text-2xl font-bold">
@@ -146,19 +158,19 @@ export function MetricStats({
                         </>
                     )}
                     {isLoadingGraphDataData ? (
-                        <Skeleton className="h-[80px] w-full mt-4"/>
+                        <Skeleton style={dynamicHeightStyle} className="mt-4"/>
                     ) : isNoSalesData ? (
                         <p className="text-sm text-muted-foreground mt-4">
                             {t("no_data_to_display")}
                         </p>
                     ) : (
-                        <ChartContainer config={chartConfig} className="mt-2 h-[80px] w-full">
+                        <ChartContainer
+                            config={chartConfig}
+                            style={dynamicHeightStyle}
+                            className="mt-4"
+                        >
                             <BarChart data={graphData}>
-                                <Bar
-                                    dataKey="sales_no"
-                                    fill={chartColor}
-                                    radius={4}
-                                />
+                                <Bar dataKey="sales_no" fill={chartColor} radius={4}/>
                             </BarChart>
                         </ChartContainer>
                     )}

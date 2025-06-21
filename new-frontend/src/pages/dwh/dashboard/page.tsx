@@ -8,7 +8,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {
     type BikeSales,
@@ -45,6 +45,45 @@ export default function DashboardPage() {
     const [isLoadingGraphDataData, setIsLoadingGraphDataData] = useState(false);
     const [isLoadingCitiesData, setIsLoadingCitiesData] = useState(false);
     const [isLoadingBikeData, setIsLoadingBikeData] = useState(false);
+
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [metricHeight, setMetricHeight] = useState<number | null>(null);
+    const [otherHeight, setOtherHeight] = useState<number | null>(null);
+
+    useEffect(() => {
+        // TODO improve: temporary
+        if (OpenAPI.BASE == apiUrl) {
+            fetchGraphMetaData();
+            fetchGraphData();
+            fetchCityData();
+            fetchBikeData();
+        }
+    }, [timeRange, roles]);
+
+    useEffect(() => {
+        const measure = () => {
+            if (!containerRef.current) return;
+            const fullHeight = window.innerHeight - containerRef.current.getBoundingClientRect().top - 14;
+
+            const newMetricHeight = Math.max(226, Math.round(fullHeight * 0.29));
+            let newOtherHeight;
+            if (newMetricHeight == 226) {
+                newOtherHeight = fullHeight - newMetricHeight - 20;
+            } else {
+                newOtherHeight = Math.round(fullHeight * 0.69);
+            }
+            setMetricHeight(newMetricHeight);
+            setOtherHeight(newOtherHeight);
+        };
+
+        const id = setTimeout(() => measure(), 0);
+
+        window.addEventListener("resize", measure);
+        return () => {
+            clearTimeout(id);
+            window.removeEventListener("resize", measure);
+        };
+    }, []);
 
     // Fetch graph meta data and calculate revenue and sales change percentage
     const fetchGraphMetaData = () => {
@@ -116,18 +155,8 @@ export default function DashboardPage() {
             .finally(() => setIsLoadingBikeData(false));
     };
 
-    useEffect(() => {
-        // TODO improve: temporary
-        if (OpenAPI.BASE == apiUrl) {
-            fetchGraphMetaData();
-            fetchGraphData();
-            fetchCityData();
-            fetchBikeData();
-        }
-    }, [timeRange, roles]);
-
     return (
-        <ContentLayout title={t("menu.dashboard")}>
+        <ContentLayout title={t("menu.dashboard")} className="2xl:px-32 h-full">
             <div className="flex flex-col gap-2 sm:gap-4 mb-4">
                 <div className="flex flex-row items-center justify-between gap-2">
                     {/* Mobile: show dashboard text; Desktop: hide because it's in breadcrumb */}
@@ -161,28 +190,36 @@ export default function DashboardPage() {
                     </Tabs>
                 </div>
             </div>
-            <div className="grid gap-4">
-                <MetricStats
-                    graphData={graphDataData}
-                    graphMeta={{
-                        currentRevenue: graphMetaData?.current_revenue ?? 0,
-                        revenueChangePct: revenueChangePct,
-                        currentSales: graphMetaData?.current_sales ?? 0,
-                        salesChangePct: salesChangePct,
-                    }}
-                    timeRange={timeRange}
-                    isLoadingGraphMetaData={isLoadingGraphMetaData}
-                    isLoadingGraphDataData={isLoadingGraphDataData}
-                />
 
-                <div className="grid gap-4 grid-cols-1 md:grid-cols-10">
-                    <div className="col-span-1 md:col-span-6 lg:col-span-6 xl:col-span-7">
-                        <BikeModels bikeData={bikeData} isLoading={isLoadingBikeData}/>
+            <div ref={containerRef} className="grid gap-4 h-[calc(100%-50px)]">
+                {metricHeight !== null && (
+                    <MetricStats
+                        graphData={graphDataData}
+                        graphMeta={{
+                            currentRevenue: graphMetaData?.current_revenue ?? 0,
+                            revenueChangePct: revenueChangePct,
+                            currentSales: graphMetaData?.current_sales ?? 0,
+                            salesChangePct: salesChangePct,
+                        }}
+                        timeRange={timeRange}
+                        isLoadingGraphMetaData={isLoadingGraphMetaData}
+                        isLoadingGraphDataData={isLoadingGraphDataData}
+                        maxHeight={metricHeight}
+                    />
+                )}
+
+                {otherHeight !== null && (
+                    <div className="grid gap-4 grid-cols-1 lg:grid-cols-10">
+                        <div className="col-span-1 md:col-span-6 lg:col-span-6 xl:col-span-7">
+                            <BikeModels bikeData={bikeData} isLoading={isLoadingBikeData} maxHeight={otherHeight}/>
+                        </div>
+                        <div className="col-span-1 md:col-span-4 lg:col-span-4 xl:col-span-3">
+                            <CitiesList citiesData={citiesData} isLoading={isLoadingCitiesData}
+                                        maxHeight={otherHeight}/>
+                        </div>
                     </div>
-                    <div className="col-span-1 md:col-span-4 lg:col-span-4 xl:col-span-3">
-                        <CitiesList citiesData={citiesData} isLoading={isLoadingCitiesData}/>
-                    </div>
-                </div>
+                )}
+
             </div>
         </ContentLayout>
     );

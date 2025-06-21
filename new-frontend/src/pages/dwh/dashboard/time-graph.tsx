@@ -25,14 +25,21 @@ import {Skeleton} from "@/components/ui/skeleton";
 import {type BikeSales} from "@/models/api";
 import {cn} from "@/lib/utils";
 import {useTranslation} from "react-i18next";
+import {useIsMobile} from "@/utils/use-mobile.ts";
 
 interface Props {
     bikeData: BikeSales[] | null;
     isLoading: boolean;
+    maxHeight: number;
 }
 
-export function BikeModels({bikeData, isLoading}: Props) {
+export function BikeModels({bikeData, isLoading, maxHeight}: Props) {
     const {t} = useTranslation();
+    const isMobile = useIsMobile();
+    const dynamicHeightStyle = {
+        height: isMobile ? 300 : maxHeight - 130,
+        width: "100%",
+    };
 
     const modelsWithSales = Array.from(new Set(
         (bikeData || []).filter((b) => b.total_sales > 0).map((b) => b.bike_model)
@@ -100,7 +107,7 @@ export function BikeModels({bikeData, isLoading}: Props) {
     );
 
     return (
-        <Card className="h-[500px] md:h-[440px] flex flex-col">
+        <Card className="flex flex-col h-full">
             <CardHeader className="space-y-4 flex items-start justify-between">
                 {/* Title + Description (links auf Desktop) */}
                 <div>
@@ -181,15 +188,15 @@ export function BikeModels({bikeData, isLoading}: Props) {
                 </div>
             </CardHeader>
 
-            <CardContent className="pb-4 flex-grow">
+            <CardContent className="flex-grow h-full">
                 {isLoading ? (
-                    <Skeleton className="w-full h-[300px]"/>
+                    <Skeleton style={dynamicHeightStyle}/>
                 ) : isNoSalesData ? (
                     <p className="text-sm text-muted-foreground mt-4">
                         {t("no_data_to_display")}
                     </p>
                 ) : (
-                    <ChartContainer config={chartConfig} className="w-full h-[300px]">
+                    <ChartContainer config={chartConfig} style={dynamicHeightStyle}>
                         <LineChart
                             data={chartData}
                             margin={{top: 5, right: 10, left: 10, bottom: 0}}
@@ -219,7 +226,7 @@ export function BikeModels({bikeData, isLoading}: Props) {
                                     if (!active || !payload || payload.length === 0) return null;
                                     const currentPoint = payload[0].payload;
                                     return (
-                                        <div className="rounded-md border bg-background p-2 shadow-sm text-sm">
+                                        <div className="rounded-md border bg-background shadow-sm text-sm">
                                             <div className="text-muted-foreground mb-1 font-medium">
                                                 {currentPoint.formattedDate}
                                             </div>

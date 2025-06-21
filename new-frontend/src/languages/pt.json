@@ -98,7 +98,7 @@
     "info": "Informações do cliente",
     "data": "Dados do cliente"
   },
-  "cities_list_title": "Top 5 cidades por receita",
+  "cities_list_title": "Top {{count}} cidades por receita",
   "project_title": "Adicionar projeto",
   "loading_cities": "Carregando cidades...",
   "sales_to_cities": "Você fez vendas para {{count}} cidades diferentes",

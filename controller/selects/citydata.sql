@@ -60,4 +60,4 @@ SELECT
 FROM current_period cp
          LEFT JOIN previous_period pp ON cp.city = pp.city
 ORDER BY cp.current_revenue DESC
-LIMIT 5
+LIMIT 15
