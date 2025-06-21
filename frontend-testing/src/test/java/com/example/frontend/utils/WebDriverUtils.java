@@ -13,7 +13,7 @@ import java.time.Duration;
 
 public class WebDriverUtils {
 
-    private static final String BASE_URL = "http://localhost:3000";
+    private static final String BASE_URL = "http://localhost:5173";
     private static WebDriver driver;
     private static WebDriverWait wait;
 

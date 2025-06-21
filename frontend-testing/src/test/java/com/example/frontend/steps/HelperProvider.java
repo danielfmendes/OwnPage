@@ -6,10 +6,10 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
-import java.util.NoSuchElementException;
 
 public class HelperProvider {
 
@@ -65,22 +65,6 @@ public class HelperProvider {
         click(By.xpath("//div[@role='option' and .//span[text()='" + visibleText + "']]"));
     }
 
-    public static void selectDate(String day) {
-        List<WebElement> rows = driver.findElements(By.cssSelector("tbody.rdp-tbody > tr"));
-        for (WebElement row : rows) {
-            for (WebElement td : row.findElements(By.tagName("td"))) {
-                try {
-                    WebElement btn = td.findElement(By.tagName("button"));
-                    if (btn.getText().equals(day)) {
-                        btn.click();
-                        return;
-                    }
-                } catch (NoSuchElementException ignored) {
-                }
-            }
-        }
-    }
-
     public static void selectBirthDate(String day, String targetMonth, String targetYear) {
         click(By.id("datepicker"));
 
@@ -89,13 +73,20 @@ public class HelperProvider {
         String currentYear = String.valueOf(today.getYear());
 
         click(By.xpath("//button[.//span[text()='" + currentMonth + "']]"));
-        selectFromDropdown(targetMonth);
+
+        By monthOption = By.xpath("//div[@role='option' and .//span[text()='" + targetMonth + "']]");
+        waitUntilVisible(monthOption);
+        click(monthOption);
 
         click(By.xpath("//button[.//span[text()='" + currentYear + "']]"));
-        WebDriverUtils.sleepMillis(500);
-        selectFromDropdown(targetYear);
 
-        selectDate(day);
+        By yearOption = By.xpath("//div[@role='option' and .//span[text()='" + targetYear + "']]");
+        waitUntilVisible(yearOption);
+        click(yearOption);
+
+        By dateButton = By.xpath("//div[@data-slot='calendar']//td/button[normalize-space(text())='" + day + "']");
+        click(dateButton);
+
         click(By.id("datepicker"));
     }
 }
