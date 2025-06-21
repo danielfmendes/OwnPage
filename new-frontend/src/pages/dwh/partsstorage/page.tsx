@@ -49,12 +49,12 @@ export default function PartsStoragePage() {
             accessorKey: "id",
             header: t("label.id"),
             widthPercent: 5,
+            mobileTitle: true,
         },
         {
             accessorKey: "part_type",
             header: t("label.part_type"),
             widthPercent: 18,
-            mobileTitle: true,
         },
         {
             accessorKey: "part_name",

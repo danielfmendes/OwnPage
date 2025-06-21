@@ -94,7 +94,7 @@ export function UserNav() {
                 <DropdownMenuGroup>
                     <DropdownMenuItem className="hover:cursor-pointer" asChild>
                         <Link to={`/dwh/rolemanagement${currentQuery}`} className="flex items-center">
-                            <UserIcon className="w-4 h-4 mr-3 text-muted-foreground"/>
+                            <UserIcon className="w-4 h-4 mr-1 text-muted-foreground"/>
                             {t("menu.role_management")}
                         </Link>
                     </DropdownMenuItem>
@@ -125,7 +125,7 @@ export function UserNav() {
                                 <Button
                                     key={lang.code}
                                     variant="ghost"
-                                    className="w-full justify-start space-x-2"
+                                    className="w-full justify-start space-x-2 ml-2"
                                     onClick={() => {
                                         i18n.changeLanguage(lang.code);
                                         Language.setLanguage(lang.code);
@@ -134,9 +134,11 @@ export function UserNav() {
                                 >
                                     <img src={lang.flag} alt={lang.label} className="w-5 h-5 rounded-full"/>
                                     <span className="flex-1 text-left">{lang.label}</span>
-                                    {i18n.language === lang.code && (
-                                        <Check className="w-4 h-4 text-green-500 ml-auto"/>
-                                    )}
+                                    <Check
+                                        className={`w-4 h-4 ${
+                                            i18n.language === lang.code ? 'text-green-500' : 'invisible'
+                                        }`}
+                                    />
                                 </Button>
                             ))}
                         </div>
@@ -145,9 +147,9 @@ export function UserNav() {
                     <DropdownMenuItem className="hover:cursor-pointer" asChild>
                         <div onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
                             {theme === "dark" ? (
-                                <SunIcon className="w-4 h-4 mr-3 text-muted-foreground"/>
+                                <SunIcon className="w-4 h-4 mr-1 text-muted-foreground"/>
                             ) : (
-                                <MoonIcon className="w-4 h-4 mr-3 text-muted-foreground"/>
+                                <MoonIcon className="w-4 h-4 mr-1 text-muted-foreground"/>
                             )}
                             {t("switch_theme")}
                         </div>

@@ -59,32 +59,61 @@ export function SimpleTable<TData>({
 
     const clickableClasses = onRowClick ? "cursor-pointer hover:bg-muted" : "";
     const clickableMobileClasses = onRowClick ? "hover:bg-muted/20 transition-colors cursor-pointer" : "";
+    const noHeaderKeys = ["email", "customer_email"];
 
-    // Helper to render mobile column details
-    const renderMobileColumnDetails = (rowData: any) => (
-        <div className="grid gap-2 text-sm">
-            {columns
-                .filter(
-                    (col) =>
-                        col.accessorKey &&
-                        col.accessorKey !== titleCol.accessorKey &&
-                        col.id !== "actions"
-                )
-                .map((col) => (
-                    <div
-                        key={col.accessorKey ?? col.id}
-                        className="flex justify-between items-start py-1 border-b last:border-0"
-                    >
-                        <span className="font-medium text-muted-foreground">
-                            {flexRender(col.header, {})}
-                        </span>
-                        <span className="text-right">
-                            {rowData[col.accessorKey ?? col.id]}
-                        </span>
-                    </div>
-                ))}
-        </div>
-    );
+    const renderCellContent = (col: any, rowData: any, hideHeaderKeys: string[] = []) => {
+        const key = col.accessorKey ?? col.id;
+        const showHeader = !hideHeaderKeys.includes(key);
+
+        const context = {
+            row: {
+                getValue: (k: string) => rowData[k],
+                original: rowData,
+            },
+        };
+
+        const header = showHeader ? flexRender(col.header, {}) : null;
+        const content = col.cell ? flexRender(col.cell, context) : rowData[key];
+
+        return {header, content};
+    };
+
+    const renderTitle = (row: any) => {
+        const {header, content} = renderCellContent(titleCol, row, noHeaderKeys);
+        return (
+            <span className="font-medium text-base truncate">
+              {header && <span className="text-muted-foreground mr-1">{header}:</span>}{" "}
+                {content}
+            </span>
+        );
+    };
+
+    const renderMobileColumnDetails = (rowData: any) => {
+        return (
+            <div className="grid gap-2 text-sm">
+                {columns
+                    .filter(
+                        (col) =>
+                            col.accessorKey &&
+                            col.accessorKey !== titleCol.accessorKey &&
+                            col.id !== "actions"
+                    )
+                    .map((col) => {
+                        const {header, content} = renderCellContent(col, rowData);
+                        return (
+                            <div
+                                key={col.accessorKey ?? col.id}
+                                className="flex justify-between items-start py-1 border-b last:border-0"
+                            >
+                                <span className="font-medium text-muted-foreground">{header}</span>
+                                <span className="text-right">{content}</span>
+                            </div>
+                        );
+                    })}
+            </div>
+        );
+    };
+
 
     return (
         <div className="rounded-md sm:border">
@@ -182,9 +211,7 @@ export function SimpleTable<TData>({
                                 className={`w-full rounded-lg border px-4 py-3 bg-muted/5 ${clickableMobileClasses}`}
                             >
                                 <div className="flex items-center justify-between mb-3">
-                                      <span className="font-medium text-base truncate">
-                                        {(data[currentIndex] as any)[titleCol.accessorKey ?? titleCol.id]}
-                                      </span>
+                                    {renderTitle(data[currentIndex])}
                                     {actionsColIndex !== -1 &&
                                         flexRender(columns[actionsColIndex].cell, {
                                             row: {original: data[currentIndex]},
@@ -195,46 +222,35 @@ export function SimpleTable<TData>({
 
                             {/* Navigation Buttons */}
                             <div className="flex items-center space-x-4 mt-2">
-                                <Button
-                                    variant="outline"
-                                    onClick={prev}
-                                    aria-label="Previous"
-                                >
+                                <Button variant="outline" onClick={prev} aria-label="Previous">
                                     <ChevronLeft size={20}/>
                                 </Button>
                                 <span className="min-w-[2rem] text-center">
                                   {currentIndex + 1} / {data.length}
                                 </span>
-                                <Button
-                                    onClick={next}
-                                    variant="outline"
-                                    aria-label="Next"
-                                >
+                                <Button variant="outline" onClick={next} aria-label="Next">
                                     <ChevronRight size={20}/>
                                 </Button>
                             </div>
                         </div>
                     ) : (
                         // Standard Mobile View (List)
-                        data.map((row: any, index) => {
-                            const titleValue = row[titleCol.accessorKey ?? titleCol.id];
-                            return (
-                                <div
-                                    key={index}
-                                    onClick={onRowClick ? () => onRowClick({original: row}) : undefined}
-                                    className={`rounded-lg border px-4 py-3 bg-muted/5 ${clickableMobileClasses}`}
-                                >
-                                    <div className="flex items-center justify-between mb-3">
-                                        <span className="font-medium text-base truncate">{titleValue}</span>
-                                        {actionsColIndex !== -1 &&
-                                            flexRender(columns[actionsColIndex].cell, {
-                                                row: {original: row},
-                                            })}
-                                    </div>
-                                    {renderMobileColumnDetails(row)}
+                        data.map((row: any, index) => (
+                            <div
+                                key={index}
+                                onClick={onRowClick ? () => onRowClick({original: row}) : undefined}
+                                className={`rounded-lg border px-4 py-3 bg-muted/5 ${clickableMobileClasses}`}
+                            >
+                                <div className="flex items-center justify-between mb-3">
+                                    {renderTitle(row)}
+                                    {actionsColIndex !== -1 &&
+                                        flexRender(columns[actionsColIndex].cell, {
+                                            row: {original: row},
+                                        })}
                                 </div>
-                            );
-                        })
+                                {renderMobileColumnDetails(row)}
+                            </div>
+                        ))
                     )
                 ) : (
                     <div className="text-center text-muted-foreground py-6">
