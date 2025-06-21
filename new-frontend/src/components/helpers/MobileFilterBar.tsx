@@ -24,6 +24,7 @@ interface MobileFilterProps<TData> {
     columns: CustomColumnDef<TData>[];
     sort: Sort;
     updateSort: (key: string, sortDirection?: SortDirectionType) => void;
+    resetFilters: () => void;
 }
 
 export default function MobileFilterDialog<TData>({
@@ -33,6 +34,7 @@ export default function MobileFilterDialog<TData>({
                                                       columns,
                                                       sort,
                                                       updateSort,
+                                                      resetFilters
                                                   }: MobileFilterProps<TData>) {
     const [open, setOpen] = useState(false);
     const selectedValues = filterManager.getSelectedValues();
@@ -136,6 +138,7 @@ export default function MobileFilterDialog<TData>({
                                 variant="destructive"
                                 className="flex-1"
                                 onClick={() => {
+                                    resetFilters();
                                     setOpen(false);
                                 }}
                             >

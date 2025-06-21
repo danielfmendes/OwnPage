@@ -18,6 +18,7 @@ import {
     ChevronsLeft,
     ChevronsRight,
     Plus,
+    X,
 } from "lucide-react";
 import {
     Select,
@@ -178,6 +179,16 @@ export default function DataTable<TData>({
         setFilterManager(newManager);
     };
 
+    const hasActiveFilters = useMemo(() => {
+        const filters = filterManager.getFilters();
+        return Object.values(filters).some((f) => f.values.length > 0);
+    }, [filterManager]);
+
+    const resetAllFilters = () => {
+        const newManager = new FilterManager();
+        setFilterManager(newManager);
+    };
+
     const table = useReactTable({
         data,
         columns,
@@ -204,6 +215,7 @@ export default function DataTable<TData>({
                         columns={columns}
                         sort={sort}
                         updateSort={updateSort}
+                        resetFilters={resetAllFilters}
                     />
                 )}
 
@@ -218,13 +230,21 @@ export default function DataTable<TData>({
                     </div>
                 )}
 
-                <Button
-                    onClick={handleAddClick}
-                    className="ml-auto bg-zinc-300 dark:bg-zinc-800 hover:bg-zinc-400 dark:hover:bg-zinc-600 text-zinc-800 dark:text-white"
-                >
-                    <Plus className="h-4 w-4"/>
-                    {t("button.add")}
-                </Button>
+                <div className="flex gap-2 ml-auto">
+                    <Button
+                        onClick={resetAllFilters}
+                        disabled={!hasActiveFilters}
+                        variant={"destructive"}
+                        size="icon"
+                        className="rounded-full"
+                    >
+                        <X className="h-4 w-4"/>
+                    </Button>
+                    <Button onClick={handleAddClick}>
+                        <Plus className="h-4 w-4"/>
+                        {t("button.add")}
+                    </Button>
+                </div>
             </div>
 
             <SimpleTable

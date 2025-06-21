@@ -45,7 +45,6 @@ export const FilterBar: FC<FilterBarProps> = ({filters, filterManager, onChange,
     const getLoadedItems = useFilterStore((state) => state.getLoadedItems);
     const setLoadedItems = useFilterStore((state) => state.setLoadedItems);
 
-    const [lastChangedKey, setLastChangedKey] = useState<string | null>(null);
     const [filterDefs, setFilterDefs] = useState(() => filters.map(f => ({...f, pinned: f.pinned !== false})));
     const [selectedValues, setSelectedValues] = useState(() => filterManager.getSelectedValues());
     const [dateRanges, setDateRanges] = useState(() => filterManager.getDateRanges());
@@ -56,6 +55,12 @@ export const FilterBar: FC<FilterBarProps> = ({filters, filterManager, onChange,
 
     const pinnedFilters = useMemo(() => filterDefs.filter(f => f.pinned), [filterDefs]);
     const unpinnedFilters = useMemo(() => filterDefs.filter(f => !f.pinned), [filterDefs]);
+
+    // Update selectedValues when filterManager changes from parent
+    useEffect(() => {
+        setSelectedValues(filterManager.getSelectedValues());
+        setDateRanges(filterManager.getDateRanges());
+    }, [filterManager]);
 
     useEffect(() => {
         setFilterDefs(filters.map(f => ({...f, pinned: f.pinned !== false})));
@@ -83,16 +88,6 @@ export const FilterBar: FC<FilterBarProps> = ({filters, filterManager, onChange,
             })
         );
     }, [selectedValues, filters]);
-
-    // updated only clicked key
-    useEffect(() => {
-        if (!lastChangedKey) return;
-
-        const filterType = filters.find(f => f.key === lastChangedKey)?.type ?? "default";
-        onChange(lastChangedKey, selectedValues[lastChangedKey] || [], filterType);
-
-        setLastChangedKey(null);
-    }, [lastChangedKey]);
 
     const loadItemsForKey = async (key: string, loader: () => Promise<FilterItem[]>) => {
         // if (getLoadedItems(context, key)) return;
@@ -122,18 +117,16 @@ export const FilterBar: FC<FilterBarProps> = ({filters, filterManager, onChange,
         return `${itemCount * 35}px`;
     };
 
-    const formatTitle = (title: string) => locale === "de" ? title : title.toLowerCase();
+    const formatTitle = (title: string) => (locale === "de" ? title : title.toLowerCase());
 
     // Load items only if not already loaded
     const toggleValue = (key: string, value: string) => {
-        setSelectedValues((prev) => {
-            const current = prev[key] || [];
-            const updated = current.includes(value)
-                ? current.filter((v) => v !== value)
-                : [...current, value];
-            setLastChangedKey(key);
-            return {...prev, [key]: updated};
-        });
+        const current = selectedValues[key] || [];
+        const updated = current.includes(value)
+            ? current.filter((v) => v !== value)
+            : [...current, value];
+        setSelectedValues((prev) => ({...prev, [key]: updated}));
+        onChange(key, updated, filters.find((f) => f.key === key)?.type ?? "default");
     };
 
     const pinFilter = (title: string) => {
@@ -157,6 +150,16 @@ export const FilterBar: FC<FilterBarProps> = ({filters, filterManager, onChange,
         );
     };
 
+    const setDateRange = (key: string, range?: DateRange) => {
+        setDateRanges((prev) => ({...prev, [key]: range}));
+        const updatedValues =
+            range?.from && range?.to
+                ? [range.from.toISOString(), range.to.toISOString()]
+                : [];
+        setSelectedValues((prev) => ({...prev, [key]: updatedValues}));
+        onChange(key, updatedValues, "date");
+    };
+
     return (
         <div className="flex flex-wrap gap-3 mr-2">
             {pinnedFilters.map(({title, key, itemsLoader, type = "default"}) => {
@@ -170,17 +173,6 @@ export const FilterBar: FC<FilterBarProps> = ({filters, filterManager, onChange,
                 const height = type === "date" ? undefined : calculateHeight(filteredItems);
                 const dateRange = dateRanges[key];
 
-                // update Funktion
-                const setDateRange = (range?: DateRange) => {
-                    setDateRanges(prev => ({...prev, [key]: range}));
-                    setSelectedValues(prev => ({
-                        ...prev,
-                        [key]: range?.from && range?.to
-                            ? [range.from.toISOString(), range.to.toISOString()]
-                            : []
-                    }));
-                    setLastChangedKey(key);
-                };
                 return (
                     <Popover
                         key={key}
@@ -208,11 +200,9 @@ export const FilterBar: FC<FilterBarProps> = ({filters, filterManager, onChange,
                                         className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground hover:text-red-600 cursor-pointer"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            setSelectedValues(prev => {
-                                                setLastChangedKey(key);
-                                                return {...prev, [key]: []};
-                                            });
-                                            if (type === "date") setDateRange(undefined);
+                                            setSelectedValues((prev) => ({...prev, [key]: []}));
+                                            if (type === "date") setDateRange(key, undefined);
+                                            onChange(key, [], type);
                                         }}
                                     />
                                 )}
@@ -237,8 +227,12 @@ export const FilterBar: FC<FilterBarProps> = ({filters, filterManager, onChange,
                                 </div>
                             )}
                             {type === "date" ? (
-                                // @ts-ignore
-                                <DatePickerCalender mode="range" date={dateRange} setDate={setDateRange}/>
+                                <DatePickerCalender
+                                    mode="range"
+                                    date={dateRange}
+                                    // @ts-ignore
+                                    setDate={(range) => setDateRange(key, range)}
+                                />
                             ) : (
                                 <ScrollArea style={{height}} className="w-auto pr-2">
                                     <div className="flex flex-col gap-2 min-w-max">
@@ -258,8 +252,9 @@ export const FilterBar: FC<FilterBarProps> = ({filters, filterManager, onChange,
                                                 </label>
                                             );
                                         }) : (
-                                            <div
-                                                className="text-sm text-muted-foreground px-2 py-1">{t("placeholder.no_results")}</div>
+                                            <div className="text-sm text-muted-foreground px-2 py-1">
+                                                {t("placeholder.no_results")}
+                                            </div>
                                         )}
                                     </div>
                                 </ScrollArea>
