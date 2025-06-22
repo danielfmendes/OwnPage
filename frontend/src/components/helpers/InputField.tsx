@@ -1,4 +1,4 @@
-import React, {ChangeEvent} from "react";
+import {type ChangeEvent} from "react";
 import {Input} from "@/components/ui/input";
 import {Lock} from "lucide-react";
 
@@ -9,12 +9,20 @@ type InputFieldProps = {
     errorMessage?: string;
     placeholder?: string;
     type?: string;
+    className?: string;
 };
 
-export default function InputField({label, value, onChange, errorMessage, placeholder, type}: InputFieldProps) {
+export default function InputField({
+                                       label,
+                                       value,
+                                       onChange,
+                                       errorMessage,
+                                       placeholder,
+                                       type,
+                                       className,
+                                   }: InputFieldProps) {
     const isReadOnly = !onChange;
-    const inputType =
-        type ?? (typeof value === "number" ? "number" : "text");
+    const inputType = type ?? (typeof value === "number" ? "number" : "text");
 
     return (
         <div className="space-y-1">
@@ -25,10 +33,8 @@ export default function InputField({label, value, onChange, errorMessage, placeh
                     onChange={onChange}
                     readOnly={isReadOnly}
                     placeholder={placeholder}
-                    className={`${
-                        errorMessage ? "border-red-500" : ""
-                    } ${isReadOnly ? "pr-10" : ""}`}
                     type={inputType}
+                    className={`placeholder:text-sm ${errorMessage ? "border-red-500" : ""} ${isReadOnly ? "pr-10" : ""} ${className ?? ""}`}
                 />
                 {isReadOnly && (
                     <Lock className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground"/>

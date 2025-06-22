@@ -1,12 +1,11 @@
-import * as React from "react";
 import {Calendar as CalendarIcon, ChevronDown} from "lucide-react";
-import {DateRange} from "react-day-picker";
+import type {DateRange} from "react-day-picker";
 
-import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {DatePickerCalender} from "@/components/helpers/datepicker/DatePickerCalender";
 import {DatePickerDisplayName} from "@/components/helpers/datepicker/DatePickerDisplayName";
+import {cn} from "@/lib/utils";
 
 
 interface DatePickerPropsBase {

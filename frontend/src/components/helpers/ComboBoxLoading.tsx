@@ -84,7 +84,7 @@ export function ComboBoxLoading<T>({
                     ) : (
                         <span className="text-muted-foreground">{placeholder}</span>
                     )}
-                        <ChevronsUpDown className="absolute right-2 w-4 h-4 opacity-50"/>
+                    <ChevronsUpDown className="absolute right-2 w-4 h-4 opacity-50"/>
                 </Button>
             </PopoverTrigger>
 

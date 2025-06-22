@@ -1,7 +1,5 @@
-"use client";
-
-import { useState, useCallback, ReactNode, createContext, useContext, useEffect, useRef } from "react";
-import { Notification, NotificationMessage, NotificationType } from "./Notification";
+import {useState, useCallback, type ReactNode, createContext, useContext, useEffect, useRef} from "react";
+import {Notification, type NotificationMessage, type NotificationType} from "@/components/helpers/Notification";
 
 interface NotificationContextType {
     addNotification: (message: string, type: NotificationType, duration?: number) => void;
@@ -12,9 +10,9 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 // Cache für die letzten Nachrichten
 const messageCache = new Map<string, number>();
 
-export const NotificationProvider = ({ children }: { children: ReactNode }) => {
+export const NotificationProvider = ({children}: { children: ReactNode }) => {
     const [notifications, setNotifications] = useState<NotificationMessage[]>([]);
-    const cleanupRef = useRef<NodeJS.Timeout>();
+    const cleanupRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         // Cache alle 2 Sekunden aufräumen
@@ -43,7 +41,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         type: NotificationType,
         duration = 3000
     ) => {
-        switch(type) {
+        switch (type) {
             case "error":
                 console.error(`[Notification] ${message}`)
                 break
@@ -79,7 +77,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     return (
-        <NotificationContext.Provider value={{ addNotification }}>
+        <NotificationContext.Provider value={{addNotification}}>
             {children}
             <div className="fixed top-16 left-0 right-0 z-[1000] flex flex-col items-center">
                 {notifications.map((notification, index) => (

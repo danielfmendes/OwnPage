@@ -1,4 +1,4 @@
-import {FilterDefinition, FilterItem} from "@/components/helpers/FilterBar";
+import type {FilterDefinition, FilterItem} from "@/components/helpers/FilterBar";
 import {
     BikesService,
     CustomersService,
@@ -6,7 +6,7 @@ import {
     RoleManagementsService,
     WareHousePartsService
 } from "@/models/api";
-import {ItemsLoaderOptions} from "./itemsLoader";
+import type {ItemsLoaderOptions} from "./itemsLoader";
 
 const createFilterItemLoaderWithManager = (
     itemsLoaderOptions: ItemsLoaderOptions
@@ -24,7 +24,7 @@ const createFilterItemLoaderWithManager = (
     key,
     title: `label.${key}`,
     itemsLoader: async (): Promise<FilterItem[]> => {
-        const filterString = await itemsLoaderOptions.filterManager.getFilterStringWithProjectIds();
+        const filterString = itemsLoaderOptions.filterManager.getFilterStringWithProjectIds();
         const response = await loader(
             filterString || undefined,
             undefined,

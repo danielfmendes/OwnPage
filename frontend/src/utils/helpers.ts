@@ -1,12 +1,12 @@
 import AuthToken from "@/utils/authtoken";
 import {useUserStore} from "@/utils/userstate";
-import {useRouter} from "next/navigation";
+import type {NavigateFunction} from "react-router-dom";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
-import {NotificationType} from "@/components/helpers/Notification";
-import {RoleManagementWithName} from "@/models/api";
+import type {NotificationType} from "@/components/helpers/Notification";
+import type {RoleManagementWithName} from "@/models/api";
 
 export const handleLogOut = (
-    router: ReturnType<typeof useRouter>,
+    navigate: NavigateFunction,
     addNotification: (message: string, type: NotificationType, duration?: number) => void
 ) => {
     AuthToken.removeAuthToken();
@@ -15,7 +15,7 @@ export const handleLogOut = (
     useRoleStore.getState().clearRoles();
     useRoleStore.getState().setIsLoading(false);
 
-    router.push("/dwh/login");
+    navigate("/dwh/login");
     addNotification(`Erfolgreich ausgeloggt`, "success");
 };
 
@@ -25,5 +25,5 @@ export const isRoleUserForProject = (projectId: number, role: string = "user") =
     return roleForProject?.role === role;
 }
 
-const apiUrl = process.env.NEXT_PUBLIC_API_ENV || "http://localhost:8080";
+const apiUrl = import.meta.env.VITE_API_ENV || "http://localhost:8080";
 export default apiUrl;

@@ -1,11 +1,9 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import {useEffect, useState} from "react";
+import {Alert, AlertDescription} from "@/components/ui/alert";
+import {Button} from "@/components/ui/button";
+import {Progress} from "@/components/ui/progress";
+import {X} from "lucide-react";
+import {cn} from "@/lib/utils";
 
 export type NotificationType = "success" | "warning" | "error" | "info";
 
@@ -62,14 +60,14 @@ export const Notification = ({
 
     return (
         <div className={cn(
-            "relative w-[60%] max-w-md mx-auto transition-all animate-in fade-in-80 slide-in-from-top-4 sm:w-full",
+            "relative w-[75%] max-w-md mx-auto transition-all animate-in fade-in-80 slide-in-from-top-4 sm:w-full",
             className
         )}>
             <Alert className={cn(
                 "border-2 shadow-lg p-4 pr-8 overflow-hidden mb-2",
                 typeStyles[message.type]
             )}>
-                <AlertDescription className="font-medium">
+                <AlertDescription className="font-medium text-white">
                     {message.message}
                 </AlertDescription>
                 <Progress
@@ -85,7 +83,7 @@ export const Notification = ({
                     className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-white/20 rounded-full"
                     onClick={() => onDismissAction(message.id)}
                 >
-                    <X className="h-4 w-4" />
+                    <X className="h-4 w-4"/>
                 </Button>
             </Alert>
         </div>

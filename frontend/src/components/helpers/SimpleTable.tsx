@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from "react";
+import React, {useState, useRef, useEffect, useMemo} from "react";
 import {
     useReactTable,
     getCoreRowModel,
@@ -13,9 +13,8 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import {Skeleton} from "@/components/ui/skeleton";
+import {ChevronLeft, ChevronRight} from "lucide-react";
 import {Button} from "@/components/ui/button";
-import {Card, CardContent} from "@/components/ui/card";
-import {ChevronDown, ChevronUp} from "lucide-react";
 import {useTranslation} from "react-i18next";
 
 interface SimpleTableProps<TData> {
@@ -26,6 +25,7 @@ interface SimpleTableProps<TData> {
     headers?: React.ReactNode;
     table?: any;
     maxHeight?: number;
+    singleData?: boolean;
 }
 
 export function SimpleTable<TData>({
@@ -36,6 +36,7 @@ export function SimpleTable<TData>({
                                        headers,
                                        table,
                                        maxHeight,
+                                       singleData = false,
                                    }: SimpleTableProps<TData>) {
     const {t} = useTranslation();
     const tableReact = table ?? useReactTable({data, columns, getCoreRowModel: getCoreRowModel()});
@@ -43,27 +44,81 @@ export function SimpleTable<TData>({
     const visibleColumnCount = tableReact.getVisibleFlatColumns().length;
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+    const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
         scrollRef.current?.scrollTo({top: 0});
+        setCurrentIndex(0);
     }, [data]);
 
-    const toggleExpanded = (id: string) => {
-        setExpandedRows((prev) => {
-            const newSet = new Set(prev);
-            newSet.has(id) ? newSet.delete(id) : newSet.add(id);
-            return newSet;
-        });
+    const actionsColIndex = useMemo(() => columns.findIndex((col) => col.id === "actions"), [columns]);
+    const titleCol = useMemo(() => columns.find((col) => col.mobileTitle) ?? columns[0], [columns]);
+
+    const prev = () => setCurrentIndex((i) => (i === 0 ? data.length - 1 : i - 1));
+    const next = () => setCurrentIndex((i) => (i === data.length - 1 ? 0 : i + 1));
+
+    const clickableClasses = onRowClick ? "cursor-pointer hover:bg-muted" : "";
+    const clickableMobileClasses = onRowClick ? "hover:bg-muted/20 transition-colors cursor-pointer" : "";
+    const noHeaderKeys = ["email", "customer_email"];
+
+    const renderCellContent = (col: any, rowData: any, hideHeaderKeys: string[] = []) => {
+        const key = col.accessorKey ?? col.id;
+        const showHeader = !hideHeaderKeys.includes(key);
+
+        const context = {
+            row: {
+                getValue: (k: string) => rowData[k],
+                original: rowData,
+            },
+        };
+
+        const header = showHeader ? flexRender(col.header, {}) : null;
+        const content = col.cell ? flexRender(col.cell, context) : rowData[key];
+
+        return {header, content};
     };
 
-    const actionsColIndex = columns.findIndex((col) => col.id === "actions");
-    const titleCol = columns.find((col) => col.mobileTitle) ?? columns[0];
+    const renderTitle = (row: any) => {
+        const {header, content} = renderCellContent(titleCol, row, noHeaderKeys);
+        return (
+            <span className="font-medium text-base truncate">
+              {header && <span className="text-muted-foreground mr-1">{header}:</span>}{" "}
+                {content}
+            </span>
+        );
+    };
+
+    const renderMobileColumnDetails = (rowData: any) => {
+        return (
+            <div className="grid gap-2 text-sm">
+                {columns
+                    .filter(
+                        (col) =>
+                            col.accessorKey &&
+                            col.accessorKey !== titleCol.accessorKey &&
+                            col.id !== "actions"
+                    )
+                    .map((col) => {
+                        const {header, content} = renderCellContent(col, rowData);
+                        return (
+                            <div
+                                key={col.accessorKey ?? col.id}
+                                className="flex justify-between items-start py-1 border-b last:border-0"
+                            >
+                                <span className="font-medium text-muted-foreground">{header}</span>
+                                <span className="text-right">{content}</span>
+                            </div>
+                        );
+                    })}
+            </div>
+        );
+    };
+
 
     return (
-        <div className="rounded-md border">
+        <div className="rounded-md sm:border">
             {/* Desktop View */}
-            <div className="hidden sm:block w-full overflow-x-auto">
+            <div className="hidden sm:block w-full overflow-x-auto rounded-md">
                 <Table>
                     <TableHeader className="sticky top-0 z-10 bg-white dark:bg-zinc-900">
                         {headers
@@ -94,7 +149,7 @@ export function SimpleTable<TData>({
                         <TableBody>
                             {isLoading ? (
                                 Array.from({length: 10}).map((_, idx) => (
-                                    <TableRow key={idx} className="border-zinc-900 dark:border-zinc-500 hover:bg-muted">
+                                    <TableRow key={idx} className="hover:bg-muted">
                                         {columns.map((_, colIdx) => (
                                             <TableCell
                                                 key={colIdx}
@@ -109,8 +164,8 @@ export function SimpleTable<TData>({
                                 visibleRows.map((row: any) => (
                                     <TableRow
                                         key={row.id}
-                                        onClick={() => onRowClick?.(row)}
-                                        className="cursor-pointer border-zinc-900 dark:border-zinc-500 hover:bg-muted"
+                                        onClick={onRowClick ? () => onRowClick(row) : undefined}
+                                        className={clickableClasses}
                                     >
                                         {row.getVisibleCells().map((cell: any) => (
                                             <TableCell
@@ -135,70 +190,68 @@ export function SimpleTable<TData>({
             </div>
 
             {/* Mobile View */}
-            <div className="block sm:hidden">
+            <div className="block sm:hidden space-y-2 mt-2">
                 {isLoading ? (
                     Array.from({length: 5}).map((_, idx) => (
-                        <Card key={idx} className="rounded-none border-b last:border-0">
-                            <CardContent className="p-4">
-                                <Skeleton className="h-6 w-3/4 mb-2"/>
-                                <Skeleton className="h-4 w-full"/>
-                            </CardContent>
-                        </Card>
+                        <div key={idx} className="rounded-lg border p-4 bg-muted/10">
+                            <Skeleton className="h-6 w-3/4 mb-3"/>
+                            <div className="space-y-2">
+                                {Array.from({length: 3}).map((_, i) => (
+                                    <Skeleton key={i} className="h-4 w-full"/>
+                                ))}
+                            </div>
+                        </div>
                     ))
                 ) : data.length ? (
-                    data.map((row: any) => {
-                        const isExpanded = expandedRows.has(row.id);
-                        const title = row[titleCol.accessorKey ?? titleCol.id];
-                        return (
-                            <Card key={row.id} onClick={() => onRowClick?.({ original: row })}
-                                  className="rounded-none border-b last:border-0">
-                                <CardContent className="p-4 space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2 w-full">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    toggleExpanded(row.id);
-                                                }}
-                                                className="h-6 w-6"
-                                            >
-                                                {isExpanded ? <ChevronUp className="w-4 h-4"/> :
-                                                    <ChevronDown className="w-4 h-4"/>}
-                                            </Button>
-                                            <span className="font-medium truncate">{title}</span>
-                                        </div>
+                    singleData ? (
+                        // Single-Element-Modus with Navigation
+                        <div className="flex flex-col items-center space-y-2">
+                            <div
+                                onClick={onRowClick ? () => onRowClick({original: data[currentIndex]}) : undefined}
+                                className={`w-full rounded-lg border px-4 py-3 bg-muted/5 ${clickableMobileClasses}`}
+                            >
+                                <div className="flex items-center justify-between mb-3">
+                                    {renderTitle(data[currentIndex])}
+                                    {actionsColIndex !== -1 &&
+                                        flexRender(columns[actionsColIndex].cell, {
+                                            row: {original: data[currentIndex]},
+                                        })}
+                                </div>
+                                {renderMobileColumnDetails(data[currentIndex])}
+                            </div>
 
-                                        {actionsColIndex !== -1 &&
-                                            flexRender(columns[actionsColIndex].cell, {
-                                                row: {original: row},
-                                            })}
-                                    </div>
-
-                                    {isExpanded && (
-                                        <div className="text-sm space-y-1 text-muted-foreground">
-                                            {columns
-                                                .filter(
-                                                    (col) =>
-                                                        col.accessorKey &&
-                                                        col.accessorKey !== titleCol.accessorKey &&
-                                                        col.id !== "actions"
-                                                )
-                                                .map((col) => (
-                                                    <div key={col.accessorKey ?? col.id}
-                                                         className="flex justify-between">
-                                                        <span
-                                                            className="font-medium">{flexRender(col.header, {})}</span>
-                                                        <span>{row[col.accessorKey ?? col.id]}</span>
-                                                    </div>
-                                                ))}
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        );
-                    })
+                            {/* Navigation Buttons */}
+                            <div className="flex items-center space-x-4 mt-2">
+                                <Button variant="outline" onClick={prev} aria-label="Previous">
+                                    <ChevronLeft size={20}/>
+                                </Button>
+                                <span className="min-w-[2rem] text-center">
+                                  {currentIndex + 1} / {data.length}
+                                </span>
+                                <Button variant="outline" onClick={next} aria-label="Next">
+                                    <ChevronRight size={20}/>
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        // Standard Mobile View (List)
+                        data.map((row: any, index) => (
+                            <div
+                                key={index}
+                                onClick={onRowClick ? () => onRowClick({original: row}) : undefined}
+                                className={`rounded-lg border px-4 py-3 bg-muted/5 ${clickableMobileClasses}`}
+                            >
+                                <div className="flex items-center justify-between mb-3">
+                                    {renderTitle(row)}
+                                    {actionsColIndex !== -1 &&
+                                        flexRender(columns[actionsColIndex].cell, {
+                                            row: {original: row},
+                                        })}
+                                </div>
+                                {renderMobileColumnDetails(row)}
+                            </div>
+                        ))
+                    )
                 ) : (
                     <div className="text-center text-muted-foreground py-6">
                         {t("placeholder.no_results")}

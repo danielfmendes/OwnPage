@@ -83,7 +83,7 @@ jobs:
           node-version: '18'
 
       - name: Install and start frontend
-        working-directory: ./new-frontend
+        working-directory: ./frontend
         run: |
           npm install
           npm run build

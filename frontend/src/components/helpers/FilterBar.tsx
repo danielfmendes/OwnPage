@@ -1,4 +1,4 @@
-import * as React from "react";
+import {type FC, type ReactNode, useEffect, useMemo, useState} from "react";
 import {Popover, PopoverContent, PopoverTrigger,} from "@/components/ui/popover";
 import {Button} from "@/components/ui/button";
 import {Checkbox} from "@/components/ui/checkbox";
@@ -8,17 +8,17 @@ import {Sliders, X} from "lucide-react";
 import {useTranslation} from "react-i18next";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import i18n from "i18next";
-import FilterManager, {FilterType} from "@/utils/filtermanager";
-import {ButtonLoading} from "@/components/helpers/ButtonLoading";
+import FilterManager, {type FilterType} from "@/utils/filtermanager";
+import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
 import {useFilterStore} from "@/utils/filterstate";
-import {DateRange} from "react-day-picker";
+import type {DateRange} from "react-day-picker";
 import {DatePickerCalender} from "@/components/helpers/datepicker/DatePickerCalender";
 import {DatePickerDisplayName} from "@/components/helpers/datepicker/DatePickerDisplayName";
 
 export interface FilterItem {
     value: string;
     count: number;
-    icon?: React.ReactNode;
+    icon?: ReactNode;
 }
 
 export interface FilterDefinition {
@@ -33,30 +33,36 @@ export interface FilterBarProps {
     filters: FilterDefinition[];
     filterManager: FilterManager;
     onChange: (key: string, selected: string[], type: FilterType) => void;
+    isMobile?: boolean
 }
 
-export const FilterBar: React.FC<FilterBarProps> = ({filters, filterManager, onChange}) => {
+export const FilterBar: FC<FilterBarProps> = ({filters, filterManager, onChange, isMobile = false}) => {
     const locale = i18n.language;
     const {t} = useTranslation();
     const {addNotification} = useNotification();
-    const context = React.useMemo(() => window.location.pathname.replace(/^\/|\/$/g, ""), []);
+    const context = useMemo(() => window.location.pathname.replace(/^\/|\/$/g, ""), []);
 
     const getLoadedItems = useFilterStore((state) => state.getLoadedItems);
     const setLoadedItems = useFilterStore((state) => state.setLoadedItems);
 
-    const [lastChangedKey, setLastChangedKey] = React.useState<string | null>(null);
-    const [filterDefs, setFilterDefs] = React.useState(() => filters.map(f => ({...f, pinned: f.pinned !== false})));
-    const [selectedValues, setSelectedValues] = React.useState(() => filterManager.getSelectedValues());
-    const [dateRanges, setDateRanges] = React.useState(() => filterManager.getDateRanges());
-    const [openKey, setOpenKey] = React.useState<string | null>(null);
-    const [loadingKeys, setLoadingKeys] = React.useState<string[]>([]);
-    const [searchTexts, setSearchTexts] = React.useState<Record<string, string>>({});
-    const [moreOpen, setMoreOpen] = React.useState(false);
+    const [filterDefs, setFilterDefs] = useState(() => filters.map(f => ({...f, pinned: f.pinned !== false})));
+    const [selectedValues, setSelectedValues] = useState(() => filterManager.getSelectedValues());
+    const [dateRanges, setDateRanges] = useState(() => filterManager.getDateRanges());
+    const [openKey, setOpenKey] = useState<string | null>(null);
+    const [loadingKeys, setLoadingKeys] = useState<string[]>([]);
+    const [searchTexts, setSearchTexts] = useState<Record<string, string>>({});
+    const [moreOpen, setMoreOpen] = useState(false);
 
-    const pinnedFilters = React.useMemo(() => filterDefs.filter(f => f.pinned), [filterDefs]);
-    const unpinnedFilters = React.useMemo(() => filterDefs.filter(f => !f.pinned), [filterDefs]);
+    const pinnedFilters = useMemo(() => filterDefs.filter(f => f.pinned), [filterDefs]);
+    const unpinnedFilters = useMemo(() => filterDefs.filter(f => !f.pinned), [filterDefs]);
 
-    React.useEffect(() => {
+    // Update selectedValues when filterManager changes from parent
+    useEffect(() => {
+        setSelectedValues(filterManager.getSelectedValues());
+        setDateRanges(filterManager.getDateRanges());
+    }, [filterManager]);
+
+    useEffect(() => {
         setFilterDefs(filters.map(f => ({...f, pinned: f.pinned !== false})));
 
         // loads items for every key with values
@@ -71,7 +77,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({filters, filterManager, onC
     }, [filters]);
 
     // unpinned => pinned, when selectedValues > 0
-    React.useEffect(() => {
+    useEffect(() => {
         setFilterDefs((prev) =>
             prev.map((filter) => {
                 const hasSelected = (selectedValues[filter.key]?.length ?? 0) > 0;
@@ -82,16 +88,6 @@ export const FilterBar: React.FC<FilterBarProps> = ({filters, filterManager, onC
             })
         );
     }, [selectedValues, filters]);
-
-    // updated only clicked key
-    React.useEffect(() => {
-        if (!lastChangedKey) return;
-
-        const filterType = filters.find(f => f.key === lastChangedKey)?.type ?? "default";
-        onChange(lastChangedKey, selectedValues[lastChangedKey] || [], filterType);
-
-        setLastChangedKey(null);
-    }, [lastChangedKey]);
 
     const loadItemsForKey = async (key: string, loader: () => Promise<FilterItem[]>) => {
         // if (getLoadedItems(context, key)) return;
@@ -111,7 +107,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({filters, filterManager, onC
         const items = getLoadedItems(context, key) || [];
         const labels = values.map((v) => items.find((i) => i.value === v)?.value).filter(Boolean);
         if (labels.length === 0) return title;
-        return labels.length < 3 ? `${title}: ${labels.join(", ")}` : `${title}: ${labels.length}+ ${t("placeholder.selected")}`;
+        const threshold = isMobile ? 2 : 3;
+        return labels.length < threshold ? `${title}: ${labels.join(", ")}` : `${title}: ${labels.length}+ ${t("placeholder.selected")}`;
     };
 
     const calculateHeight = (items: FilterItem[] | undefined) => {
@@ -120,18 +117,16 @@ export const FilterBar: React.FC<FilterBarProps> = ({filters, filterManager, onC
         return `${itemCount * 35}px`;
     };
 
-    const formatTitle = (title: string) => locale === "de" ? title : title.toLowerCase();
+    const formatTitle = (title: string) => (locale === "de" ? title : title.toLowerCase());
 
     // Load items only if not already loaded
     const toggleValue = (key: string, value: string) => {
-        setSelectedValues((prev) => {
-            const current = prev[key] || [];
-            const updated = current.includes(value)
-                ? current.filter((v) => v !== value)
-                : [...current, value];
-            setLastChangedKey(key);
-            return {...prev, [key]: updated};
-        });
+        const current = selectedValues[key] || [];
+        const updated = current.includes(value)
+            ? current.filter((v) => v !== value)
+            : [...current, value];
+        setSelectedValues((prev) => ({...prev, [key]: updated}));
+        onChange(key, updated, filters.find((f) => f.key === key)?.type ?? "default");
     };
 
     const pinFilter = (title: string) => {
@@ -155,12 +150,18 @@ export const FilterBar: React.FC<FilterBarProps> = ({filters, filterManager, onC
         );
     };
 
+    const setDateRange = (key: string, range?: DateRange) => {
+        setDateRanges((prev) => ({...prev, [key]: range}));
+        const updatedValues =
+            range?.from && range?.to
+                ? [range.from.toISOString(), range.to.toISOString()]
+                : [];
+        setSelectedValues((prev) => ({...prev, [key]: updatedValues}));
+        onChange(key, updatedValues, "date");
+    };
+
     return (
-        <div
-            className="flex gap-3 whitespace-nowrap mr-2
-             overflow-x-auto scrollbar-thin scrollbar-thumb-muted-foreground
-             md:flex-wrap md:overflow-visible md:scrollbar-none md:whitespace-normal"
-        >
+        <div className="flex flex-wrap gap-3 mr-2">
             {pinnedFilters.map(({title, key, itemsLoader, type = "default"}) => {
                 const items = getLoadedItems(context, key);
                 const search = searchTexts[key] ?? "";
@@ -172,17 +173,6 @@ export const FilterBar: React.FC<FilterBarProps> = ({filters, filterManager, onC
                 const height = type === "date" ? undefined : calculateHeight(filteredItems);
                 const dateRange = dateRanges[key];
 
-                // update Funktion
-                const setDateRange = (range?: DateRange) => {
-                    setDateRanges(prev => ({...prev, [key]: range}));
-                    setSelectedValues(prev => ({
-                        ...prev,
-                        [key]: range?.from && range?.to
-                            ? [range.from.toISOString(), range.to.toISOString()]
-                            : []
-                    }));
-                    setLastChangedKey(key);
-                };
                 return (
                     <Popover
                         key={key}
@@ -193,27 +183,30 @@ export const FilterBar: React.FC<FilterBarProps> = ({filters, filterManager, onC
                         }}
                     >
                         <PopoverTrigger asChild>
-                            <ButtonLoading
-                                isLoading={loadingKeys.includes(key)}
-                                loadingText={getDisplayLabel(key, t(title))}
-                                variant={(selectedValues[key]?.length ?? 0) > 0 ? "default" : "outline"}
-                                className="rounded-full text-sm flex items-center gap-2"
-                            >
-                                {renderDisplayLabelWithDate(key, title, type, dateRange)}
+                            <div className="relative">
+                                <ButtonLoading
+                                    isLoading={loadingKeys.includes(key)}
+                                    loadingText={getDisplayLabel(key, t(title))}
+                                    variant={(selectedValues[key]?.length ?? 0) > 0 ? "default" : "outline"}
+                                    className={`rounded-full text-sm flex items-center gap-2 ${
+                                        (selectedValues[key]?.length ?? 0) > 0 ? "pr-7" : ""
+                                    }`}
+                                >
+                                    {renderDisplayLabelWithDate(key, title, type, dateRange)}
+                                </ButtonLoading>
+
                                 {(selectedValues[key]?.length ?? 0) > 0 && (
                                     <X
-                                        className="w-4 h-4 text-muted-foreground hover:text-red-600"
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground hover:text-red-600 cursor-pointer"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            setSelectedValues(prev => {
-                                                setLastChangedKey(key);
-                                                return { ...prev, [key]: [] };
-                                            });
-                                            if (type === "date") setDateRange(undefined);
+                                            setSelectedValues((prev) => ({...prev, [key]: []}));
+                                            if (type === "date") setDateRange(key, undefined);
+                                            onChange(key, [], type);
                                         }}
                                     />
                                 )}
-                            </ButtonLoading>
+                            </div>
                         </PopoverTrigger>
 
                         <PopoverContent align="start" className="p-2 w-auto min-w-[220px]">
@@ -234,8 +227,12 @@ export const FilterBar: React.FC<FilterBarProps> = ({filters, filterManager, onC
                                 </div>
                             )}
                             {type === "date" ? (
-                                // @ts-ignore
-                                <DatePickerCalender mode="range" date={dateRange} setDate={setDateRange}/>
+                                <DatePickerCalender
+                                    mode="range"
+                                    date={dateRange}
+                                    // @ts-ignore
+                                    setDate={(range) => setDateRange(key, range)}
+                                />
                             ) : (
                                 <ScrollArea style={{height}} className="w-auto pr-2">
                                     <div className="flex flex-col gap-2 min-w-max">
@@ -255,8 +252,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({filters, filterManager, onC
                                                 </label>
                                             );
                                         }) : (
-                                            <div
-                                                className="text-sm text-muted-foreground px-2 py-1">{t("placeholder.no_results")}</div>
+                                            <div className="text-sm text-muted-foreground px-2 py-1">
+                                                {t("placeholder.no_results")}
+                                            </div>
                                         )}
                                     </div>
                                 </ScrollArea>

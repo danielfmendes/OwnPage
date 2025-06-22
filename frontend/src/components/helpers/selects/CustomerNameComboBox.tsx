@@ -1,11 +1,11 @@
-import React from "react";
+import {useEffect, useState} from "react";
 import {Check} from "lucide-react";
 import {useNotification} from "@/components/helpers/NotificationProvider";
-import {Customer, CustomerListResponse, CustomersService} from "@/models/api";
-import {cn} from "@/lib/utils";
-import {ComboBoxLoading} from "@/components/helpers/ComboBoxLoading";
+import {type Customer, type CustomerListResponse, CustomersService} from "@/models/api";
 import {useTranslation} from "react-i18next";
 import FilterManager from "@/utils/filtermanager";
+import {cn} from "@/lib/utils";
+import {ComboBoxLoading} from "@/components/helpers/ComboBoxLoading";
 
 interface Props {
     customerID: number | null;
@@ -21,25 +21,23 @@ export default function CustomerNameComboBox({customerID, onChange}: Props) {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
     const filterManager = new FilterManager();
-    const [customerIdOptions, setCustomerIdOptions] = React.useState<Customer[]>([]);
-    const [selectedCustomer, setSelectedCustomer] = React.useState<Customer | null>(null);
-    const [isLoading, setIsLoading] = React.useState(false);
+    const [customerIdOptions, setCustomerIdOptions] = useState<Customer[]>([]);
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         setIsLoading(true);
 
-        (async () => {
-            const filterString = await filterManager.getFilterStringWithProjectIds();
-            CustomersService.getCustomers(filterString === "" ? undefined : filterString)
-                .then((customers) => {
-                    const customerList = customers as CustomerListResponse;
-                    setCustomerIdOptions(customerList.items ?? []);
-                    const selected = customerList.items?.find(c => c.id === customerID) ?? null;
-                    setSelectedCustomer(selected);
-                })
-                .catch(err => addNotification(`Failed to load customer options${err?.message ? `: ${err.message}` : ""}`, "error"))
-                .finally(() => setIsLoading(false))
-        })();
+        const filterString = filterManager.getFilterStringWithProjectIds();
+        CustomersService.getCustomers(filterString === "" ? undefined : filterString)
+            .then((customers) => {
+                const customerList = customers as CustomerListResponse;
+                setCustomerIdOptions(customerList.items ?? []);
+                const selected = customerList.items?.find(c => c.id === customerID) ?? null;
+                setSelectedCustomer(selected);
+            })
+            .catch(err => addNotification(`Failed to load customer options${err?.message ? `: ${err.message}` : ""}`, "error"))
+            .finally(() => setIsLoading(false))
     }, [customerID]);
 
     const handleSelect = (id: number) => {

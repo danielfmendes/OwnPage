@@ -10,9 +10,9 @@ export declare interface ItemsLoaderOptions {
     sort: Sort;
 }
 
-export declare type ItemsLoader = (_: ItemsLoaderOptions) => Promise<any[]>;
+export declare type ItemsLoader = (_: ItemsLoaderOptions) => Promise<void>;
 
-export function useRefreshData(itemsLoader: (options: ItemsLoaderOptions) => Promise<void>) {
+export function useRefreshData(itemsLoader: ItemsLoader) {
     return useCallback(() => {
         return itemsLoader({
             filterManager: new FilterManager(),
@@ -33,7 +33,7 @@ export async function genericItemsLoader<T>(
     setData: (items: T[]) => void,
     setTotalCount: (count: number) => void,
 ): Promise<void> {
-    const filterString = await options.filterManager.getFilterStringWithProjectIds();
+    const filterString = options.filterManager.getFilterStringWithProjectIds();
     const sortString = options.sort.toCallOpts().join(",");
 
     const result = await fetchFunction(

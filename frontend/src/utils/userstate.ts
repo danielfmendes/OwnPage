@@ -1,5 +1,5 @@
 import {create} from "zustand";
-import {User} from "@/models/api";
+import type {User} from "@/models/api";
 
 interface UserState {
     user: User | null;

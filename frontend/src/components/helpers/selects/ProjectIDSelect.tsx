@@ -1,23 +1,23 @@
-import React from "react";
+import {useEffect, useState} from "react";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {useRoleStore} from "@/utils/rolemananagemetstate";
 import {useTranslation} from "react-i18next";
-import {Project} from "@/models/api";
+import type {Project} from "@/models/api";
 
 interface Props {
     projectID: string;
     onChange: (value: string) => void;
 }
 
-export default function ProjectIDSelect({ projectID, onChange }: Props) {
+export default function ProjectIDSelect({projectID, onChange}: Props) {
     const {t} = useTranslation();
     const roles = useRoleStore((state) => state.roles);
     const selectedRoles = useRoleStore((state) => state.selectedRoles);
 
-    const [projectId, setProjectId] = React.useState<string>(projectID);
-    const [projectIdOptions, setProjectIdOptions] = React.useState<Project[]>([]);
+    const [projectId, setProjectId] = useState<string>(projectID);
+    const [projectIdOptions, setProjectIdOptions] = useState<Project[]>([]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const sourceRoles = selectedRoles.length > 0 ? selectedRoles : roles;
 
         if (sourceRoles.length > 0) {
@@ -44,7 +44,7 @@ export default function ProjectIDSelect({ projectID, onChange }: Props) {
             <label className="block text-sm font-medium">{t("label.project")}</label>
             <Select value={projectId} onValueChange={handleChange}>
                 <SelectTrigger className="w-full p-2 border rounded">
-                    <SelectValue placeholder={t("placeholder.project")} />
+                    <SelectValue placeholder={t("placeholder.project")}/>
                 </SelectTrigger>
                 <SelectContent>
                     {projectIdOptions.length === 0 ? (

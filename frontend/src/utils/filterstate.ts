@@ -1,5 +1,5 @@
 import {create} from "zustand";
-import {FilterItem} from "@/components/helpers/FilterBar";
+import {type FilterItem} from "@/components/helpers/FilterBar";
 
 interface FilterState {
     loadedItems: Record<string, Record<string, FilterItem[]>>; // context -> key -> items[]

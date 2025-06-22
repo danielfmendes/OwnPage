@@ -1,5 +1,6 @@
 import {useRoleStore} from "@/utils/rolemananagemetstate";
-import { DateRange } from "react-day-picker";
+import type {DateRange} from "react-day-picker";
+
 export type FilterType = "search" | "date" | "default";
 
 interface FilterData {
@@ -51,7 +52,7 @@ class FilterManager {
                 const from = new Date(fromStr);
                 const to = new Date(toStr);
                 if (!isNaN(from.getTime()) && !isNaN(to.getTime())) {
-                    result[key] = { from, to };
+                    result[key] = {from, to};
                 }
             }
         });
@@ -59,15 +60,19 @@ class FilterManager {
         return result;
     }
 
+    private updateFilter(key: string, values: any[], type: FilterType = "default") {
+        if (values.length === 0) {
+            this.filters.delete(key);
+        } else {
+            this.filters.set(key, {values, type});
+        }
+    }
+
     addFilter(key: string, values: any[], type: FilterType = "default") {
         if (!key || !Array.isArray(values)) {
             throw new Error("Key must be string and values must be array");
         }
-        if (values.length === 0) {
-            this.filters.delete(key);
-        } else {
-            this.filters.set(key, { values, type });
-        }
+        this.updateFilter(key, values, type);
     }
 
     removeFilter(key: string) {
@@ -78,31 +83,17 @@ class FilterManager {
         return this.filters.has(key);
     }
 
-    private async getProjectIds(maxWaitMs = 1000, intervalMs = 100): Promise<number[]> {
-        const waitForRoles = async (): Promise<void> => {
-            const start = Date.now();
-            while (useRoleStore.getState().roles.length === 0) {
-                if (Date.now() - start > maxWaitMs) return;
-                await new Promise((resolve) => setTimeout(resolve, intervalMs));
-            }
-        };
-
-        await waitForRoles();
-
+    private getProjectIdsFromStore(): number[] {
         const selectedRoles = useRoleStore.getState().selectedRoles;
-        if (selectedRoles.length > 0) {
-            return selectedRoles.map((role) => role.project_id);
-        }
-        return [];
+        return selectedRoles.map((r) => r.project_id);
     }
 
-    private buildFilterString(): string {
+    private buildFilterString(ignoreOthers: boolean = false): string {
         const parts: string[] = [];
 
-        for (const [key, filterData] of this.filters.entries()) {
+        const formatFilter = (key: string, filterData: FilterData) => {
             const {values, type} = filterData;
-
-            if (values.length === 0) continue;
+            if (values.length === 0) return;
 
             if (type === "date" && values.length === 2) {
                 parts.push(`${key}:$between.${values[0]}|${values[1]}`);
@@ -111,25 +102,42 @@ class FilterManager {
             } else {
                 parts.push(`${key}:$in.${values.join("|")}`);
             }
+        };
+
+        const projectFilter = this.filters.get("project_id");
+        if (projectFilter) {
+            formatFilter("project_id", projectFilter);
         }
+
+        if (!ignoreOthers) {
+            for (const [key, filterData] of this.filters.entries()) {
+                if (key === "project_id") continue;
+                formatFilter(key, filterData);
+            }
+        }
+
         return parts.join(",");
     }
 
-    // Jetzt async, damit wir getProjectIds awaiten können
-    async getFilterStringWithProjectIds(): Promise<string> {
-        // Projekt-IDs holen
-        const projectIds = await this.getProjectIds();
+    getFilterStringWithProjectIds(ignoreOthers: boolean = false): string {
+        const roles = useRoleStore.getState().roles;
+        const projectIds = this.getProjectIdsFromStore();
 
-        // Projekt-Filter setzen, falls vorhanden
         if (projectIds.length > 0) {
             this.filters.set("project_id", {values: projectIds, type: "default"});
+        } else if (roles.length > 0) {
+            this.filters.delete("project_id");
         }
 
+        return this.buildFilterString(ignoreOthers);
+    }
+
+    getFilterString(): string {
         return this.buildFilterString();
     }
 
-    async toQueryParams(): Promise<Record<string, string>> {
-        const filterString = await this.getFilterStringWithProjectIds();
+    toQueryParams(): Record<string, string> {
+        const filterString = this.getFilterStringWithProjectIds();
         if (filterString) {
             return {filter: filterString};
         }
@@ -164,10 +172,6 @@ class FilterManager {
             }
         }
         return new FilterManager(filters);
-    }
-
-    getFilterString(): string {
-        return this.buildFilterString();
     }
 }
 
