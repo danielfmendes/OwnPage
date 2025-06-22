@@ -1,9 +1,9 @@
-import {StrictMode} from 'react'
+import {StrictMode, useEffect} from 'react'
 import {createRoot} from 'react-dom/client'
 import './index.css'
 import "../i18n";
 import {NotificationProvider} from "@/components/helpers/NotificationProvider.tsx";
-import {ThemeProvider} from "next-themes";
+import {ThemeProvider, useTheme} from "next-themes";
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
 import Home from "@/pages/page.tsx";
 import LoginCard from "@/pages/dwh/login/page.tsx";
@@ -16,10 +16,22 @@ import PartsStoragePage from "@/pages/dwh/partsstorage/page.tsx";
 import RoleManagementPage from "@/pages/dwh/rolemanagement/page.tsx";
 import WareHousePage from "@/pages/dwh/warehouse/page.tsx";
 
+function SystemThemeSetter() {
+    const {setTheme} = useTheme()
+
+    useEffect(() => {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        setTheme(prefersDark ? 'dark' : 'light')
+    }, [])
+
+    return null
+}
+
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <NotificationProvider>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+                <SystemThemeSetter/>
                 <BrowserRouter>
                     <Routes>
                         <Route path="/" element={<Home/>}/>
