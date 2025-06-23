@@ -25,7 +25,7 @@ import {Skeleton} from "@/components/ui/skeleton";
 import {type BikeSales} from "@/models/api";
 import {cn} from "@/lib/utils";
 import {useTranslation} from "react-i18next";
-import {useIsMobile} from "@/utils/use-mobile.ts";
+import {useIsMobile} from "@/utils/use-mobile";
 
 interface Props {
     bikeData: BikeSales[] | null;

@@ -2,20 +2,29 @@ import {StrictMode, useEffect} from 'react'
 import {createRoot} from 'react-dom/client'
 import './index.css'
 import "../i18n";
-import {NotificationProvider} from "@/components/helpers/NotificationProvider.tsx";
+import i18n from "i18next";
+import {NotificationProvider} from "@/components/helpers/NotificationProvider";
 import {ThemeProvider, useTheme} from "next-themes";
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
-import Home from "@/pages/page.tsx";
-import LoginCard from "@/pages/dwh/login/page.tsx";
-import DWHLayout from "@/pages/dwh/layout.tsx";
-import RegisterCard from "@/pages/dwh/register/page.tsx";
-import CustomerPage from "@/pages/dwh/customer/page.tsx";
-import DashboardPage from "@/pages/dwh/dashboard/page.tsx";
-import OrderPage from "@/pages/dwh/orders/page.tsx";
-import PartsStoragePage from "@/pages/dwh/partsstorage/page.tsx";
-import RoleManagementPage from "@/pages/dwh/rolemanagement/page.tsx";
-import WareHousePage from "@/pages/dwh/warehouse/page.tsx";
+import Home from "@/pages/page";
+import LoginCard from "@/pages/dwh/login/page";
+import DWHLayout from "@/pages/dwh/layout";
+import RegisterCard from "@/pages/dwh/register/page";
+import CustomerPage from "@/pages/dwh/customer/page";
+import DashboardPage from "@/pages/dwh/dashboard/page";
+import OrderPage from "@/pages/dwh/orders/page";
+import PartsStoragePage from "@/pages/dwh/partsstorage/page";
+import RoleManagementPage from "@/pages/dwh/rolemanagement/page";
+import WareHousePage from "@/pages/dwh/warehouse/page";
+import PrivacyPage from "@/pages/privacy/page";
+import ImprintPage from "@/pages/imprint/page";
 import Chat from "@/pages/chat/page.tsx";
+import Language from "@/utils/language";
+
+const savedLang = Language.getLanguage();
+if (savedLang && i18n.language !== savedLang) {
+    i18n.changeLanguage(savedLang);
+}
 
 function SystemThemeSetter() {
     const {setTheme} = useTheme()
@@ -38,6 +47,8 @@ createRoot(document.getElementById('root')!).render(
                         <Route path="/" element={<Home/>}/>
                         <Route path="/chat" element={<Chat/>}/>
                         <Route path="/dwh" element={<DWHLayout/>}>
+                            <Route path="imprint" element={<ImprintPage/>}/>
+                            <Route path="privacy" element={<PrivacyPage/>}/>
                             <Route path="login" element={<LoginCard/>}/>
                             <Route path="register" element={<RegisterCard/>}/>
                             <Route path="customer" element={<CustomerPage/>}/>

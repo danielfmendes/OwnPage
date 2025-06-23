@@ -24,7 +24,7 @@ import {Button} from "@/components/ui/button";
 import {useTranslation} from "react-i18next";
 import FilterManager from "@/utils/filtermanager";
 import {isRoleUserForProject} from "@/utils/helpers";
-import {useIsMobile} from "@/utils/use-mobile.ts";
+import {useIsMobile} from "@/utils/use-mobile";
 
 interface Props {
     rowData?: OrderWithCustomer;

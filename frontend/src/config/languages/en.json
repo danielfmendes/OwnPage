@@ -56,7 +56,8 @@
     "warehouse_location": "Warehouse Location",
     "number_of_sales": "Number of Sales",
     "birthday": "Birthday",
-    "dob": "Date of Birth"
+    "dob": "Date of Birth",
+    "rightsReserved": "All rights reserved."
   },
   "placeholder": {
     "email": "e.g. test@example.com",
@@ -190,5 +191,111 @@
     "desc": "Desc",
     "title": "Filters & Sorting",
     "subtitle": "Refine your results by applying filters and sorting"
+  },
+  "imprint": {
+    "title": "Imprint",
+    "legalInfo": {
+      "title": "Information according to § 5 TMG"
+    },
+    "contact": {
+      "title": "Contact Information",
+      "representedBy": "Represented by",
+      "email": "Email",
+      "phone": "Phone",
+      "fax": "Fax"
+    },
+    "register": {
+      "title": "Commercial Register",
+      "court": "Registered at",
+      "number": "Registration number",
+      "vatId": "VAT ID",
+      "taxNumber": "Tax number"
+    },
+    "disclaimer": {
+      "title": "Disclaimer",
+      "contentTitle": "Accountability for content",
+      "content": "The content of our website has been created with great care. However, we cannot guarantee the accuracy, completeness, or timeliness of the content.",
+      "linksTitle": "Accountability for links",
+      "links": "Our site contains links to external websites. We have no influence on the content of those sites and therefore cannot assume liability for them."
+    },
+    "copyright": {
+      "title": "Copyright Notice",
+      "content": "All content and works on this website are subject to German copyright law. Duplication, editing, distribution, or any kind of use beyond the scope of copyright law requires the prior written consent of the respective author or creator."
+    },
+    "dispute": {
+      "title": "Dispute Resolution",
+      "content": "The European Commission provides a platform for online dispute resolution (ODR):",
+      "note": "We are not willing or obliged to participate in dispute resolution proceedings before a consumer arbitration board."
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "sections": {
+      "glance": {
+        "title": "1. Data Protection at a Glance",
+        "p1": "We take the protection of your personal data very seriously. All personal information will be handled confidentially and in accordance with statutory data protection regulations (GDPR).",
+        "p2": "The use of our website is generally possible without providing personal data. Where personal data is collected, this is always done on a voluntary basis whenever possible."
+      },
+      "collection": {
+        "title": "2. Data Collection on Our Website",
+        "serverLogs": {
+          "title": "Server Log Files",
+          "p": "Our Go backend automatically collects and stores information in server log files that your browser transmits to us, including:",
+          "items": [
+            "Browser type and version",
+            "Operating system",
+            "Referrer URL",
+            "Hostname of the accessing computer",
+            "Time of server request",
+            "IP address (anonymized)"
+          ]
+        },
+        "cookies": {
+          "title": "Cookies (js-cookie)",
+          "p": "Our website uses cookies via js-cookie to enhance user experience. These include:",
+          "items": [
+            "Session cookies for authentication",
+            "Preference cookies for user settings",
+            "Analytics cookies (if applicable)"
+          ],
+          "notice": "You can configure your browser to refuse cookies, though this may limit functionality."
+        }
+      },
+      "storage": {
+        "title": "3. Data Storage & Processing",
+        "p1": "Personal data is stored in our PostgreSQL database with the following safeguards:",
+        "items": [
+          "Encryption at rest and in transit",
+          "Role-based access control",
+          "Regular security audits"
+        ],
+        "p2": "Client-side state management uses Zustand, which stores non-sensitive UI state locally in the browser."
+      },
+      "rights": {
+        "title": "4. Your Rights",
+        "p1": "Under GDPR, you have the right to:",
+        "items": [
+          "Request access to your personal data",
+          "Request correction or deletion",
+          "Withdraw consent",
+          "Lodge a complaint with a supervisory authority"
+        ],
+        "contact": "To exercise these rights, please contact us at privacy@yourcompany.com."
+      },
+      "thirdParties": {
+        "title": "5. Third-Party Services",
+        "p": "We may integrate with third-party services that process data under their own privacy policies. These include:",
+        "items": [
+          "Payment processors (if applicable)",
+          "Analytics providers (if used)",
+          "Hosting providers"
+        ]
+      },
+      "changes": {
+        "title": "6. Changes to This Policy",
+        "p1": "We may update this policy periodically. Significant changes will be announced via our website or email notification.",
+        "updated": "Last updated"
+      }
+    }
   }
 }

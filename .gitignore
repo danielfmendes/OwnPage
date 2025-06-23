@@ -1,6 +1,7 @@
 .idea
 backend/info.md
 controller/.env.local
+controller/own_tables.md
 frontend-testing/target
 frontend-testing/screenshots
 ToDo_Current.md
