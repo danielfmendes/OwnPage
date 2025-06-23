@@ -11,7 +11,7 @@ import {Building2} from "lucide-react";
 import type {CityData} from "@/models/api";
 import {useTranslation} from "react-i18next";
 import {useMemo} from "react";
-import {useIsMobile} from "@/utils/use-mobile.ts";
+import {useIsMobile} from "@/utils/use-mobile";
 
 interface Props {
     citiesData: CityData[];

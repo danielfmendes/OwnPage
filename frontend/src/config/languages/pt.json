@@ -56,7 +56,8 @@
     "warehouse_location": "Localização do armazém",
     "number_of_sales": "Número de vendas",
     "birthday": "Aniversário",
-    "dob": "Data de nascimento"
+    "dob": "Data de nascimento",
+    "rightsReserved": "Todos os direitos reservados."
   },
   "placeholder": {
     "email": "ex.: teste@exemplo.com",
@@ -190,5 +191,111 @@
     "desc": "Desc",
     "title": "Filtros e Ordenação",
     "subtitle": "Refine seus resultados aplicando filtros e ordenação"
+  },
+  "imprint": {
+    "title": "Impressão",
+    "legalInfo": {
+      "title": "Informações de acordo com § 5 TMG"
+    },
+    "contact": {
+      "title": "Informações de Contato",
+      "representedBy": "Representado por",
+      "email": "Email",
+      "phone": "Telefone",
+      "fax": "Fax"
+    },
+    "register": {
+      "title": "Registro Comercial",
+      "court": "Registrado em",
+      "number": "Número de registro",
+      "vatId": "ID de IVA",
+      "taxNumber": "Número fiscal"
+    },
+    "disclaimer": {
+      "title": "Isenção de Responsabilidade",
+      "contentTitle": "Responsabilidade pelo conteúdo",
+      "content": "O conteúdo do nosso site foi criado com muito cuidado. No entanto, não podemos garantir a exatidão, integridade ou atualidade das informações.",
+      "linksTitle": "Responsabilidade por links",
+      "links": "Nosso site contém links para sites externos. Não temos controle sobre o conteúdo desses sites e, portanto, não podemos assumir responsabilidade por eles."
+    },
+    "copyright": {
+      "title": "Aviso de Direitos Autorais",
+      "content": "Todo o conteúdo e trabalhos neste site estão sujeitos à lei de direitos autorais alemã. A reprodução, edição, distribuição ou qualquer tipo de utilização fora dos limites do direito autoral requer consentimento prévio por escrito do autor ou criador."
+    },
+    "dispute": {
+      "title": "Resolução de Disputas",
+      "content": "A Comissão Europeia fornece uma plataforma para resolução de disputas online (ODR):",
+      "note": "Não estamos dispostos nem obrigados a participar de procedimentos de resolução de disputas perante uma entidade de arbitragem de consumo."
+    }
+  },
+  "privacy": {
+    "title": "Política de Privacidade",
+    "sections": {
+      "glance": {
+        "title": "1. Proteção de Dados em Resumo",
+        "p1": "Levamos a sério a proteção dos seus dados pessoais. Todas as informações pessoais são tratadas com confidencialidade e de acordo com os regulamentos legais de proteção de dados (GDPR).",
+        "p2": "O uso do nosso site geralmente é possível sem fornecer dados pessoais. Quando os dados são coletados, isso é feito de forma voluntária sempre que possível."
+      },
+      "collection": {
+        "title": "2. Coleta de Dados no Nosso Site",
+        "serverLogs": {
+          "title": "Arquivos de Log do Servidor",
+          "p": "Nosso backend Go coleta e armazena automaticamente informações nos arquivos de log do servidor que seu navegador nos transmite, incluindo:",
+          "items": [
+            "Tipo e versão do navegador",
+            "Sistema operacional",
+            "URL de referência",
+            "Nome do host do computador acessando",
+            "Hora da solicitação do servidor",
+            "Endereço IP (anonimizado)"
+          ]
+        },
+        "cookies": {
+          "title": "Cookies (js-cookie)",
+          "p": "Nosso site usa cookies via js-cookie para melhorar a experiência do usuário. Isso inclui:",
+          "items": [
+            "Cookies de sessão para autenticação",
+            "Cookies de preferência para configurações do usuário",
+            "Cookies de análise (se aplicável)"
+          ],
+          "notice": "Você pode configurar seu navegador para recusar cookies, mas isso pode limitar a funcionalidade."
+        }
+      },
+      "storage": {
+        "title": "3. Armazenamento e Processamento de Dados",
+        "p1": "Os dados pessoais são armazenados em nosso banco de dados PostgreSQL com as seguintes medidas de segurança:",
+        "items": [
+          "Criptografia em repouso e em trânsito",
+          "Controle de acesso baseado em funções",
+          "Auditorias de segurança regulares"
+        ],
+        "p2": "O gerenciamento de estado do lado do cliente usa Zustand, que armazena estados de UI não sensíveis localmente no navegador."
+      },
+      "rights": {
+        "title": "4. Seus Direitos",
+        "p1": "De acordo com o GDPR, você tem o direito de:",
+        "items": [
+          "Solicitar acesso aos seus dados pessoais",
+          "Solicitar correção ou exclusão",
+          "Retirar o consentimento",
+          "Registrar uma reclamação junto a uma autoridade supervisora"
+        ],
+        "contact": "Para exercer esses direitos, entre em contato conosco em privacy@yourcompany.com."
+      },
+      "thirdParties": {
+        "title": "5. Serviços de Terceiros",
+        "p": "Podemos integrar serviços de terceiros que processam dados de acordo com suas próprias políticas de privacidade. Isso inclui:",
+        "items": [
+          "Processadores de pagamento (se aplicável)",
+          "Provedores de análise (se usados)",
+          "Provedores de hospedagem"
+        ]
+      },
+      "changes": {
+        "title": "6. Alterações nesta Política",
+        "p1": "Podemos atualizar esta política periodicamente. Mudanças significativas serão anunciadas por meio do nosso site ou notificação por e-mail.",
+        "updated": "Última atualização"
+      }
+    }
   }
 }

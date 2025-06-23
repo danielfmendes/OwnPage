@@ -24,8 +24,8 @@ import ContentLayout from "@/components/layout/ContentLayout";
 import {MetricStats} from "@/pages/dwh/dashboard/revenue-graph";
 import {BikeModels} from "@/pages/dwh/dashboard/time-graph";
 import CitiesList from "@/pages/dwh/dashboard/cities-list";
-import {useRoleStore} from "@/utils/rolemananagemetstate.ts";
-import apiUrl from "@/utils/helpers.ts";
+import {useRoleStore} from "@/utils/rolemananagemetstate";
+import apiUrl from "@/utils/helpers";
 
 export default function DashboardPage() {
     const {t} = useTranslation();
@@ -63,7 +63,8 @@ export default function DashboardPage() {
     useEffect(() => {
         const measure = () => {
             if (!containerRef.current) return;
-            const fullHeight = window.innerHeight - containerRef.current.getBoundingClientRect().top - 14;
+            const footerHeight = 51;
+            const fullHeight = window.innerHeight - containerRef.current.getBoundingClientRect().top - 16 - footerHeight;
 
             const newMetricHeight = Math.max(226, Math.round(fullHeight * 0.29));
             let newOtherHeight;

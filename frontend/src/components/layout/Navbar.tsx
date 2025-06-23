@@ -9,7 +9,7 @@ import {UserNav} from "@/components/layout/UserNav";
 import {ProjectDialog} from "@/components/layout/ProjectDialog";
 
 type NavbarProps = {
-    title: string;
+    title?: string;
     children?: ReactNode;
 };
 

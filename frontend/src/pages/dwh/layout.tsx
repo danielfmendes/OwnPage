@@ -10,12 +10,10 @@ import {
     type RoleManagementListResponse,
 } from "@/models/api";
 import apiUrl, {handleLogOut} from "@/utils/helpers";
-import Language from "@/utils/language";
-import {useTranslation} from "react-i18next";
 import {OpenAPI} from "@/models/api/core/OpenAPI";
 import FilterManager from "@/utils/filtermanager";
 import {useNavigate, useLocation, Outlet} from "react-router-dom";
-import {useDataTableStore} from "@/models/datatable/dataTableStore.ts";
+import {useDataTableStore} from "@/models/datatable/dataTableStore";
 
 export default function DWHLayout() {
     const navigate = useNavigate();
@@ -33,7 +31,6 @@ export default function DWHLayout() {
     const setIsLoadingRole = useRoleStore((state) => state.setIsLoading);
     const selectedRoles = useRoleStore((state) => state.selectedRoles);
     const setSelectedRoles = useRoleStore((state) => state.setSelectedRoles);
-    const {i18n} = useTranslation();
     const {toQueryParams, fromQueryParams, filterManager: globalFilterManager} = useDataTableStore();
 
     useEffect(() => {
@@ -43,13 +40,6 @@ export default function DWHLayout() {
     useEffect(() => {
         if (token) OpenAPI.TOKEN = token;
     }, [token]);
-
-    useEffect(() => {
-        const savedLang = Language.getLanguage();
-        if (savedLang && i18n.language !== savedLang) {
-            i18n.changeLanguage(savedLang);
-        }
-    }, [i18n]);
 
     useEffect(() => {
         fromQueryParams(new URLSearchParams(location.search));

@@ -10,7 +10,7 @@ import {type ChartConfig, ChartContainer} from "@/components/ui/chart";
 import type {GraphData} from "@/models/api";
 import {Skeleton} from "@/components/ui/skeleton";
 import {useTranslation} from "react-i18next";
-import {useIsMobile} from "@/utils/use-mobile.ts";
+import {useIsMobile} from "@/utils/use-mobile";
 
 interface Props {
     graphData: GraphData[];

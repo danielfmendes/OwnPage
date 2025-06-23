@@ -1,9 +1,9 @@
 import i18n from "i18next"
 import {initReactI18next} from "react-i18next"
 
-import en from "./src/languages/en.json"
-import de from "./src/languages/de.json"
-import pt from "./src/languages/pt.json"
+import en from "@/config/languages/en.json"
+import de from "@/config/languages/de.json"
+import pt from "@/config/languages/pt.json"
 
 i18n
     .use(initReactI18next)
