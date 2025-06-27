@@ -59,7 +59,7 @@ export function SimpleTable<TData>({
 
     const clickableClasses = onRowClick ? "cursor-pointer hover:bg-muted" : "";
     const clickableMobileClasses = onRowClick ? "hover:bg-muted/20 transition-colors cursor-pointer" : "";
-    const noHeaderKeys = ["email", "customer_email"];
+    const noHeaderKeys = ["email", "customer_email", "project_name"];
 
     const renderCellContent = (col: any, rowData: any, hideHeaderKeys: string[] = []) => {
         const key = col.accessorKey ?? col.id;
