@@ -13,19 +13,32 @@ env:
   DB_USER: fahrrad_user
   DB_PORT: 5432
   DB_HOST: localhost
-  DOCKER_NETWORK: flyway-network
   POSTGRES_CONTAINER_NAME: postgres-container
 
 jobs:
   frontend-test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: ${{ env.DB_PASS }}
+          POSTGRES_DB: ${{ env.DB_NAME }}
+          POSTGRES_USER: ${{ env.DB_USER }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     strategy:
       matrix:
         test-run:
           - register
           - login
-
     steps:
       - uses: actions/checkout@v3
 
@@ -34,35 +47,25 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y xvfb ffmpeg x11-utils
 
-      - name: Create Docker network
-        run: docker network create ${{ env.DOCKER_NETWORK }} || true
-
-      - name: Start PostgreSQL container
+      - name: Wait for PostgreSQL to be ready
         run: |
-          docker run --rm -d \
-            --name ${{ env.POSTGRES_CONTAINER_NAME }} \
-            --network ${{ env.DOCKER_NETWORK }} \
-            -e POSTGRES_PASSWORD=${{ env.DB_PASS }} \
-            -e POSTGRES_DB=${{ env.DB_NAME }} \
-            -e POSTGRES_USER=${{ env.DB_USER }} \
-            -p ${{ env.DB_PORT }}:5432 \
-            postgres:15
-
-          echo "Waiting for PostgreSQL..."
-          until docker exec ${{ env.POSTGRES_CONTAINER_NAME }} pg_isready --host=localhost --port=5432 --username=${{ env.DB_USER }}; do
+          echo "Waiting for PostgreSQL to be ready..."
+          until pg_isready -h ${{ env.DB_HOST }} -p ${{ env.DB_PORT }} -U ${{ env.DB_USER }}; do
             echo "Still waiting for PostgreSQL..."
             sleep 2
           done
           echo "PostgreSQL is ready!"
 
-      - name: Run Flyway migrations
+      - name: Run database migrations
         run: |
-          docker run --rm --network ${{ env.DOCKER_NETWORK }} \
-            -v ${{ github.workspace }}/backend/init:/flyway/sql \
-            flyway/flyway \
-            -url=jdbc:postgresql://${{ env.POSTGRES_CONTAINER_NAME }}:${{ env.DB_PORT }}/${{ env.DB_NAME }} \
+          wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/9.22.3/flyway-commandline-9.22.3-linux-x64.tar.gz | tar xvz
+          sudo ln -s $(pwd)/flyway-9.22.3/flyway /usr/local/bin
+          
+          flyway \
+            -url=jdbc:postgresql://${{ env.DB_HOST }}:${{ env.DB_PORT }}/${{ env.DB_NAME }} \
             -user=${{ env.DB_USER }} \
             -password=${{ env.DB_PASS }} \
+            -locations=filesystem:${{ github.workspace }}/backend/init \
             -baselineOnMigrate=true \
             migrate
 
