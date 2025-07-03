@@ -17,17 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Start PostgreSQL and run migrations
-        run: |
-          docker compose -f .github/docker/docker-compose.yml up -d postgres
-          docker compose -f .github/docker/docker-compose.yml run --rm flyway
-          echo "Database setup complete!"
-
-      - name: Install dependencies for recording
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb ffmpeg x11-utils
-
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
@@ -43,6 +32,17 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+
+      - name: Install dependencies for recording
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb ffmpeg x11-utils
+
+      - name: Start PostgreSQL service
+        run: docker compose -f .github/docker/docker-compose.yml up -d postgres
+
+      - name: Run Flyway migrations
+        run: docker compose -f .github/docker/docker-compose.yml run --rm flyway
 
       - name: Run Controller
         working-directory: ./controller
