@@ -1,5 +1,4 @@
 name: CI Pipeline
-
 on:
 #  push:
 #    branches:
@@ -7,33 +6,9 @@ on:
 #  pull_request:
   workflow_dispatch:
 
-env:
-  DB_PASS: geheim
-  DB_NAME: fahrrad_db
-  DB_USER: fahrrad_user
-  DB_PORT: 5432
-  DB_HOST: localhost
-  POSTGRES_CONTAINER_NAME: postgres-container
-
 jobs:
   frontend-test:
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: ${{ env.DB_PASS }}
-          POSTGRES_DB: ${{ env.DB_NAME }}
-          POSTGRES_USER: ${{ env.DB_USER }}
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     strategy:
       matrix:
         test-run:
@@ -42,37 +17,32 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Start PostgreSQL and run migrations
+        run: |
+          docker compose -f .github/docker/docker-compose.yml up -d postgres
+          docker compose -f .github/docker/docker-compose.yml run --rm flyway
+          echo "Database setup complete!"
+
       - name: Install dependencies for recording
         run: |
           sudo apt-get update
           sudo apt-get install -y xvfb ffmpeg x11-utils
 
-      - name: Wait for PostgreSQL to be ready
-        run: |
-          echo "Waiting for PostgreSQL to be ready..."
-          until pg_isready -h ${{ env.DB_HOST }} -p ${{ env.DB_PORT }} -U ${{ env.DB_USER }}; do
-            echo "Still waiting for PostgreSQL..."
-            sleep 2
-          done
-          echo "PostgreSQL is ready!"
-
-      - name: Run database migrations
-        run: |
-          wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/9.22.3/flyway-commandline-9.22.3-linux-x64.tar.gz | tar xvz
-          sudo ln -s $(pwd)/flyway-9.22.3/flyway /usr/local/bin
-          
-          flyway \
-            -url=jdbc:postgresql://${{ env.DB_HOST }}:${{ env.DB_PORT }}/${{ env.DB_NAME }} \
-            -user=${{ env.DB_USER }} \
-            -password=${{ env.DB_PASS }} \
-            -locations=filesystem:${{ github.workspace }}/backend/init \
-            -baselineOnMigrate=true \
-            migrate
-
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Run Controller
         working-directory: ./controller
@@ -81,23 +51,12 @@ jobs:
           go mod tidy
           nohup go run main.go &
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
       - name: Install and start frontend
         working-directory: ./frontend
         run: |
           npm install
           npm run build
           nohup npm run preview -- --port 5173 &
-
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
 
       - name: Prepare recording directory
         run: mkdir -p recordings
@@ -127,3 +86,7 @@ jobs:
         with:
           name: test-results-${{ matrix.test-run }}
           path: test-results/${{ matrix.test-run }}
+
+      - name: Cleanup
+        if: always()
+        run: docker compose -f .github/docker/docker-compose.yml down -v
