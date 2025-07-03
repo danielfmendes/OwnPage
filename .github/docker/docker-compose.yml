@@ -1,0 +1,39 @@
+version: "3.9"
+
+networks:
+  flyway-network:
+    driver: bridge
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres-container
+    environment:
+      POSTGRES_USER: fahrrad_user
+      POSTGRES_PASSWORD: geheim
+      POSTGRES_DB: fahrrad_db
+    ports:
+      - "5432:5432"
+    networks:
+      - flyway-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U fahrrad_user" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  flyway:
+    image: flyway/flyway
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - -url=jdbc:postgresql://postgres:5432/fahrrad_db
+      - -user=fahrrad_user
+      - -password=geheim
+      - -baselineOnMigrate=true
+      - migrate
+    volumes:
+      - ../../backend/init:/flyway/sql
+    networks:
+      - flyway-network
