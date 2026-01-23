@@ -1,34 +1,44 @@
-import jwt, { SignOptions, JwtPayload as JwtLibPayload } from "jsonwebtoken";
+import { SignJWT, jwtVerify } from "jose";
 
 export interface JwtPayload {
     email: string;
 }
 
-// Secret intern (via global Binding)
-// In Cloudflare Worker: https://dash.cloudflare.com → Worker → Settings → Add Secret → JWT_SECRET
-const JWT_SECRET = (globalThis as any).JWT_SECRET as string || "supersecret";
+/**
+ * Globales Binding für das Secret.
+ * wenn es unter "Settings -> Variables" als Secret definiert ist.
+ */
+const getSecretKey = () => {
+    const secret = (globalThis as any).JWT_SECRET as string || "supersecret";
+    return new TextEncoder().encode(secret);
+};
 
-export function createJWT(email: string): string {
+const alg = "HS256";
+const issuer = "NebulaDW";
+
+export async function createJWT(email: string): Promise<string> {
     const payload: JwtPayload = { email };
 
-    const options: SignOptions = {
-        algorithm: "HS256",
-        expiresIn: "30m", // 30 Minuten
-        issuer: "NebulaDW",
-    };
-
-    return jwt.sign(payload, JWT_SECRET, options);
+    return await new SignJWT({ ...payload })
+        .setProtectedHeader({ alg })
+        .setIssuedAt()
+        .setIssuer(issuer)
+        .setExpirationTime("30m")
+        .sign(getSecretKey());
 }
 
-export function verifyJWT(token: string): JwtPayload {
+export async function verifyJWT(token: string): Promise<JwtPayload> {
     try {
-        const decoded = jwt.verify(token, JWT_SECRET) as JwtLibPayload;
+        const { payload } = await jwtVerify(token, getSecretKey(), {
+            issuer: issuer,
+            algorithms: [alg],
+        });
 
-        if (!decoded || typeof decoded !== "object" || !("email" in decoded)) {
+        if (!payload || typeof payload !== "object" || !("email" in payload)) {
             throw new Error("Invalid token payload");
         }
 
-        return { email: decoded.email as string };
+        return { email: payload.email as string };
     } catch (err) {
         throw new Error("Invalid or expired token");
     }
