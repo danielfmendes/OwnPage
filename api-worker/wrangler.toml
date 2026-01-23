@@ -1,0 +1,8 @@
+name = "api-worker"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "db-prod"
+database_id = "0eb07cee-ea57-4ba1-9b2f-a86ae5f17d87"
