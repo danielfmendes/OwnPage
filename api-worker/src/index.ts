@@ -17,7 +17,7 @@ import { addCorsHeaders } from "./utils/cors";
 
 async function handleRequest(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url)
-    const path = url.pathname
+    const path = url.pathname.replace(/^\/api/, "");
 
     if (path.startsWith("/auth/")) return await authHandler(request, env);
     if (path.startsWith("/dashboard/")) return await dashboardHandler(request, env);
