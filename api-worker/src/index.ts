@@ -11,6 +11,8 @@ import {
     getUsers,
     getUser,
 } from "./handlers"
+import {authHandler} from "./handlers/auth";
+import {dashboardHandler} from "./handlers/dashboard";
 
 export default {
     async fetch(request: Request, env: Env): Promise<Response> {
@@ -18,8 +20,9 @@ export default {
         const path = url.pathname
 
         // AUTH / DASHBOARD später
-        if (path.startsWith("/auth/")) return new Response("Auth: TODO implement")
-        if (path.startsWith("/dashboard/")) return new Response("Dashboard: TODO implement")
+        if (path.startsWith("/auth/")) return authHandler(request, env);
+
+        if (path.startsWith("/dashboard/")) return dashboardHandler(request, env);
 
         // API ROUTES
         if (path === "/bikemodels") return getBikeModels(env)
