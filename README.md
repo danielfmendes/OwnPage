@@ -17,6 +17,34 @@
 
 ## 🔧 Setup & Installation
 
+## Cloudflare - Implementation
+
+```bash
+npm install -g wrangler
+wrangler login
+```
+
+Datenbank erstellen:
+
+```bash
+wrangler d1 create db-prod
+```
+
+Datenbank-Schema ausführen:
+```bash
+cd init_sqlite
+wrangler d1 execute db-prod --file=V0__Create_Tables.sql --remote
+wrangler d1 execute db-prod --file=V1__Create_Views.sql --remote
+wrangler d1 execute db-prod --file=V2__Insert_Models.sql --remote
+wrangler d1 execute db-prod --file=V3__Insert_Random_Test_Data.sql --remote
+wrangler d1 execute db-prod --file=V4__Generate_Orders.sql --remote
+```
+
+```bash
+cd wasp
+npx wrangler dev --remote
+```
+
 ### 📦 Backend (Go)
 
 #### 🔁 Lokal starten:
