@@ -95,7 +95,7 @@ JWT_SECRET=
 - **Umgebungsvariablen:** In Vercel diese Umgebungsvariable hinzufügen:
 
 ```env
-NEXT_PUBLIC_API_ENV=link_from_controller_endpoint
+VITE_API_ENV=link_from_controller_endpoint
 ```
 
 ---
