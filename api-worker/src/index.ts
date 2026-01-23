@@ -11,31 +11,39 @@ import {
     getUsers,
     getUser,
 } from "./handlers"
-import {authHandler} from "./handlers/auth";
-import {dashboardHandler} from "./handlers/dashboard";
+import { authHandler } from "./handlers/auth";
+import { dashboardHandler } from "./handlers/dashboard";
+import { addCorsHeaders } from "./utils/cors";
+
+async function handleRequest(request: Request, env: Env): Promise<Response> {
+    const url = new URL(request.url)
+    const path = url.pathname
+
+    if (path.startsWith("/auth/")) return await authHandler(request, env);
+    if (path.startsWith("/dashboard/")) return await dashboardHandler(request, env);
+
+    if (path === "/bikemodels") return await getBikeModels(env)
+    if (path === "/bikes") return await bikeHandler(env)
+    if (path === "/components") return await componentHandler(env)
+    if (path === "/customers") return await customerHandler(env)
+    if (path === "/orders") return await orderHandler(env)
+    if (path === "/orderitems") return await orderItemsHandler(env)
+    if (path === "/projects") return await projectHandler(env)
+    if (path === "/users") return await getUsers(env)
+    if (path === "/user") return await getUser(env)
+    if (path === "/warehouseparts") return await warehousePartHandler(env)
+
+    return new Response("Not Found", { status: 404 })
+}
 
 export default {
     async fetch(request: Request, env: Env): Promise<Response> {
-        const url = new URL(request.url)
-        const path = url.pathname
+        if (request.method === "OPTIONS") {
+            return addCorsHeaders(request, new Response(null, { status: 204 }));
+        }
 
-        // AUTH / DASHBOARD später
-        if (path.startsWith("/auth/")) return authHandler(request, env);
+        const response = await handleRequest(request, env);
 
-        if (path.startsWith("/dashboard/")) return dashboardHandler(request, env);
-
-        // API ROUTES
-        if (path === "/bikemodels") return getBikeModels(env)
-        if (path === "/bikes") return bikeHandler(env)
-        if (path === "/components") return componentHandler(env)
-        if (path === "/customers") return customerHandler(env)
-        if (path === "/orders") return orderHandler(env)
-        if (path === "/orderitems") return orderItemsHandler(env)
-        if (path === "/projects") return projectHandler(env)
-        if (path === "/users") return getUsers(env)
-        if (path === "/user") return getUser(env)
-        if (path === "/warehouseparts") return warehousePartHandler(env)
-
-        return new Response("Not Found", { status: 404 })
+        return addCorsHeaders(request, response);
     },
 }
