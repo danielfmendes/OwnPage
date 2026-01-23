@@ -40,7 +40,7 @@ jobs:
           npm run build
         working-directory: frontend
         env:
-          VITE_API_ENV: https://api-worker.freiremendesdaniel2002.workers.dev
+          VITE_API_ENV: https://danielfreiremendes.com/api
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
