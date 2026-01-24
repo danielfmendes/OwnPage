@@ -1,4 +1,4 @@
-import { Env } from "./types"
+import { Env } from "../../types"
 
 async function selectAll(env: Env, table: string) {
     const { results } = await env.DB

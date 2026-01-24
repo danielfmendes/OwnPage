@@ -1,10 +1,10 @@
-import { Env } from "../types";
-import { runQuery, jsonResponse, errorResponse } from "../utils/response";
-import {bikeModelsSalesSQL, cityDataSQL, graphDataSQL, graphMetaSQL} from "../selects";
-import {GraphMeta} from "../models/GraphMeta";
-import {GraphData} from "../models/GraphData";
-import {CityData} from "../models/CityData";
-import {BikeSales} from "../models/BikeSales";
+import { Env } from "../../types";
+import { runQuery, jsonResponse, errorResponse } from "../../utils/response";
+import {bikeModelsSalesSQL, cityDataSQL, graphDataSQL, graphMetaSQL} from "../../selects";
+import {GraphMeta} from "../../models/GraphMeta";
+import {GraphData} from "../../models/GraphData";
+import {CityData} from "../../models/CityData";
+import {BikeSales} from "../../models/BikeSales";
 
 function extractRange(request: Request): string {
     const range = new URL(request.url).searchParams.get("range");

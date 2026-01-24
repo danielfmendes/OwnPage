@@ -40,9 +40,10 @@ wrangler d1 execute db-prod --file=V3__Insert_Random_Test_Data.sql --remote
 wrangler d1 execute db-prod --file=V4__Generate_Orders.sql --remote
 ```
 
+Neue D1-Datenbank für Chat erstellen:
 ```bash
-cd wasp
-npx wrangler dev --remote
+npx wrangler d1 create chat_db
+wrangler d1 execute chat_db --file=initial.sql --remote
 ```
 
 ### 📦 Backend (Go)
