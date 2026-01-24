@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import ReactMarkdown from "react-markdown";
 
 // Subcomponent for the "thinking" state
 const TypingSkeleton = () => (
@@ -12,7 +13,7 @@ const TypingSkeleton = () => (
         <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0 shadow-sm">
             <Bot size={14} className="text-muted-foreground animate-pulse" />
         </div>
-        <div className="bg-muted p-4 rounded-2xl rounded-tl-none w-24 space-y-2">
+        <div className="bg-muted p-4 rounded-2xl rounded-tl-none w-24 space-y-2 border border-border/40">
             <div className="h-2 bg-muted-foreground/20 rounded-full animate-pulse" />
             <div className="h-2 bg-muted-foreground/10 rounded-full animate-pulse w-2/3" />
         </div>
@@ -24,7 +25,7 @@ export default function MinimalChat() {
     const [input, setInput] = useState("");
     const [sessionId, setSessionId] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [isStreaming, setIsStreaming] = useState(false); // New state to track if chunks are arriving
+    const [isStreaming, setIsStreaming] = useState(false);
     const [aiResponseCount, setAiResponseCount] = useState(0);
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -89,7 +90,9 @@ export default function MinimalChat() {
                         if (line.startsWith("data: ") && line !== "data: [DONE]") {
                             try {
                                 const data = JSON.parse(line.substring(6));
-                                accumulatedContent += data.response;
+                                if (data.response && data.response !== "null") {
+                                    accumulatedContent += data.response;
+                                }
 
                                 setMessages((prev) => {
                                     const updated = [...prev];
@@ -127,63 +130,72 @@ export default function MinimalChat() {
                     </div>
                     <div>
                         <h1 className="font-semibold text-sm leading-none">AI Assistant</h1>
-                        <p className="text-[10px] text-muted-foreground mt-1">Llama 3.1 8B Stream</p>
+                        <p className="text-[10px] text-muted-foreground mt-1 tracking-wider uppercase">Llama 3.1 8B Stream</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
                     <Badge variant={aiResponseCount >= 10 ? "destructive" : "outline"} className="px-3 py-1 font-mono text-xs">
                         {aiResponseCount} / 10
                     </Badge>
-                    <Button variant="ghost" size="icon" onClick={() => {
+                    <Button variant="ghost" size="icon" className="hover:bg-destructive/10 group" onClick={() => {
                         const newId = uuidv4();
                         localStorage.setItem("chat_session_id", newId);
                         setSessionId(newId);
                         setMessages([]);
                         setAiResponseCount(0);
                     }}>
-                        <Trash2 className="w-4 h-4 text-muted-foreground hover:text-destructive transition-colors" />
+                        <Trash2 className="w-4 h-4 text-muted-foreground group-hover:text-destructive transition-colors" />
                     </Button>
                 </div>
             </header>
 
-            <ScrollArea className="flex-1 px-6 py-8" ref={scrollRef}>
-                <div className="space-y-8 max-w-3xl mx-auto">
+            <ScrollArea className="flex-1 px-4 py-8" ref={scrollRef}>
+                <div className="space-y-8 max-w-3xl mx-auto pb-10">
                     {messages.length === 0 && (
                         <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-4">
-                            <Bot className="w-12 h-12 text-muted-foreground/10" />
-                            <p className="text-muted-foreground text-sm max-w-xs leading-relaxed">
-                                How can I help you today?
+                            <div className="p-4 rounded-full bg-muted/30">
+                                <Bot className="w-10 h-10 text-muted-foreground/40" />
+                            </div>
+                            <p className="text-muted-foreground text-sm max-w-xs leading-relaxed italic">
+                                Welcome to the Nebuladw assistant. How can I help you today?
                             </p>
                         </div>
                     )}
 
                     {messages.map((m, i) => (
-                        <div key={i} className={`flex items-start gap-4 ${m.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm ${
-                                m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
+                        <div key={i} className={`flex items-start gap-4 ${m.role === "user" ? "flex-row-reverse" : "flex-row"} animate-in fade-in duration-300`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm border ${
+                                m.role === "user" ? "bg-primary text-primary-foreground border-primary" : "bg-muted border-border"
                             }`}>
                                 {m.role === "user" ? <User size={14} /> : <Bot size={14} />}
                             </div>
-                            <div className={`leading-relaxed text-sm p-4 rounded-2xl shadow-sm ${
+                            <div className={`leading-relaxed text-sm p-4 rounded-2xl shadow-sm border ${
                                 m.role === "user"
-                                    ? "bg-primary text-primary-foreground rounded-tr-none"
-                                    : "bg-muted text-foreground rounded-tl-none"
+                                    ? "bg-primary text-primary-foreground rounded-tr-none border-primary/20"
+                                    : "bg-muted text-foreground rounded-tl-none border-border/40 max-w-[85%]"
                             }`}>
-                                {m.content}
+                                {m.role === "assistant" ? (
+                                    <div className="prose prose-sm dark:prose-invert prose-p:leading-relaxed prose-pre:bg-zinc-900 prose-pre:p-2 prose-ol:list-decimal prose-ul:list-disc">
+                                        <ReactMarkdown>
+                                            {m.content}
+                                        </ReactMarkdown>
+                                    </div>
+                                ) : (
+                                    m.content
+                                )}
                             </div>
                         </div>
                     ))}
 
-                    {/* Show Skeleton ONLY when waiting for the first chunk */}
                     {isLoading && !isStreaming && <TypingSkeleton />}
                 </div>
             </ScrollArea>
 
-            <footer className="p-6 bg-gradient-to-t from-background via-background to-transparent">
+            <footer className="p-6 bg-gradient-to-t from-background via-background to-transparent border-t border-border/20">
                 <div className="max-w-3xl mx-auto relative group">
                     <Input
-                        className="h-14 pl-6 pr-14 rounded-2xl shadow-sm border-muted-foreground/20 focus-visible:ring-primary transition-all bg-muted/20 backdrop-blur-sm"
-                        placeholder={aiResponseCount >= 10 ? "Limit reached" : "Ask something..."}
+                        className="h-14 pl-6 pr-14 rounded-2xl shadow-sm border-zinc-200 dark:border-zinc-800 focus-visible:ring-primary transition-all bg-background/50 backdrop-blur-sm"
+                        placeholder={aiResponseCount >= 10 ? "Daily limit reached" : "Ask about the database..."}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleSend()}
@@ -191,7 +203,7 @@ export default function MinimalChat() {
                     />
                     <Button
                         size="icon"
-                        className="absolute right-2 top-2 h-10 w-10 rounded-xl transition-transform active:scale-95"
+                        className="absolute right-2 top-2 h-10 w-10 rounded-xl transition-transform active:scale-95 shadow-md"
                         onClick={handleSend}
                         disabled={isLoading || !input.trim() || aiResponseCount >= 10}
                     >
