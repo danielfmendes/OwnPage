@@ -1,19 +1,29 @@
-version: '3.8'
-
 services:
-  db:
-    image: postgres:latest
-    container_name: fahrrad-postgres
-    restart: always
+  postgres:
+    image: postgres:15
+    container_name: postgres-container
     environment:
-      POSTGRES_DB: fahrrad_db
       POSTGRES_USER: fahrrad_user
       POSTGRES_PASSWORD: geheim
+      POSTGRES_DB: fahrrad_db
     ports:
       - "5433:5432"
-    volumes:
-      - ./init:/docker-entrypoint-initdb.d
-      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fahrrad_user -d fahrrad_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-volumes:
-  postgres_data:
+  flyway:
+    image: flyway/flyway
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - -url=jdbc:postgresql://postgres:5432/fahrrad_db
+      - -user=fahrrad_user
+      - -password=geheim
+      - -baselineOnMigrate=true
+      - migrate
+    volumes:
+      - ../../backend/init:/flyway/sql
