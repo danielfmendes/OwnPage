@@ -9,7 +9,7 @@ import {
     LayersIcon,
     DatabaseIcon,
     BrainCircuitIcon,
-    LayoutTemplateIcon,
+    LayoutTemplateIcon, GithubIcon,
 } from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
@@ -128,13 +128,23 @@ export default function Home() {
                         <div className="flex flex-wrap justify-center md:justify-start gap-4">
                             <Button asChild size="lg"
                                     className="rounded-full px-8 shadow-xl hover:scale-105 transition-all duration-300 font-bold">
-                                <a href="https://linkedin.com" target="_blank">
+                                <a href="https://www.linkedin.com/in/daniel-freire-mendes/" target="_blank" rel="noopener noreferrer">
                                     <LinkedinIcon className="mr-2 h-4 w-4"/> Connect
                                 </a>
                             </Button>
-                            <Button variant="outline" size="lg"
+
+                            <Button asChild size="lg" variant="secondary"
+                                    className="rounded-full px-8 shadow-lg hover:scale-105 transition-all duration-300 font-bold">
+                                <a href="https://github.com/danielfmendes" target="_blank" rel="noopener noreferrer">
+                                    <GithubIcon className="mr-2 h-4 w-4"/> GitHub
+                                </a>
+                            </Button>
+
+                            <Button asChild variant="outline" size="lg"
                                     className="rounded-full px-8 border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-                                <MailIcon className="mr-2 h-4 w-4"/> Email Me
+                                <a href="mailto:freiremendesdaniel2002@gmail.com">
+                                    <MailIcon className="mr-2 h-4 w-4"/> Email Me
+                                </a>
                             </Button>
                         </div>
                     </div>
