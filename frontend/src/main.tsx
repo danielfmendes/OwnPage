@@ -15,6 +15,7 @@ import OrderPage from "@/pages/dwh/orders/page.tsx";
 import PartsStoragePage from "@/pages/dwh/partsstorage/page.tsx";
 import RoleManagementPage from "@/pages/dwh/rolemanagement/page.tsx";
 import WareHousePage from "@/pages/dwh/warehouse/page.tsx";
+import Chat from "@/pages/chat/page.tsx";
 
 function SystemThemeSetter() {
     const {setTheme} = useTheme()
@@ -35,6 +36,7 @@ createRoot(document.getElementById('root')!).render(
                 <BrowserRouter>
                     <Routes>
                         <Route path="/" element={<Home/>}/>
+                        <Route path="/chat" element={<Chat/>}/>
                         <Route path="/dwh" element={<DWHLayout/>}>
                             <Route path="login" element={<LoginCard/>}/>
                             <Route path="register" element={<RegisterCard/>}/>
