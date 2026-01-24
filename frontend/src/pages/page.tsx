@@ -6,96 +6,12 @@ import {
     LinkedinIcon,
     ChevronRightIcon,
     MailIcon,
-    LayersIcon,
-    DatabaseIcon,
-    BrainCircuitIcon,
-    LayoutTemplateIcon, GithubIcon,
+    GithubIcon,
 } from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Badge} from "@/components/ui/badge";
-
-const education = [
-    {
-        title: "Business Analytics Master of Science",
-        institution: "Católica Lisbon School of Business & Economics",
-        description: [
-            "Coursework includes Foundations of Statistics, Database Management, and Predictive Analytics",
-            "Programme fully taught in English"
-        ],
-        period: "09/2025 - 02/2027",
-        image: "/logo/Católica.png",
-    },
-    {
-        title: "Business Informatics Bachelor of Science",
-        institution: "University of Applied Sciences Hamburg",
-        description: [
-            "Final Grade: 14.13 points out of 15",
-            "The programme covered topics including Software Development, Business Systems, Databases, and Mathematics",
-            "Strong focus on practical experience with projects and teamwork, providing hands-on learning opportunities"
-        ],
-        period: "09/2021 - 03/2025",
-        image: "/logo/Haw.jpg",
-    },
-    {
-        title: "German Abitur (equivalent to High School Diploma)",
-        institution: "Emil-von-Behring-Gymnasium Großhansdorf",
-        description: [
-            "Graduated with final grade: 1.2",
-            "Specialization: Natural Sciences (Physics, Biology, and Informatics)",
-            "Final examinations in: Mathematics, Physics, French, and Economics"
-        ],
-        period: "09/2013 - 06/2021",
-        image: "/logo/Emil-von-Behring.jpg",
-    },
-];
-
-const experience = [
-    {
-        title: "Intern Software Development",
-        company: "softAIs GmbH - Hamburg / remote",
-        description: [
-            "Developed and automated frontend test suites (CRUD operations, table validations) and integrated them into CI/CD pipelines",
-            "Designed and implemented modern web applications for internal and client use with React, improving usability and visual consistency"
-        ],
-        period: "05/2025- 08/2025",
-        image: "/logo/softais.jpg",
-    },
-    {
-        title: "Working student, Software Development & Data Science",
-        company: "Otto Group data.works GmbH - Hamburg",
-        description: [
-            "Analyzed production databases with SQL, including views, materialized views, indexes, window functions, and triggers, identifying and resolving critical errors to improve data accuracy and reliability",
-            "Developed and implemented frontend features using Vue / TypeScript",
-            "Collaborated in Agile cycles (Dailies, Sprints, Retrospectives) and improved code quality via code reviews and pair programming"
-        ],
-        period: "01/2024- 12/2024",
-        image: "/logo/data_works.jpeg",
-    },
-];
-
-const skill_categories = [
-    {
-        label: "AI & Intelligence",
-        icon: <BrainCircuitIcon className="w-5 h-5"/>,
-        skills: ["Llama 3.1", "Workers AI", "Python", "RAG Systems"]
-    },
-    {
-        label: "Data Engineering",
-        icon: <DatabaseIcon className="w-5 h-5"/>,
-        skills: ["PostgreSQL", "Cloudflare D1", "SQL Optimization", "ETL"]
-    },
-    {
-        label: "Modern Frontend",
-        icon: <LayoutTemplateIcon className="w-5 h-5"/>,
-        skills: ["React", "TypeScript", "Next.js", "Tailwind CSS"]
-    },
-    {
-        label: "Backend & Cloud",
-        icon: <LayersIcon className="w-5 h-5"/>,
-        skills: ["Node.js", "Cloudflare Workers", "Docker", "REST APIs"]
-    }
-];
+import {education, experience, skill_categories, social_links} from "@/config/personal.tsx";
 
 export default function Home() {
     return (
@@ -113,7 +29,7 @@ export default function Home() {
                         <div className="space-y-4">
                             <Badge variant="outline"
                                    className="px-3 py-1 text-xs font-bold uppercase tracking-widest border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400">
-                                Software Engineer
+                                Software Engineer / Data Analyst
                             </Badge>
                             <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-[1.1]">
                                 Hi, I'm <span
@@ -128,21 +44,21 @@ export default function Home() {
                         <div className="flex flex-wrap justify-center md:justify-start gap-4">
                             <Button asChild size="lg"
                                     className="rounded-full px-8 shadow-xl hover:scale-105 transition-all duration-300 font-bold">
-                                <a href="https://www.linkedin.com/in/daniel-freire-mendes/" target="_blank" rel="noopener noreferrer">
+                                <a href={social_links.linkedin} target="_blank" rel="noopener noreferrer">
                                     <LinkedinIcon className="mr-2 h-4 w-4"/> Connect
                                 </a>
                             </Button>
 
                             <Button asChild size="lg" variant="secondary"
                                     className="rounded-full px-8 shadow-lg hover:scale-105 transition-all duration-300 font-bold">
-                                <a href="https://github.com/danielfmendes" target="_blank" rel="noopener noreferrer">
+                                <a href={social_links.github} target="_blank" rel="noopener noreferrer">
                                     <GithubIcon className="mr-2 h-4 w-4"/> GitHub
                                 </a>
                             </Button>
 
                             <Button asChild variant="outline" size="lg"
                                     className="rounded-full px-8 border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-                                <a href="mailto:freiremendesdaniel2002@gmail.com">
+                                <a href={`mailto:${social_links.email}`}>
                                     <MailIcon className="mr-2 h-4 w-4"/> Email Me
                                 </a>
                             </Button>

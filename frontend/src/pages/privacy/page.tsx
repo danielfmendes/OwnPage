@@ -1,87 +1,71 @@
-import {Section} from "@/components/helpers/Section";
+import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { Section } from "@/components/helpers/Section";
 import ContentLayout from "@/components/layout/ContentLayout";
-import {useTranslation} from "react-i18next";
 
 export default function PrivacyPage() {
-    const {t} = useTranslation();
+    const { t } = useTranslation();
+    const location = useLocation();
+    const isFromDwh = location.state?.fromDwh;
 
-    return (
-        <ContentLayout>
-            <div className="container px-4 py-10 max-w-4xl">
-                <h1 className="text-3xl font-bold tracking-tight mb-6">{t("privacy.title")}</h1>
+    const PageContent = (
+        <div className="container px-8 md:px-16 py-12">
+            <h1 className="text-4xl font-extrabold tracking-tight mb-10 text-foreground">
+                {t("privacy.title")}
+            </h1>
 
-                <div className="space-y-6 text-muted-foreground">
-                    <Section title={t("privacy.sections.glance.title")}>
-                        <p>{t("privacy.sections.glance.p1")}</p>
-                        <p className="mt-3">{t("privacy.sections.glance.p2")}</p>
-                    </Section>
+            <div className="space-y-12 text-muted-foreground leading-relaxed">
+                <Section title={t("privacy.sections.glance.title")}>
+                    <p>{t("privacy.sections.glance.p1")}</p>
+                    <p className="mt-4">{t("privacy.sections.glance.p2")}</p>
+                </Section>
 
-                    <Section title={t("privacy.sections.collection.title")}>
-                        <h3 className="mb-2 text-foreground">{t("privacy.sections.collection.serverLogs.title")}</h3>
-                        <p>{t("privacy.sections.collection.serverLogs.p")}</p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1">
-                            <li>{t("privacy.sections.collection.serverLogs.items.0")}</li>
-                            <li>{t("privacy.sections.collection.serverLogs.items.1")}</li>
-                            <li>{t("privacy.sections.collection.serverLogs.items.2")}</li>
-                            <li>{t("privacy.sections.collection.serverLogs.items.3")}</li>
-                            <li>{t("privacy.sections.collection.serverLogs.items.4")}</li>
-                            <li>{t("privacy.sections.collection.serverLogs.items.5")}</li>
-                        </ul>
+                <Section title={t("privacy.sections.collection.title")}>
+                    <div className="space-y-6">
+                        <div>
+                            <h3 className="mb-2 font-bold text-foreground">{t("privacy.sections.collection.serverLogs.title")}</h3>
+                            <p>{t("privacy.sections.collection.serverLogs.p")}</p>
+                            <ul className="list-disc pl-5 mt-3 space-y-2 marker:text-primary">
+                                {[0, 1, 2, 3, 4, 5].map((i) => (
+                                    <li key={i}>{t(`privacy.sections.collection.serverLogs.items.${i}`)}</li>
+                                ))}
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 className="mb-2 font-bold text-foreground">{t("privacy.sections.collection.cookies.title")}</h3>
+                            <p>{t("privacy.sections.collection.cookies.p")}</p>
+                            <ul className="list-disc pl-5 mt-3 space-y-2 marker:text-primary">
+                                {[0, 1, 2].map((i) => (
+                                    <li key={i}>{t(`privacy.sections.collection.cookies.items.${i}`)}</li>
+                                ))}
+                            </ul>
+                            <p className="mt-4 italic text-sm border-l-2 border-primary/20 pl-4">
+                                {t("privacy.sections.collection.cookies.notice")}
+                            </p>
+                        </div>
+                    </div>
+                </Section>
 
-                        <h3 className="mt-4 mb-2 text-foreground">{t("privacy.sections.collection.cookies.title")}</h3>
-                        <p>{t("privacy.sections.collection.cookies.p")}</p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1">
-                            <li>{t("privacy.sections.collection.cookies.items.0")}</li>
-                            <li>{t("privacy.sections.collection.cookies.items.1")}</li>
-                            <li>{t("privacy.sections.collection.cookies.items.2")}</li>
-                        </ul>
-                        <p className="mt-3">{t("privacy.sections.collection.cookies.notice")}</p>
-                    </Section>
+                <Section title={t("privacy.sections.rights.title")}>
+                    <p>{t("privacy.sections.rights.p1")}</p>
+                    <ul className="list-disc pl-5 mt-3 space-y-2 marker:text-primary">
+                        {[0, 1, 2, 3].map((i) => (
+                            <li key={i}>{t(`privacy.sections.rights.items.${i}`)}</li>
+                        ))}
+                    </ul>
+                    <p className="mt-4 font-medium text-foreground">{t("privacy.sections.rights.contact")}</p>
+                </Section>
 
-                    <Section title={t("privacy.sections.storage.title")}>
-                        <p>{t("privacy.sections.storage.p1")}</p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1">
-                            <li>{t("privacy.sections.storage.items.0")}</li>
-                            <li>{t("privacy.sections.storage.items.1")}</li>
-                            <li>{t("privacy.sections.storage.items.2")}</li>
-                        </ul>
-                        <p className="mt-3">{t("privacy.sections.storage.p2")}</p>
-                    </Section>
-
-                    <Section title={t("privacy.sections.rights.title")}>
-                        <p>{t("privacy.sections.rights.p1")}</p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1">
-                            <li>{t("privacy.sections.rights.items.0")}</li>
-                            <li>{t("privacy.sections.rights.items.1")}</li>
-                            <li>{t("privacy.sections.rights.items.2")}</li>
-                            <li>{t("privacy.sections.rights.items.3")}</li>
-                        </ul>
-                        <p className="mt-3">{t("privacy.sections.rights.contact")}</p>
-                    </Section>
-
-                    <Section title={t("privacy.sections.thirdParties.title")}>
-                        <p>{t("privacy.sections.thirdParties.p")}</p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1">
-                            <li>{t("privacy.sections.thirdParties.items.0")}</li>
-                            <li>{t("privacy.sections.thirdParties.items.1")}</li>
-                            <li>{t("privacy.sections.thirdParties.items.2")}</li>
-                        </ul>
-                    </Section>
-
-                    <Section title={t("privacy.sections.changes.title")}>
-                        <p>{t("privacy.sections.changes.p1")}</p>
-                        <p className="mt-3">
-                            <strong>{t("privacy.sections.changes.updated")}:</strong>{" "}
-                            {new Date().toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                            })}
-                        </p>
-                    </Section>
-                </div>
+                <Section title={t("privacy.sections.changes.title")}>
+                    <p>{t("privacy.sections.changes.p1")}</p>
+                    <p className="mt-8 pt-4 border-t border-border text-xs uppercase tracking-tighter">
+                        <strong>{t("privacy.sections.changes.updated")}:</strong>{" "}
+                        {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+                    </p>
+                </Section>
             </div>
-        </ContentLayout>
+        </div>
     );
+
+    return isFromDwh ? <ContentLayout>{PageContent}</ContentLayout> : <div className="max-w-5xl mx-auto">{PageContent}</div>;
 }
-;

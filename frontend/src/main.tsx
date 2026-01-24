@@ -20,6 +20,7 @@ import PrivacyPage from "@/pages/privacy/page";
 import ImprintPage from "@/pages/imprint/page";
 import Chat from "@/pages/chat/page.tsx";
 import Language from "@/utils/language";
+import {GlobalLayout} from "@/components/layout/GlobalLayout.tsx";
 
 const savedLang = Language.getLanguage();
 if (savedLang && i18n.language !== savedLang) {
@@ -44,19 +45,21 @@ createRoot(document.getElementById('root')!).render(
                 <SystemThemeSetter/>
                 <BrowserRouter>
                     <Routes>
-                        <Route path="/" element={<Home/>}/>
-                        <Route path="/chat" element={<Chat/>}/>
-                        <Route path="/dwh" element={<DWHLayout/>}>
-                            <Route path="imprint" element={<ImprintPage/>}/>
-                            <Route path="privacy" element={<PrivacyPage/>}/>
-                            <Route path="login" element={<LoginCard/>}/>
-                            <Route path="register" element={<RegisterCard/>}/>
-                            <Route path="customer" element={<CustomerPage/>}/>
-                            <Route path="dashboard" element={<DashboardPage/>}/>
-                            <Route path="orders" element={<OrderPage/>}/>
-                            <Route path="partsstorage" element={<PartsStoragePage/>}/>
-                            <Route path="rolemanagement" element={<RoleManagementPage/>}/>
-                            <Route path="warehouse" element={<WareHousePage/>}/>
+                        <Route element={<GlobalLayout />}>
+                            <Route path="/" element={<Home/>}/>
+                            <Route path="/chat" element={<Chat/>}/>
+                            <Route path="/imprint" element={<ImprintPage/>}/>
+                            <Route path="/privacy" element={<PrivacyPage/>}/>
+                            <Route path="/dwh" element={<DWHLayout/>}>
+                                <Route path="login" element={<LoginCard/>}/>
+                                <Route path="register" element={<RegisterCard/>}/>
+                                <Route path="customer" element={<CustomerPage/>}/>
+                                <Route path="dashboard" element={<DashboardPage/>}/>
+                                <Route path="orders" element={<OrderPage/>}/>
+                                <Route path="partsstorage" element={<PartsStoragePage/>}/>
+                                <Route path="rolemanagement" element={<RoleManagementPage/>}/>
+                                <Route path="warehouse" element={<WareHousePage/>}/>
+                            </Route>
                         </Route>
                     </Routes>
                 </BrowserRouter>

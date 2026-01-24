@@ -6,7 +6,6 @@ import {Navbar} from "@/components/layout/Navbar";
 import {Button} from "@/components/ui/button";
 import {ChevronLeft, ChevronRight, Menu} from "lucide-react";
 import {useIsMobile} from "@/utils/use-mobile";
-import {Footer} from "@/components/layout/Footer";
 
 const SIDEBAR_COOKIE_KEY = "sidebar_state";
 
@@ -109,7 +108,6 @@ function LayoutContent({title, isOpen, setIsOpen, children}: LayoutContentProps)
                 )}
 
                 <main className="flex-1 py-4 px-8">{children}</main>
-                <Footer/>
             </div>
         </>
     );
