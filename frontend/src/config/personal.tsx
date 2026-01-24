@@ -49,7 +49,7 @@ export const experience = [
             "Developed and automated frontend test suites (CRUD operations, table validations) and integrated them into CI/CD pipelines",
             "Designed and implemented modern web applications for internal and client use with React, improving usability and visual consistency"
         ],
-        period: "05/2025- 08/2025",
+        period: "05/2025 - 08/2025",
         image: "/logo/softais.jpg",
     },
     {
@@ -60,7 +60,7 @@ export const experience = [
             "Developed and implemented frontend features using Vue / TypeScript",
             "Collaborated in Agile cycles (Dailies, Sprints, Retrospectives) and improved code quality via code reviews and pair programming"
         ],
-        period: "01/2024- 12/2024",
+        period: "01/2024 - 12/2024",
         image: "/logo/data_works.jpeg",
     },
 ];
