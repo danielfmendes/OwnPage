@@ -59,6 +59,21 @@ export default function Home() {
 
                         </Button>
                     </Link>
+                    <Link to="/chat">
+                        <Button
+                            size="lg"
+                            className="w-full group transition-all"
+                            variant="outline"
+                        >
+                    <span className="group-hover:translate-x-1 transition-transform">
+                        Chatbot ansehen
+                    </span>
+                            <span className="group-hover:translate-x-1 transition-transform">
+                    <ChevronRightIcon/>
+                    </span>
+
+                        </Button>
+                    </Link>
                 </CardContent>
             </Card>
         </div>

@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   deploy-backend:
@@ -24,6 +27,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           WRANGLER_D1_ID_DB: ${{ secrets.NEBULADW_DATABASE_ID }}
+          WRANGLER_D1_ID_CHAT_DB: ${{ secrets.CHAT_DATABASE_ID }}
 
   deploy-frontend:
     name: Deploy Web-App (Pages)
