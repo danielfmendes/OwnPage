@@ -7,7 +7,7 @@ servers:
   - url: https://api.example.com
 
 paths:
-  /auth/login:
+  /dwh/auth/login:
     post:
       summary: User login
       operationId: userLogin
@@ -41,7 +41,7 @@ paths:
           description: Internal server error
       tags:
         - Auths
-  /auth/register:
+  /dwh/auth/register:
     post:
       summary: User registration
       operationId: userRegister
@@ -70,7 +70,7 @@ paths:
       tags:
         - Auths
 
-  /bikes:
+  /dwh/bikes:
     get:
       summary: Retrieve a list of bikes
       operationId: getBikes
@@ -163,7 +163,7 @@ paths:
       tags:
         - Bikes
 
-  /bikemodels:
+  /dwh/bikemodels:
     get:
       summary: Retrieve a list of bike models
       operationId: getBikeModels
@@ -187,7 +187,7 @@ paths:
       tags:
         - Bikes
 
-  /components:
+  /dwh/components:
     get:
       summary: Retrieve a list of bike components (saddles, frames, forks)
       operationId: getBikeComponents
@@ -218,7 +218,7 @@ paths:
       tags:
         - Bikes
 
-  /customers:
+  /dwh/customers:
     get:
       summary: Retrieve a list of customers
       operationId: getCustomers
@@ -311,7 +311,7 @@ paths:
       tags:
         - Customers
 
-  /dashboard/bikemodels:
+  /dwh/dashboard/bikemodels:
     get:
       summary: Retrieve a list of bike sales by model
       operationId: getBikeSales
@@ -334,7 +334,7 @@ paths:
           description: Internal server error
       tags:
         - Dashboards
-  /dashboard/citydata:
+  /dwh/dashboard/citydata:
     get:
       summary: Retrieve a list of city data
       operationId: getCityData
@@ -357,7 +357,7 @@ paths:
           description: Internal server error
       tags:
         - Dashboards
-  /dashboard/graphdata:
+  /dwh/dashboard/graphdata:
     get:
       summary: Retrieve a list of graph data
       operationId: getGraphData
@@ -380,7 +380,7 @@ paths:
           description: Internal server error
       tags:
         - Dashboards
-  /dashboard/graphmeta:
+  /dwh/dashboard/graphmeta:
     get:
       summary: Retrieve a list of graph meta
       operationId: getGraphMeta
@@ -404,7 +404,7 @@ paths:
       tags:
         - Dashboards
 
-  /orders:
+  /dwh/orders:
     get:
       summary: Retrieve a list of orders (various response types possible)
       operationId: getOrders
@@ -514,7 +514,7 @@ paths:
       tags:
         - Orders
 
-  /orderitems:
+  /dwh/orderitems:
     get:
       summary: Retrieve a list of order items
       operationId: getOrderItems
@@ -598,7 +598,7 @@ paths:
       tags:
         - Orders
 
-  /projects:
+  /dwh/projects:
     post:
       summary: Create a new project
       operationId: createProject
@@ -622,7 +622,7 @@ paths:
       tags:
         - Projects
 
-  /rolemanagements:
+  /dwh/rolemanagements:
     get:
       summary: Retrieve a list of role managements with project names
       operationId: getRoleManagements
@@ -715,7 +715,7 @@ paths:
       tags:
         - RoleManagements
 
-  /rolemanagements/{id}:
+  /dwh/rolemanagements/{id}:
     get:
       summary: Retrieve a list of role managements for a given ID
       operationId: getRoleManagementsById
@@ -741,7 +741,7 @@ paths:
       tags:
         - RoleManagements
 
-  /user:
+  /dwh/user:
     get:
       summary: Retrieve a user's information by email
       operationId: getUserInfo
@@ -763,7 +763,7 @@ paths:
       tags:
         - Users
 
-  /warehouseparts:
+  /dwh/warehouseparts:
     get:
       summary: Retrieve a list of warehouse parts
       operationId: getWareHouseParts

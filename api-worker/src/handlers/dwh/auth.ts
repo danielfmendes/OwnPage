@@ -1,7 +1,7 @@
-import { Env } from "../types";
-import { createJWT } from "../utils/jwt";
+import { Env } from "../../types";
+import { createJWT } from "../../utils/jwt";
 import bcrypt from "bcryptjs";
-import { generateVerificationToken, getVerificationExpiry } from "../utils/verification";
+import { generateVerificationToken, getVerificationExpiry } from "../../utils/verification";
 
 interface RegisterRequest {
     username: string;

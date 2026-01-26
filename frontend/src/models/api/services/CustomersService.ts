@@ -28,7 +28,7 @@ export class CustomersService {
     ): CancelablePromise<(CustomerListResponse | Array<CountByResult>)> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/customers',
+            url: '/dwh/customers',
             query: {
                 'filter': filter,
                 'page': page,
@@ -56,7 +56,7 @@ export class CustomersService {
     ): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/customers',
+            url: '/dwh/customers',
             query: {
                 'id': id,
                 'cascade': cascade,
@@ -80,7 +80,7 @@ export class CustomersService {
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/customers',
+            url: '/dwh/customers',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -102,7 +102,7 @@ export class CustomersService {
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/customers',
+            url: '/dwh/customers',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
