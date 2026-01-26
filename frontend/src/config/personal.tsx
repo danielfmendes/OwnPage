@@ -15,7 +15,7 @@ export const education = [
             "Programme fully taught in English"
         ],
         period: "09/2025 - 02/2027",
-        image: "/logo/Catolica.png",
+        image: "/logo/education/catolica.png",
     },
     {
         title: "Business Informatics Bachelor of Science",
@@ -26,7 +26,7 @@ export const education = [
             "Strong focus on practical experience with projects and teamwork, providing hands-on learning opportunities"
         ],
         period: "09/2021 - 03/2025",
-        image: "/logo/Haw.jpg",
+        image: "/logo/education/haw.jpg",
     },
     {
         title: "German Abitur (equivalent to High School Diploma)",
@@ -37,7 +37,7 @@ export const education = [
             "Final examinations in: Mathematics, Physics, French, and Economics"
         ],
         period: "09/2013 - 06/2021",
-        image: "/logo/Emil-von-Behring.jpg",
+        image: "/logo/education/emil-von-behring.jpg",
     },
 ];
 
@@ -50,7 +50,7 @@ export const experience = [
             "Designed and implemented modern web applications for internal and client use with React, improving usability and visual consistency"
         ],
         period: "05/2025 - 08/2025",
-        image: "/logo/softais.jpg",
+        image: "/logo/experience/softais.jpg",
     },
     {
         title: "Working student, Software Development & Data Science",
@@ -61,7 +61,7 @@ export const experience = [
             "Collaborated in Agile cycles (Dailies, Sprints, Retrospectives) and improved code quality via code reviews and pair programming"
         ],
         period: "01/2024 - 12/2024",
-        image: "/logo/data_works.jpeg",
+        image: "/logo/experience/data_works.jpeg",
     },
 ];
 
