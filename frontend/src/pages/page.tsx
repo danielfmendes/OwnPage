@@ -70,7 +70,7 @@ export default function Home() {
                         <div
                             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130%] h-[130%] bg-gradient-to-tr from-primary/20 to-blue-600/20 rounded-full blur-[80px] -z-10"></div>
                         <img
-                            src="/logo/Portrait_Daniel_Freire_Mendes.png"
+                            src="/logo/fotos/portrait.png"
                             alt="Daniel"
                             className="relative w-48 h-48 md:w-80 md:h-80 rounded-full object-cover p-1 md:p-2 border-[8px] border-white dark:border-zinc-900 shadow-2xl z-10 transition-transform duration-500 hover:scale-[1.02]"
                         />
