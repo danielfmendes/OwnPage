@@ -12,8 +12,15 @@ import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Badge} from "@/components/ui/badge";
 import {education, experience, skill_categories, social_links} from "@/config/personal.tsx";
+import {useTheme} from "next-themes";
 
 export default function Home() {
+    const {theme, setTheme} = useTheme();
+
+    const toggleTheme = () => {
+        setTheme(theme === "dark" ? "light" : "dark");
+    };
+
     return (
         <div
             className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans selection:bg-primary/20">
@@ -66,13 +73,20 @@ export default function Home() {
                     </div>
 
                     {/* Image Column (Right Desktop, Creative Top Mobile) */}
-                    <div className="relative order-1 md:order-2 flex-shrink-0 animate-in fade-in zoom-in duration-1000">
+                    <div
+                        className="relative order-1 md:order-2 flex-shrink-0 animate-in fade-in zoom-in duration-1000 cursor-pointer group"
+                        onClick={toggleTheme}
+                        title="Click to change theme"
+                    >
+                        {/* Interactive Background Glow */}
                         <div
-                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130%] h-[130%] bg-gradient-to-tr from-primary/20 to-blue-600/20 rounded-full blur-[80px] -z-10"></div>
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130%] h-[130%] bg-gradient-to-tr from-primary/20 to-blue-600/20 rounded-full blur-[80px] -z-10 group-hover:from-primary/40 group-hover:to-blue-600/40 transition-colors duration-500"></div>
+
+                        {/* Portrait Image */}
                         <img
                             src="/logo/fotos/portrait.png"
-                            alt="Daniel"
-                            className="relative w-48 h-48 md:w-80 md:h-80 rounded-full object-cover p-1 md:p-2 border-[8px] border-white dark:border-zinc-900 shadow-2xl z-10 transition-transform duration-500 hover:scale-[1.02]"
+                            alt="Daniel - Click to toggle theme"
+                            className="relative w-48 h-48 md:w-80 md:h-80 rounded-full object-cover p-1 md:p-2 border-[8px] border-white dark:border-zinc-900 shadow-2xl z-10 transition-all duration-500 group-hover:scale-[1.05] group-active:scale-95"
                         />
                     </div>
                 </section>
@@ -88,16 +102,16 @@ export default function Home() {
 
                     <div className="grid md:grid-cols-2 gap-8">
                         <ProjectCard
-                            title="Data Warehouse System"
-                            desc="A comprehensive BI platform for real-time sales and inventory tracking powered by D1."
-                            link="/dwh/login"
-                            tag="Analytics"
-                        />
-                        <ProjectCard
                             title="AI Streaming Chatbot"
                             desc="Intelligent assistant with real-time token streaming using Llama 3.1 & Workers AI."
                             link="/chat"
                             tag="AI / LLM"
+                        />
+                        <ProjectCard
+                            title="Data Warehouse System"
+                            desc="A comprehensive BI platform for real-time sales and inventory tracking powered by D1."
+                            link="/dwh/login"
+                            tag="Analytics"
                         />
                     </div>
                 </section>

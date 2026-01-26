@@ -12,5 +12,5 @@ database_id = ""
 
 [[d1_databases]]
 binding = "CHAT_DB"
-database_name = "chat_db"
+database_name = "chat-db"
 database_id = ""
