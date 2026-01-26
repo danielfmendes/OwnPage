@@ -18,7 +18,7 @@ export class ProjectsService {
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/projects',
+            url: '/dwh/projects',
             body: requestBody,
             mediaType: 'application/json',
             errors: {

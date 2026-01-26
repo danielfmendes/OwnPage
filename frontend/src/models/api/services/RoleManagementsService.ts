@@ -28,7 +28,7 @@ export class RoleManagementsService {
     ): CancelablePromise<(RoleManagementListResponse | Array<CountByResult>)> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/rolemanagements',
+            url: '/dwh/rolemanagements',
             query: {
                 'filter': filter,
                 'page': page,
@@ -56,7 +56,7 @@ export class RoleManagementsService {
     ): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/rolemanagements',
+            url: '/dwh/rolemanagements',
             query: {
                 'email': email,
                 'project_id': projectId,
@@ -80,7 +80,7 @@ export class RoleManagementsService {
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/rolemanagements',
+            url: '/dwh/rolemanagements',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -102,7 +102,7 @@ export class RoleManagementsService {
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/rolemanagements',
+            url: '/dwh/rolemanagements',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -124,7 +124,7 @@ export class RoleManagementsService {
     ): CancelablePromise<Array<RoleManagement>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/rolemanagements/{id}',
+            url: '/dwh/rolemanagements/{id}',
             path: {
                 'id': id,
             },

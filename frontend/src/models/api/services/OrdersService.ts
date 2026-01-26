@@ -37,7 +37,7 @@ export class OrdersService {
     })> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/orders',
+            url: '/dwh/orders',
             query: {
                 'filter': filter,
                 'page': page,
@@ -65,7 +65,7 @@ export class OrdersService {
     ): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/orders',
+            url: '/dwh/orders',
             query: {
                 'id': id,
                 'cascade': cascade,
@@ -89,7 +89,7 @@ export class OrdersService {
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/orders',
+            url: '/dwh/orders',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -111,7 +111,7 @@ export class OrdersService {
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/orders',
+            url: '/dwh/orders',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -133,7 +133,7 @@ export class OrdersService {
     ): CancelablePromise<Array<OrderItemsWithBikeName>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/orderitems',
+            url: '/dwh/orderitems',
             query: {
                 'filter': filter,
             },
@@ -155,7 +155,7 @@ export class OrdersService {
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/orderitems',
+            url: '/dwh/orderitems',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -177,7 +177,7 @@ export class OrdersService {
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/orderitems',
+            url: '/dwh/orderitems',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -199,7 +199,7 @@ export class OrdersService {
     ): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/orderitems',
+            url: '/dwh/orderitems',
             query: {
                 'id': id,
             },

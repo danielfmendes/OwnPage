@@ -18,7 +18,7 @@ export class UsersService {
     ): CancelablePromise<Array<User>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/user',
+            url: '/dwh/user',
             query: {
                 'filter': filter,
             },

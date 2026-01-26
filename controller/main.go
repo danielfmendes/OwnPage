@@ -39,26 +39,28 @@ func corsMiddleware(allowedOrigins []string, h http.Handler) http.Handler {
 
 // setupRoutes registriert alle HTTP-Routen
 func setupRoutes() http.Handler {
-	r := http.NewServeMux()
+	dwh := http.NewServeMux()
 
-	r.HandleFunc("/auth/", handlers.AuthHandler)
+	dwh.HandleFunc("/auth/", handlers.AuthHandler)
+	dwh.HandleFunc("/dashboard/", handlers.DashBoardHandler)
+	dwh.HandleFunc("/bikemodels", handlers.GetBikeModels)
+	dwh.HandleFunc("/bikes", handlers.BikeHandler)
+	dwh.HandleFunc("/components", handlers.ComponentHandler)
+	dwh.HandleFunc("/customers", handlers.CustomerHandler)
+	dwh.HandleFunc("/orders", handlers.OrderHandler)
+	dwh.HandleFunc("/orderitems", handlers.OrderItemsHandler)
+	dwh.HandleFunc("/partcosts", handlers.GetPartCosts)
+	dwh.HandleFunc("/rolemanagements/", handlers.GetRoleManagementByID)
+	dwh.HandleFunc("/rolemanagements", handlers.RoleManagementHandler)
+	dwh.HandleFunc("/projects", handlers.ProjectHandler)
+	dwh.HandleFunc("/user", handlers.GetUser)
+	dwh.HandleFunc("/users", handlers.GetUsers)
+	dwh.HandleFunc("/warehouseparts", handlers.WarehousePartHandler)
 
-	r.HandleFunc("/bikemodels", handlers.GetBikeModels)
-	r.HandleFunc("/bikes", handlers.BikeHandler)
-	r.HandleFunc("/components", handlers.ComponentHandler)
-	r.HandleFunc("/customers", handlers.CustomerHandler)
-	r.HandleFunc("/dashboard/", handlers.DashBoardHandler)
-	r.HandleFunc("/orders", handlers.OrderHandler)
-	r.HandleFunc("/orderitems", handlers.OrderItemsHandler)
-	r.HandleFunc("/partcosts", handlers.GetPartCosts)
-	r.HandleFunc("/rolemanagements/", handlers.GetRoleManagementByID)
-	r.HandleFunc("/rolemanagements", handlers.RoleManagementHandler)
-	r.HandleFunc("/projects", handlers.ProjectHandler)
-	r.HandleFunc("/user", handlers.GetUser)
-	r.HandleFunc("/users", handlers.GetUsers)
-	r.HandleFunc("/warehouseparts", handlers.WarehousePartHandler)
+	mainRouter := http.NewServeMux()
+	mainRouter.Handle("/dwh/", http.StripPrefix("/dwh", dwh))
 
-	return r
+	return mainRouter
 }
 
 func main() {

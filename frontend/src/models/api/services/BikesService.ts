@@ -32,7 +32,7 @@ export class BikesService {
     ): CancelablePromise<(BikeListResponse | Array<CountByResult>)> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/bikes',
+            url: '/dwh/bikes',
             query: {
                 'filter': filter,
                 'page': page,
@@ -60,7 +60,7 @@ export class BikesService {
     ): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/bikes',
+            url: '/dwh/bikes',
             query: {
                 'id': id,
                 'cascade': cascade,
@@ -84,7 +84,7 @@ export class BikesService {
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/bikes',
+            url: '/dwh/bikes',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -106,7 +106,7 @@ export class BikesService {
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/bikes',
+            url: '/dwh/bikes',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -128,7 +128,7 @@ export class BikesService {
     ): CancelablePromise<Array<BikeModel>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/bikemodels',
+            url: '/dwh/bikemodels',
             query: {
                 'filter': filter,
             },
@@ -150,7 +150,7 @@ export class BikesService {
     ): CancelablePromise<(Array<Frame> | Array<Fork> | Array<Saddle>)> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/components',
+            url: '/dwh/components',
             query: {
                 'filter': filter,
             },

@@ -21,7 +21,7 @@ export class DashboardsService {
     ): CancelablePromise<Array<BikeSales>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/dashboard/bikemodels',
+            url: '/dwh/dashboard/bikemodels',
             query: {
                 'filter': filter,
             },
@@ -43,7 +43,7 @@ export class DashboardsService {
     ): CancelablePromise<Array<CityData>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/dashboard/citydata',
+            url: '/dwh/dashboard/citydata',
             query: {
                 'filter': filter,
             },
@@ -65,7 +65,7 @@ export class DashboardsService {
     ): CancelablePromise<Array<GraphData>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/dashboard/graphdata',
+            url: '/dwh/dashboard/graphdata',
             query: {
                 'filter': filter,
             },
@@ -87,7 +87,7 @@ export class DashboardsService {
     ): CancelablePromise<Array<GraphMeta>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/dashboard/graphmeta',
+            url: '/dwh/dashboard/graphmeta',
             query: {
                 'filter': filter,
             },

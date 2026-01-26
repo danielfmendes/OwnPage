@@ -28,7 +28,7 @@ export class WareHousePartsService {
     ): CancelablePromise<(PartStorageListResponse | Array<CountByResult>)> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/warehouseparts',
+            url: '/dwh/warehouseparts',
             query: {
                 'filter': filter,
                 'page': page,
@@ -54,7 +54,7 @@ export class WareHousePartsService {
     ): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/warehouseparts',
+            url: '/dwh/warehouseparts',
             query: {
                 'id': id,
             },
@@ -76,7 +76,7 @@ export class WareHousePartsService {
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/warehouseparts',
+            url: '/dwh/warehouseparts',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -98,7 +98,7 @@ export class WareHousePartsService {
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/warehouseparts',
+            url: '/dwh/warehouseparts',
             body: requestBody,
             mediaType: 'application/json',
             errors: {

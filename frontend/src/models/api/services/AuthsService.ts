@@ -23,7 +23,7 @@ export class AuthsService {
     }> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/auth/login',
+            url: '/dwh/auth/login',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -46,7 +46,7 @@ export class AuthsService {
     }> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/auth/register',
+            url: '/dwh/auth/register',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
