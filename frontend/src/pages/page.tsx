@@ -4,14 +4,16 @@ import {
     BriefcaseIcon,
     GraduationCapIcon,
     LinkedinIcon,
-    ChevronRightIcon,
     MailIcon,
     GithubIcon,
+    Cpu,
+    ArrowUpRight,
+    ArrowRight,
 } from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Badge} from "@/components/ui/badge";
-import {education, experience, skill_categories, social_links} from "@/config/personal.tsx";
+import {education, experience, selected_projects, skill_categories, social_links} from "@/config/personal.tsx";
 import {useTheme} from "next-themes";
 
 export default function Home() {
@@ -25,7 +27,7 @@ export default function Home() {
         <div
             className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans selection:bg-primary/20">
 
-            <main className="max-w-6xl mx-auto px-6 py-12 md:py-24 space-y-32">
+            <main className="max-w-6xl mx-auto px-6 py-12 md:py-24 space-y-16">
 
                 {/* 1. HERO SECTION */}
                 <section className="flex flex-col md:flex-row items-center justify-between gap-12 md:gap-20">
@@ -92,27 +94,25 @@ export default function Home() {
                 </section>
 
 
-                {/* 2. SELECTED WORK (High Contrast Cards) */}
+                {/* 2. SELECTED WORK */}
                 <section className="space-y-10">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-primary/10 rounded-xl border border-primary/20"><RocketIcon
-                            className="h-6 w-6 text-primary"/></div>
+                        <div className="p-3 bg-primary/10 rounded-xl border border-primary/20">
+                            <RocketIcon className="h-6 w-6 text-primary"/>
+                        </div>
                         <h2 className="text-3xl md:text-4xl font-black tracking-tight">Selected Work</h2>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-8">
-                        <ProjectCard
-                            title="AI Streaming Chatbot"
-                            desc="Intelligent assistant with real-time token streaming using Llama 3.1 & Workers AI."
-                            link="/chat"
-                            tag="AI / LLM"
-                        />
-                        <ProjectCard
-                            title="Data Warehouse System"
-                            desc="A comprehensive BI platform for real-time sales and inventory tracking powered by D1."
-                            link="/dwh/login"
-                            tag="Analytics"
-                        />
+                        {selected_projects.map((project, index) => (
+                            <ProjectCard
+                                key={index}
+                                title={project.title}
+                                desc={project.desc}
+                                link={project.link}
+                                tag={project.tag}
+                            />
+                        ))}
                     </div>
                 </section>
 
@@ -125,94 +125,169 @@ export default function Home() {
 
                     {/* Education */}
                     <div className="space-y-10">
-                        <div className="flex items-center gap-3 pb-4">
-                            <GraduationCapIcon className="h-6 w-6 text-primary"/>
-                            <h3 className="text-2xl font-bold tracking-tight">Education</h3>
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-primary/10 rounded-xl border border-primary/20">
+                                <GraduationCapIcon className="h-6 w-6 text-primary"/>
+                            </div>
+                            <h2 className="text-3xl md:text-4xl font-black tracking-tight">Education</h2>
                         </div>
+
                         <div className="space-y-10">
-                            {education.map((item, i) => <TimelineItem key={i} {...item} />)}
+                            {education.map((item, i) => (
+                                <TimelineItem key={i} {...item} />
+                            ))}
                         </div>
                     </div>
 
                     {/* Experience */}
                     <div className="space-y-10">
-                        <div className="flex items-center gap-3 pb-4">
-                            <BriefcaseIcon className="h-6 w-6 text-primary"/>
-                            <h3 className="text-2xl font-bold tracking-tight">Experience</h3>
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-primary/10 rounded-xl border border-primary/20">
+                                <BriefcaseIcon className="h-6 w-6 text-primary"/>
+                            </div>
+                            <h2 className="text-3xl md:text-4xl font-black tracking-tight">Experience</h2>
                         </div>
+
                         <div className="space-y-10">
-                            {experience.map((item, i) => <TimelineItem key={i} {...item} />)}
+                            {experience.map((item, i) => (
+                                <TimelineItem key={i} {...item} />
+                            ))}
                         </div>
                     </div>
                 </section>
 
 
                 {/* 4. TECHNICAL ARSENAL */}
-                <section className="space-y-10 pb-12">
-                    <div className="text-center space-y-4 max-w-2xl mx-auto">
-                        <h2 className="text-3xl md:text-4xl font-black tracking-tight">Technical Arsenal</h2>
-                        <p className="text-zinc-600 dark:text-zinc-400 text-lg">The tools and technologies I use to
-                            build scalable solutions.</p>
+                <section className="space-y-12 pb-24">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-primary/10 rounded-xl border border-primary/20">
+                                <Cpu className="h-6 w-6 text-primary"/>
+                            </div>
+                            <h2 className="text-3xl md:text-4xl font-black tracking-tight">Technical Arsenal</h2>
+                        </div>
+                        <p className="text-zinc-600 dark:text-zinc-400 text-lg max-w-2xl">
+                            My preferred weapons of choice for digital construction.
+                        </p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {/* CONTENT: Modern Watermarked Bento Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         {skill_categories.map((cat, idx) => (
-                            <Card key={idx}
-                                  className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm hover:border-primary/50 transition-colors">
-                                <CardHeader className="pb-3">
-                                    <div className="flex items-center gap-3 text-primary mb-2">
-                                        <div className="p-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-lg">{cat.icon}</div>
+                            <div
+                                key={idx}
+                                className="group relative overflow-hidden rounded-3xl bg-zinc-100/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 p-8 transition-all duration-500 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-2xl hover:shadow-zinc-200/50 dark:hover:shadow-black/50"
+                            >
+                                {/* 1. The Watermark Icon (Creative Element) */}
+                                <div
+                                    className="absolute -right-6 -bottom-6 text-zinc-200 dark:text-zinc-800/50 opacity-20 group-hover:opacity-40 group-hover:scale-110 group-hover:-rotate-12 transition-all duration-700 ease-out pointer-events-none">
+                                    <div className="[&>svg]:w-48 [&>svg]:h-48 [&>svg]:stroke-[1]">
+                                        {cat.icon}
                                     </div>
-                                    <CardTitle
-                                        className="text-sm font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">{cat.label}</CardTitle>
-                                </CardHeader>
-                                <CardContent>
+                                </div>
+
+                                {/* 2. Content Layer */}
+                                <div className="relative z-10 space-y-6">
+                                    {/* Header */}
+                                    <div className="flex items-center gap-3">
+                                        <div
+                                            className="p-2 bg-white dark:bg-zinc-950 rounded-lg border border-zinc-200 dark:border-zinc-800 text-primary shadow-sm">
+                                            {cat.icon}
+                                        </div>
+                                        <h3 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                                            {cat.label}
+                                        </h3>
+                                    </div>
+
+                                    {/* Skills Cloud */}
                                     <div className="flex flex-wrap gap-2">
-                                        {cat.skills.map(skill => (
-                                            <Badge key={skill} variant="secondary"
-                                                   className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-primary/10 hover:text-primary transition-colors font-medium border border-zinc-200 dark:border-zinc-700">
-                                                {skill}
-                                            </Badge>
+                                        {cat.skills.map((skill) => (
+                                            <span
+                                                key={skill}
+                                                className="
+                                    px-3 py-1.5 rounded-md text-xs font-semibold font-mono tracking-wide
+                                    bg-white/80 dark:bg-black/40 backdrop-blur-md
+                                    border border-zinc-200/50 dark:border-zinc-800/50
+                                    text-zinc-600 dark:text-zinc-400
+                                    group-hover:border-primary/30 group-hover:text-primary
+                                    group-hover:bg-white dark:group-hover:bg-zinc-950
+                                    transition-all duration-300 cursor-default select-none
+                                "
+                                            >
+                                {skill}
+                            </span>
                                         ))}
                                     </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 </section>
-
             </main>
         </div>
     );
 }
 
 // --- HELPER COMPONENTS (Optimized for Visibility) ---
+interface ProjectCardProps {
+    title: string;
+    desc: string;
+    link: string;
+    tag: string;
+}
 
-function ProjectCard({title, desc, link, tag}: any) {
+function ProjectCard({title, desc, link, tag}: ProjectCardProps) {
     return (
-        <Card
-            className="group overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition-all duration-300 hover:shadow-xl hover:border-primary/50">
-            <CardHeader>
-                <div className="flex justify-between items-start">
-                    <div className="space-y-2">
-                        <CardTitle
-                            className="text-xl font-bold group-hover:text-primary transition-colors">{title}</CardTitle>
-                        <Badge variant="outline"
-                               className="text-[10px] font-bold border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400">{tag}</Badge>
-                    </div>
+        <Link to={link} className="block h-full group outline-none cursor-pointer">
+            <Card
+                className="relative h-full flex flex-col border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 rounded-[2rem] overflow-hidden transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-primary/10 group-hover:border-primary/20">
+
+                {/* Visual Indicator: Top Right Arrow (Hidden until hover) */}
+                <div
+                    className="absolute top-6 right-6 text-primary opacity-0 -translate-y-2 translate-x-2 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0">
+                    <ArrowUpRight className="w-5 h-5"/>
                 </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                <p className="text-zinc-600 dark:text-zinc-300 leading-relaxed text-sm font-medium">{desc}</p>
-                <Button asChild variant="ghost"
-                        className="w-full justify-between group/btn border border-zinc-200 dark:border-zinc-800 hover:bg-primary/5 dark:hover:bg-primary/10 hover:text-primary">
-                    <Link to={link}>
-                        Explore Project <ChevronRightIcon
-                        className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform"/>
-                    </Link>
-                </Button>
-            </CardContent>
-        </Card>
+
+                <div className="flex flex-col h-full">
+                    {/* 1. Header: Tighter Top Padding */}
+                    <CardHeader className="px-6 pt-5 md:px-8 pb-0">
+                        <div className="flex flex-col items-start gap-4">
+                            <Badge
+                                variant="secondary"
+                                className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors border-transparent rounded-md px-2 py-0.5 text-[10px] font-bold tracking-[0.15em] uppercase"
+                            >
+                                {tag}
+                            </Badge>
+
+                            <CardTitle
+                                className="text-2xl md:text-3xl font-black tracking-tight text-zinc-900 dark:text-white group-hover:text-primary transition-colors duration-300 leading-none pr-4">
+                                {title}
+                            </CardTitle>
+                        </div>
+                    </CardHeader>
+
+                    {/* 2. Content */}
+                    <CardContent
+                        className="px-6 pb-5 md:px-8 md:pb-6 pt-4 flex flex-col justify-between flex-grow gap-6">
+                        <p className="text-zinc-500 dark:text-zinc-400 leading-snug text-base font-medium transition-colors group-hover:text-zinc-900 dark:group-hover:text-zinc-200">
+                            {desc}
+                        </p>
+
+                        {/* 3. Bottom Indicator */}
+                        <div
+                            className="flex items-center gap-2 text-xs font-bold text-zinc-400 dark:text-zinc-600 group-hover:text-primary transition-colors duration-300 mt-auto">
+                            View Project
+                            <ArrowRight
+                                className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1"/>
+                        </div>
+                    </CardContent>
+                </div>
+
+                {/* 4. Active Line Animation */}
+                <div
+                    className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-primary to-blue-600 w-0 group-hover:w-full transition-all duration-500 ease-out"/>
+            </Card>
+        </Link>
     );
 }
 
