@@ -9,6 +9,7 @@ import {
     Cpu,
     ArrowUpRight,
     ArrowRight,
+    ExternalLink,
 } from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
@@ -237,58 +238,48 @@ interface ProjectCardProps {
 }
 
 function ProjectCard({title, desc, link, tag}: ProjectCardProps) {
-    return (
-        <Link to={link} className="block h-full group outline-none cursor-pointer">
-            <Card
-                className="relative h-full flex flex-col border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 rounded-[2rem] overflow-hidden transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-primary/10 group-hover:border-primary/20">
+    const isExternal = link.startsWith('http');
+    const ActionIcon = isExternal ? ExternalLink : ArrowRight;
+    const CornerIcon = isExternal ? ExternalLink : ArrowUpRight;
 
-                {/* Visual Indicator: Top Right Arrow (Hidden until hover) */}
-                <div
-                    className="absolute top-6 right-6 text-primary opacity-0 -translate-y-2 translate-x-2 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0">
-                    <ArrowUpRight className="w-5 h-5"/>
-                </div>
+    const hoverColor = isExternal ? "group-hover:text-blue-600 dark:group-hover:text-blue-400" : "group-hover:text-primary";
 
-                <div className="flex flex-col h-full">
-                    {/* 1. Header: Tighter Top Padding */}
-                    <CardHeader className="px-6 pt-5 md:px-8 pb-0">
-                        <div className="flex flex-col items-start gap-4">
-                            <Badge
-                                variant="secondary"
-                                className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors border-transparent rounded-md px-2 py-0.5 text-[10px] font-bold tracking-[0.15em] uppercase"
-                            >
-                                {tag}
-                            </Badge>
-
-                            <CardTitle
-                                className="text-2xl md:text-3xl font-black tracking-tight text-zinc-900 dark:text-white group-hover:text-primary transition-colors duration-300 leading-none pr-4">
-                                {title}
-                            </CardTitle>
-                        </div>
-                    </CardHeader>
-
-                    {/* 2. Content */}
-                    <CardContent
-                        className="px-6 pb-5 md:px-8 md:pb-6 pt-4 flex flex-col justify-between flex-grow gap-6">
-                        <p className="text-zinc-500 dark:text-zinc-400 leading-snug text-base font-medium transition-colors group-hover:text-zinc-900 dark:group-hover:text-zinc-200">
-                            {desc}
-                        </p>
-
-                        {/* 3. Bottom Indicator */}
-                        <div
-                            className="flex items-center gap-2 text-xs font-bold text-zinc-400 dark:text-zinc-600 group-hover:text-primary transition-colors duration-300 mt-auto">
-                            View Project
-                            <ArrowRight
-                                className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1"/>
-                        </div>
-                    </CardContent>
-                </div>
-
-                {/* 4. Active Line Animation */}
-                <div
-                    className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-primary to-blue-600 w-0 group-hover:w-full transition-all duration-500 ease-out"/>
-            </Card>
-        </Link>
+    const cardContent = (
+        <Card
+            className={`relative h-full flex flex-col border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 rounded-[2rem] overflow-hidden transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-zinc-200/50 dark:group-hover:shadow-black/50 ${isExternal ? 'group-hover:border-blue-500/30' : 'group-hover:border-primary/30'}`}>
+            <div
+                className={`absolute top-6 right-6 opacity-0 -translate-y-2 translate-x-2 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 ${isExternal ? 'text-blue-600 dark:text-blue-400' : 'text-primary'}`}>
+                <CornerIcon className="w-5 h-5"/>
+            </div>
+            <div className="flex flex-col h-full">
+                <CardHeader className="px-6 pt-5 md:px-8 pb-0">
+                    <div className="flex flex-col items-start gap-4">
+                        <Badge variant="secondary"
+                               className={`bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 transition-colors border-transparent rounded-md px-2 py-0.5 text-[10px] font-bold tracking-[0.15em] uppercase ${isExternal ? 'group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400' : 'group-hover:bg-primary/10 group-hover:text-primary'}`}>{tag}</Badge>
+                        <CardTitle
+                            className={`text-2xl md:text-3xl font-black tracking-tight text-zinc-900 dark:text-white transition-colors duration-300 leading-none pr-4 ${hoverColor}`}>{title}</CardTitle>
+                    </div>
+                </CardHeader>
+                <CardContent className="px-6 pb-5 md:px-8 md:pb-6 pt-4 flex flex-col justify-between flex-grow gap-6">
+                    <p className="text-zinc-500 dark:text-zinc-400 leading-snug text-base font-medium transition-colors group-hover:text-zinc-900 dark:group-hover:text-zinc-200">{desc}</p>
+                    <div
+                        className={`flex items-center gap-2 text-xs font-bold text-zinc-400 dark:text-zinc-600 transition-colors duration-300 mt-auto ${hoverColor}`}>
+                        {isExternal ? "Visit Website" : "View Project"}
+                        <ActionIcon
+                            className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1"/>
+                    </div>
+                </CardContent>
+            </div>
+            <div
+                className={`absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-500 ease-out ${isExternal ? 'bg-gradient-to-r from-blue-500 to-cyan-500' : 'bg-gradient-to-r from-primary to-violet-600'}`}/>
+        </Card>
     );
+
+    const className = "block h-full group outline-none cursor-pointer";
+
+    return isExternal
+        ? <a href={link} target="_blank" rel="noopener noreferrer" className={className}>{cardContent}</a>
+        : <Link to={link} className={className}>{cardContent}</Link>;
 }
 
 function TimelineItem({title, institution, company, description, period, image}: any) {
