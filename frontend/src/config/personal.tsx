@@ -18,7 +18,13 @@ export const selected_projects = [
         tag: "Enterprise BI",
         desc: "A multi-tenant data platform modeling complex bicycle manufacturing logic. Tracks component-level inventory (frames, forks) to final sales, featuring granular RBAC and real-time financial reporting on D1.",
         link: "/dwh/login"
-    }
+    },
+    {
+        title: "Real-Time Feedback Pulse",
+        tag: "Analytics / UX",
+        desc: "A sophisticated dashboard monitoring customer sentiment via urgency scatter plots and signal intensity heatmaps. Features complex Recharts visualizations, dark mode support, and a high-performance triage queue.",
+        link: "https://cfchallenge.pages.dev/"
+    },
 ];
 
 export const education = [
