@@ -112,6 +112,7 @@ export default function Home() {
                                 desc={project.desc}
                                 link={project.link}
                                 tag={project.tag}
+                                isMigrating={project.isMigrating}
                             />
                         ))}
                     </div>
@@ -237,7 +238,7 @@ interface ProjectCardProps {
     tag: string;
 }
 
-function ProjectCard({title, desc, link, tag}: ProjectCardProps) {
+function ProjectCard({title, desc, link, tag, isMigrating}: ProjectCardProps & {isMigrating?: boolean}) {
     const isExternal = link.startsWith('http');
     const ActionIcon = isExternal ? ExternalLink : ArrowRight;
     const CornerIcon = isExternal ? ExternalLink : ArrowUpRight;
@@ -247,10 +248,18 @@ function ProjectCard({title, desc, link, tag}: ProjectCardProps) {
     const cardContent = (
         <Card
             className={`relative h-full flex flex-col border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 rounded-[2rem] overflow-hidden transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-zinc-200/50 dark:group-hover:shadow-black/50 ${isExternal ? 'group-hover:border-blue-500/30' : 'group-hover:border-primary/30'}`}>
-            <div
-                className={`absolute top-6 right-6 opacity-0 -translate-y-2 translate-x-2 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 ${isExternal ? 'text-blue-600 dark:text-blue-400' : 'text-primary'}`}>
-                <CornerIcon className="w-5 h-5"/>
+
+            <div className="absolute top-6 right-6 flex items-center gap-3">
+                {isMigrating && (
+                    <Badge variant="outline" className="bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 text-[10px] font-bold uppercase tracking-wider rounded-full px-2 py-0 animate-pulse">
+                        currently migrating
+                    </Badge>
+                )}
+                <div className={`opacity-0 -translate-y-2 translate-x-2 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 ${isExternal ? 'text-blue-600 dark:text-blue-400' : 'text-primary'}`}>
+                    <CornerIcon className="w-5 h-5"/>
+                </div>
             </div>
+
             <div className="flex flex-col h-full">
                 <CardHeader className="px-6 pt-5 md:px-8 pb-0">
                     <div className="flex flex-col items-start gap-4">
@@ -270,8 +279,15 @@ function ProjectCard({title, desc, link, tag}: ProjectCardProps) {
                     </div>
                 </CardContent>
             </div>
+
             <div
-                className={`absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-500 ease-out ${isExternal ? 'bg-gradient-to-r from-blue-500 to-cyan-500' : 'bg-gradient-to-r from-primary to-violet-600'}`}/>
+                className={`absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-500 ease-out ${
+                    isMigrating
+                        ? 'bg-red-500'
+                        : isExternal
+                            ? 'bg-gradient-to-r from-blue-500 to-cyan-500'
+                            : 'bg-gradient-to-r from-primary to-violet-600'
+                }`}/>
         </Card>
     );
 

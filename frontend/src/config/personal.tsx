@@ -16,6 +16,7 @@ export const selected_projects = [
     {
         title: "Data Warehouse System",
         tag: "Enterprise BI",
+        isMigrating: true,
         desc: "A multi-tenant data platform modeling complex bicycle manufacturing logic. Tracks component-level inventory (frames, forks) to final sales, featuring granular RBAC and real-time financial reporting on D1.",
         link: "/dwh/login"
     },
