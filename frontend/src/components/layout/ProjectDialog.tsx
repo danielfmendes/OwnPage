@@ -1,23 +1,52 @@
-import {useState} from "react";
-import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
-import {Button} from "@/components/ui/button";
-import {Checkbox} from "@/components/ui/checkbox";
-import {ScrollArea} from "@/components/ui/scroll-area";
-import {DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
-import {Trash, X} from "lucide-react";
-import type {RoleManagementWithName} from "@/models/api";
-import {useRoleStore} from "@/utils/rolemananagemetstate";
-import {useTranslation} from "react-i18next";
+import { useMemo, useState } from "react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Trash, X } from "lucide-react";
+import type { RoleManagementWithName } from "@/models/api";
+import { useRoleStore } from "@/utils/rolemananagemetstate";
+import { useTranslation } from "react-i18next";
 
 interface Props {
     onClose: () => void;
 }
 
-export function ProjectDialog({onClose}: Props) {
-    const {t} = useTranslation();
-    const projects: RoleManagementWithName[] = useRoleStore((state) => state.roles);
+export function ProjectDialog({ onClose }: Props) {
+    const { t } = useTranslation();
+    const rawProjects: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const setSelectedStore = useRoleStore((state) => state.setSelectedRoles);
-    const [selected, setSelected] = useState<RoleManagementWithName[]>(useRoleStore((state) => state.selectedRoles));
+
+    const projects = useMemo(() => {
+        const rolePriority: Record<string, number> = { creator: 3, admin: 2, user: 1, viewer: 0 };
+        const projectMap = new Map<number, RoleManagementWithName>();
+
+        rawProjects.forEach(p => {
+            if (!p.project_id) return;
+            const existing = projectMap.get(p.project_id);
+            if (!existing) {
+                projectMap.set(p.project_id, { ...p });
+            } else {
+                const existingPriority = rolePriority[existing.role?.toLowerCase() || ""] || 0;
+                const newPriority = rolePriority[p.role?.toLowerCase() || ""] || 0;
+                if (newPriority > existingPriority) {
+                    projectMap.set(p.project_id, { ...p });
+                }
+            }
+        });
+        return Array.from(projectMap.values());
+    }, [rawProjects]);
+
+    const rawSelected = useRoleStore((state) => state.selectedRoles);
+
+    // Derive initial unique selected projects matching the filtered `projects` list
+    const initialSelected = useMemo(() => {
+        const selectedIds = new Set(rawSelected.map(r => r.project_id));
+        return projects.filter(p => selectedIds.has(p.project_id));
+    }, [rawSelected, projects]);
+
+    const [selected, setSelected] = useState<RoleManagementWithName[]>(initialSelected);
 
     const isSelected = (project: RoleManagementWithName) =>
         selected.some((p) => p.project_id === project.project_id);
@@ -110,7 +139,7 @@ export function ProjectDialog({onClose}: Props) {
                                             className="h-5 w-5"
                                             onClick={() => removeSelection(project)}
                                         >
-                                            <X className="h-4 w-4"/>
+                                            <X className="h-4 w-4" />
                                         </Button>
                                     </li>
                                 ))}
@@ -122,7 +151,7 @@ export function ProjectDialog({onClose}: Props) {
 
             <div className="flex justify-between gap-2">
                 <Button variant="ghost" onClick={clearSelection} className="flex items-center gap-2">
-                    <Trash className="w-4 h-4"/>
+                    <Trash className="w-4 h-4" />
                     {t("button.clear_selection")}
                 </Button>
 

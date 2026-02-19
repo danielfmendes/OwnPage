@@ -1,5 +1,5 @@
-import {Link} from "react-router-dom";
-import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import { Link } from "react-router-dom";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -8,8 +8,8 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import {useEffect, useRef, useState} from "react";
-import {useNotification} from "@/components/helpers/NotificationProvider";
+import { useEffect, useRef, useState } from "react";
+import { useNotification } from "@/components/helpers/NotificationProvider";
 import {
     type BikeSales,
     type CityData,
@@ -18,18 +18,18 @@ import {
     type GraphMeta, OpenAPI,
     type RoleManagementWithName
 } from "@/models/api";
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
 import FilterManager from "@/utils/filtermanager";
 import ContentLayout from "@/components/layout/ContentLayout";
-import {MetricStats} from "@/pages/dwh/dashboard/revenue-graph";
-import {BikeModels} from "@/pages/dwh/dashboard/time-graph";
+import { MetricStats } from "@/pages/dwh/dashboard/revenue-graph";
+import { BikeModels } from "@/pages/dwh/dashboard/time-graph";
 import CitiesList from "@/pages/dwh/dashboard/cities-list";
-import {useRoleStore} from "@/utils/rolemananagemetstate";
+import { useRoleStore } from "@/utils/rolemananagemetstate";
 import apiUrl from "@/utils/helpers";
 
 export default function DashboardPage() {
-    const {t} = useTranslation();
-    const {addNotification} = useNotification();
+    const { t } = useTranslation();
+    const { addNotification } = useNotification();
     const filterManager = new FilterManager();
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.selectedRoles);
 
@@ -173,7 +173,7 @@ export default function DashboardPage() {
                                         <Link to="/">{t("home")}</Link>
                                     </BreadcrumbLink>
                                 </BreadcrumbItem>
-                                <BreadcrumbSeparator/>
+                                <BreadcrumbSeparator />
                                 <BreadcrumbItem>
                                     <BreadcrumbPage>{t("menu.dashboard")}</BreadcrumbPage>
                                 </BreadcrumbItem>
@@ -210,13 +210,13 @@ export default function DashboardPage() {
                 )}
 
                 {otherHeight !== null && (
-                    <div className="grid gap-4 grid-cols-1 lg:grid-cols-10">
-                        <div className="col-span-1 md:col-span-6 lg:col-span-6 xl:col-span-7">
-                            <BikeModels bikeData={bikeData} isLoading={isLoadingBikeData} maxHeight={otherHeight}/>
+                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-10">
+                        <div className="col-span-1 sm:col-span-6 xl:col-span-7">
+                            <BikeModels bikeData={bikeData} isLoading={isLoadingBikeData} maxHeight={otherHeight} />
                         </div>
-                        <div className="col-span-1 md:col-span-4 lg:col-span-4 xl:col-span-3">
+                        <div className="col-span-1 sm:col-span-4 xl:col-span-3">
                             <CitiesList citiesData={citiesData} isLoading={isLoadingCitiesData}
-                                        maxHeight={otherHeight}/>
+                                maxHeight={otherHeight} />
                         </div>
                     </div>
                 )}

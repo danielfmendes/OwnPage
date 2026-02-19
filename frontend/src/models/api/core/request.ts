@@ -263,7 +263,11 @@ export const catchErrorCodes = (options: ApiRequestOptions, result: ApiResult): 
 
     const error = errors[result.status];
     if (error) {
-        throw new ApiError(options, result, error);
+        // Prefer the actual server response body over the hardcoded error string
+        const serverMessage = typeof result.body === 'string' && result.body.length > 0
+            ? result.body
+            : error;
+        throw new ApiError(options, result, serverMessage);
     }
 
     if (!result.ok) {

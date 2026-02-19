@@ -1,41 +1,27 @@
-import {useState, type ChangeEvent, type FormEvent} from 'react';
-import {Card, CardContent, CardHeader} from '@/components/ui/card';
-import {Button} from '@/components/ui/button';
-import InputField from '@/components/helpers/InputField';
-import {ArrowRight, Box} from 'lucide-react';
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
 import AuthToken from "@/utils/authtoken";
-import {useNotification} from "@/components/helpers/NotificationProvider";
-import {useTranslation} from "react-i18next";
-import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
-import {AuthsService} from "@/models/api";
-import {useNavigate} from "react-router-dom";
+import { useNotification } from "@/components/helpers/NotificationProvider";
+import { useTranslation } from "react-i18next";
+import { AuthsService } from "@/models/api";
+import { Link } from "react-router-dom";
+import { DwhAuthLayout } from "@/pages/dwh/AuthLayout";
 
 export default function LoginCard() {
-    const {t} = useTranslation();
-    const {addNotification} = useNotification();
-    const navigate = useNavigate();
+    const { t } = useTranslation();
+    const { addNotification } = useNotification();
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingDemo, setIsLoadingDemo] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [formData, setFormData] = useState({ email: '', password: '' });
     const [errorMessageEmail, setErrorMessageEmail] = useState('');
     const [errorMessagePassword, setErrorMessagePassword] = useState('');
-    const [isLoadingDemo, setIsLoadingDemo] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
 
-    const handleChange = (field: 'email' | 'password') => (e: ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        field === 'email' ? setEmail(value) : setPassword(value);
-    };
-
-    const validateInputs = () => {
-        const emailError = email ? '' : t("error.email");
-        const passwordError = password ? '' : t("error.password");
-        setErrorMessageEmail(emailError);
-        setErrorMessagePassword(passwordError);
-        return !(emailError || passwordError);
-    };
-
-    const login = (loginEmail: string, loginPassword: string, redirect = true, demo = false) => {
+    const login = (loginEmail: string, loginPassword: string, demo = false) => {
         const setLoading = demo ? setIsLoadingDemo : setIsLoading;
         setLoading(true);
 
@@ -46,16 +32,11 @@ export default function LoginCard() {
             }
         }, 5000);
 
-        const newData = {
-            email: loginEmail,
-            password: loginPassword,
-        };
-
-        AuthsService.userLogin(newData)
+        AuthsService.userLogin({ email: loginEmail, password: loginPassword })
             .then(data => {
                 if (data.token) {
                     AuthToken.setAuthToken(data.token);
-                    if (redirect) window.location.href = '/dwh/dashboard';
+                    window.location.href = '/dwh/dashboard';
                 } else {
                     addNotification("Login failed: Token not provided", "error");
                 }
@@ -71,67 +52,109 @@ export default function LoginCard() {
             });
     };
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (validateInputs()) login(email, password);
-    };
-
-    const handleBack = () => {
-        document.referrer ? window.history.back() : window.location.href = '/';
-    };
-
-    const handleRegister = () => {
-        navigate('/dwh/register');
-    };
-
-    const handleDemo = () => {
-        login("testuser@example.com", "test", true, true);
+        const emailError = formData.email ? '' : t("error.email");
+        const passwordError = formData.password ? '' : t("error.password");
+        setErrorMessageEmail(emailError);
+        setErrorMessagePassword(passwordError);
+        if (!emailError && !passwordError) {
+            login(formData.email, formData.password);
+        }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-            <Card className="w-full max-w-md">
-                <CardHeader className="flex flex-row justify-center items-center space-x-2">
-                    <Box className="w-6 h-6"/>
-                    <h1 className="text-lg font-semibold">NebulaDW</h1>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <InputField
-                        label={t("label.email")}
-                        value={email}
-                        onChange={handleChange('email')}
-                        errorMessage={errorMessageEmail}
+        <DwhAuthLayout title="Welcome Back" subtitle="Sign in to your NebulaDW workspace">
+            <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-2">
+                    <Label className="text-[10px] uppercase tracking-widest text-zinc-500 ml-1">
+                        {t("label.email")}
+                    </Label>
+                    <Input
+                        type="email"
+                        placeholder="email@example.com"
+                        className={`bg-zinc-100/80 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800 h-11 focus:border-orange-500 transition-all shadow-sm text-zinc-900 dark:text-white ${errorMessageEmail ? 'border-red-500' : ''}`}
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        required
                     />
-                    <InputField
-                        label={t("label.password")}
-                        value={password}
-                        onChange={handleChange('password')}
-                        errorMessage={errorMessagePassword}
-                    />
-                    <ButtonLoading id="send-btn" onClick={event => handleSubmit(event)} isLoading={isLoading}
-                                   className="w-full">
+                    {errorMessageEmail && (
+                        <p className="text-red-500 text-xs ml-1">{errorMessageEmail}</p>
+                    )}
+                </div>
+
+                <div className="space-y-2">
+                    <Label className="text-[10px] uppercase tracking-widest text-zinc-500 ml-1">
+                        {t("label.password")}
+                    </Label>
+                    <div className="relative">
+                        <Input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            className={`bg-zinc-100/80 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800 h-11 focus:border-orange-500 transition-all shadow-sm pr-10 text-zinc-900 dark:text-white ${errorMessagePassword ? 'border-red-500' : ''}`}
+                            value={formData.password}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            required
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 transition-colors"
+                        >
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                    </div>
+                    {errorMessagePassword && (
+                        <p className="text-red-500 text-xs ml-1">{errorMessagePassword}</p>
+                    )}
+                </div>
+
+                <div className="pt-2 space-y-3">
+                    <Button
+                        type="submit"
+                        className="w-full h-12 bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 font-bold rounded-xl transition-all shadow-lg active:scale-[0.98]"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? <Loader2 className="animate-spin mr-2" /> : null}
                         {t("button.send")}
-                    </ButtonLoading>
-                    <Button onClick={handleBack} variant="secondary" className="w-full">
-                        {t("button.back")}
-                    </Button>
-                    <Button id="register-btn" onClick={handleRegister} variant="link"
-                            className="w-full text-blue-600">
-                        {t("go_to_register")}
                     </Button>
 
-                    <div className="flex items-center">
-                        <div className="flex-grow h-px bg-gray-300"/>
-                        <span className="px-2 text-sm text-gray-500">or</span>
-                        <div className="flex-grow h-px bg-gray-300"/>
+                    <div className="relative w-full py-2">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t border-zinc-200 dark:border-zinc-800" />
+                        </div>
+                        <div className="relative flex justify-center text-[10px] uppercase">
+                            <span className="bg-white dark:bg-transparent px-2 text-zinc-400 dark:text-zinc-500 tracking-tighter">
+                                Or continue with
+                            </span>
+                        </div>
                     </div>
-                    <ButtonLoading onClick={handleDemo} isLoading={isLoadingDemo}
-                                   className="w-1/2 mx-auto flex justify-center items-center">
-                        <span>{t("demo")}</span>
-                        <ArrowRight className="w-4 h-4"/>
-                    </ButtonLoading>
-                </CardContent>
-            </Card>
-        </div>
+
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full h-12 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-xl group transition-all"
+                        onClick={() => login("testuser@example.com", "test", true)}
+                        disabled={isLoadingDemo}
+                    >
+                        {isLoadingDemo ? <Loader2 className="animate-spin mr-2" /> : null}
+                        {t("demo")}
+                        <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </Button>
+                </div>
+            </form>
+
+            <div className="mt-8 text-center border-t border-zinc-100 dark:border-zinc-800 pt-6">
+                <p className="text-zinc-500 text-xs">
+                    {t("go_to_register").replace(/^.*$/, "Don't have an account?")}{" "}
+                    <Link
+                        to="/dwh/register"
+                        className="text-orange-600 dark:text-white font-semibold underline underline-offset-4 hover:opacity-80 transition-opacity"
+                    >
+                        Create account
+                    </Link>
+                </p>
+            </div>
+        </DwhAuthLayout>
     );
 }

@@ -1,25 +1,31 @@
-import {useState, type ChangeEvent} from 'react';
-import {Card, CardContent, CardHeader} from '@/components/ui/card';
-import {Button} from '@/components/ui/button';
-import InputField from '@/components/helpers/InputField';
-import {Box} from 'lucide-react';
-import {DatePicker} from "@/components/helpers/datepicker/DatePicker";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { DatePicker } from "@/components/helpers/datepicker/DatePicker";
 import AuthToken from "@/utils/authtoken";
-import {useNotification} from "@/components/helpers/NotificationProvider";
-import {useTranslation} from "react-i18next";
-import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
-import {AuthsService} from "@/models/api";
+import { useNotification } from "@/components/helpers/NotificationProvider";
+import { useTranslation } from "react-i18next";
+import { AuthsService } from "@/models/api";
+import { Link } from "react-router-dom";
+import { DwhAuthLayout } from "@/pages/dwh/AuthLayout";
 
 export default function RegisterCard() {
-    const {t} = useTranslation();
-    const {addNotification} = useNotification();
-    const [name, setName] = useState<string>('');
-    const [email, setEmail] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
-    const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-    const [isLoading, setIsLoading] = useState(false);
+    const { t } = useTranslation();
+    const { addNotification } = useNotification();
 
-    const handleSubmit = () => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: '',
+    });
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
         setIsLoading(true);
 
         let stillLoading = true;
@@ -30,9 +36,9 @@ export default function RegisterCard() {
         }, 5000);
 
         const newData = {
-            username: name,
-            email,
-            password,
+            username: formData.name,
+            email: formData.email,
+            password: formData.password,
             dob: selectedDate ? selectedDate.toISOString() : "",
         };
 
@@ -57,52 +63,90 @@ export default function RegisterCard() {
             });
     };
 
-    const handleBack = () => {
-        if (document.referrer) {
-            window.history.back();
-        } else {
-            window.location.href = '/';
-        }
-    };
-
     return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-            <Card className="w-full max-w-md">
-                <CardHeader className="flex flex-row justify-center items-center space-x-2">
-                    <Box className="w-6 h-6"/>
-                    <h1 className="text-lg font-semibold">NebulaDW</h1>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <InputField
-                        label={t("label.name")}
-                        value={name}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+        <DwhAuthLayout title="Create Account" subtitle="Set up your NebulaDW workspace">
+            <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-2">
+                    <Label className="text-[10px] uppercase tracking-widest text-zinc-500 ml-1">
+                        {t("label.name")}
+                    </Label>
+                    <Input
+                        type="text"
+                        placeholder="John Doe"
+                        className="bg-zinc-100/80 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800 h-11 focus:border-orange-500 transition-all shadow-sm text-zinc-900 dark:text-white"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        required
                     />
-                    <div className="space-y-1">
-                        <label className="block text-sm font-medium">{t("label.birthday")}</label>
-                        <div className="relative">
-                            <DatePicker date={selectedDate} setDate={setSelectedDate}/>
-                        </div>
+                </div>
+
+                <div className="space-y-2">
+                    <Label className="text-[10px] uppercase tracking-widest text-zinc-500 ml-1">
+                        {t("label.birthday")}
+                    </Label>
+                    <DatePicker date={selectedDate} setDate={setSelectedDate} />
+                </div>
+
+                <div className="space-y-2">
+                    <Label className="text-[10px] uppercase tracking-widest text-zinc-500 ml-1">
+                        {t("label.email")}
+                    </Label>
+                    <Input
+                        type="email"
+                        placeholder="email@example.com"
+                        className="bg-zinc-100/80 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800 h-11 focus:border-orange-500 transition-all shadow-sm text-zinc-900 dark:text-white"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        required
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <Label className="text-[10px] uppercase tracking-widest text-zinc-500 ml-1">
+                        {t("label.password")}
+                    </Label>
+                    <div className="relative">
+                        <Input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            className="bg-zinc-100/80 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800 h-11 focus:border-orange-500 transition-all shadow-sm pr-10 text-zinc-900 dark:text-white"
+                            value={formData.password}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            required
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 transition-colors"
+                        >
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
                     </div>
-                    <InputField
-                        label={t("label.email")}
-                        value={email}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                    />
-                    <InputField
-                        label={t("label.password")}
-                        type="password"
-                        value={password}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                    />
-                    <ButtonLoading id="send-btn" onClick={handleSubmit} isLoading={isLoading} className="w-full">
+                </div>
+
+                <div className="pt-2">
+                    <Button
+                        type="submit"
+                        className="w-full h-12 bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 font-bold rounded-xl transition-all shadow-lg active:scale-[0.98]"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? <Loader2 className="animate-spin mr-2" /> : null}
                         {t("button.register")}
-                    </ButtonLoading>
-                    <Button onClick={handleBack} variant="secondary" className="w-full">
-                        {t("button.back")}
                     </Button>
-                </CardContent>
-            </Card>
-        </div>
+                </div>
+            </form>
+
+            <div className="mt-8 text-center border-t border-zinc-100 dark:border-zinc-800 pt-6">
+                <p className="text-zinc-500 text-xs">
+                    Already have an account?{" "}
+                    <Link
+                        to="/dwh/login"
+                        className="text-orange-600 dark:text-white font-semibold underline underline-offset-4 hover:opacity-80 transition-opacity"
+                    >
+                        Sign in
+                    </Link>
+                </p>
+            </div>
+        </DwhAuthLayout>
     );
 }
