@@ -1,4 +1,4 @@
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
     RocketIcon,
     BriefcaseIcon,
@@ -11,14 +11,14 @@ import {
     ArrowRight,
     ExternalLink,
 } from "lucide-react";
-import {Button} from "@/components/ui/button";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Badge} from "@/components/ui/badge";
-import {education, experience, selected_projects, skill_categories, social_links} from "@/config/personal.tsx";
-import {useTheme} from "next-themes";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { education, experience, selected_projects, skill_categories, social_links } from "@/config/personal.tsx";
+import { useTheme } from "next-themes";
 
 export default function Home() {
-    const {theme, setTheme} = useTheme();
+    const { theme, setTheme } = useTheme();
 
     const toggleTheme = () => {
         setTheme(theme === "dark" ? "light" : "dark");
@@ -38,12 +38,12 @@ export default function Home() {
                         className="flex-1 space-y-8 text-center md:text-left order-2 md:order-1 animate-in fade-in slide-in-from-bottom-8 duration-700">
                         <div className="space-y-4">
                             <Badge variant="outline"
-                                   className="px-3 py-1 text-xs font-bold uppercase tracking-widest border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400">
+                                className="px-3 py-1 text-xs font-bold uppercase tracking-widest border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400">
                                 Software Engineer / Data Analyst
                             </Badge>
                             <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-[1.1]">
                                 Hi, I'm <span
-                                className="text-primary underline decoration-primary/30 decoration-4 underline-offset-4">Daniel</span>.
+                                    className="text-primary underline decoration-primary/30 decoration-4 underline-offset-4">Daniel</span>.
                             </h1>
                             <p className="text-xl md:text-2xl text-zinc-600 dark:text-zinc-300 leading-relaxed max-w-lg mx-auto md:mx-0 font-medium">
                                 I build performant data warehouses and intelligent AI assistants that solve real-world
@@ -53,23 +53,23 @@ export default function Home() {
 
                         <div className="flex flex-wrap justify-center md:justify-start gap-4">
                             <Button asChild size="lg"
-                                    className="rounded-full px-8 shadow-xl hover:scale-105 transition-all duration-300 font-bold">
+                                className="rounded-full px-8 shadow-xl hover:scale-105 transition-all duration-300 font-bold">
                                 <a href={social_links.linkedin} target="_blank" rel="noopener noreferrer">
-                                    <LinkedinIcon className="mr-2 h-4 w-4"/> Connect
+                                    <LinkedinIcon className="mr-2 h-4 w-4" /> Connect
                                 </a>
                             </Button>
 
                             <Button asChild size="lg" variant="secondary"
-                                    className="rounded-full px-8 shadow-lg hover:scale-105 transition-all duration-300 font-bold">
+                                className="rounded-full px-8 shadow-lg hover:scale-105 transition-all duration-300 font-bold">
                                 <a href={social_links.github} target="_blank" rel="noopener noreferrer">
-                                    <GithubIcon className="mr-2 h-4 w-4"/> GitHub
+                                    <GithubIcon className="mr-2 h-4 w-4" /> GitHub
                                 </a>
                             </Button>
 
                             <Button asChild variant="outline" size="lg"
-                                    className="rounded-full px-8 border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+                                className="rounded-full px-8 border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
                                 <a href={`mailto:${social_links.email}`}>
-                                    <MailIcon className="mr-2 h-4 w-4"/> Email Me
+                                    <MailIcon className="mr-2 h-4 w-4" /> Email Me
                                 </a>
                             </Button>
                         </div>
@@ -99,7 +99,7 @@ export default function Home() {
                 <section className="space-y-10">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-primary/10 rounded-xl border border-primary/20">
-                            <RocketIcon className="h-6 w-6 text-primary"/>
+                            <RocketIcon className="h-6 w-6 text-primary" />
                         </div>
                         <h2 className="text-3xl md:text-4xl font-black tracking-tight">Selected Work</h2>
                     </div>
@@ -112,7 +112,6 @@ export default function Home() {
                                 desc={project.desc}
                                 link={project.link}
                                 tag={project.tag}
-                                isMigrating={project.isMigrating}
                             />
                         ))}
                     </div>
@@ -129,7 +128,7 @@ export default function Home() {
                     <div className="space-y-10">
                         <div className="flex items-center gap-4">
                             <div className="p-3 bg-primary/10 rounded-xl border border-primary/20">
-                                <GraduationCapIcon className="h-6 w-6 text-primary"/>
+                                <GraduationCapIcon className="h-6 w-6 text-primary" />
                             </div>
                             <h2 className="text-3xl md:text-4xl font-black tracking-tight">Education</h2>
                         </div>
@@ -145,7 +144,7 @@ export default function Home() {
                     <div className="space-y-10">
                         <div className="flex items-center gap-4">
                             <div className="p-3 bg-primary/10 rounded-xl border border-primary/20">
-                                <BriefcaseIcon className="h-6 w-6 text-primary"/>
+                                <BriefcaseIcon className="h-6 w-6 text-primary" />
                             </div>
                             <h2 className="text-3xl md:text-4xl font-black tracking-tight">Experience</h2>
                         </div>
@@ -164,7 +163,7 @@ export default function Home() {
                     <div className="space-y-4">
                         <div className="flex items-center gap-4">
                             <div className="p-3 bg-primary/10 rounded-xl border border-primary/20">
-                                <Cpu className="h-6 w-6 text-primary"/>
+                                <Cpu className="h-6 w-6 text-primary" />
                             </div>
                             <h2 className="text-3xl md:text-4xl font-black tracking-tight">Technical Arsenal</h2>
                         </div>
@@ -216,8 +215,8 @@ export default function Home() {
                                     transition-all duration-300 cursor-default select-none
                                 "
                                             >
-                                {skill}
-                            </span>
+                                                {skill}
+                                            </span>
                                         ))}
                                     </div>
                                 </div>
@@ -236,9 +235,10 @@ interface ProjectCardProps {
     desc: string;
     link: string;
     tag: string;
+    isMigrating?: boolean;
 }
 
-function ProjectCard({title, desc, link, tag, isMigrating}: ProjectCardProps & {isMigrating?: boolean}) {
+function ProjectCard({ title, desc, link, tag, isMigrating }: ProjectCardProps) {
     const isExternal = link.startsWith('http');
     const ActionIcon = isExternal ? ExternalLink : ArrowRight;
     const CornerIcon = isExternal ? ExternalLink : ArrowUpRight;
@@ -256,7 +256,7 @@ function ProjectCard({title, desc, link, tag, isMigrating}: ProjectCardProps & {
                     </Badge>
                 )}
                 <div className={`opacity-0 -translate-y-2 translate-x-2 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 ${isExternal ? 'text-blue-600 dark:text-blue-400' : 'text-primary'}`}>
-                    <CornerIcon className="w-5 h-5"/>
+                    <CornerIcon className="w-5 h-5" />
                 </div>
             </div>
 
@@ -264,7 +264,7 @@ function ProjectCard({title, desc, link, tag, isMigrating}: ProjectCardProps & {
                 <CardHeader className="px-6 pt-5 md:px-8 pb-0">
                     <div className="flex flex-col items-start gap-4">
                         <Badge variant="secondary"
-                               className={`bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 transition-colors border-transparent rounded-md px-2 py-0.5 text-[10px] font-bold tracking-[0.15em] uppercase ${isExternal ? 'group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400' : 'group-hover:bg-primary/10 group-hover:text-primary'}`}>{tag}</Badge>
+                            className={`bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 transition-colors border-transparent rounded-md px-2 py-0.5 text-[10px] font-bold tracking-[0.15em] uppercase ${isExternal ? 'group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400' : 'group-hover:bg-primary/10 group-hover:text-primary'}`}>{tag}</Badge>
                         <CardTitle
                             className={`text-2xl md:text-3xl font-black tracking-tight text-zinc-900 dark:text-white transition-colors duration-300 leading-none pr-4 ${hoverColor}`}>{title}</CardTitle>
                     </div>
@@ -275,19 +275,18 @@ function ProjectCard({title, desc, link, tag, isMigrating}: ProjectCardProps & {
                         className={`flex items-center gap-2 text-xs font-bold text-zinc-400 dark:text-zinc-600 transition-colors duration-300 mt-auto ${hoverColor}`}>
                         {isExternal ? "Visit Website" : "View Project"}
                         <ActionIcon
-                            className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1"/>
+                            className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                     </div>
                 </CardContent>
             </div>
 
             <div
-                className={`absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-500 ease-out ${
-                    isMigrating
-                        ? 'bg-red-500'
-                        : isExternal
-                            ? 'bg-gradient-to-r from-blue-500 to-cyan-500'
-                            : 'bg-gradient-to-r from-primary to-violet-600'
-                }`}/>
+                className={`absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-500 ease-out ${isMigrating
+                    ? 'bg-red-500'
+                    : isExternal
+                        ? 'bg-gradient-to-r from-blue-500 to-cyan-500'
+                        : 'bg-gradient-to-r from-primary to-violet-600'
+                    }`} />
         </Card>
     );
 
@@ -298,7 +297,7 @@ function ProjectCard({title, desc, link, tag, isMigrating}: ProjectCardProps & {
         : <Link to={link} className={className}>{cardContent}</Link>;
 }
 
-function TimelineItem({title, institution, company, description, period, image}: any) {
+function TimelineItem({ title, institution, company, description, period, image }: any) {
     return (
         <div className="flex gap-5 items-start group">
             {/* Logo Container: Fixed original colors and proper fit */}
@@ -332,7 +331,7 @@ function TimelineItem({title, institution, company, description, period, image}:
                             <li key={index}
                                 className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed flex items-start gap-2.5 font-medium">
                                 {/* Custom Bullet Point */}
-                                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary/60 shrink-0"/>
+                                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary/60 shrink-0" />
                                 <span>{point}</span>
                             </li>
                         ))
