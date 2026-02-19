@@ -4,3 +4,4 @@ controller/.env.local
 frontend-testing/target
 frontend-testing/screenshots
 ToDo_Current.md
+.DS_Store

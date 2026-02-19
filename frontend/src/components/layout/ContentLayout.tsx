@@ -87,7 +87,8 @@ function LayoutContent({ title, isOpen, setIsOpen, children }: LayoutContentProp
                     <Button
                         onClick={handleToggleSidebar}
                         aria-label="Toggle Sidebar"
-                        className="absolute top-10 -translate-x-1/2 rounded-md border border-input shadow-sm
+                        className="fixed top-10 -translate-x-1/2 rounded-md border border-input shadow-sm
+                                   bg-background
                                    dark:bg-[var(--sidebar)]
                                    dark:hover:bg-muted
                                    text-foreground hover:text-accent-foreground

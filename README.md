@@ -32,6 +32,7 @@ wrangler d1 create db-prod
 
 Datenbank-Schema ausführen:
 ```bash
+wrangler d1 execute db-prod --file=drop_tables.sql --remote
 cd init_sqlite
 wrangler d1 execute db-prod --file=V0__Create_Tables.sql --remote
 wrangler d1 execute db-prod --file=V1__Create_Views.sql --remote
