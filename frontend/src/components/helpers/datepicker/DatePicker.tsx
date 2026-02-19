@@ -1,11 +1,11 @@
-import {Calendar as CalendarIcon, ChevronDown} from "lucide-react";
-import type {DateRange} from "react-day-picker";
+import { Calendar as CalendarIcon, ChevronDown } from "lucide-react";
+import type { DateRange } from "react-day-picker";
 
-import {Button} from "@/components/ui/button";
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import {DatePickerCalender} from "@/components/helpers/datepicker/DatePickerCalender";
-import {DatePickerDisplayName} from "@/components/helpers/datepicker/DatePickerDisplayName";
-import {cn} from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DatePickerCalender } from "@/components/helpers/datepicker/DatePickerCalender";
+import { DatePickerDisplayName } from "@/components/helpers/datepicker/DatePickerDisplayName";
+import { cn } from "@/lib/utils";
 
 
 interface DatePickerPropsBase {
@@ -29,13 +29,13 @@ interface DatePickerPropsRange extends DatePickerPropsBase {
 type DatePickerProps = DatePickerPropsSingle | DatePickerPropsRange;
 
 export function DatePicker({
-                               date,
-                               setDate,
-                               endYear,
-                               position = "bottom",
-                               mode = "single",
-                               numberOfMonths = 1,
-                           }: DatePickerProps) {
+    date,
+    setDate,
+    endYear,
+    position = "bottom",
+    mode = "single",
+    numberOfMonths = 1,
+}: DatePickerProps) {
 
     return (
         <Popover>
@@ -44,16 +44,16 @@ export function DatePicker({
                     id="datepicker"
                     variant="outline"
                     className={cn(
-                        "w-full justify-between text-left font-normal relative pr-10",
+                        "w-full h-11 justify-between text-left font-normal relative pr-10",
                         !date && "text-muted-foreground"
                     )}
                 >
                     <div className="flex items-center">
-                        <CalendarIcon className="mr-2 h-4 w-4"/>
-                        <DatePickerDisplayName mode={mode} date={date}/>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        <DatePickerDisplayName mode={mode} date={date} />
                     </div>
                     <div className="absolute right-2 flex items-center space-x-1 opacity-50">
-                        <ChevronDown className="w-4 h-4"/>
+                        <ChevronDown className="w-4 h-4" />
                     </div>
                 </Button>
             </PopoverTrigger>
