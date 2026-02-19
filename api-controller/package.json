@@ -1,0 +1,12 @@
+{
+  "name": "api-controller",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260124.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "jose": "^6.1.3"
+  }
+}
