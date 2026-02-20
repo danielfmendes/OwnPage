@@ -1,9 +1,9 @@
 import AuthToken from "@/utils/authtoken";
-import {useUserStore} from "@/utils/userstate";
-import type {NavigateFunction} from "react-router-dom";
-import {useRoleStore} from "@/utils/rolemananagemetstate";
-import type {NotificationType} from "@/components/helpers/Notification";
-import type {RoleManagementWithName} from "@/models/api";
+import { useUserStore } from "@/utils/userstate";
+import type { NavigateFunction } from "react-router-dom";
+import { useRoleStore } from "@/utils/roleManagementState";
+import type { NotificationType } from "@/components/helpers/Notification";
+import type { RoleManagementWithName } from "@/models/api";
 
 export const handleLogOut = (
     navigate: NavigateFunction,
@@ -16,7 +16,7 @@ export const handleLogOut = (
     useRoleStore.getState().setIsLoading(false);
 
     navigate("/dwh/login");
-    addNotification(`Erfolgreich ausgeloggt`, "success");
+    addNotification("Successfully logged out.", "success");
 };
 
 export const isRoleUserForProject = (projectId: number, role: string = "user") => {

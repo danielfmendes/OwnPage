@@ -3,7 +3,7 @@ import {jwtDecode} from "jwt-decode";
 import AuthToken from "@/utils/authtoken";
 import {useNotification} from "@/components/helpers/NotificationProvider";
 import {useUserStore} from "@/utils/userstate";
-import {useRoleStore} from "@/utils/rolemananagemetstate";
+import {useRoleStore} from "@/utils/roleManagementState";
 import {
     RoleManagementsService,
     UsersService,

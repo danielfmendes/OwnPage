@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useRoleStore } from "@/utils/rolemananagemetstate";
+import { useRoleStore } from "@/utils/roleManagementState";
 import { useTranslation } from "react-i18next";
 import type { Project } from "@/models/api";
 

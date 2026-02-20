@@ -1,4 +1,4 @@
-import {useRoleStore} from "@/utils/rolemananagemetstate";
+import {useRoleStore} from "@/utils/roleManagementState";
 import type {DateRange} from "react-day-picker";
 
 export type FilterType = "search" | "date" | "default";
