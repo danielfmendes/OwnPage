@@ -1,5 +1,5 @@
-import {useEffect, useState, type ReactNode, useMemo} from "react";
-import {Dialog} from "@/components/ui/dialog";
+import { useEffect, useState, type ReactNode, useMemo } from "react";
+import { Dialog } from "@/components/ui/dialog";
 import {
     type ColumnFiltersState,
     type SortingState,
@@ -27,19 +27,19 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {Button} from "@/components/ui/button";
-import {SimpleTable} from "@/components/helpers/SimpleTable";
-import {useTranslation} from "react-i18next";
-import {defaultPageSize, Pagination} from "@/models/datatable/pagination";
-import {TableHead, TableRow} from "@/components/ui/table";
-import {Sort, SortDirection, type SortDirectionType} from "@/models/datatable/sort";
-import {type ItemsLoaderOptions} from "@/models/datatable/itemsLoader";
-import {useNotification} from "@/components/helpers/NotificationProvider";
-import {type CustomColumnDef} from "@/models/datatable/column";
-import {FilterBar, type  FilterDefinition} from "./FilterBar";
-import FilterManager, {type FilterType} from "@/utils/filtermanager";
-import {useNavigate} from "react-router-dom";
-import {useDataTableStore} from "@/models/datatable/dataTableStore";
+import { Button } from "@/components/ui/button";
+import { SimpleTable } from "@/components/helpers/SimpleTable";
+import { useTranslation } from "react-i18next";
+import { defaultPageSize, Pagination } from "@/models/datatable/pagination";
+import { TableHead, TableRow } from "@/components/ui/table";
+import { Sort, SortDirection, type SortDirectionType } from "@/models/datatable/sort";
+import { type ItemsLoaderOptions } from "@/models/datatable/itemsLoader";
+import { useNotification } from "@/components/helpers/NotificationProvider";
+import { type CustomColumnDef } from "@/models/datatable/column";
+import { FilterBar, type FilterDefinition } from "./FilterBar";
+import FilterManager, { type FilterType } from "@/utils/filtermanager";
+import { useNavigate } from "react-router-dom";
+import { useDataTableStore } from "@/models/datatable/dataTableStore";
 import MobileFilterDialog from "@/components/helpers/MobileFilterBar";
 
 interface DataTableProps<TData> {
@@ -54,17 +54,17 @@ interface DataTableProps<TData> {
 }
 
 export default function DataTable<TData>({
-                                             title,
-                                             columns,
-                                             data,
-                                             itemsLoader,
-                                             totalCount,
-                                             filterDefinition,
-                                             rowDialogContent,
-                                             addDialogContent,
-                                         }: DataTableProps<TData>) {
-    const {t} = useTranslation();
-    const {addNotification} = useNotification();
+    title,
+    columns,
+    data,
+    itemsLoader,
+    totalCount,
+    filterDefinition,
+    rowDialogContent,
+    addDialogContent,
+}: DataTableProps<TData>) {
+    const { t } = useTranslation();
+    const { addNotification } = useNotification();
     const navigate = useNavigate();
 
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -149,12 +149,12 @@ export default function DataTable<TData>({
 
         if (index !== -1) {
             if (sortDirection === SortDirection.ASC || sortDirection === SortDirection.DESC) {
-                updated[index] = {key, order: sortDirection};
+                updated[index] = { key, order: sortDirection };
             } else {
                 updated.splice(index, 1);
             }
         } else if (sortDirection) {
-            updated.push({key, order: sortDirection});
+            updated.push({ key, order: sortDirection });
         }
 
         setSort(new Sort(updated));
@@ -199,11 +199,11 @@ export default function DataTable<TData>({
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        state: {sorting, columnFilters, columnVisibility, rowSelection},
+        state: { sorting, columnFilters, columnVisibility, rowSelection },
     });
 
     return (
-        <div className="mt-2 w-full p-4 border rounded-lg border-zinc-900 dark:border-zinc-50">
+        <div className="mt-2 w-full p-4 border rounded-xl shadow-sm bg-card text-card-foreground">
             <h2 className="font-bold text-lg">{title}</h2>
             <div className="flex items-center pt-3 pb-2">
                 {/* Mobile filter/sort button - hidden on desktop */}
@@ -238,10 +238,10 @@ export default function DataTable<TData>({
                         size="icon"
                         className="rounded-full"
                     >
-                        <X className="h-4 w-4"/>
+                        <X className="h-4 w-4" />
                     </Button>
                     <Button onClick={handleAddClick}>
-                        <Plus className="h-4 w-4"/>
+                        <Plus className="h-4 w-4" />
                         {t("button.add")}
                     </Button>
                 </div>
@@ -255,11 +255,11 @@ export default function DataTable<TData>({
                 onRowClick={handleRowClick}
                 headers={
                     table.getHeaderGroups().map((group: any) => (
-                        <TableRow key={group.id} className="border-zinc-900 dark:border-zinc-500">
+                        <TableRow key={group.id} className="hover:bg-transparent">
                             {group.headers.map((header: any) => {
-                                if (header.isPlaceholder) return <TableHead key={header.id}/>;
+                                if (header.isPlaceholder) return <TableHead key={header.id} />;
 
-                                const {column} = header;
+                                const { column } = header;
                                 const key = column.id;
                                 const canSort = column.columnDef.enableSorting ?? true;
                                 const sortItem = sort.items.find(item => item.key === key);
@@ -277,9 +277,9 @@ export default function DataTable<TData>({
                                         <div className="flex items-center gap-1">
                                             {flexRender(column.columnDef.header, header.getContext())}
                                             {sortItem?.order === SortDirection.ASC &&
-                                                <ArrowUp className="w-4 h-4"/>}
+                                                <ArrowUp className="w-4 h-4" />}
                                             {sortItem?.order === SortDirection.DESC &&
-                                                <ArrowDown className="w-4 h-4"/>}
+                                                <ArrowDown className="w-4 h-4" />}
                                             {sortIndex !== -1 && (
                                                 <span
                                                     className="text-xs text-muted-foreground">{sortIndex + 1}</span>
@@ -299,9 +299,9 @@ export default function DataTable<TData>({
                 <div className="flex justify-center md:justify-start items-center gap-4 w-full md:w-auto">
                     <span className="text-sm text-muted-foreground">{t("pagination.page")}:</span>
                     <Select value={String(pagination.itemsPerPage)}
-                            onValueChange={(v) => updateItemsPerPage(parseInt(v))}>
-                        <SelectTrigger className="w-[80px] border-zinc-900 dark:border-zinc-50">
-                            <SelectValue placeholder={pagination.itemsPerPage.toString()}/>
+                        onValueChange={(v) => updateItemsPerPage(parseInt(v))}>
+                        <SelectTrigger className="w-[80px]">
+                            <SelectValue placeholder={pagination.itemsPerPage.toString()} />
                         </SelectTrigger>
                         <SelectContent>
                             {paginationOptions.map((option) => (
@@ -317,29 +317,29 @@ export default function DataTable<TData>({
                 <div className="flex items-center w-full md:w-auto justify-center md:justify-end gap-2 px-2">
 
                     <Button variant="outline" size="sm" onClick={() => updatePage(1)}
-                            disabled={pagination.page === 1}>
-                        <ChevronsLeft className="w-4 h-4"/>
+                        disabled={pagination.page === 1}>
+                        <ChevronsLeft className="w-4 h-4" />
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => updatePage(pagination.page - 1)}
-                            disabled={pagination.page === 1}>
-                        <ChevronLeft className="w-4 h-4"/>
+                        disabled={pagination.page === 1}>
+                        <ChevronLeft className="w-4 h-4" />
                     </Button>
 
                     <span className="text-sm text-muted-foreground whitespace-nowrap text-center">
-                      {t("pagination.info", {
-                          from: totalCount === 0 ? 0 : (pagination.page - 1) * pagination.itemsPerPage + 1,
-                          to: Math.min(totalCount, pagination.page * pagination.itemsPerPage),
-                          total: totalCount,
-                      })}
+                        {t("pagination.info", {
+                            from: totalCount === 0 ? 0 : (pagination.page - 1) * pagination.itemsPerPage + 1,
+                            to: Math.min(totalCount, pagination.page * pagination.itemsPerPage),
+                            total: totalCount,
+                        })}
                     </span>
 
                     <Button variant="outline" size="sm" onClick={() => updatePage(pagination.page + 1)}
-                            disabled={pagination.page >= maxPage}>
-                        <ChevronRight className="w-4 h-4"/>
+                        disabled={pagination.page >= maxPage}>
+                        <ChevronRight className="w-4 h-4" />
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => updatePage(maxPage)}
-                            disabled={pagination.page >= maxPage}>
-                        <ChevronsRight className="w-4 h-4"/>
+                        disabled={pagination.page >= maxPage}>
+                        <ChevronsRight className="w-4 h-4" />
                     </Button>
                 </div>
             </div>
