@@ -143,7 +143,7 @@ export function SimpleTable<TData>({
                 <div
                     ref={scrollRef}
                     className="w-full overflow-y-auto"
-                    style={{ maxHeight: maxHeight !== undefined ? `${maxHeight}px` : "calc(100vh - 350px)" }}
+                    style={{ maxHeight: maxHeight !== undefined ? `${maxHeight}px` : "calc(100vh - 430px)" }}
                 >
                     <Table>
                         <TableBody>

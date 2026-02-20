@@ -234,14 +234,17 @@ export default function DataTable<TData>({
                     <Button
                         onClick={resetAllFilters}
                         disabled={!hasActiveFilters}
-                        variant={"destructive"}
+                        variant="outline"
                         size="icon"
-                        className="rounded-full"
+                        className="rounded-full border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 hover:border-red-300 dark:border-red-900/50 dark:hover:bg-red-900/20 transition-all shadow-sm disabled:opacity-0 disabled:pointer-events-none"
                     >
                         <X className="h-4 w-4" />
                     </Button>
-                    <Button onClick={handleAddClick}>
-                        <Plus className="h-4 w-4" />
+                    <Button
+                        onClick={handleAddClick}
+                        className="rounded-full px-5 bg-zinc-900 text-zinc-50 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm transition-all active:scale-[0.98]"
+                    >
+                        <Plus className="h-4 w-4 mr-1" />
                         {t("button.add")}
                     </Button>
                 </div>
