@@ -5,13 +5,13 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import {Avatar, AvatarFallback} from "@/components/ui/avatar";
-import {Skeleton} from "@/components/ui/skeleton";
-import {Building2} from "lucide-react";
-import type {CityData} from "@/models/api";
-import {useTranslation} from "react-i18next";
-import {useMemo} from "react";
-import {useIsMobile} from "@/utils/use-mobile";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Building2 } from "lucide-react";
+import type { CityData } from "@/models/api";
+import { useTranslation } from "react-i18next";
+import { useMemo } from "react";
+import { useIsMobile } from "@/utils/use-mobile";
 
 interface Props {
     citiesData: CityData[];
@@ -19,8 +19,8 @@ interface Props {
     maxHeight: number;
 }
 
-export default function CitiesList({citiesData, isLoading, maxHeight}: Props) {
-    const {t} = useTranslation();
+export default function CitiesList({ citiesData, isLoading, maxHeight }: Props) {
+    const { t } = useTranslation();
     const isMobile = useIsMobile();
 
     const visibleCount = useMemo(() => {
@@ -28,7 +28,7 @@ export default function CitiesList({citiesData, isLoading, maxHeight}: Props) {
             return 5;
         }
         const heightTitle = 100;
-        const itemHeight = 64;
+        const itemHeight = 52; // Reduced item height for dashboard logic
         return maxHeight ? Math.floor((maxHeight - heightTitle) / itemHeight) : 0;
     }, [maxHeight, isMobile]);
 
@@ -46,27 +46,27 @@ export default function CitiesList({citiesData, isLoading, maxHeight}: Props) {
     return (
         <Card className="col-span-3 flex flex-col h-full">
             <CardHeader>
-                <CardTitle>{t("cities_list_title", {count: visibleCities.length})}</CardTitle>
+                <CardTitle>{t("cities_list_title", { count: visibleCities.length })}</CardTitle>
                 <CardDescription>
                     {isLoading
                         ? t("loading_cities")
                         : visibleCities.length > 0
-                            ? t("sales_to_cities", {count: visibleCities.length})
+                            ? t("sales_to_cities", { count: visibleCities.length })
                             : t("no_sales_data")}
                 </CardDescription>
             </CardHeader>
             <CardContent className="flex-grow overflow-auto">
-                <div className="space-y-6">
+                <div className="space-y-3">
                     {isLoading ? (
                         // Show as many skeleton items as fit
-                        Array.from({length: visibleCount}).map((_, index) => (
+                        Array.from({ length: visibleCount }).map((_, index) => (
                             <div key={index} className="flex items-center space-x-4">
-                                <Skeleton className="w-10 h-10 rounded-full"/>
+                                <Skeleton className="w-10 h-10 rounded-full" />
                                 <div className="flex-1 space-y-2">
-                                    <Skeleton className="h-4 w-32"/>
-                                    <Skeleton className="h-3 w-24"/>
+                                    <Skeleton className="h-4 w-32" />
+                                    <Skeleton className="h-3 w-24" />
                                 </div>
-                                <Skeleton className="h-4 w-16 ml-auto"/>
+                                <Skeleton className="h-4 w-16 ml-auto" />
                             </div>
                         ))
                     ) : visibleCities.length === 0 ? (
@@ -91,20 +91,20 @@ export default function CitiesList({citiesData, isLoading, maxHeight}: Props) {
 
                             return (
                                 <div key={index} className="flex items-center">
-                                    <Avatar className={`w-10 h-10 ${avatarClass}`}>
+                                    <Avatar className={`w-8 h-8 ${avatarClass}`}>
                                         <AvatarFallback>
-                                            <Building2 size={20}/>
+                                            <Building2 size={16} />
                                         </AvatarFallback>
                                     </Avatar>
-                                    <div className="ml-4 space-y-1">
+                                    <div className="ml-4 space-y-0.5">
                                         <p className="text-sm font-medium leading-none">
                                             {cityData.city}
                                         </p>
                                         {percentageChange !== undefined && (
                                             <p className="text-sm text-muted-foreground">
                                                 {percentageChange > 0
-                                                    ? t("up_percentage", {value: formattedPercentage})
-                                                    : t("down_percentage", {value: Math.abs(parseFloat(formattedPercentage)).toFixed(2)})}
+                                                    ? t("up_percentage", { value: formattedPercentage })
+                                                    : t("down_percentage", { value: Math.abs(parseFloat(formattedPercentage)).toFixed(2) })}
                                             </p>
                                         )}
                                     </div>
