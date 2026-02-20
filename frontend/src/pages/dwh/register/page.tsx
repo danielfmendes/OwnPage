@@ -10,12 +10,10 @@ import { useTranslation } from "react-i18next";
 import { AuthsService } from "@/models/api";
 import { Link } from "react-router-dom";
 import { DwhAuthLayout } from "@/pages/dwh/AuthLayout";
-import { useNavigate } from "react-router-dom";
 
 export default function RegisterCard() {
     const { t } = useTranslation();
     const { addNotification } = useNotification();
-    const navigate = useNavigate();
 
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -48,7 +46,7 @@ export default function RegisterCard() {
             .then(data => {
                 if (data.token) {
                     AuthToken.setAuthToken(data.token);
-                    navigate('/dwh/dashboard');
+                    window.location.href = '/dwh/dashboard';
                     addNotification(
                         "Confirmation e-mail has been sent. Please confirm your account within 7 days (check your spam folder if necessary).",
                         "success"

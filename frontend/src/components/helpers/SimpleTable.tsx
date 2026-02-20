@@ -146,8 +146,8 @@ export function SimpleTable<TData>({
                     style={{ maxHeight: maxHeight !== undefined ? `${maxHeight}px` : "calc(100vh - 430px)" }}
                 >
                     <Table>
-                        <TableBody>
-                            {isLoading ? (
+                        <TableBody className={`transition-opacity duration-300 ${isLoading ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
+                            {isLoading && data.length === 0 ? (
                                 Array.from({ length: 10 }).map((_, idx) => (
                                     <TableRow key={idx} className="hover:bg-muted">
                                         {columns.map((_, colIdx) => (

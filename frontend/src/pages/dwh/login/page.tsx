@@ -9,12 +9,10 @@ import { useTranslation } from "react-i18next";
 import { AuthsService } from "@/models/api";
 import { Link } from "react-router-dom";
 import { DwhAuthLayout } from "@/pages/dwh/AuthLayout";
-import { useNavigate } from "react-router-dom";
 
 export default function LoginCard() {
     const { t } = useTranslation();
     const { addNotification } = useNotification();
-    const navigate = useNavigate();
 
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingDemo, setIsLoadingDemo] = useState(false);
@@ -38,7 +36,7 @@ export default function LoginCard() {
             .then(data => {
                 if (data.token) {
                     AuthToken.setAuthToken(data.token);
-                    navigate('/dwh/dashboard');
+                    window.location.href = '/dwh/dashboard';
                 } else {
                     addNotification("Login failed: Token not provided", "error");
                 }
