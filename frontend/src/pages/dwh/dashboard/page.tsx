@@ -24,7 +24,7 @@ import ContentLayout from "@/components/layout/ContentLayout";
 import { MetricStats } from "@/pages/dwh/dashboard/revenue-graph";
 import { BikeModels } from "@/pages/dwh/dashboard/time-graph";
 import CitiesList from "@/pages/dwh/dashboard/cities-list";
-import { useRoleStore } from "@/utils/rolemananagemetstate";
+import { useRoleStore } from "@/utils/roleManagementState";
 import apiUrl from "@/utils/helpers";
 
 export default function DashboardPage() {

@@ -1,7 +1,8 @@
-import {Plus, MessageSquare, LogOut} from "lucide-react";
-import {Button} from "@/components/ui/button";
-import {ScrollArea} from "@/components/ui/scroll-area";
-import type {Session} from "@/models/chat/chatApi.ts";
+import { Plus, MessageSquare, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import type { Session } from "@/models/chat/chatApi.ts";
+import { useNavigate } from "react-router-dom";
 
 interface ChatSidebarProps {
     isOpen: boolean;
@@ -12,10 +13,12 @@ interface ChatSidebarProps {
     onCreateSession: () => void;
 }
 
-export function ChatSidebar({isOpen, setOpen, sessions, activeId, setActiveId, onCreateSession}: ChatSidebarProps) {
+export function ChatSidebar({ isOpen, setOpen, sessions, activeId, setActiveId, onCreateSession }: ChatSidebarProps) {
+    const navigate = useNavigate();
+
     const handleSignOut = () => {
         localStorage.removeItem("chat_token");
-        window.location.href = "/chat/login";
+        navigate("/chat/login");
     };
 
     return (
@@ -33,9 +36,8 @@ export function ChatSidebar({isOpen, setOpen, sessions, activeId, setActiveId, o
                 className={`fixed inset-y-0 left-0 z-[50] w-72 
                     bg-white/80 dark:bg-zinc-950/40 
                     backdrop-blur-2xl border-r border-zinc-200 dark:border-zinc-800/50 
-                    transform transition-transform duration-300 lg:relative lg:translate-x-0 ${
-                    isOpen ? "translate-x-0" : "-translate-x-full"
-                }`}
+                    transform transition-transform duration-300 lg:relative lg:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"
+                    }`}
             >
                 <div className="flex flex-col h-full p-4">
                     {/* Create Session Button */}
@@ -44,7 +46,7 @@ export function ChatSidebar({isOpen, setOpen, sessions, activeId, setActiveId, o
                         disabled={sessions.length >= 5}
                         className="w-full justify-start gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl h-12 mb-4 shadow-lg shadow-blue-600/20 disabled:opacity-50"
                     >
-                        <Plus size={18}/>
+                        <Plus size={18} />
                         New Chat ({sessions.length}/5)
                     </Button>
 
@@ -58,13 +60,12 @@ export function ChatSidebar({isOpen, setOpen, sessions, activeId, setActiveId, o
                                         setActiveId(s.id);
                                         setOpen(false);
                                     }}
-                                    className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all border ${
-                                        activeId === s.id
+                                    className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all border ${activeId === s.id
                                             ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-700 shadow-sm"
                                             : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 border-transparent"
-                                    }`}
+                                        }`}
                                 >
-                                    <MessageSquare size={16} className="shrink-0"/>
+                                    <MessageSquare size={16} className="shrink-0" />
                                     <span className="truncate block max-w-[180px] text-left">
                                         {s.title || "New Conversation"}
                                     </span>
@@ -80,7 +81,7 @@ export function ChatSidebar({isOpen, setOpen, sessions, activeId, setActiveId, o
                             variant="ghost"
                             className="w-full justify-start gap-3 text-zinc-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-xl"
                         >
-                            <LogOut size={18}/> Sign Out
+                            <LogOut size={18} /> Sign Out
                         </Button>
                     </div>
                 </div>

@@ -10,10 +10,12 @@ import { useTranslation } from "react-i18next";
 import { AuthsService } from "@/models/api";
 import { Link } from "react-router-dom";
 import { DwhAuthLayout } from "@/pages/dwh/AuthLayout";
+import { useNavigate } from "react-router-dom";
 
 export default function RegisterCard() {
     const { t } = useTranslation();
     const { addNotification } = useNotification();
+    const navigate = useNavigate();
 
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -46,7 +48,7 @@ export default function RegisterCard() {
             .then(data => {
                 if (data.token) {
                     AuthToken.setAuthToken(data.token);
-                    window.location.href = '/dwh/dashboard';
+                    navigate('/dwh/dashboard');
                     addNotification(
                         "Confirmation e-mail has been sent. Please confirm your account within 7 days (check your spam folder if necessary).",
                         "success"
@@ -138,7 +140,7 @@ export default function RegisterCard() {
 
             <div className="mt-8 text-center border-t border-zinc-100 dark:border-zinc-800 pt-6">
                 <p className="text-zinc-500 text-xs">
-                    Already have an account?{" "}
+                    {t("already_have_account", "Already have an account?")}{" "}
                     <Link
                         to="/dwh/login"
                         className="text-orange-600 dark:text-white font-semibold underline underline-offset-4 hover:opacity-80 transition-opacity"

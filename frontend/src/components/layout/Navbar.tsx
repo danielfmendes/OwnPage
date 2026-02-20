@@ -4,7 +4,7 @@ import {type ReactNode, useState} from "react";
 import type {RoleManagementWithName} from "@/models/api";
 import {useTranslation} from "react-i18next";
 import {Folder} from "lucide-react";
-import {useRoleStore} from "@/utils/rolemananagemetstate";
+import {useRoleStore} from "@/utils/roleManagementState";
 import {UserNav} from "@/components/layout/UserNav";
 import {ProjectDialog} from "@/components/layout/ProjectDialog";
 

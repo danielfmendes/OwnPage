@@ -9,10 +9,12 @@ import { useTranslation } from "react-i18next";
 import { AuthsService } from "@/models/api";
 import { Link } from "react-router-dom";
 import { DwhAuthLayout } from "@/pages/dwh/AuthLayout";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginCard() {
     const { t } = useTranslation();
     const { addNotification } = useNotification();
+    const navigate = useNavigate();
 
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingDemo, setIsLoadingDemo] = useState(false);
@@ -36,7 +38,7 @@ export default function LoginCard() {
             .then(data => {
                 if (data.token) {
                     AuthToken.setAuthToken(data.token);
-                    window.location.href = '/dwh/dashboard';
+                    navigate('/dwh/dashboard');
                 } else {
                     addNotification("Login failed: Token not provided", "error");
                 }
@@ -146,7 +148,7 @@ export default function LoginCard() {
 
             <div className="mt-8 text-center border-t border-zinc-100 dark:border-zinc-800 pt-6">
                 <p className="text-zinc-500 text-xs">
-                    {t("go_to_register").replace(/^.*$/, "Don't have an account?")}{" "}
+                    {t("go_to_register", "Don't have an account?")}{" "}
                     <Link
                         to="/dwh/register"
                         className="text-orange-600 dark:text-white font-semibold underline underline-offset-4 hover:opacity-80 transition-opacity"

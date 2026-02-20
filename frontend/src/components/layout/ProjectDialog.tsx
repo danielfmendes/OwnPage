@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Trash, X } from "lucide-react";
 import type { RoleManagementWithName } from "@/models/api";
-import { useRoleStore } from "@/utils/rolemananagemetstate";
+import { useRoleStore } from "@/utils/roleManagementState";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -20,22 +20,16 @@ export function ProjectDialog({ onClose }: Props) {
 
     const projects = useMemo(() => {
         const rolePriority: Record<string, number> = { creator: 3, admin: 2, user: 1, viewer: 0 };
-        const projectMap = new Map<number, RoleManagementWithName>();
-
-        rawProjects.forEach(p => {
-            if (!p.project_id) return;
-            const existing = projectMap.get(p.project_id);
-            if (!existing) {
-                projectMap.set(p.project_id, { ...p });
-            } else {
-                const existingPriority = rolePriority[existing.role?.toLowerCase() || ""] || 0;
-                const newPriority = rolePriority[p.role?.toLowerCase() || ""] || 0;
-                if (newPriority > existingPriority) {
-                    projectMap.set(p.project_id, { ...p });
+        return Array.from(
+            rawProjects.reduce((acc, p) => {
+                if (!p.project_id) return acc;
+                const existing = acc.get(p.project_id);
+                if (!existing || (rolePriority[p.role?.toLowerCase() || ""] || 0) > (rolePriority[existing.role?.toLowerCase() || ""] || 0)) {
+                    acc.set(p.project_id, { ...p });
                 }
-            }
-        });
-        return Array.from(projectMap.values());
+                return acc;
+            }, new Map<number, RoleManagementWithName>()).values()
+        );
     }, [rawProjects]);
 
     const rawSelected = useRoleStore((state) => state.selectedRoles);
