@@ -73,6 +73,9 @@ export const roleManagementHandler = async (req: Request, env: Env) => {
             if (!data.user_email || !data.project_id || !data.role) {
                 return errorResponse("Missing required fields: user_email, project_id, role");
             }
+            if (data.role === "creator") {
+                return errorResponse("Cannot manually assign the creator role.", 403);
+            }
             await env.DB.prepare(
                 "INSERT INTO role_management (useremail, project_id, role) VALUES (?, ?, ?)"
             ).bind(data.user_email, data.project_id, data.role).run();
@@ -92,6 +95,19 @@ export const roleManagementHandler = async (req: Request, env: Env) => {
             if (!data.user_email || !data.project_id || !data.role) {
                 return errorResponse("Missing required fields: user_email, project_id, role");
             }
+            if (data.role === "creator") {
+                return errorResponse("Cannot reassign a user to the creator role.", 403);
+            }
+
+            // Check current role: cannot demote the creator
+            const existingRoleResult: any = await env.DB.prepare(
+                "SELECT role FROM role_management WHERE useremail = ? AND project_id = ?"
+            ).bind(data.user_email, data.project_id).first();
+
+            if (existingRoleResult?.role === "creator") {
+                return errorResponse("Cannot change the role of the project creator.", 403);
+            }
+
             await env.DB.prepare(
                 "UPDATE role_management SET role = ? WHERE useremail = ? AND project_id = ?"
             ).bind(data.role, data.user_email, data.project_id).run();
@@ -109,6 +125,15 @@ export const roleManagementHandler = async (req: Request, env: Env) => {
             return errorResponse("Missing required query params: email, project_id");
         }
         try {
+            // Cannot delete the creator
+            const existingRoleResult: any = await env.DB.prepare(
+                "SELECT role FROM role_management WHERE useremail = ? AND project_id = ?"
+            ).bind(email, projectId).first();
+
+            if (existingRoleResult?.role === "creator") {
+                return errorResponse("Cannot remove the project creator.", 403);
+            }
+
             await env.DB.prepare(
                 "DELETE FROM role_management WHERE useremail = ? AND project_id = ?"
             ).bind(email, projectId).run();
