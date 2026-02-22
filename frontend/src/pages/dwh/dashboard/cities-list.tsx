@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Building2 } from "lucide-react";
+import { Building2, MapPinOff } from "lucide-react";
 import type { CityData } from "@/models/api";
 import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
@@ -70,7 +70,12 @@ export default function CitiesList({ citiesData, isLoading, maxHeight }: Props) 
                             </div>
                         ))
                     ) : visibleCities.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">{t("no_data_to_display")}</p>
+                        <div className="flex flex-col items-center justify-center text-muted-foreground h-full min-h-[150px]">
+                            <div className="rounded-full bg-muted p-4 mb-3 mt-4">
+                                <MapPinOff className="w-6 h-6" />
+                            </div>
+                            <p className="text-sm font-medium">{t("no_data_to_display")}</p>
+                        </div>
                     ) : (
                         visibleCities.map((cityData, index) => {
                             const percentageChange = calculatePercentageChange(

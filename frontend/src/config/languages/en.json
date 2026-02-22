@@ -78,6 +78,7 @@
     "serial_number": "e.g. SN1001",
     "filter": "Filter",
     "no_results": "No results found.",
+    "no_results_hint": "Try adjusting your filters or search terms.",
     "loading": "Loading...",
     "search": "Search",
     "selected": "selected",
