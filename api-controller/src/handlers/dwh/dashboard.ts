@@ -8,11 +8,29 @@ const parseRangeFromFilter = (url: URL): string => {
     // The frontend sends ?filter=range:$eq.1m
     const filter = url.searchParams.get("filter");
     if (filter && filter.includes("range:$eq.")) {
-        return filter.split("range:$eq.")[1];
+        return filter.split("range:$eq.")[1].split(",")[0];
     }
     // Also try normal range param just in case
     return url.searchParams.get("range") || "1m";
 }
+
+// Parse project_id from filter string, e.g. "project_id:$in.1|2|3" or "project_id:$eq.1"
+const parseProjectIds = (url: URL): number[] => {
+    const filter = url.searchParams.get("filter");
+    if (!filter) return [];
+    const inMatch = filter.match(/project_id:\$in\.([\d|]+)/);
+    if (inMatch) return inMatch[1].split("|").map(Number).filter(n => !isNaN(n));
+    const eqMatch = filter.match(/project_id:\$eq\.(\d+)/);
+    if (eqMatch) return [Number(eqMatch[1])];
+    return [];
+};
+
+// Returns { sql: " AND o.project_id IN (?,?)", bindings: [1,2] } or empty
+const buildProjectFilter = (projectIds: number[], prefix: "WHERE" | "AND" = "AND"): { sql: string; bindings: number[] } => {
+    if (projectIds.length === 0) return { sql: "", bindings: [] };
+    const placeholders = projectIds.map(() => "?").join(", ");
+    return { sql: ` ${prefix} o.project_id IN (${placeholders})`, bindings: projectIds };
+};
 
 function getModifiers(range: string) {
     switch (range) {
@@ -24,47 +42,58 @@ function getModifiers(range: string) {
     }
 }
 
-// GET /dashboard/graphmeta?filter=range:$eq.1m
+// GET /dashboard/graphmeta?filter=range:$eq.1m,project_id:$in.1|2
 export const getGraphMeta = async (req: Request, env: Env) => {
     const url = new URL(req.url);
     const range = parseRangeFromFilter(url);
     if (!range) return errorResponse("Range missing");
 
     const mods = getModifiers(range);
+    const projectIds = parseProjectIds(url);
+    const proj = buildProjectFilter(projectIds, "AND");
 
     let query: string;
-    let bindings: string[] = [];
+    let bindings: any[] = [];
 
     if (mods.current) {
         query = `
             SELECT 
-                COALESCE((SELECT SUM(oi.price * oi.number) FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE date(o.order_date) >= date('now', ?) AND date(o.order_date) < date('now', '+1 day')), 0) as current_revenue,
-                COALESCE((SELECT SUM(oi.price * oi.number) FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE date(o.order_date) >= date('now', ?) AND date(o.order_date) < date('now', ?)), 0) as previous_revenue,
-                COALESCE((SELECT SUM(oi.number) FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE date(o.order_date) >= date('now', ?) AND date(o.order_date) < date('now', '+1 day')), 0) as current_sales,
-                COALESCE((SELECT SUM(oi.number) FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE date(o.order_date) >= date('now', ?) AND date(o.order_date) < date('now', ?)), 0) as previous_sales
+                COALESCE((SELECT SUM(oi.price * oi.number) FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE date(o.order_date) >= date('now', ?)${proj.sql} AND date(o.order_date) < date('now', '+1 day')), 0) as current_revenue,
+                COALESCE((SELECT SUM(oi.price * oi.number) FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE date(o.order_date) >= date('now', ?) AND date(o.order_date) < date('now', ?)${proj.sql}), 0) as previous_revenue,
+                COALESCE((SELECT SUM(oi.number) FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE date(o.order_date) >= date('now', ?)${proj.sql} AND date(o.order_date) < date('now', '+1 day')), 0) as current_sales,
+                COALESCE((SELECT SUM(oi.number) FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE date(o.order_date) >= date('now', ?) AND date(o.order_date) < date('now', ?)${proj.sql}), 0) as previous_sales
         `;
-        bindings = [mods.current, mods.previous, mods.current, mods.current, mods.previous, mods.current];
+        bindings = [
+            mods.current, ...proj.bindings,
+            mods.previous, mods.current, ...proj.bindings,
+            mods.current, ...proj.bindings,
+            mods.previous, mods.current, ...proj.bindings,
+        ];
     } else {
         query = `
             SELECT 
-                COALESCE((SELECT SUM(oi.price * oi.number) FROM order_items oi JOIN orders o ON oi.order_id = o.id), 0) as current_revenue,
+                COALESCE((SELECT SUM(oi.price * oi.number) FROM order_items oi JOIN orders o ON oi.order_id = o.id${proj.sql.replace("AND", "WHERE")}), 0) as current_revenue,
                 0 as previous_revenue,
-                COALESCE((SELECT SUM(oi.number) FROM order_items oi JOIN orders o ON oi.order_id = o.id), 0) as current_sales,
+                COALESCE((SELECT SUM(oi.number) FROM order_items oi JOIN orders o ON oi.order_id = o.id${proj.sql.replace("AND", "WHERE")}), 0) as current_sales,
                 0 as previous_sales
         `;
+        bindings = [...proj.bindings, ...proj.bindings];
     }
 
     const { results } = await env.DB.prepare(query).bind(...bindings).all();
     return Response.json(results);
 };
 
-// GET /dashboard/graphdata?filter=range:$eq.1m
+// GET /dashboard/graphdata?filter=range:$eq.1m,project_id:$in.1|2
 export const getGraphData = async (req: Request, env: Env) => {
     const url = new URL(req.url);
     const range = parseRangeFromFilter(url);
     if (!range) return errorResponse("Range missing");
 
     const mods = getModifiers(range);
+    const projectIds = parseProjectIds(url);
+    const proj = buildProjectFilter(projectIds, "AND");
+
     let query = `
         SELECT
              date(o.order_date) as bucket,
@@ -73,11 +102,14 @@ export const getGraphData = async (req: Request, env: Env) => {
         FROM order_items oi
         JOIN orders o ON oi.order_id = o.id
     `;
-    let bindings: string[] = [];
+    let bindings: any[] = [];
 
     if (mods.current) {
-        query += ` WHERE date(o.order_date) >= date('now', ?) AND date(o.order_date) < date('now', '+1 day') `;
-        bindings = [mods.current];
+        query += ` WHERE date(o.order_date) >= date('now', ?) AND date(o.order_date) < date('now', '+1 day')${proj.sql} `;
+        bindings = [mods.current, ...proj.bindings];
+    } else if (proj.bindings.length > 0) {
+        query += ` WHERE${proj.sql.trimStart().replace(/^AND /, "")} `;
+        bindings = proj.bindings;
     }
 
     query += ` GROUP BY date(o.order_date) ORDER BY bucket ASC`;
@@ -86,16 +118,18 @@ export const getGraphData = async (req: Request, env: Env) => {
     return Response.json(results);
 };
 
-// GET /dashboard/citydata?filter=range:$eq.1m
+// GET /dashboard/citydata?filter=range:$eq.1m,project_id:$in.1|2
 export const getCityData = async (req: Request, env: Env) => {
     const url = new URL(req.url);
     const range = parseRangeFromFilter(url);
     if (!range) return errorResponse("Range missing");
 
     const mods = getModifiers(range);
+    const projectIds = parseProjectIds(url);
+    const proj = buildProjectFilter(projectIds, "AND");
 
     let query: string;
-    let bindings: string[] = [];
+    let bindings: any[] = [];
 
     if (mods.current) {
         query = `
@@ -105,35 +139,40 @@ export const getCityData = async (req: Request, env: Env) => {
             FROM order_items oi
             JOIN orders o ON oi.order_id = o.id
             JOIN customers c ON o.customer_id = c.id
-            WHERE date(o.order_date) >= date('now', ?)
+            WHERE date(o.order_date) >= date('now', ?)${proj.sql}
             GROUP BY c.city
             ORDER BY current_revenue DESC
             LIMIT 15
         `;
-        bindings = [mods.current, mods.previous, mods.current, mods.previous];
+        bindings = [mods.current, mods.previous, mods.current, mods.previous, ...proj.bindings];
     } else {
         query = `
             SELECT c.city, SUM(oi.price * oi.number) as current_revenue, 0 as previous_revenue
             FROM order_items oi
             JOIN orders o ON oi.order_id = o.id
             JOIN customers c ON o.customer_id = c.id
+            ${proj.bindings.length > 0 ? `WHERE${proj.sql.trimStart().replace(/^AND /, "")}` : ""}
             GROUP BY c.city
             ORDER BY current_revenue DESC
             LIMIT 15
         `;
+        bindings = proj.bindings;
     }
 
     const { results } = await env.DB.prepare(query).bind(...bindings).all();
     return Response.json(results);
 };
 
-// GET /dashboard/bikemodels?filter=range:$eq.1m
+// GET /dashboard/bikemodels?filter=range:$eq.1m,project_id:$in.1|2
 export const getBikeSales = async (req: Request, env: Env) => {
     const url = new URL(req.url);
     const range = parseRangeFromFilter(url);
     if (!range) return errorResponse("Range missing");
 
     const mods = getModifiers(range);
+    const projectIds = parseProjectIds(url);
+    const proj = buildProjectFilter(projectIds, "AND");
+
     let query = `
         SELECT
              date(o.order_date) as order_date,
@@ -145,11 +184,14 @@ export const getBikeSales = async (req: Request, env: Env) => {
         JOIN bikes b ON oi.bike_id = b.id
         JOIN bike_models bm ON b.model_id = bm.id
     `;
-    let bindings: string[] = [];
+    let bindings: any[] = [];
 
     if (mods.current) {
-        query += ` WHERE date(o.order_date) >= date('now', ?) AND date(o.order_date) < date('now', '+1 day') `;
-        bindings = [mods.current];
+        query += ` WHERE date(o.order_date) >= date('now', ?) AND date(o.order_date) < date('now', '+1 day')${proj.sql} `;
+        bindings = [mods.current, ...proj.bindings];
+    } else if (proj.bindings.length > 0) {
+        query += ` WHERE${proj.sql.trimStart().replace(/^AND /, "")} `;
+        bindings = proj.bindings;
     }
 
     query += ` GROUP BY date(o.order_date), bm.name ORDER BY order_date ASC`;

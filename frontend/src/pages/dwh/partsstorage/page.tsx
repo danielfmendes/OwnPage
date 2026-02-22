@@ -1,29 +1,29 @@
-import {useMemo, useState, type MouseEvent} from "react";
+import { useMemo, useRef, useState, type MouseEvent } from "react";
 import DataTable from "@/components/helpers/Table";
-import {type CustomColumnDef} from "@/models/datatable/column";
-import {WareHousePartsService, type WarehousePartWithName} from "@/models/api";
-import {useNotification} from "@/components/helpers/NotificationProvider";
-import {useTranslation} from "react-i18next";
-import {isRoleUserForProject} from "@/utils/helpers";
-import {genericItemsLoader, type ItemsLoaderOptions, useRefreshData} from "@/models/datatable/itemsLoader";
-import {type FilterDefinition} from "@/components/helpers/FilterBar";
-import {createWareHousePartsFilterItemLoader} from "@/models/datatable/filterItemsLoader";
+import { type CustomColumnDef } from "@/models/datatable/column";
+import { WareHousePartsService, type WarehousePartWithName } from "@/models/api";
+import { useNotification } from "@/components/helpers/NotificationProvider";
+import { useTranslation } from "react-i18next";
+import { isRoleUserForProject } from "@/utils/helpers";
+import { genericItemsLoader, type ItemsLoaderOptions, useRefreshData } from "@/models/datatable/itemsLoader";
+import { type FilterDefinition } from "@/components/helpers/FilterBar";
+import { createWareHousePartsFilterItemLoader } from "@/models/datatable/filterItemsLoader";
 import ContentLayout from "@/components/layout/ContentLayout";
 import WarehousePartDialogContent from "@/pages/dwh/partsstorage/content-dialog";
-import {DeleteButton} from "@/components/helpers/buttons/DeleteButton";
+import { DeleteButton } from "@/components/helpers/buttons/DeleteButton";
 
 export default function PartsStoragePage() {
-    const {t} = useTranslation();
-    const {addNotification} = useNotification();
+    const { t } = useTranslation();
+    const { addNotification } = useNotification();
     const refreshData = useRefreshData(itemsLoader);
 
     const [data, setData] = useState<WarehousePartWithName[]>([]);
     const [totalCount, setTotalCount] = useState<number>(0);
     const [loadingDeleteId, setLoadingDeleteId] = useState<number | null>(null);
-    const [itemsLoaderOptions, setItemsLoaderOptions] = useState<ItemsLoaderOptions | null>(null);
+    const itemsLoaderOptionsRef = useRef<ItemsLoaderOptions | null>(null);
 
     async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
-        setItemsLoaderOptions(options);
+        itemsLoaderOptionsRef.current = options;
         return genericItemsLoader<WarehousePartWithName>(
             options,
             WareHousePartsService.getWareHouseParts,
@@ -75,7 +75,7 @@ export default function PartsStoragePage() {
             id: "actions",
             enableHiding: false,
             widthPercent: 5,
-            cell: ({row}) => {
+            cell: ({ row }) => {
                 const warehousePart: WarehousePartWithName = row.original
 
                 return (
@@ -90,17 +90,17 @@ export default function PartsStoragePage() {
     ]
 
     const filters: FilterDefinition[] = useMemo(() => {
-        if (!itemsLoaderOptions) return [];
-        const warehouseFilterLoader = createWareHousePartsFilterItemLoader(itemsLoaderOptions);
+        const warehouseFilterLoader = createWareHousePartsFilterItemLoader(itemsLoaderOptionsRef);
 
         return [
-            warehouseFilterLoader("id", {pinned: false, type: "search"}),
-            warehouseFilterLoader("part_type", {type: "search"}),
-            warehouseFilterLoader("part_name", {type: "search"}),
-            warehouseFilterLoader("quantity", {pinned: false, type: "search"}),
-            warehouseFilterLoader("storage_location", {type: "search"}),
+            warehouseFilterLoader("id", { pinned: false, type: "search" }),
+            warehouseFilterLoader("part_type", { type: "search" }),
+            warehouseFilterLoader("part_name", { type: "search" }),
+            warehouseFilterLoader("quantity", { pinned: false, type: "search" }),
+            warehouseFilterLoader("storage_location", { type: "search" }),
         ];
-    }, [itemsLoaderOptions]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <ContentLayout title={t("menu.parts_storage")}>

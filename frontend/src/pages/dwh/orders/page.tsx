@@ -1,23 +1,23 @@
-import {useMemo, useState, type MouseEvent} from "react";
+import { useMemo, useRef, useState, type MouseEvent } from "react";
 import DataTable from "@/components/helpers/Table";
-import {type CustomColumnDef} from "@/models/datatable/column";
-import {Button} from "@/components/ui/button";
-import {type Order, OrdersService, type OrderWithCustomer} from "@/models/api";
-import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
-import {DeleteButton} from "@/components/helpers/buttons/DeleteButton";
-import {useNotification} from "@/components/helpers/NotificationProvider";
-import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
-import {useTranslation} from "react-i18next";
-import {isRoleUserForProject} from "@/utils/helpers";
-import {genericItemsLoader, type ItemsLoaderOptions, useRefreshData} from "@/models/datatable/itemsLoader";
-import {type FilterDefinition} from "@/components/helpers/FilterBar";
-import {createOrdersFilterItemLoader} from "@/models/datatable/filterItemsLoader";
+import { type CustomColumnDef } from "@/models/datatable/column";
+import { Button } from "@/components/ui/button";
+import { type Order, OrdersService, type OrderWithCustomer } from "@/models/api";
+import { ButtonLoading } from "@/components/helpers/buttons/ButtonLoading";
+import { DeleteButton } from "@/components/helpers/buttons/DeleteButton";
+import { useNotification } from "@/components/helpers/NotificationProvider";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useTranslation } from "react-i18next";
+import { isRoleUserForProject } from "@/utils/helpers";
+import { genericItemsLoader, type ItemsLoaderOptions, useRefreshData } from "@/models/datatable/itemsLoader";
+import { type FilterDefinition } from "@/components/helpers/FilterBar";
+import { createOrdersFilterItemLoader } from "@/models/datatable/filterItemsLoader";
 import ContentLayout from "@/components/layout/ContentLayout";
 import OrderDialogContent from "@/pages/dwh/orders/content-dialog";
 
 export default function OrderPage() {
-    const {t} = useTranslation();
-    const {addNotification} = useNotification();
+    const { t } = useTranslation();
+    const { addNotification } = useNotification();
     const refreshData = useRefreshData(itemsLoader);
 
     const [data, setData] = useState<OrderWithCustomer[]>([]);
@@ -26,10 +26,10 @@ export default function OrderPage() {
     const [isLoadingDeleteCascade, setIsLoadingDeleteCascade] = useState(false);
     const [showCascadeDialog, setShowCascadeDialog] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
-    const [itemsLoaderOptions, setItemsLoaderOptions] = useState<ItemsLoaderOptions | null>(null);
+    const itemsLoaderOptionsRef = useRef<ItemsLoaderOptions | null>(null);
 
     async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
-        setItemsLoaderOptions(options);
+        itemsLoaderOptionsRef.current = options;
         return genericItemsLoader<OrderWithCustomer>(
             options,
             OrdersService.getOrders,
@@ -99,7 +99,7 @@ export default function OrderPage() {
             accessorKey: "order_date",
             header: t("label.order_date"),
             widthPercent: 25,
-            cell: ({row}) => {
+            cell: ({ row }) => {
                 const date = new Date(row.getValue("order_date"))
                 return date.toLocaleDateString()
             },
@@ -108,7 +108,7 @@ export default function OrderPage() {
             id: "actions",
             widthPercent: 5,
             enableHiding: false,
-            cell: ({row}) => {
+            cell: ({ row }) => {
                 const order: Order = row.original
 
                 return (
@@ -123,15 +123,15 @@ export default function OrderPage() {
     ]
 
     const filters: FilterDefinition[] = useMemo(() => {
-        if (!itemsLoaderOptions) return [];
-        const orderFilterLoader = createOrdersFilterItemLoader(itemsLoaderOptions);
+        const orderFilterLoader = createOrdersFilterItemLoader(itemsLoaderOptionsRef);
 
         return [
-            orderFilterLoader("customer_name", {pinned: false, type: "search"}),
-            orderFilterLoader("customer_email", {type: "search"}),
-            orderFilterLoader("order_date", {type: "date"}),
+            orderFilterLoader("customer_name", { pinned: false, type: "search" }),
+            orderFilterLoader("customer_email", { type: "search" }),
+            orderFilterLoader("order_date", { type: "date" }),
         ];
-    }, [itemsLoaderOptions]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
 
     return (

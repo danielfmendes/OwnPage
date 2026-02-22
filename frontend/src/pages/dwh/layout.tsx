@@ -1,26 +1,26 @@
-import {useEffect} from "react";
-import {jwtDecode} from "jwt-decode";
+import { useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
 import AuthToken from "@/utils/authtoken";
-import {useNotification} from "@/components/helpers/NotificationProvider";
-import {useUserStore} from "@/utils/userstate";
-import {useRoleStore} from "@/utils/roleManagementState";
+import { useNotification } from "@/components/helpers/NotificationProvider";
+import { useUserStore } from "@/utils/userstate";
+import { useRoleStore } from "@/utils/roleManagementState";
 import {
     RoleManagementsService,
     UsersService,
     type RoleManagementListResponse,
 } from "@/models/api";
-import apiUrl, {handleLogOut} from "@/utils/helpers";
-import {OpenAPI} from "@/models/api/core/OpenAPI";
+import apiUrl, { handleLogOut } from "@/utils/helpers";
+import { OpenAPI } from "@/models/api/core/OpenAPI";
 import FilterManager from "@/utils/filtermanager";
-import {useNavigate, useLocation, Outlet} from "react-router-dom";
-import {useDataTableStore} from "@/models/datatable/dataTableStore";
+import { useNavigate, useLocation, Outlet } from "react-router-dom";
+import { useDataTableStore } from "@/models/datatable/dataTableStore";
 
 export default function DWHLayout() {
     const navigate = useNavigate();
     const location = useLocation();
     const hideSidebar = ['/dwh/login', '/dwh/register'].includes(location.pathname);
     const hasDataTable = ['/dwh/orders', '/dwh/customers', '/dwh/warehouse', '/dwh/partsstorage', '/dwh/rolemanagement'].includes(location.pathname);
-    const {addNotification} = useNotification();
+    const { addNotification } = useNotification();
     const token = AuthToken.getAuthToken();
     const filterManager = new FilterManager();
 
@@ -31,7 +31,7 @@ export default function DWHLayout() {
     const setIsLoadingRole = useRoleStore((state) => state.setIsLoading);
     const selectedRoles = useRoleStore((state) => state.selectedRoles);
     const setSelectedRoles = useRoleStore((state) => state.setSelectedRoles);
-    const {toQueryParams, fromQueryParams, filterManager: globalFilterManager} = useDataTableStore();
+    const { toQueryParams, fromQueryParams, filterManager: globalFilterManager } = useDataTableStore();
 
     useEffect(() => {
         OpenAPI.BASE = apiUrl;
@@ -45,18 +45,38 @@ export default function DWHLayout() {
         fromQueryParams(new URLSearchParams(location.search));
     }, [location.search]);
 
-    // Storer befüllen
     useEffect(() => {
-        const filters = globalFilterManager.getFilters();
-        const projectIds = filters.project_id?.values.map(String) || [];
+        if (!roles.length) return;
 
-        if (roles.length !== 0 && projectIds.length > 0) {
-            const selectedRoles = roles.filter(role =>
-                projectIds.includes(role.project_id?.toString())
-            );
-            setSelectedRoles(selectedRoles);
+        // Parse project_id manually since FilterManager.fromQueryParams purposely drops it to prevent infinite loops
+        const searchParams = new URL(window.location.href).searchParams;
+        const filterStr = searchParams.get("filter") || "";
+        let projectIds: string[] = [];
+
+        const inMatch = filterStr.match(/project_id:\$in\.([\d|]+)/);
+        if (inMatch) {
+            projectIds = inMatch[1].split("|");
+        } else {
+            const eqMatch = filterStr.match(/project_id:\$eq\.(\d+)/);
+            if (eqMatch) {
+                projectIds = [eqMatch[1]];
+            }
         }
-    }, [roles, JSON.stringify(globalFilterManager.getFilters().project_id?.values)]);
+
+        if (projectIds.length > 0) {
+            const newSelectedRoles = roles.filter(role =>
+                projectIds.includes(role.project_id?.toString() || "")
+            );
+
+            // Only update if it actually changed to prevent loops
+            const currentSelectedRefs = selectedRoles.map(r => r.project_id).sort().join(",");
+            const newSelectedRefs = newSelectedRoles.map(r => r.project_id).sort().join(",");
+
+            if (currentSelectedRefs !== newSelectedRefs) {
+                setSelectedRoles(newSelectedRoles);
+            }
+        }
+    }, [roles, location.search]);
 
     // Updates url if project filter changes
     useEffect(() => {
@@ -65,7 +85,7 @@ export default function DWHLayout() {
             const newSearch = `?${queryParams.toString()}`;
 
             if (location.search !== newSearch) {
-                navigate(newSearch, {replace: true});
+                navigate(newSearch, { replace: true });
             }
         }
     }, [roles, selectedRoles]);
@@ -117,7 +137,7 @@ export default function DWHLayout() {
 
     return (
         <div>
-            <Outlet/>
+            <Outlet />
         </div>
     );
 }
