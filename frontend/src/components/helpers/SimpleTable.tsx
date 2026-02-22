@@ -13,7 +13,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 
@@ -143,10 +143,10 @@ export function SimpleTable<TData>({
                 <div
                     ref={scrollRef}
                     className="w-full overflow-y-auto"
-                    style={{ maxHeight: maxHeight !== undefined ? `${maxHeight}px` : "calc(100vh - 430px)" }}
+                    style={{ height: maxHeight !== undefined ? `${maxHeight}px` : "calc(100vh - 430px)" }}
                 >
                     <Table>
-                        <TableBody className={`transition-opacity duration-300 ${isLoading ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
+                        <TableBody className={`transition-opacity duration-500 ${isLoading ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
                             {isLoading && data.length === 0 ? (
                                 Array.from({ length: 10 }).map((_, idx) => (
                                     <TableRow key={idx} className="hover:bg-muted">
@@ -161,26 +161,35 @@ export function SimpleTable<TData>({
                                     </TableRow>
                                 ))
                             ) : data.length ? (
-                                visibleRows.map((row: any) => (
-                                    <TableRow
-                                        key={row.id}
-                                        onClick={onRowClick ? () => onRowClick(row) : undefined}
-                                        className={clickableClasses}
-                                    >
-                                        {row.getVisibleCells().map((cell: any) => (
-                                            <TableCell
-                                                key={cell.id}
-                                                style={{ width: `${cell.column.columnDef.widthPercent ?? (100 / visibleColumnCount)}%` }}
-                                            >
-                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))
+                                <>
+                                    {visibleRows.map((row: any) => (
+                                        <TableRow
+                                            key={row.id}
+                                            onClick={onRowClick ? () => onRowClick(row) : undefined}
+                                            className={`transition-all duration-200 ${clickableClasses}`}
+                                            style={{ animation: "fadeInRow 0.3s ease both" }}
+                                        >
+                                            {row.getVisibleCells().map((cell: any) => (
+                                                <TableCell
+                                                    key={cell.id}
+                                                    style={{ width: `${cell.column.columnDef.widthPercent ?? (100 / visibleColumnCount)}%` }}
+                                                >
+                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))}
+                                </>
                             ) : (
-                                <TableRow>
-                                    <TableCell colSpan={columns.length} className="h-24 text-center">
-                                        {t("placeholder.no_results")}
+                                <TableRow className="hover:bg-transparent">
+                                    <TableCell colSpan={columns.length} className="h-48 text-center p-0">
+                                        <div className="flex flex-col items-center justify-center gap-3 py-12 text-muted-foreground">
+                                            <div className="rounded-full bg-muted p-4">
+                                                <SearchX className="w-7 h-7" />
+                                            </div>
+                                            <p className="text-sm font-semibold text-foreground">{t("placeholder.no_results")}</p>
+                                            <p className="text-xs">{t("placeholder.no_results_hint")}</p>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -253,8 +262,12 @@ export function SimpleTable<TData>({
                         ))
                     )
                 ) : (
-                    <div className="text-center text-muted-foreground py-6">
-                        {t("placeholder.no_results")}
+                    <div className="flex flex-col items-center justify-center gap-3 py-12 text-muted-foreground">
+                        <div className="rounded-full bg-muted p-4">
+                            <SearchX className="w-7 h-7" />
+                        </div>
+                        <p className="text-sm font-semibold text-foreground">{t("placeholder.no_results")}</p>
+                        <p className="text-xs">{t("placeholder.no_results_hint")}</p>
                     </div>
                 )}
             </div>

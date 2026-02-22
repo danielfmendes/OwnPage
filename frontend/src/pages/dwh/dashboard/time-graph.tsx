@@ -1,5 +1,5 @@
-import {useMemo, useState, useEffect} from "react";
-import {Line, LineChart, Tooltip, XAxis} from "recharts";
+import { useMemo, useState, useEffect } from "react";
+import { Line, LineChart, Tooltip, XAxis } from "recharts";
 import {
     Card,
     CardContent,
@@ -17,15 +17,15 @@ import {
     CommandGroup,
     CommandItem,
 } from "@/components/ui/command";
-import {Button} from "@/components/ui/button";
-import {Check, ChevronDown} from "lucide-react";
-import {ChartContainer, type ChartConfig} from "@/components/ui/chart";
-import {Switch} from "@/components/ui/switch";
-import {Skeleton} from "@/components/ui/skeleton";
-import {type BikeSales} from "@/models/api";
-import {cn} from "@/lib/utils";
-import {useTranslation} from "react-i18next";
-import {useIsMobile} from "@/utils/use-mobile";
+import { Button } from "@/components/ui/button";
+import { Check, ChevronDown, LineChart as LineChartIcon } from "lucide-react";
+import { ChartContainer, type ChartConfig } from "@/components/ui/chart";
+import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
+import { type BikeSales } from "@/models/api";
+import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
+import { useIsMobile } from "@/utils/use-mobile";
 
 interface Props {
     bikeData: BikeSales[] | null;
@@ -33,8 +33,8 @@ interface Props {
     maxHeight: number;
 }
 
-export function BikeModels({bikeData, isLoading, maxHeight}: Props) {
-    const {t} = useTranslation();
+export function BikeModels({ bikeData, isLoading, maxHeight }: Props) {
+    const { t } = useTranslation();
     const isMobile = useIsMobile();
     const dynamicHeightStyle = {
         height: isMobile ? 300 : maxHeight - 130,
@@ -157,7 +157,7 @@ export function BikeModels({bikeData, isLoading, maxHeight}: Props) {
                             <PopoverTrigger asChild>
                                 <Button variant="outline" className="text-sm h-8 px-3">
                                     {t("bike_models.filter_models")}
-                                    <ChevronDown className="ml-2 h-4 w-4"/>
+                                    <ChevronDown className="ml-2 h-4 w-4" />
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-[200px] p-0">
@@ -174,7 +174,7 @@ export function BikeModels({bikeData, isLoading, maxHeight}: Props) {
                                                     )}
                                                 >
                                                     {selectedModels.includes(model) && (
-                                                        <Check className="h-3 w-3"/>
+                                                        <Check className="h-3 w-3" />
                                                     )}
                                                 </div>
                                                 {model}
@@ -190,16 +190,19 @@ export function BikeModels({bikeData, isLoading, maxHeight}: Props) {
 
             <CardContent className="flex-grow h-full">
                 {isLoading ? (
-                    <Skeleton style={dynamicHeightStyle}/>
+                    <Skeleton style={dynamicHeightStyle} />
                 ) : isNoSalesData ? (
-                    <p style={dynamicHeightStyle} className="text-sm text-muted-foreground">
-                        {t("no_data_to_display")}
-                    </p>
+                    <div style={dynamicHeightStyle} className="flex flex-col items-center justify-center text-muted-foreground">
+                        <div className="rounded-full bg-muted p-4 mb-3">
+                            <LineChartIcon className="w-6 h-6" />
+                        </div>
+                        <p className="text-sm font-medium">{t("no_data_to_display")}</p>
+                    </div>
                 ) : (
                     <ChartContainer config={chartConfig} style={dynamicHeightStyle}>
                         <LineChart
                             data={chartData}
-                            margin={{top: 5, right: 10, left: 10, bottom: 0}}
+                            margin={{ top: 5, right: 10, left: 10, bottom: 0 }}
                         >
                             {selectedModels.map((modelName, index) => (
                                 <Line
@@ -219,10 +222,10 @@ export function BikeModels({bikeData, isLoading, maxHeight}: Props) {
                                 tickFormatter={(tick) => tick}
                                 axisLine={false}
                                 tickLine={false}
-                                tick={{fontSize: 12, fill: "#555"}}
+                                tick={{ fontSize: 12, fill: "#555" }}
                             />
                             <Tooltip
-                                content={({active, payload}) => {
+                                content={({ active, payload }) => {
                                     if (!active || !payload || payload.length === 0) return null;
                                     const currentPoint = payload[0].payload;
                                     return (
@@ -241,9 +244,9 @@ export function BikeModels({bikeData, isLoading, maxHeight}: Props) {
                                                         />
                                                         <span>{entry.name}</span>
                                                         <span className="ml-auto font-medium">
-                                                          {metric === "revenue"
-                                                              ? `$${(entry.value as number).toFixed(2)}`
-                                                              : entry.value}
+                                                            {metric === "revenue"
+                                                                ? `$${(entry.value as number).toFixed(2)}`
+                                                                : entry.value}
                                                         </span>
                                                     </div>
                                                 ))}

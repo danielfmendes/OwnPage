@@ -75,6 +75,7 @@
     "serial_number": "Test",
     "filter": "Test",
     "no_results": "Test",
+    "no_results_hint": "Test hint.",
     "loading": "Test",
     "search": "Test",
     "selected": "Test",

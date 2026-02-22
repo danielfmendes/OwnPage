@@ -1,16 +1,17 @@
-import {useTheme} from "next-themes";
-import {Bar, BarChart, Line, LineChart} from "recharts";
+import { useTheme } from "next-themes";
+import { Bar, BarChart, Line, LineChart } from "recharts";
 import {
     Card,
     CardContent,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import {type ChartConfig, ChartContainer} from "@/components/ui/chart";
-import type {GraphData} from "@/models/api";
-import {Skeleton} from "@/components/ui/skeleton";
-import {useTranslation} from "react-i18next";
-import {useIsMobile} from "@/utils/use-mobile";
+import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
+import type { GraphData } from "@/models/api";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
+import { useIsMobile } from "@/utils/use-mobile";
+import { BarChart3 } from "lucide-react";
 
 interface Props {
     graphData: GraphData[];
@@ -27,15 +28,15 @@ interface Props {
 }
 
 export function MetricStats({
-                                graphData,
-                                graphMeta,
-                                timeRange,
-                                isLoadingGraphMetaData,
-                                isLoadingGraphDataData,
-                                maxHeight,
-                            }: Props) {
-    const {t} = useTranslation();
-    const {theme} = useTheme();
+    graphData,
+    graphMeta,
+    timeRange,
+    isLoadingGraphMetaData,
+    isLoadingGraphDataData,
+    maxHeight,
+}: Props) {
+    const { t } = useTranslation();
+    const { theme } = useTheme();
     const chartColor = theme === "dark" ? "white" : "black";
     const isMobile = useIsMobile();
     const dynamicHeightStyle = {
@@ -55,7 +56,7 @@ export function MetricStats({
     } satisfies ChartConfig;
 
     const formatCurrency = (value: number) =>
-        value.toLocaleString("en-US", {style: "currency", currency: "USD"});
+        value.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
     const formatPercentage = (value: number) =>
         `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
@@ -85,8 +86,8 @@ export function MetricStats({
                 <CardContent className="-mt-5 pb-0">
                     {isLoadingGraphMetaData ? (
                         <div className="space-y-1.5">
-                            <Skeleton className="h-[30px] w-40"/>
-                            {timeLabel && <Skeleton className="h-[12px] w-48"/>}
+                            <Skeleton className="h-[30px] w-40" />
+                            {timeLabel && <Skeleton className="h-[12px] w-48" />}
                         </div>
                     ) : (
                         <>
@@ -104,11 +105,14 @@ export function MetricStats({
                         </>
                     )}
                     {isLoadingGraphDataData ? (
-                        <Skeleton style={dynamicHeightStyle} className="mt-4"/>
+                        <Skeleton style={dynamicHeightStyle} className="mt-4" />
                     ) : isNoRevenueData ? (
-                        <p style={dynamicHeightStyle} className="text-sm text-muted-foreground mt-4">
-                            {t("no_data_to_display")}
-                        </p>
+                        <div style={dynamicHeightStyle} className="flex flex-col items-center justify-center text-muted-foreground mt-4">
+                            <div className="rounded-full bg-muted p-4 mb-3">
+                                <BarChart3 className="w-6 h-6" />
+                            </div>
+                            <p className="text-sm font-medium">{t("no_data_to_display")}</p>
+                        </div>
                     ) : (
                         <ChartContainer
                             config={chartConfig}
@@ -121,7 +125,7 @@ export function MetricStats({
                                     strokeWidth={2}
                                     dataKey="revenue"
                                     stroke={chartColor}
-                                    activeDot={{r: 6}}
+                                    activeDot={{ r: 6 }}
                                 />
                             </LineChart>
                         </ChartContainer>
@@ -139,8 +143,8 @@ export function MetricStats({
                 <CardContent className="-mt-5 pb-0">
                     {isLoadingGraphMetaData ? (
                         <div className="space-y-1.5">
-                            <Skeleton className="h-[30px] w-40"/>
-                            {timeLabel && <Skeleton className="h-[12px] w-48"/>}
+                            <Skeleton className="h-[30px] w-40" />
+                            {timeLabel && <Skeleton className="h-[12px] w-48" />}
                         </div>
                     ) : (
                         <>
@@ -158,11 +162,14 @@ export function MetricStats({
                         </>
                     )}
                     {isLoadingGraphDataData ? (
-                        <Skeleton style={dynamicHeightStyle} className="mt-4"/>
+                        <Skeleton style={dynamicHeightStyle} className="mt-4" />
                     ) : isNoSalesData ? (
-                        <p style={dynamicHeightStyle} className="text-sm text-muted-foreground mt-4">
-                            {t("no_data_to_display")}
-                        </p>
+                        <div style={dynamicHeightStyle} className="flex flex-col items-center justify-center text-muted-foreground mt-4">
+                            <div className="rounded-full bg-muted p-4 mb-3">
+                                <BarChart3 className="w-6 h-6" />
+                            </div>
+                            <p className="text-sm font-medium">{t("no_data_to_display")}</p>
+                        </div>
                     ) : (
                         <ChartContainer
                             config={chartConfig}
@@ -170,7 +177,7 @@ export function MetricStats({
                             className="mt-4"
                         >
                             <BarChart data={graphData}>
-                                <Bar dataKey="sales_no" fill={chartColor} radius={4}/>
+                                <Bar dataKey="sales_no" fill={chartColor} radius={4} />
                             </BarChart>
                         </ChartContainer>
                     )}

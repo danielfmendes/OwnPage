@@ -75,6 +75,7 @@ export default function DataTable<TData>({
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [selectedRow, setSelectedRow] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [refreshSignal, setRefreshSignal] = useState(0);
 
     const {
         filterManager,
@@ -104,6 +105,7 @@ export default function DataTable<TData>({
                 await itemsLoader(toItemsLoaderOptions());
                 const queryParams = toQueryParams();
                 navigate(`?${queryParams.toString()}`);
+                setRefreshSignal(prev => prev + 1);
             } catch (err: any) {
                 addNotification(
                     `Error loading the data${err?.message ? `: ${err.message}` : ""}`,
@@ -203,7 +205,7 @@ export default function DataTable<TData>({
     });
 
     return (
-        <div className="mt-2 w-full p-4 border rounded-xl shadow-sm bg-card text-card-foreground">
+        <div className="flex flex-col mt-2 w-full p-4 border rounded-xl shadow-sm bg-card text-card-foreground">
             <h2 className="font-bold text-lg">{title}</h2>
             <div className="flex items-center pt-3 pb-2">
                 {/* Mobile filter/sort button - hidden on desktop */}
@@ -216,6 +218,7 @@ export default function DataTable<TData>({
                         sort={sort}
                         updateSort={updateSort}
                         resetFilters={resetAllFilters}
+                        refreshSignal={refreshSignal}
                     />
                 )}
 
@@ -226,6 +229,7 @@ export default function DataTable<TData>({
                             filters={filterDefinition}
                             filterManager={filterManager}
                             onChange={onFilterChange}
+                            refreshSignal={refreshSignal}
                         />
                     </div>
                 )}
@@ -296,7 +300,7 @@ export default function DataTable<TData>({
                 }
             />
 
-            <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-4 md:gap-0 py-4 w-full">
+            <div className="mt-auto flex flex-col md:flex-row md:items-center md:justify-end gap-4 md:gap-0 pt-4 w-full">
 
                 {/* Pagination page label + select */}
                 <div className="flex justify-center md:justify-start items-center gap-4 w-full md:w-auto">
