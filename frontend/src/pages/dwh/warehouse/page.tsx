@@ -1,23 +1,23 @@
-import {useMemo, useState, type MouseEvent} from "react";
+import { useMemo, useRef, useState, type MouseEvent } from "react";
 import DataTable from "@/components/helpers/Table";
-import {type CustomColumnDef} from "@/models/datatable/column";
-import {Button} from "@/components/ui/button";
-import {useNotification} from "@/components/helpers/NotificationProvider";
-import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
-import {DeleteButton} from "@/components/helpers/buttons/DeleteButton";
-import {BikesService, type BikeWithModelName} from "@/models/api";
-import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
-import {useTranslation} from "react-i18next";
-import {isRoleUserForProject} from "@/utils/helpers";
-import {genericItemsLoader, type ItemsLoaderOptions, useRefreshData} from "@/models/datatable/itemsLoader";
-import {type FilterDefinition} from "@/components/helpers/FilterBar";
-import {createBikeFilterItemLoader} from "@/models/datatable/filterItemsLoader";
+import { type CustomColumnDef } from "@/models/datatable/column";
+import { Button } from "@/components/ui/button";
+import { useNotification } from "@/components/helpers/NotificationProvider";
+import { ButtonLoading } from "@/components/helpers/buttons/ButtonLoading";
+import { DeleteButton } from "@/components/helpers/buttons/DeleteButton";
+import { BikesService, type BikeWithModelName } from "@/models/api";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useTranslation } from "react-i18next";
+import { isRoleUserForProject } from "@/utils/helpers";
+import { genericItemsLoader, type ItemsLoaderOptions, useRefreshData } from "@/models/datatable/itemsLoader";
+import { type FilterDefinition } from "@/components/helpers/FilterBar";
+import { createBikeFilterItemLoader } from "@/models/datatable/filterItemsLoader";
 import ContentLayout from "@/components/layout/ContentLayout";
 import BikeDialogContent from "@/pages/dwh/warehouse/content-dialog";
 
 export default function WareHousePage() {
-    const {t} = useTranslation();
-    const {addNotification} = useNotification();
+    const { t } = useTranslation();
+    const { addNotification } = useNotification();
     const refreshData = useRefreshData(itemsLoader);
 
     const [data, setData] = useState<BikeWithModelName[]>([]);
@@ -26,10 +26,10 @@ export default function WareHousePage() {
     const [isLoadingDeleteCascade, setIsLoadingDeleteCascade] = useState(false);
     const [showCascadeDialog, setShowCascadeDialog] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
-    const [itemsLoaderOptions, setItemsLoaderOptions] = useState<ItemsLoaderOptions | null>(null);
+    const itemsLoaderOptionsRef = useRef<ItemsLoaderOptions | null>(null);
 
     async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
-        setItemsLoaderOptions(options);
+        itemsLoaderOptionsRef.current = options;
         return genericItemsLoader<BikeWithModelName>(
             options,
             BikesService.getBikes,
@@ -104,7 +104,7 @@ export default function WareHousePage() {
             accessorKey: "production_date",
             header: t("label.production_date"),
             widthPercent: 20,
-            cell: ({row}) => {
+            cell: ({ row }) => {
                 const date = new Date(row.getValue("production_date"))
                 return date.toLocaleDateString()
             },
@@ -123,7 +123,7 @@ export default function WareHousePage() {
             id: "actions",
             enableHiding: false,
             widthPercent: 5,
-            cell: ({row}) => {
+            cell: ({ row }) => {
                 const bike: BikeWithModelName = row.original
 
                 return (
@@ -138,18 +138,18 @@ export default function WareHousePage() {
     ]
 
     const filters: FilterDefinition[] = useMemo(() => {
-        if (!itemsLoaderOptions) return [];
-        const bikeFilterLoader = createBikeFilterItemLoader(itemsLoaderOptions);
+        const bikeFilterLoader = createBikeFilterItemLoader(itemsLoaderOptionsRef);
 
         return [
-            bikeFilterLoader("id", {pinned: false, type: "search"}),
-            bikeFilterLoader("model_name", {type: "search"}),
-            bikeFilterLoader("serial_number", {type: "search"}),
-            bikeFilterLoader("production_date", {type: "date"}),
-            bikeFilterLoader("quantity", {pinned: false, type: "search"}),
-            bikeFilterLoader("warehouse_location", {type: "search"}),
+            bikeFilterLoader("id", { pinned: false, type: "search" }),
+            bikeFilterLoader("model_name", { type: "search" }),
+            bikeFilterLoader("serial_number", { type: "search" }),
+            bikeFilterLoader("production_date", { type: "date" }),
+            bikeFilterLoader("quantity", { pinned: false, type: "search" }),
+            bikeFilterLoader("warehouse_location", { type: "search" }),
         ];
-    }, [itemsLoaderOptions]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <ContentLayout title={t("menu.warehouse")}>

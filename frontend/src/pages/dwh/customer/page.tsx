@@ -1,24 +1,24 @@
-import {useMemo, useState, type MouseEvent} from "react";
+import { useMemo, useRef, useState, type MouseEvent } from "react";
 import DataTable from "@/components/helpers/Table";
-import {useNotification} from "@/components/helpers/NotificationProvider";
-import type {CustomColumnDef} from "@/models/datatable/column";
-import {Button} from "@/components/ui/button";
-import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
-import {DeleteButton} from "@/components/helpers/buttons/DeleteButton";
-import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
-import {useTranslation} from "react-i18next";
-import {type Customer, CustomersService} from "@/models/api";
-import {isRoleUserForProject} from "@/utils/helpers";
-import {genericItemsLoader, type ItemsLoaderOptions, useRefreshData} from "@/models/datatable/itemsLoader";
-import {createCustomerFilterItemLoader} from "@/models/datatable/filterItemsLoader";
-import type {FilterDefinition} from "@/components/helpers/FilterBar";
+import { useNotification } from "@/components/helpers/NotificationProvider";
+import type { CustomColumnDef } from "@/models/datatable/column";
+import { Button } from "@/components/ui/button";
+import { ButtonLoading } from "@/components/helpers/buttons/ButtonLoading";
+import { DeleteButton } from "@/components/helpers/buttons/DeleteButton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useTranslation } from "react-i18next";
+import { type Customer, CustomersService } from "@/models/api";
+import { isRoleUserForProject } from "@/utils/helpers";
+import { genericItemsLoader, type ItemsLoaderOptions, useRefreshData } from "@/models/datatable/itemsLoader";
+import { createCustomerFilterItemLoader } from "@/models/datatable/filterItemsLoader";
+import type { FilterDefinition } from "@/components/helpers/FilterBar";
 import ContentLayout from "@/components/layout/ContentLayout";
 import CustomerDetailContent from "@/pages/dwh/customer/customer-detail-content";
 import AddCustomerContent from "@/pages/dwh/customer/add-customer-content";
 
 export default function CustomerPage() {
-    const {t} = useTranslation();
-    const {addNotification} = useNotification();
+    const { t } = useTranslation();
+    const { addNotification } = useNotification();
     const refreshData = useRefreshData(itemsLoader);
 
     const [data, setData] = useState<Customer[]>([]);
@@ -27,10 +27,10 @@ export default function CustomerPage() {
     const [isLoadingDeleteCascade, setIsLoadingDeleteCascade] = useState(false);
     const [showCascadeDialog, setShowCascadeDialog] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
-    const [itemsLoaderOptions, setItemsLoaderOptions] = useState<ItemsLoaderOptions | null>(null);
+    const itemsLoaderOptionsRef = useRef<ItemsLoaderOptions | null>(null);
 
     async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
-        setItemsLoaderOptions(options);
+        itemsLoaderOptionsRef.current = options;
         return genericItemsLoader<Customer>(
             options,
             CustomersService.getCustomers,
@@ -104,7 +104,7 @@ export default function CustomerPage() {
         {
             accessorKey: "dob",
             header: t("label.dob"),
-            cell: ({row}) => {
+            cell: ({ row }) => {
                 const date = new Date(row.getValue("dob"))
                 return date.toLocaleDateString()
             },
@@ -119,7 +119,7 @@ export default function CustomerPage() {
             id: "actions",
             enableHiding: false,
             widthPercent: 5,
-            cell: ({row}) => {
+            cell: ({ row }) => {
                 const customer: Customer = row.original
 
                 return (
@@ -134,17 +134,17 @@ export default function CustomerPage() {
     ]
 
     const filters: FilterDefinition[] = useMemo(() => {
-        if (!itemsLoaderOptions) return [];
-        const customerFilterLoader = createCustomerFilterItemLoader(itemsLoaderOptions);
+        const customerFilterLoader = createCustomerFilterItemLoader(itemsLoaderOptionsRef);
 
         return [
-            customerFilterLoader("first_name", {pinned: false, type: "search"}),
-            customerFilterLoader("name", {pinned: false, type: "search"}),
-            customerFilterLoader("email", {type: "search"}),
+            customerFilterLoader("first_name", { pinned: false, type: "search" }),
+            customerFilterLoader("name", { pinned: false, type: "search" }),
+            customerFilterLoader("email", { type: "search" }),
             customerFilterLoader("city"),
-            customerFilterLoader("dob", {type: "date"}),
+            customerFilterLoader("dob", { type: "date" }),
         ];
-    }, [itemsLoaderOptions]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <ContentLayout title={t("customer.data")}>

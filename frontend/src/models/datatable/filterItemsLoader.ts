@@ -1,4 +1,4 @@
-import type {FilterDefinition, FilterItem} from "@/components/helpers/FilterBar";
+import type { FilterDefinition, FilterItem } from "@/components/helpers/FilterBar";
 import {
     BikesService,
     CustomersService,
@@ -6,10 +6,11 @@ import {
     RoleManagementsService,
     WareHousePartsService
 } from "@/models/api";
-import type {ItemsLoaderOptions} from "./itemsLoader";
+import type { ItemsLoaderOptions } from "./itemsLoader";
+import type { RefObject } from "react";
 
 const createFilterItemLoaderWithManager = (
-    itemsLoaderOptions: ItemsLoaderOptions
+    itemsLoaderOptionsRef: RefObject<ItemsLoaderOptions | null>
 ) => (
     key: string,
     loader: (
@@ -24,7 +25,9 @@ const createFilterItemLoaderWithManager = (
     key,
     title: `label.${key}`,
     itemsLoader: async (): Promise<FilterItem[]> => {
-        const filterString = itemsLoaderOptions.filterManager.getFilterStringWithProjectIds();
+        const current = itemsLoaderOptionsRef.current;
+        if (!current) return [];
+        const filterString = current.filterManager.getFilterStringWithProjectIds();
         const response = await loader(
             filterString || undefined,
             undefined,
@@ -45,27 +48,27 @@ const createFilterItemLoaderWithManager = (
     ...options,
 });
 
-export const createBikeFilterItemLoader = (itemsLoaderOptions: ItemsLoaderOptions) => (
+export const createBikeFilterItemLoader = (itemsLoaderOptionsRef: RefObject<ItemsLoaderOptions | null>) => (
     key: string,
     options?: Partial<Omit<FilterDefinition, "key" | "title" | "itemsLoader">>
-) => createFilterItemLoaderWithManager(itemsLoaderOptions)(key, BikesService.getBikes, options);
+) => createFilterItemLoaderWithManager(itemsLoaderOptionsRef)(key, BikesService.getBikes, options);
 
-export const createCustomerFilterItemLoader = (itemsLoaderOptions: ItemsLoaderOptions) => (
+export const createCustomerFilterItemLoader = (itemsLoaderOptionsRef: RefObject<ItemsLoaderOptions | null>) => (
     key: string,
     options?: Partial<Omit<FilterDefinition, "key" | "title" | "itemsLoader">>
-) => createFilterItemLoaderWithManager(itemsLoaderOptions)(key, CustomersService.getCustomers, options);
+) => createFilterItemLoaderWithManager(itemsLoaderOptionsRef)(key, CustomersService.getCustomers, options);
 
-export const createOrdersFilterItemLoader = (itemsLoaderOptions: ItemsLoaderOptions) => (
+export const createOrdersFilterItemLoader = (itemsLoaderOptionsRef: RefObject<ItemsLoaderOptions | null>) => (
     key: string,
     options?: Partial<Omit<FilterDefinition, "key" | "title" | "itemsLoader">>
-) => createFilterItemLoaderWithManager(itemsLoaderOptions)(key, OrdersService.getOrders, options);
+) => createFilterItemLoaderWithManager(itemsLoaderOptionsRef)(key, OrdersService.getOrders, options);
 
-export const createRoleManagementFilterItemLoader = (itemsLoaderOptions: ItemsLoaderOptions) => (
+export const createRoleManagementFilterItemLoader = (itemsLoaderOptionsRef: RefObject<ItemsLoaderOptions | null>) => (
     key: string,
     options?: Partial<Omit<FilterDefinition, "key" | "title" | "itemsLoader">>
-) => createFilterItemLoaderWithManager(itemsLoaderOptions)(key, RoleManagementsService.getRoleManagements, options);
+) => createFilterItemLoaderWithManager(itemsLoaderOptionsRef)(key, RoleManagementsService.getRoleManagements, options);
 
-export const createWareHousePartsFilterItemLoader = (itemsLoaderOptions: ItemsLoaderOptions) => (
+export const createWareHousePartsFilterItemLoader = (itemsLoaderOptionsRef: RefObject<ItemsLoaderOptions | null>) => (
     key: string,
     options?: Partial<Omit<FilterDefinition, "key" | "title" | "itemsLoader">>
-) => createFilterItemLoaderWithManager(itemsLoaderOptions)(key, WareHousePartsService.getWareHouseParts, options);
+) => createFilterItemLoaderWithManager(itemsLoaderOptionsRef)(key, WareHousePartsService.getWareHouseParts, options);

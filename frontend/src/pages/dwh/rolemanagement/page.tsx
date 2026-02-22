@@ -1,31 +1,31 @@
-import {useMemo, useState} from "react";
+import { useMemo, useRef, useState } from "react";
 import DataTable from "@/components/helpers/Table";
-import {type CustomColumnDef} from "@/models/datatable/column";
-import {RoleManagementsService, type RoleManagementWithName} from "@/models/api";
-import {Button} from "@/components/ui/button";
-import {Dialog} from "@/components/ui/dialog";
-import {useTranslation} from "react-i18next";
-import {genericItemsLoader, type  ItemsLoaderOptions, useRefreshData} from "@/models/datatable/itemsLoader";
-import {type  FilterDefinition} from "@/components/helpers/FilterBar";
-import {createRoleManagementFilterItemLoader} from "@/models/datatable/filterItemsLoader";
+import { type CustomColumnDef } from "@/models/datatable/column";
+import { RoleManagementsService, type RoleManagementWithName } from "@/models/api";
+import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
+import { useTranslation } from "react-i18next";
+import { genericItemsLoader, type ItemsLoaderOptions, useRefreshData } from "@/models/datatable/itemsLoader";
+import { type FilterDefinition } from "@/components/helpers/FilterBar";
+import { createRoleManagementFilterItemLoader } from "@/models/datatable/filterItemsLoader";
 import ContentLayout from "@/components/layout/ContentLayout";
 import AddProjektDialogContent from "@/pages/dwh/rolemanagement/add-project-dialog";
 import ManageDialogContent from "@/pages/dwh/rolemanagement/manage-dialog";
 
 export default function RoleManagementPage() {
-    const {t} = useTranslation();
+    const { t } = useTranslation();
     const refreshData = useRefreshData(itemsLoader);
 
     const [data, setData] = useState<RoleManagementWithName[]>([]);
     const [totalCount, setTotalCount] = useState<number>(0);
     const [showDialog, setShowDialog] = useState(false);
     const [manageId, setManageId] = useState<number | null>(null);
-    const [itemsLoaderOptions, setItemsLoaderOptions] = useState<ItemsLoaderOptions | null>(null);
+    const itemsLoaderOptionsRef = useRef<ItemsLoaderOptions | null>(null);
 
     async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
-        setItemsLoaderOptions(options);
+        itemsLoaderOptionsRef.current = options;
         return genericItemsLoader<RoleManagementWithName>(
-            options,
+            { ...options, ignoreGlobalProjectFilter: true },
             RoleManagementsService.getRoleManagements,
             setData,
             setTotalCount
@@ -50,7 +50,7 @@ export default function RoleManagementPage() {
             id: "actions",
             widthPercent: 10,
             enableHiding: false,
-            cell: ({row}) => {
+            cell: ({ row }) => {
                 const roleman: RoleManagementWithName = row.original
                 return roleman.role !== "user" ? (
                     <Button
@@ -76,14 +76,14 @@ export default function RoleManagementPage() {
     ]
 
     const filters: FilterDefinition[] = useMemo(() => {
-        if (!itemsLoaderOptions) return [];
-        const roleManagementFilterLoader = createRoleManagementFilterItemLoader(itemsLoaderOptions);
+        const roleManagementFilterLoader = createRoleManagementFilterItemLoader(itemsLoaderOptionsRef);
 
         return [
-            roleManagementFilterLoader("project_name", {type: "search"}),
+            roleManagementFilterLoader("project_name", { type: "search" }),
             roleManagementFilterLoader("role"),
         ];
-    }, [itemsLoaderOptions]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <ContentLayout title={t("menu.role_management")}>

@@ -30,8 +30,10 @@ import apiUrl from "@/utils/helpers";
 export default function DashboardPage() {
     const { t } = useTranslation();
     const { addNotification } = useNotification();
-    const filterManager = new FilterManager();
+    const filterManagerRef = useRef(new FilterManager());
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.selectedRoles);
+    // Stable string dep: re-fetches whenever the set of selected project IDs changes
+    const roleKey = roles.map(r => r.project_id).join(",");
 
     const [timeRange, setTimeRange] = useState("1m");
     const [revenueChangePct, setRevenueChangePct] = useState(100);
@@ -58,7 +60,7 @@ export default function DashboardPage() {
             fetchCityData();
             fetchBikeData();
         }
-    }, [timeRange, roles, OpenAPI.BASE]);
+    }, [timeRange, roleKey, OpenAPI.BASE]);
 
     useEffect(() => {
         const measure = () => {
@@ -89,8 +91,9 @@ export default function DashboardPage() {
     // Fetch graph meta data and calculate revenue and sales change percentage
     const fetchGraphMetaData = () => {
         setIsLoadingGraphMetaData(true);
-        filterManager.addFilter("range", [timeRange]);
-        const filterString = filterManager.getFilterStringWithProjectIds();
+        const fm = filterManagerRef.current;
+        fm.addFilter("range", [timeRange]);
+        const filterString = fm.getFilterStringWithProjectIds();
         DashboardsService.getGraphMeta(filterString === "" ? undefined : filterString)
             .then((data: GraphMeta[]) => {
                 const graphMeta = data[0];
@@ -120,8 +123,9 @@ export default function DashboardPage() {
     // Fetch graph data
     const fetchGraphData = () => {
         setIsLoadingGraphDataData(true);
-        filterManager.addFilter("range", [timeRange]);
-        const filterString = filterManager.getFilterStringWithProjectIds();
+        const fm = filterManagerRef.current;
+        fm.addFilter("range", [timeRange]);
+        const filterString = fm.getFilterStringWithProjectIds();
         DashboardsService.getGraphData(filterString === "" ? undefined : filterString)
             .then((data: GraphData[]) => setGraphDataData(data))
             .catch(err => addNotification(`Failed to load graph data${err?.message ? `: ${err.message}` : ""}`, "error"))
@@ -131,8 +135,9 @@ export default function DashboardPage() {
     // Fetch city data
     const fetchCityData = () => {
         setIsLoadingCitiesData(true);
-        filterManager.addFilter("range", [timeRange]);
-        const filterString = filterManager.getFilterStringWithProjectIds();
+        const fm = filterManagerRef.current;
+        fm.addFilter("range", [timeRange]);
+        const filterString = fm.getFilterStringWithProjectIds();
         DashboardsService.getCityData(filterString === "" ? undefined : filterString)
             .then((data: CityData[]) => {
                 if (data) {
@@ -148,8 +153,9 @@ export default function DashboardPage() {
     // Fetch bike data
     const fetchBikeData = () => {
         setIsLoadingBikeData(true);
-        filterManager.addFilter("range", [timeRange]);
-        const filterString = filterManager.getFilterStringWithProjectIds();
+        const fm = filterManagerRef.current;
+        fm.addFilter("range", [timeRange]);
+        const filterString = fm.getFilterStringWithProjectIds();
         DashboardsService.getBikeSales(filterString === "" ? undefined : filterString)
             .then((data: BikeSales[]) => setBikeData(data))
             .catch(err => addNotification(`Failed to load bike data${err?.message ? `: ${err.message}` : ""}`, "error"))

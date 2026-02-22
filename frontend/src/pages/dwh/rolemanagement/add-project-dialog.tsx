@@ -1,20 +1,22 @@
-import {useState} from "react";
-import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
-import {Button} from "@/components/ui/button";
-import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
+import { useState } from "react";
+import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ButtonLoading } from "@/components/helpers/buttons/ButtonLoading";
 import InputField from "@/components/helpers/InputField";
-import {useNotification} from "@/components/helpers/NotificationProvider";
-import {ProjectsService} from "@/models/api";
-import {useTranslation} from "react-i18next";
+import { useNotification } from "@/components/helpers/NotificationProvider";
+import { ProjectsService, RoleManagementsService, type RoleManagementListResponse } from "@/models/api";
+import { useTranslation } from "react-i18next";
+import { useRoleStore } from "@/utils/roleManagementState";
 
 interface RoleManagementProps {
     onClose: () => void;
     onRefresh: () => void;
 }
 
-export default function AddProjektDialogContent({onClose, onRefresh}: RoleManagementProps) {
-    const {t} = useTranslation();
-    const {addNotification} = useNotification();
+export default function AddProjektDialogContent({ onClose, onRefresh }: RoleManagementProps) {
+    const { t } = useTranslation();
+    const { addNotification } = useNotification();
+    const setRoles = useRoleStore((state) => state.setRoles);
     const [isLoadingAddProject, setIsLoadingAddProject] = useState(false);
     const [projectName, setProjectName] = useState<string>('');
 
@@ -28,6 +30,12 @@ export default function AddProjektDialogContent({onClose, onRefresh}: RoleManage
             .then(() => {
                 addNotification("Project saved successfully", "success");
                 setProjectName("");
+                // Re-fetch roles so the new project appears immediately in the global project filter
+                return RoleManagementsService.getRoleManagements();
+            })
+            .then((roles) => {
+                const list = roles as RoleManagementListResponse;
+                setRoles(list.items || []);
                 onClose();
                 onRefresh();
             })

@@ -1,5 +1,5 @@
-import {useRoleStore} from "@/utils/roleManagementState";
-import type {DateRange} from "react-day-picker";
+import { useRoleStore } from "@/utils/roleManagementState";
+import type { DateRange } from "react-day-picker";
 
 export type FilterType = "search" | "date" | "default";
 
@@ -52,7 +52,7 @@ class FilterManager {
                 const from = new Date(fromStr);
                 const to = new Date(toStr);
                 if (!isNaN(from.getTime()) && !isNaN(to.getTime())) {
-                    result[key] = {from, to};
+                    result[key] = { from, to };
                 }
             }
         });
@@ -64,7 +64,7 @@ class FilterManager {
         if (values.length === 0) {
             this.filters.delete(key);
         } else {
-            this.filters.set(key, {values, type});
+            this.filters.set(key, { values, type });
         }
     }
 
@@ -88,11 +88,14 @@ class FilterManager {
         return selectedRoles.map((r) => r.project_id);
     }
 
-    private buildFilterString(ignoreOthers: boolean = false): string {
+    private buildFilterString(
+        ignoreOthers: boolean = false,
+        overrideProjectIds?: number[]
+    ): string {
         const parts: string[] = [];
 
         const formatFilter = (key: string, filterData: FilterData) => {
-            const {values, type} = filterData;
+            const { values, type } = filterData;
             if (values.length === 0) return;
 
             if (type === "date" && values.length === 2) {
@@ -104,9 +107,16 @@ class FilterManager {
             }
         };
 
-        const projectFilter = this.filters.get("project_id");
-        if (projectFilter) {
-            formatFilter("project_id", projectFilter);
+        // Use override project IDs if provided, otherwise fall back to stored filter
+        if (overrideProjectIds !== undefined) {
+            if (overrideProjectIds.length > 0) {
+                formatFilter("project_id", { values: overrideProjectIds, type: "default" });
+            }
+        } else {
+            const projectFilter = this.filters.get("project_id");
+            if (projectFilter) {
+                formatFilter("project_id", projectFilter);
+            }
         }
 
         if (!ignoreOthers) {
@@ -123,13 +133,20 @@ class FilterManager {
         const roles = useRoleStore.getState().roles;
         const projectIds = this.getProjectIdsFromStore();
 
+        // Determine effective project IDs without mutating this.filters
+        let effectiveProjectIds: number[] | undefined;
         if (projectIds.length > 0) {
-            this.filters.set("project_id", {values: projectIds, type: "default"});
+            effectiveProjectIds = projectIds;
         } else if (roles.length > 0) {
-            this.filters.delete("project_id");
+            // Roles exist but none selected — use ALL user's projects as default filter
+            // otherwise the backend receives no project filter and returns all system data
+            effectiveProjectIds = roles.map(r => r.project_id).filter(id => id !== undefined) as number[];
+        } else {
+            // No roles at all — use whatever is in filters (if anything)
+            effectiveProjectIds = undefined;
         }
 
-        return this.buildFilterString(ignoreOthers);
+        return this.buildFilterString(ignoreOthers, effectiveProjectIds);
     }
 
     getFilterString(): string {
@@ -137,9 +154,9 @@ class FilterManager {
     }
 
     toQueryParams(): Record<string, string> {
-        const filterString = this.getFilterStringWithProjectIds();
+        const filterString = this.getFilterString();
         if (filterString) {
-            return {filter: filterString};
+            return { filter: filterString };
         }
         return {};
     }
@@ -153,18 +170,19 @@ class FilterManager {
             for (const part of parts) {
                 if (part.includes(":$eq.")) {
                     const [key, value] = part.split(":$eq.");
-                    if (key && value !== undefined) {
-                        filters[key] = {values: [value], type: "default"};
+                    // project_id is owned by useRoleStore — never bake it into FilterManager state
+                    if (key && value !== undefined && key !== "project_id") {
+                        filters[key] = { values: [value], type: "default" };
                     }
                 } else if (part.includes(":$in.")) {
                     const [key, value] = part.split(":$in.");
-                    if (key && value !== undefined) {
-                        filters[key] = {values: value.split("|"), type: "default"};
+                    if (key && value !== undefined && key !== "project_id") {
+                        filters[key] = { values: value.split("|"), type: "default" };
                     }
                 } else if (part.includes(":$between.")) {
                     const [key, value] = part.split(":$between.");
-                    if (key && value !== undefined) {
-                        filters[key] = {values: value.split("|"), type: "date"};
+                    if (key && value !== undefined && key !== "project_id") {
+                        filters[key] = { values: value.split("|"), type: "date" };
                     }
                 } else {
                     console.warn(`Unknown filter format: ${part}`);

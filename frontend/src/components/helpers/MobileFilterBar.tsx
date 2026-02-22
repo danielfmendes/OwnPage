@@ -1,4 +1,4 @@
-import {useState} from "react";
+import { useState } from "react";
 import {
     Dialog,
     DialogContent,
@@ -7,15 +7,15 @@ import {
     DialogFooter,
     DialogTitle,
 } from "@/components/ui/dialog";
-import {Button} from "@/components/ui/button";
-import {Sliders} from "lucide-react";
-import {FilterBar} from "./FilterBar";
-import type {FilterDefinition} from "./FilterBar";
-import FilterManager, {type FilterType} from "@/utils/filtermanager";
-import {useTranslation} from "react-i18next";
-import {Badge} from "@/components/ui/badge";
-import type {CustomColumnDef} from "@/models/datatable/column";
-import {Sort, SortDirection, type SortDirectionType} from "@/models/datatable/sort";
+import { Button } from "@/components/ui/button";
+import { Sliders } from "lucide-react";
+import { FilterBar } from "./FilterBar";
+import type { FilterDefinition } from "./FilterBar";
+import FilterManager, { type FilterType } from "@/utils/filtermanager";
+import { useTranslation } from "react-i18next";
+import { Badge } from "@/components/ui/badge";
+import type { CustomColumnDef } from "@/models/datatable/column";
+import { Sort, SortDirection, type SortDirectionType } from "@/models/datatable/sort";
 
 interface MobileFilterProps<TData> {
     filters: FilterDefinition[];
@@ -25,20 +25,22 @@ interface MobileFilterProps<TData> {
     sort: Sort;
     updateSort: (key: string, sortDirection?: SortDirectionType) => void;
     resetFilters: () => void;
+    refreshSignal?: number;
 }
 
 export default function MobileFilterDialog<TData>({
-                                                      filters,
-                                                      filterManager,
-                                                      onChange,
-                                                      columns,
-                                                      sort,
-                                                      updateSort,
-                                                      resetFilters
-                                                  }: MobileFilterProps<TData>) {
+    filters,
+    filterManager,
+    onChange,
+    columns,
+    sort,
+    updateSort,
+    resetFilters,
+    refreshSignal,
+}: MobileFilterProps<TData>) {
     const [open, setOpen] = useState(false);
     const selectedValues = filterManager.getSelectedValues();
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     const totalSelected = Object.values(selectedValues).reduce(
         (sum, arr) => sum + (arr?.length ?? 0),
@@ -51,9 +53,9 @@ export default function MobileFilterDialog<TData>({
     }
 
     const sortStates: { label: string; value?: SortDirectionType; display: string }[] = [
-        {label: "asc", value: SortDirection.ASC, display: t("filterBar.asc")},
-        {label: "desc", value: SortDirection.DESC, display: t("filterBar.desc")},
-        {label: "unsorted", value: undefined, display: t("filterBar.unsorted")},
+        { label: "asc", value: SortDirection.ASC, display: t("filterBar.asc") },
+        { label: "desc", value: SortDirection.DESC, display: t("filterBar.desc") },
+        { label: "unsorted", value: undefined, display: t("filterBar.unsorted") },
     ];
 
     return (
@@ -61,7 +63,7 @@ export default function MobileFilterDialog<TData>({
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                     <Button variant="outline" className="relative rounded-full">
-                        <Sliders className="w-4 h-4"/>
+                        <Sliders className="w-4 h-4" />
                         {t("filterBar.filters")}
                         {totalSelected > 0 && (
                             <Badge className="absolute top-[-6px] right-[-6px] text-[10px] px-1.5 py-0.5 rounded-full">
@@ -87,7 +89,7 @@ export default function MobileFilterDialog<TData>({
                             {t("filterBar.filters")}
                         </h2>
                         <FilterBar filters={filters} filterManager={filterManager} onChange={onChange}
-                                   isMobile={true}/>
+                            isMobile={true} refreshSignal={refreshSignal} />
                     </div>
 
                     {/* Sort Section */}
@@ -106,11 +108,11 @@ export default function MobileFilterDialog<TData>({
                                         key={col.id || colKey || idx}
                                         className="flex justify-between items-center border border-primary rounded-md p-3"
                                     >
-                                            <span className="font-medium">
-                                              {col.header || colKey || "Unnamed"}
-                                            </span>
+                                        <span className="font-medium">
+                                            {col.header || colKey || "Unnamed"}
+                                        </span>
                                         <div className="flex gap-2 text-sm">
-                                            {sortStates.map(({label, value, display}) => (
+                                            {sortStates.map(({ label, value, display }) => (
                                                 <Button
                                                     key={label}
                                                     variant={currentDirection === label ? "default" : "secondary"}

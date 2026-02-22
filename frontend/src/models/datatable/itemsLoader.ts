@@ -1,13 +1,14 @@
-import {defaultPageSize, Pagination} from "@/models/datatable/pagination";
-import {Sort} from "@/models/datatable/sort";
-import {useCallback} from "react";
-import {CancelablePromise} from "@/models/api";
+import { defaultPageSize, Pagination } from "@/models/datatable/pagination";
+import { Sort } from "@/models/datatable/sort";
+import { useCallback } from "react";
+import { CancelablePromise } from "@/models/api";
 import FilterManager from "@/utils/filtermanager";
 
 export declare interface ItemsLoaderOptions {
     filterManager: FilterManager;
     pagination: Pagination;
     sort: Sort;
+    ignoreGlobalProjectFilter?: boolean;
 }
 
 export declare type ItemsLoader = (_: ItemsLoaderOptions) => Promise<void>;
@@ -33,7 +34,9 @@ export async function genericItemsLoader<T>(
     setData: (items: T[]) => void,
     setTotalCount: (count: number) => void,
 ): Promise<void> {
-    const filterString = options.filterManager.getFilterStringWithProjectIds();
+    const filterString = options.ignoreGlobalProjectFilter
+        ? options.filterManager.getFilterString()
+        : options.filterManager.getFilterStringWithProjectIds();
     const sortString = options.sort.toCallOpts().join(",");
 
     const result = await fetchFunction(

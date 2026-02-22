@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRoleStore } from "@/utils/roleManagementState";
 import { useTranslation } from "react-i18next";
 import type { Project } from "@/models/api";
@@ -55,11 +56,13 @@ export default function ProjectIDSelect({ projectID, onChange }: Props) {
                     {projectIdOptions.length === 0 ? (
                         <div className="p-2 text-sm text-gray-500">{t("placeholder.no_project")}</div>
                     ) : (
-                        projectIdOptions.map((option) => (
-                            <SelectItem key={option.id} value={option.id!.toString()}>
-                                {option.name}
-                            </SelectItem>
-                        ))
+                        <ScrollArea className="max-h-60">
+                            {projectIdOptions.map((option) => (
+                                <SelectItem key={option.id} value={option.id!.toString()}>
+                                    {option.name}
+                                </SelectItem>
+                            ))}
+                        </ScrollArea>
                     )}
                 </SelectContent>
             </Select>
