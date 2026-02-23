@@ -3,7 +3,7 @@ import { Footer } from "@/components/layout/Footer.tsx";
 
 export function GlobalLayout() {
     const location = useLocation();
-    const isDwh = location.pathname.startsWith("/dwh");
+    const isDwh = location.pathname.startsWith("/dwh") || location.state?.fromDwh === true;
 
     return (
         <div className="flex flex-col min-h-screen">
