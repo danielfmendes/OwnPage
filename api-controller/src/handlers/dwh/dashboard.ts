@@ -108,7 +108,7 @@ export const getGraphData = async (req: Request, env: Env) => {
         query += ` WHERE date(o.order_date) >= date('now', ?) AND date(o.order_date) < date('now', '+1 day')${proj.sql} `;
         bindings = [mods.current, ...proj.bindings];
     } else if (proj.bindings.length > 0) {
-        query += ` WHERE${proj.sql.trimStart().replace(/^AND /, "")} `;
+        query += ` WHERE ${proj.sql.trimStart().replace(/^AND /, "")} `;
         bindings = proj.bindings;
     }
 
@@ -151,7 +151,7 @@ export const getCityData = async (req: Request, env: Env) => {
             FROM order_items oi
             JOIN orders o ON oi.order_id = o.id
             JOIN customers c ON o.customer_id = c.id
-            ${proj.bindings.length > 0 ? `WHERE${proj.sql.trimStart().replace(/^AND /, "")}` : ""}
+            ${proj.bindings.length > 0 ? `WHERE ${proj.sql.trimStart().replace(/^AND /, "")}` : ""}
             GROUP BY c.city
             ORDER BY current_revenue DESC
             LIMIT 15
@@ -190,7 +190,7 @@ export const getBikeSales = async (req: Request, env: Env) => {
         query += ` WHERE date(o.order_date) >= date('now', ?) AND date(o.order_date) < date('now', '+1 day')${proj.sql} `;
         bindings = [mods.current, ...proj.bindings];
     } else if (proj.bindings.length > 0) {
-        query += ` WHERE${proj.sql.trimStart().replace(/^AND /, "")} `;
+        query += ` WHERE ${proj.sql.trimStart().replace(/^AND /, "")} `;
         bindings = proj.bindings;
     }
 
