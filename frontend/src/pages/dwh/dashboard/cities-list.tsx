@@ -56,7 +56,7 @@ export default function CitiesList({ citiesData, isLoading, maxHeight }: Props) 
                 </CardDescription>
             </CardHeader>
             <CardContent className="flex-grow overflow-auto">
-                <div className="space-y-3">
+                <div className="space-y-5 pt-2">
                     {isLoading ? (
                         // Show as many skeleton items as fit
                         Array.from({ length: visibleCount }).map((_, index) => (
@@ -66,7 +66,7 @@ export default function CitiesList({ citiesData, isLoading, maxHeight }: Props) 
                                     <Skeleton className="h-4 w-32" />
                                     <Skeleton className="h-3 w-24" />
                                 </div>
-                                <Skeleton className="h-4 w-16 ml-auto" />
+                                <Skeleton className="h-4 w-20 ml-auto" />
                             </div>
                         ))
                     ) : visibleCities.length === 0 ? (
@@ -85,28 +85,28 @@ export default function CitiesList({ citiesData, isLoading, maxHeight }: Props) 
                             const formattedPercentage =
                                 percentageChange !== undefined ? percentageChange.toFixed(1) : "";
 
-                            let avatarClass = '';
+                            let avatarClass = 'bg-muted text-muted-foreground';
                             if (index === 0) {
-                                avatarClass = 'border-4 border-yellow-500';
+                                avatarClass = 'ring-2 ring-yellow-500 ring-offset-2 ring-offset-background bg-yellow-500/10 text-yellow-600 dark:text-yellow-400';
                             } else if (index === 1) {
-                                avatarClass = 'border-4 border-gray-400';
+                                avatarClass = 'ring-2 ring-gray-400 ring-offset-2 ring-offset-background bg-gray-400/10 text-gray-600 dark:text-gray-300';
                             } else if (index === 2) {
-                                avatarClass = 'border-4 border-orange-500';
+                                avatarClass = 'ring-2 ring-orange-500 ring-offset-2 ring-offset-background bg-orange-500/10 text-orange-600 dark:text-orange-400';
                             }
 
                             return (
-                                <div key={index} className="flex items-center">
-                                    <Avatar className={`w-8 h-8 ${avatarClass}`}>
-                                        <AvatarFallback>
-                                            <Building2 size={16} />
+                                <div key={index} className="flex items-center space-x-4">
+                                    <Avatar className={`w-10 h-10 ${avatarClass}`}>
+                                        <AvatarFallback className="bg-transparent flex items-center justify-center">
+                                            <Building2 className="w-5 h-5" />
                                         </AvatarFallback>
                                     </Avatar>
-                                    <div className="ml-4 space-y-0.5">
+                                    <div className="flex-1 space-y-1">
                                         <p className="text-sm font-medium leading-none">
                                             {cityData.city}
                                         </p>
                                         {percentageChange !== undefined && (
-                                            <p className="text-sm text-muted-foreground">
+                                            <p className="text-xs text-muted-foreground">
                                                 {percentageChange > 0
                                                     ? t("up_percentage", { value: formattedPercentage })
                                                     : t("down_percentage", { value: Math.abs(parseFloat(formattedPercentage)).toFixed(2) })}
@@ -114,7 +114,7 @@ export default function CitiesList({ citiesData, isLoading, maxHeight }: Props) 
                                         )}
                                     </div>
                                     <div className="ml-auto font-medium">
-                                        ${cityData.current_revenue.toFixed(2)}
+                                        ${cityData.current_revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </div>
                                 </div>
                             );
