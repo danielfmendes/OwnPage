@@ -19,8 +19,10 @@ export type OpenAPIConfig = {
     ENCODE_PATH?: ((path: string) => string) | undefined;
 };
 
+import apiUrl from '../../../utils/helpers';
+
 export const OpenAPI: OpenAPIConfig = {
-    BASE: 'https://api.example.com',
+    BASE: apiUrl,
     VERSION: '1.0.0',
     WITH_CREDENTIALS: false,
     CREDENTIALS: 'include',

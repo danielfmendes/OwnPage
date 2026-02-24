@@ -16,7 +16,7 @@ export async function chatAuthHandler(request: Request, env: Env): Promise<Respo
                 "INSERT INTO chat_users (email, password, ai_mode) VALUES (?, ?, ?)"
             ).bind(email, hashedPassword, ai_mode || 'balanced').run();
 
-            const token = await createJWT(email);
+            const token = await createJWT(email, env.JWT_SECRET);
             return new Response(JSON.stringify({ token }), { status: 201 });
         } catch (e) {
             return new Response("User already exists", { status: 409 });
@@ -35,7 +35,7 @@ export async function chatAuthHandler(request: Request, env: Env): Promise<Respo
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) return new Response("Invalid credentials", { status: 401 });
 
-        const token = await createJWT(user.email);
+        const token = await createJWT(user.email, env.JWT_SECRET);
         return new Response(JSON.stringify({ token }), { status: 200 });
     }
 

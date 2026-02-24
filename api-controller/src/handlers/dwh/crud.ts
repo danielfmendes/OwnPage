@@ -1,5 +1,6 @@
 import { Env } from "../../types";
 import { queryWithPagination } from "./pagination";
+import { getValidUserEmail } from "../../utils/jwt";
 
 // Generic CRUD helper
 const createCrudHandlers = (table: string, columns: string[]) => {
@@ -137,15 +138,7 @@ export const projectsHandler = async (req: Request, env: Env) => {
             const data: any = await req.json();
 
             // Extract user email from JWT
-            const authHeader = req.headers.get("Authorization");
-            let userEmail = "";
-            if (authHeader?.startsWith("Bearer ")) {
-                const token = authHeader.slice(7);
-                try {
-                    const payload = JSON.parse(atob(token.split(".")[1]));
-                    userEmail = payload.sub || payload.email || "";
-                } catch { /* ignore decode errors */ }
-            }
+            const userEmail = await getValidUserEmail(req, env);
 
             // Insert project
             const result = await env.DB.prepare("INSERT INTO projects (name) VALUES (?)").bind(data.name).run();

@@ -137,7 +137,7 @@ export const resolve = async <T>(options: ApiRequestOptions, resolver?: T | Reso
 };
 
 export const getHeaders = async (config: OpenAPIConfig, options: ApiRequestOptions): Promise<Headers> => {
-    const [token, username, password, additionalHeaders] = await Promise.all([
+    const [_, username, password, additionalHeaders] = await Promise.all([
         resolve(options, config.TOKEN),
         resolve(options, config.USERNAME),
         resolve(options, config.PASSWORD),
@@ -155,9 +155,7 @@ export const getHeaders = async (config: OpenAPIConfig, options: ApiRequestOptio
             [key]: String(value),
         }), {} as Record<string, string>);
 
-    if (isStringWithValue(token)) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
+    // Removed Authorization header injection as we rely on HttpOnly Cookies
 
     if (isStringWithValue(username) && isStringWithValue(password)) {
         const credentials = base64(`${username}:${password}`);
@@ -208,6 +206,7 @@ export const sendRequest = async (
         body: body ?? formData,
         method: options.method,
         signal: controller.signal,
+        credentials: 'include', // Automatically send Secure HttpOnly cookies
     };
 
     if (config.WITH_CREDENTIALS) {
@@ -304,6 +303,46 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
 
             if (!onCancel.isCancelled) {
                 const response = await sendRequest(config, options, url, body, formData, headers, onCancel);
+                if (response.status === 401) {
+                    // Try to refresh token
+                    try {
+                        const refreshResponse = await fetch(`${config.BASE}/dwh/auth/refresh`, {
+                            method: 'POST',
+                            credentials: 'include', // Ensure the expired cookie is sent
+                        });
+
+                        if (refreshResponse.ok) {
+                            // Backend has set the new cookie automatically via Set-Cookie
+                            // Retry request; credentials: 'include' will automatically attach the new cookie
+                            const retryResponse = await sendRequest(config, options, url, body, formData, headers, onCancel);
+                            const retryResponseBody = await getResponseBody(retryResponse);
+                            const retryResponseHeader = getResponseHeader(retryResponse, options.responseHeader);
+
+                            const retryResult: ApiResult = {
+                                url,
+                                ok: retryResponse.ok,
+                                status: retryResponse.status,
+                                statusText: retryResponse.statusText,
+                                body: retryResponseHeader ?? retryResponseBody,
+                            };
+
+                            catchErrorCodes(options, retryResult);
+                            resolve(retryResult.body);
+                            return;
+                        }
+                    } catch (refreshErr) {
+                        console.error('Failed to refresh token', refreshErr);
+                    }
+
+                    // If refresh failed, perform logout by hitting the logout endpoint
+                    try {
+                        await fetch(`${config.BASE}/dwh/auth/logout`, { method: 'POST', credentials: 'include' });
+                    } catch (e) {
+                        // ignore error, we are redirecting anyway
+                    }
+                    window.location.href = '/dwh/login'; // Or emit an event
+                }
+
                 const responseBody = await getResponseBody(response);
                 const responseHeader = getResponseHeader(response, options.responseHeader);
 

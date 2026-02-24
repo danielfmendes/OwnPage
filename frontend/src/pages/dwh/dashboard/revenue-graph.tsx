@@ -126,6 +126,7 @@ export function MetricStats({
                                     dataKey="revenue"
                                     stroke={chartColor}
                                     activeDot={{ r: 6 }}
+                                    dot={{ r: 3, fill: chartColor }}
                                 />
                             </LineChart>
                         </ChartContainer>

@@ -1,17 +1,13 @@
 import { useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
-import AuthToken from "@/utils/authtoken";
+// AuthToken removed, using HttpOnly cookies
 import { useNotification } from "@/components/helpers/NotificationProvider";
 import { useUserStore } from "@/utils/userstate";
 import { useRoleStore } from "@/utils/roleManagementState";
 import {
     RoleManagementsService,
-    UsersService,
     type RoleManagementListResponse,
 } from "@/models/api";
-import apiUrl, { handleLogOut } from "@/utils/helpers";
-import { OpenAPI } from "@/models/api/core/OpenAPI";
-import FilterManager from "@/utils/filtermanager";
+import apiUrl from "@/utils/helpers";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { useDataTableStore } from "@/models/datatable/dataTableStore";
 
@@ -21,25 +17,20 @@ export default function DWHLayout() {
     const hideSidebar = ['/dwh/login', '/dwh/register'].includes(location.pathname);
     const hasDataTable = ['/dwh/orders', '/dwh/customers', '/dwh/warehouse', '/dwh/partsstorage', '/dwh/rolemanagement'].includes(location.pathname);
     const { addNotification } = useNotification();
-    const token = AuthToken.getAuthToken();
-    const filterManager = new FilterManager();
 
-    const setUser = useUserStore((state) => state.setUser);
-    const setIsLoadingUser = useUserStore((state) => state.setIsLoading);
-    const roles = useRoleStore((state) => state.roles);
-    const setRoles = useRoleStore((state) => state.setRoles);
-    const setIsLoadingRole = useRoleStore((state) => state.setIsLoading);
-    const selectedRoles = useRoleStore((state) => state.selectedRoles);
-    const setSelectedRoles = useRoleStore((state) => state.setSelectedRoles);
+    // User State
+    const { setIsLoading: setIsLoadingUser } = useUserStore();
+
+    // Role State
+    const {
+        roles,
+        setRoles,
+        setIsLoading: setIsLoadingRole,
+        selectedRoles,
+        setSelectedRoles
+    } = useRoleStore();
+
     const { toQueryParams, fromQueryParams, filterManager: globalFilterManager } = useDataTableStore();
-
-    useEffect(() => {
-        OpenAPI.BASE = apiUrl;
-    }, []);
-
-    useEffect(() => {
-        if (token) OpenAPI.TOKEN = token;
-    }, [token]);
 
     useEffect(() => {
         fromQueryParams(new URLSearchParams(location.search));
@@ -91,49 +82,54 @@ export default function DWHLayout() {
     }, [roles, selectedRoles]);
 
     useEffect(() => {
-        if (!token) {
-            if (!hideSidebar) {
-                handleLogOut(navigate, addNotification);
-            }
-            return;
-        }
+        if (hideSidebar) return;
 
-        try {
-            const decoded = jwtDecode(token);
-            if (decoded.sub) {
-                setIsLoadingUser(true);
-                filterManager.addFilter("email", [decoded.sub]);
+        setIsLoadingUser(true);
+        setIsLoadingRole(true);
 
-                UsersService.getUserInfo(filterManager.getFilterString())
-                    .then((data) => setUser(data[0]))
-                    .catch((err) =>
-                        addNotification(
-                            `Failed to load user data${err?.message ? `: ${err.message}` : ""}`,
-                            "error"
-                        )
-                    )
-                    .finally(() => setIsLoadingUser(false));
-            }
+        // Fetch user data via plain fetch since openapi client doesn't know about /auth/me yet
+        fetch(`${apiUrl}/dwh/auth/me`, { method: "GET", credentials: "include" })
+            .then(res => {
+                if (!res.ok) throw new Error("Unauthorized");
+                return res.json();
+            })
+            .then(user => {
+                useUserStore.getState().setUser(user);
+            })
+            .catch(() => {
+                useUserStore.getState().clearUser();
+                // We don't notify here because the axios/fetch interceptor will handle redirection on 401
+            })
+            .finally(() => {
+                setIsLoadingUser(false);
+            });
 
-            setIsLoadingRole(true);
-            RoleManagementsService.getRoleManagements()
-                .then((roles) => {
-                    const list = roles as RoleManagementListResponse;
-                    setRoles(list.items || []);
-                })
-                .catch((err) =>
+        RoleManagementsService.getRoleManagements()
+            .then((rolesResponse) => {
+                const list = rolesResponse as RoleManagementListResponse;
+                setRoles(list.items || []);
+            })
+            .catch((err) => {
+                if (err?.status !== 401) {
                     addNotification(
                         `Failed to load role management${err?.message ? `: ${err.message}` : ""}`,
                         "error"
-                    )
-                )
-                .finally(() => setIsLoadingRole(false));
-        } catch (err) {
-            addNotification(`Invalid or expired token: ${err}`, "error");
-            setIsLoadingUser(false);
-            setIsLoadingRole(false);
-        }
-    }, [token, setUser]);
+                    );
+                }
+            })
+            .finally(() => {
+                setIsLoadingRole(false);
+            });
+
+    }, [hideSidebar]);
+
+    // Extract loading state
+    const { isLoading: isLoadingUserStatus } = useUserStore();
+    const { isLoading: isLoadingRoleStatus } = useRoleStore();
+
+    if (!hideSidebar && (isLoadingUserStatus || isLoadingRoleStatus)) {
+        return null;
+    }
 
     return (
         <div>

@@ -1,117 +1,102 @@
-# 🌌 NebulaDW
+# NebulaDW
 
-**NebulaDW** ist ein modernes, cloud-basiertes Data-Warehouse-System.
+NebulaDW is a modern, cloud-based Data Warehouse application.
 
-### 🚀 Durchführung
-
-- **🔗 Deployte Live-Version:**  
-  👉 [NebulaDW – Live ansehen](https://danielfreiremendes.com/)
-
-
-- **🖥️ Lokale Ausführung:**  
-  Details zur lokalen Einrichtung und Ausführung findest du in den Abschnitten:  
-  → **„Setup & Installation“**  
-  → **„Deployment“**
+## Live Deployment
+- **Production Environment:** [danielfreiremendes.com](https://danielfreiremendes.com/)
 
 ---
 
-## 🔧 Setup & Installation
+## Technology Stack
 
-## Cloudflare - Implementation
+- **Frontend:** React, Vite, Tailwind CSS, shadcn/ui
+- **Backend:** Cloudflare Workers (TypeScript)
+- **Database:** Cloudflare D1 (Serverless SQLite)
+- **AI Integration:** Cloudflare Workers AI
+- **Testing:** Java + Maven (End-to-End Tests)
+
+---
+
+## Setup & Installation
+
+### Cloudflare Initialization
+
+Install Wrangler and authenticate:
 
 ```bash
 npm install -g wrangler
 wrangler login
 ```
 
-Datenbank erstellen:
+### Database Setup
+
+Create the primary production database:
 
 ```bash
-wrangler d1 create db-prod
+npx wrangler d1 create db-prod
 ```
 
-Datenbank-Schema ausführen:
+Execute the database schema migrations:
 ```bash
-wrangler d1 execute db-prod --file=drop_tables.sql --remote
+npx wrangler d1 execute db-prod --file=drop_tables.sql --remote
 cd init_sqlite
-wrangler d1 execute db-prod --file=V0__Create_Tables.sql --remote
-wrangler d1 execute db-prod --file=V1__Create_Views.sql --remote
-wrangler d1 execute db-prod --file=V2__Insert_Models.sql --remote
-wrangler d1 execute db-prod --file=V3__Insert_Random_Test_Data.sql --remote
-wrangler d1 execute db-prod --file=V4__Generate_Orders.sql --remote
+npx wrangler d1 execute db-prod --file=V0__Create_Tables.sql --remote
+npx wrangler d1 execute db-prod --file=V1__Create_Views.sql --remote
+npx wrangler d1 execute db-prod --file=V2__Insert_Models.sql --remote
+npx wrangler d1 execute db-prod --file=V3__Insert_Random_Test_Data.sql --remote
+npx wrangler d1 execute db-prod --file=V4__Generate_Orders.sql --remote
 ```
 
-Neue D1-Datenbank für Chat erstellen:
+Create the separate D1 database for the AI chat application:
 ```bash
 npx wrangler d1 create chat-db
-wrangler d1 execute chat-db --file=initial.sql --remote
-```
-
-### 📦 Backend (Go)
-
-#### 🔁 Lokal starten:
-
-```bash
-go run main.go --local
-```
-
-#### 🌐 Mit Render-Postgres starten:
-
-```bash
-go run main.go
-```
-
-> 💡 **Hinweis:** In Render eine neue Postgres-Datenbank erstellen und die Verbindungszeichenfolge als Umgebungsvariable
-> einfügen.
-
-#### 🚀 Deployment auf Render:
-
-- **Environment:** `Go`
-- **Build Command:**
-  ```bash
-  cd controller && go build -o out
-  ```
-- **Start Command:**
-  ```bash
-  cd controller && ./out
-  ```
-
-##### Benötigte Umgebungsvariablen (Render):
-
-```env
-BACKEND_BASE_URL=
-DATABASE_PUBLIC_URL=
-EMAIL_FROM=
-EMAIL_PASS=
-JWT_SECRET=
+npx wrangler d1 execute chat-db --file=initial.sql --remote
 ```
 
 ---
 
-#### 🌍 Deployment auf Vercel:
+### Backend (Cloudflare Workers)
 
-- **Framework Preset:** Vite (Standard-Einstellungen verwenden)
-- **Root Directory:** `frontend`
-- **Node Version:** `22.x`
-- **Domain hinzufügen:** Eigene Domain hinzufügen und CNAME-Eintrag im Hosting-Provider (z. B. IONOS) setzen
-- **Umgebungsvariablen:** In Vercel diese Umgebungsvariable hinzufügen:
+The core backend infrastructure is deployed via Cloudflare Workers for global low-latency execution.
 
-```env
-VITE_API_ENV=link_from_controller_endpoint
+**Local Development:**
+```bash
+cd api-controller
+npm install
+npm run dev
 ```
+
+**Deployment:**
+```bash
+cd api-controller
+npm run deploy
+```
+
+*(Note: The legacy Go backend is retained under the `controller/` directory for reference, but the primary deployment now utilizes Cloudflare Workers.)*
 
 ---
 
-### 🎨 Frontend (Vite + React + Tailwind CSS + shadcn/ui)
+### Frontend Setup
 
-#### Lokale Einrichtung:
-
+**Local Development:**
 ```bash
 cd frontend
 npm install
+npm run dev
 ```
 
-#### ✅ Frontend-Test:
+**Deployment:**
+The frontend can be deployed to Cloudflare Pages or Vercel using the Vite preset. Ensure the following environment variable is defined in the hosting provider to point to the Cloudflare Worker URL:
+
+```env
+VITE_API_ENV=your_cloudflare_worker_url
+```
+
+---
+
+## Testing
+
+End-to-End Front-end Tests are configured using Java and Maven.
 
 ```bash
 cd frontend-testing
@@ -120,33 +105,21 @@ mvn test
 
 ---
 
-## 🧱 Komponenten
+## Component Libraries
 
-- **📚 Vite + Tailwind CSS + Shadcn Ui**  
-  → [Guide ansehen](https://ui.shadcn.com/docs/installation/vite)
-
-- **🃏 UI-Komponenten mit shadcn/ui**
-    - [📦 Card-Komponente](https://ui.shadcn.com/docs/components/card)
-    - [📂 Sidebar-Komponente](https://ui.shadcn.com/docs/components/sidebar)
+- **UI Frameworks:** Vite, Tailwind CSS, Shadcn UI
+- **Icons:** Lucide Icons
 
 ---
 
-## 🧩 Icon Library
-- 
+## Project Structure
 
-- Verwendete Icons: [Box (Lucide Icons)](https://lucide.dev/icons/box)
-
----
-
-## 📁 Projektstruktur
-
-```bash
+```text
 /
-├── controller/           # Backend (Go)
-│   └── main.go
-├── frontend/             # Next.js Frontend mit Tailwind & shadcn/ui
-│   └── .env.local
-├── frontend-testing/     # End-to-End Tests (Java + Maven)
+├── api-controller/       # Cloudflare Workers Backend (TypeScript)
+├── controller/           # Legacy Backend (Go)
+├── frontend/             # Single Page Application (Vite + React)
+└── frontend-testing/     # E2E Tests (Java + Maven)
 ```
 
 ---

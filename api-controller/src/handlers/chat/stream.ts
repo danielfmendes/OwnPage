@@ -1,13 +1,12 @@
-import {Env} from "../../types";
-import {verifyJWT} from "../../utils/jwt";
+import { Env } from "../../types";
+import { getValidUserEmail } from "../../utils/jwt";
 
 export async function streamHandler(request: Request, env: Env): Promise<Response> {
     try {
-        const authHeader = request.headers.get("Authorization");
-        if (!authHeader) return new Response("Unauthorized", {status: 401});
-        const {email} = await verifyJWT(authHeader.split(" ")[1]);
+        const email = await getValidUserEmail(request, env);
+        if (!email) return new Response("Unauthorized", { status: 401 });
 
-        const {sessionId, message} = await request.json() as { sessionId: string; message: string };
+        const { sessionId, message } = await request.json() as { sessionId: string; message: string };
 
         // Validate session ownership and get user settings
         const sessionInfo = await env.CHAT_DB.prepare(
@@ -18,7 +17,7 @@ export async function streamHandler(request: Request, env: Env): Promise<Respons
                AND s.user_email = ?`
         ).bind(sessionId, email).first() as { ai_mode: string, max_messages: number } | null;
 
-        if (!sessionInfo) return new Response("Forbidden", {status: 403});
+        if (!sessionInfo) return new Response("Forbidden", { status: 403 });
 
         // Check message limit (Assistant replies)
         const msgCount = await env.CHAT_DB.prepare(
@@ -26,7 +25,7 @@ export async function streamHandler(request: Request, env: Env): Promise<Respons
         ).bind(sessionId).first() as { count: number };
 
         if (msgCount.count >= sessionInfo.max_messages) {
-            return new Response(JSON.stringify({error: "Message limit reached"}), {status: 403});
+            return new Response(JSON.stringify({ error: "Message limit reached" }), { status: 403 });
         }
 
         // Fetch history for AI context
@@ -42,9 +41,9 @@ export async function streamHandler(request: Request, env: Env): Promise<Respons
         };
 
         const messages = [
-            {role: "system", content: systemPrompts[sessionInfo.ai_mode] || systemPrompts.balanced},
-            ...history.results.map(r => ({role: r.role, content: r.content})),
-            {role: "user", content: message}
+            { role: "system", content: systemPrompts[sessionInfo.ai_mode] || systemPrompts.balanced },
+            ...history.results.map(r => ({ role: r.role, content: r.content })),
+            { role: "user", content: message }
         ];
 
         // Start AI Stream
@@ -54,7 +53,7 @@ export async function streamHandler(request: Request, env: Env): Promise<Respons
         });
 
         let fullAiResponse = "";
-        const {readable, writable} = new TransformStream({
+        const { readable, writable } = new TransformStream({
             transform(chunk, controller) {
                 const text = new TextDecoder().decode(chunk);
                 text.split("\n").forEach(line => {
@@ -83,10 +82,10 @@ export async function streamHandler(request: Request, env: Env): Promise<Respons
         (aiStream as ReadableStream).pipeTo(writable);
 
         return new Response(readable, {
-            headers: {"Content-Type": "text/event-stream", "Cache-Control": "no-cache"}
+            headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" }
         });
 
     } catch (err) {
-        return new Response("Internal Server Error", {status: 500});
+        return new Response("Internal Server Error", { status: 500 });
     }
 }

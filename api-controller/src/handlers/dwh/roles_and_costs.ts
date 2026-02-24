@@ -1,5 +1,6 @@
 import { Env } from "../../types";
 import { queryWithPagination } from "./pagination";
+import { getValidUserEmail } from "../../utils/jwt";
 
 // Helper for error responses
 const errorResponse = (msg: string, status = 400) => new Response(msg, { status });
@@ -9,19 +10,6 @@ const errorResponse = (msg: string, status = 400) => new Response(msg, { status 
 // DELETE /rolemanagements?email=...&project_id=...
 // PUT /rolemanagements
 // POST /rolemanagements
-
-// Helper to extract user email from JWT Authorization header
-function getUserEmail(req: Request): string {
-    const authHeader = req.headers.get("Authorization");
-    if (authHeader?.startsWith("Bearer ")) {
-        try {
-            const token = authHeader.slice(7);
-            const payload = JSON.parse(atob(token.split(".")[1]));
-            return payload.sub || payload.email || "";
-        } catch { /* ignore */ }
-    }
-    return "";
-}
 
 export const getRoleManagement = async (req: Request, env: Env) => {
     const url = new URL(req.url);
@@ -41,7 +29,7 @@ export const getRoleManagement = async (req: Request, env: Env) => {
     }
 
     // Default listing: only show roles for the currently authenticated user
-    const userEmail = getUserEmail(req);
+    const userEmail = await getValidUserEmail(req, env);
     if (!userEmail) {
         return errorResponse("Unauthorized – missing or invalid token", 401);
     }
