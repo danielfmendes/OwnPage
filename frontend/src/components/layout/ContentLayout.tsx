@@ -1,4 +1,3 @@
-import Cookies from "js-cookie";
 import { useState, useEffect } from "react";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { DwhSidebar } from "@/components/layout/DwhSidebar";
@@ -20,8 +19,8 @@ export default function ContentLayout({ title, children, className }: ContentLay
     const [isOpen, setIsOpen] = useState<boolean | null>(null);
 
     useEffect(() => {
-        const cookie = Cookies.get(SIDEBAR_COOKIE_KEY);
-        setIsOpen(cookie === "true");
+        const storageValue = localStorage.getItem(SIDEBAR_COOKIE_KEY);
+        setIsOpen(storageValue !== "false"); // Default to true if not explicitly false
     }, []);
 
     if (isOpen === null) return null;
@@ -50,7 +49,7 @@ function LayoutContent({ title, isOpen, setIsOpen, children }: LayoutContentProp
     const leftPosition = isOpen ? 256 : 48;
 
     const updateSidebarState = (next: boolean) => {
-        Cookies.set(SIDEBAR_COOKIE_KEY, String(next));
+        localStorage.setItem(SIDEBAR_COOKIE_KEY, String(next));
         setIsOpen(next);
     };
 

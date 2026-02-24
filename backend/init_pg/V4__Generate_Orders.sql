@@ -3,7 +3,7 @@ DO $$
 BEGIN
     FOR i IN 1..20 LOOP
 INSERT INTO orders (customer_id, order_date, project_id)
-VALUES ((i % 7) + 1, NOW() - INTERVAL '7 days' + (i || ' hours')::interval, 1);
+VALUES ((i % 7) + 1, NOW() - INTERVAL '7 days' + ((i * 8) || ' hours')::interval, 1);
 END LOOP;
 END $$;
 
@@ -12,7 +12,7 @@ DO $$
 BEGIN
     FOR i IN 1..20 LOOP
 INSERT INTO orders (customer_id, order_date, project_id)
-VALUES ((i % 7) + 1, NOW() - INTERVAL '30 days' + (i || ' days')::interval, 1);
+VALUES ((i % 7) + 1, NOW() - INTERVAL '30 days' + ((i * 36) || ' hours')::interval, 1);
 END LOOP;
 END $$;
 
@@ -21,7 +21,7 @@ DO $$
 BEGIN
     FOR i IN 1..20 LOOP
 INSERT INTO orders (customer_id, order_date, project_id)
-VALUES ((i % 7) + 1, NOW() - INTERVAL '365 days' + (i || ' days')::interval, 1);
+VALUES ((i % 7) + 1, NOW() - INTERVAL '365 days' + ((i * 438) || ' hours')::interval, 1);
 END LOOP;
 END $$;
 

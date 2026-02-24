@@ -3,17 +3,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
-import AuthToken from "@/utils/authtoken";
 import { useNotification } from "@/components/helpers/NotificationProvider";
 import { useTranslation } from "react-i18next";
 import { AuthsService } from "@/models/api";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { DwhAuthLayout } from "@/pages/dwh/AuthLayout";
 
 export default function LoginCard() {
     const { t } = useTranslation();
     const { addNotification } = useNotification();
 
+    const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingDemo, setIsLoadingDemo] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -33,13 +33,11 @@ export default function LoginCard() {
         }, 5000);
 
         AuthsService.userLogin({ email: loginEmail, password: loginPassword })
-            .then(data => {
-                if (data.token) {
-                    AuthToken.setAuthToken(data.token);
-                    window.location.href = '/dwh/dashboard';
-                } else {
-                    addNotification("Login failed: Token not provided", "error");
-                }
+            .then(() => {
+                // When Using HttpOnly cookies, the token is not returned in the JSON, it is set securely in the response headers.
+                // It will only reach here if the request was successful (200 OK) due to the OpenAPI client throwing on 401s.
+                addNotification("Successfully logged in.", "success");
+                navigate('/dwh/dashboard');
             })
             .catch(err => {
                 setErrorMessagePassword(t("error.login"));

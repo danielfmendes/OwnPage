@@ -9,7 +9,7 @@ WITH RECURSIVE cnt(i) AS (
 )
 SELECT
     (i % 7) + 1,
-    datetime('now', '-7 days', '+' || i || ' hours'),
+    datetime('now', '-7 days', '+' || (i * 8) || ' hours'),
     1
 FROM cnt;
 
@@ -20,7 +20,7 @@ WITH RECURSIVE cnt(i) AS (
 )
 SELECT
     (i % 7) + 1,
-    date('now', '-30 days', '+' || i || ' days'),
+    date('now', '-30 days', '+' || (i * 1.5) || ' days'),
     1
 FROM cnt;
 
@@ -31,7 +31,7 @@ WITH RECURSIVE cnt(i) AS (
 )
 SELECT
     (i % 7) + 1,
-    date('now', '-365 days', '+' || i || ' days'),
+    date('now', '-365 days', '+' || (i * 18) || ' days'),
     1
 FROM cnt;
 

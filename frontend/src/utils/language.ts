@@ -1,16 +1,14 @@
-import Cookies from "js-cookie";
-
 class Language {
     static getLanguage(): string | undefined {
-        return Cookies.get('language');
+        return localStorage.getItem('language') || undefined;
     }
 
     static setLanguage(language: string): void {
-        Cookies.set('language', language, { expires: 1 }); // 1 Day
+        localStorage.setItem('language', language);
     }
 
     static removeLanguage(): void {
-        Cookies.remove('language');
+        localStorage.removeItem('language');
     }
 }
 

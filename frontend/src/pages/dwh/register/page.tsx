@@ -4,17 +4,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { DatePicker } from "@/components/helpers/datepicker/DatePicker";
-import AuthToken from "@/utils/authtoken";
 import { useNotification } from "@/components/helpers/NotificationProvider";
 import { useTranslation } from "react-i18next";
 import { AuthsService } from "@/models/api";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { DwhAuthLayout } from "@/pages/dwh/AuthLayout";
 
 export default function RegisterCard() {
     const { t } = useTranslation();
     const { addNotification } = useNotification();
 
+    const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
@@ -43,17 +43,12 @@ export default function RegisterCard() {
         };
 
         AuthsService.userRegister(newData)
-            .then(data => {
-                if (data.token) {
-                    AuthToken.setAuthToken(data.token);
-                    window.location.href = '/dwh/dashboard';
-                    addNotification(
-                        "Confirmation e-mail has been sent. Please confirm your account within 7 days (check your spam folder if necessary).",
-                        "success"
-                    );
-                } else {
-                    addNotification("Registration failed: Token not provided", "error");
-                }
+            .then(() => {
+                navigate('/dwh/dashboard');
+                addNotification(
+                    "Confirmation e-mail has been sent. Please confirm your account within 7 days (check your spam folder if necessary).",
+                    "success"
+                );
             })
             .catch(err => addNotification(`Registration error${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => {

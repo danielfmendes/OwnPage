@@ -1,5 +1,5 @@
-import {Trash2} from "lucide-react";
-import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
+import { Trash2 } from "lucide-react";
+import { ButtonLoading } from "@/components/helpers/buttons/ButtonLoading";
 
 interface DeleteButtonProps {
     onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
@@ -9,21 +9,28 @@ interface DeleteButtonProps {
 }
 
 export const DeleteButton = ({
-                                 onClick,
-                                 isLoading = false,
-                                 disabled = false,
-                                 className = "",
-                             }: DeleteButtonProps) => {
+    onClick,
+    isLoading = false,
+    disabled = false,
+    className = "",
+}: DeleteButtonProps) => {
     return (
         <ButtonLoading
-            onClick={onClick}
+            onClick={(e) => {
+                if (disabled || isLoading) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+                if (onClick) onClick(e);
+            }}
             isLoading={isLoading}
             disabled={disabled}
             className={`text-black dark:text-white p-2 rounded-full sm:rounded ${className}`}
             size="icon"
             variant="destructive"
         >
-            <Trash2 className="w-5 h-5"/>
+            <Trash2 className="w-5 h-5" />
         </ButtonLoading>
     );
 };

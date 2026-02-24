@@ -252,14 +252,14 @@
           ]
         },
         "cookies": {
-          "title": "Cookies (js-cookie)",
-          "p": "Our website uses cookies via js-cookie to enhance user experience. These include:",
+          "title": "Local Storage & Cookies",
+          "p": "Our website uses secure HttpOnly cookies and HTML5 Local Storage to enhance user experience and maintain session states. These include:",
           "items": [
-            "Session cookies for authentication",
-            "Preference cookies for user settings",
-            "Analytics cookies (if applicable)"
+            "HttpOnly cookies for secure authentication sessions",
+            "Local Storage for UI preferences (e.g., language selection, sidebar state)",
+            "Local Storage for current AI chat sessions"
           ],
-          "notice": "You can configure your browser to refuse cookies, though this may limit functionality."
+          "notice": "You can clear your local storage and cookies through your browser settings, though this will sign you out and reset your preferences."
         }
       },
       "storage": {

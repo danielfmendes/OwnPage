@@ -252,14 +252,14 @@
           ]
         },
         "cookies": {
-          "title": "Cookies (js-cookie)",
-          "p": "Nosso site usa cookies via js-cookie para melhorar a experiência do usuário. Isso inclui:",
+          "title": "Armazenamento Local e Cookies",
+          "p": "Nosso site usa cookies HttpOnly seguros e Armazenamento Local HTML5 para melhorar a experiência do usuário e manter os estados da sessão. Isso inclui:",
           "items": [
-            "Cookies de sessão para autenticação",
-            "Cookies de preferência para configurações do usuário",
-            "Cookies de análise (se aplicável)"
+            "Cookies HttpOnly para sessões de autenticação seguras",
+            "Armazenamento local para preferências de interface (ex.: seleção de idioma, estado da barra lateral)",
+            "Armazenamento local para sessões de chat com IA atuais"
           ],
-          "notice": "Você pode configurar seu navegador para recusar cookies, mas isso pode limitar a funcionalidade."
+          "notice": "Você pode limpar o armazenamento local e os cookies nas configurações do navegador, mas isso desconectará você e redefinirá suas preferências."
         }
       },
       "storage": {

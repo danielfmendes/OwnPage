@@ -211,6 +211,7 @@ export function BikeModels({ bikeData, isLoading, maxHeight }: Props) {
                                     dataKey={modelName}
                                     stroke={modelColors[index % modelColors.length]}
                                     strokeWidth={2}
+                                    dot={{ r: 3, fill: modelColors[index % modelColors.length] }}
                                     activeDot={{
                                         r: 6,
                                         fill: modelColors[index % modelColors.length],

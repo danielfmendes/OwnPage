@@ -252,14 +252,14 @@
           ]
         },
         "cookies": {
-          "title": "Cookies (js-cookie)",
-          "p": "Unsere Website verwendet Cookies über js-cookie, um die Benutzererfahrung zu verbessern. Dazu gehören:",
+          "title": "Lokaler Speicher & Cookies",
+          "p": "Unsere Website verwendet sichere HttpOnly-Cookies und HTML5 Local Storage, um die Benutzererfahrung zu verbessern und Sitzungszustände beizubehalten. Dazu gehören:",
           "items": [
-            "Sitzungscookies für die Authentifizierung",
-            "Präferenz-Cookies für Benutzereinstellungen",
-            "Analyse-Cookies (falls zutreffend)"
+            "HttpOnly-Cookies für sichere Authentifizierungssitzungen",
+            "Lokaler Speicher für UI-Einstellungen (z.B. Sprachauswahl, Seitenleistenstatus)",
+            "Lokaler Speicher für aktuelle KI-Chat-Sitzungen"
           ],
-          "notice": "Sie können Ihren Browser so einstellen, dass Cookies abgelehnt werden. Dies kann jedoch die Funktionalität einschränken."
+          "notice": "Sie können Ihren lokalen Speicher und Cookies über Ihre Browsereinstellungen löschen. Dies meldet Sie jedoch ab und setzt Ihre Einstellungen zurück."
         }
       },
       "storage": {
