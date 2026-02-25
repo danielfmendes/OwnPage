@@ -23,7 +23,10 @@ export default function ModelNameSelect({ modelID, onChange }: Props) {
 
         const filterString = filterManager.getFilterString();
         BikesService.getBikeModels(filterString === "" ? undefined : filterString)
-            .then(setModelIdOptions)
+            .then((res: any) => {
+                const items = res?.items || res;
+                setModelIdOptions(items);
+            })
             .catch(err => addNotification(`Failed to load model options${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingModels(false));
     }, []);
