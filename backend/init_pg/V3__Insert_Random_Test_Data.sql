@@ -23,7 +23,7 @@ INSERT INTO role_management (useremail, project_id, role)
 VALUES
     ('testadmin@example.com', 2, 'creator'),
     ('testcreator@example.com', 2, 'admin'),
-    ('testuser@example.com', 2, 'user');
+    ('testuser@example.com', 2, 'admin');
 
 -- Insert customers
 INSERT INTO customers (email, password, first_name, name, dob, city, project_id)
