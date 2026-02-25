@@ -1,51 +1,71 @@
 -- ==========================================================
--- ORDERS GENERIEREN (Simulation von Schleifen via CTE)
+-- GENERATE ORDERS (Simulation of loops via CTE)
 -- ==========================================================
 
--- LETZTE WOCHE: 20 Orders
+-- LAST WEEK: 20 Orders per project
 INSERT INTO orders (customer_id, order_date, project_id)
 WITH RECURSIVE cnt(i) AS (
     SELECT 1 UNION ALL SELECT i + 1 FROM cnt WHERE i < 20
 )
 SELECT
-    (i % 7) + 1,
+    (i % 4) + 1,
     datetime('now', '-7 days', '+' || (i * 8) || ' hours'),
     1
+FROM cnt
+UNION ALL
+SELECT
+    (i % 3) + 5,
+    datetime('now', '-7 days', '+' || (i * 8) || ' hours'),
+    2
 FROM cnt;
 
--- LETZTER MONAT: 20 Orders
+-- LAST MONTH: 20 Orders per project
 INSERT INTO orders (customer_id, order_date, project_id)
 WITH RECURSIVE cnt(i) AS (
     SELECT 1 UNION ALL SELECT i + 1 FROM cnt WHERE i < 20
 )
 SELECT
-    (i % 7) + 1,
+    (i % 4) + 1,
     date('now', '-30 days', '+' || (i * 1.5) || ' days'),
     1
+FROM cnt
+UNION ALL
+SELECT
+    (i % 3) + 5,
+    date('now', '-30 days', '+' || (i * 1.5) || ' days'),
+    2
 FROM cnt;
 
--- LETZTES JAHR: 20 Orders
+-- LAST YEAR: 20 Orders per project
 INSERT INTO orders (customer_id, order_date, project_id)
 WITH RECURSIVE cnt(i) AS (
     SELECT 1 UNION ALL SELECT i + 1 FROM cnt WHERE i < 20
 )
 SELECT
-    (i % 7) + 1,
+    (i % 4) + 1,
     date('now', '-365 days', '+' || (i * 18) || ' days'),
     1
+FROM cnt
+UNION ALL
+SELECT
+    (i % 3) + 5,
+    date('now', '-365 days', '+' || (i * 18) || ' days'),
+    2
 FROM cnt;
 
 -- ==========================================================
--- ORDER ITEMS ANFÜGEN
+-- ADD ORDER ITEMS
 -- ==========================================================
--- Wir nehmen die letzten 60 Orders und fügen pro Order ein Item hinzu.
--- Da SQLite kein einfaches RANDOM() für Array-Indizes hat, nutzen wir
--- ABS(RANDOM() % 8) + 1 für die Bike-ID.
+-- We take the last 120 generated orders and add an item to each.
+-- We use ABS(RANDOM() % 4) to pick bikes 1-4 for Project 1 and 5-8 for Project 2
 
 INSERT INTO order_items (order_id, bike_id, number, price)
 SELECT
     id,
-    (ABS(RANDOM()) % 8) + 1,               -- Zufällige Bike-ID (1-8)
-    (ABS(RANDOM()) % 4) + 1,               -- Zufällige Anzahl (1-4)
-    ROUND(800 + (ABS(RANDOM()) % 1000), 2) -- Zufälliger Preis (800-1800)
-FROM (SELECT id FROM orders ORDER BY id DESC LIMIT 60);
+    CASE 
+        WHEN project_id = 1 THEN (ABS(RANDOM()) % 4) + 1 
+        ELSE (ABS(RANDOM()) % 4) + 5 
+    END,                           -- Random Bike-ID based on project
+    (ABS(RANDOM()) % 4) + 1,               -- Random quantity (1-4)
+    ROUND(800 + (ABS(RANDOM()) % 1000), 2) -- Random price (800-1800)
+FROM (SELECT id, project_id FROM orders ORDER BY id DESC LIMIT 120);
