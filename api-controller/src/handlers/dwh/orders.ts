@@ -9,19 +9,18 @@ export const getOrders = async (req: Request, env: Env) => {
     const url = new URL(req.url);
     const filter = url.searchParams.get("filter");
 
-    if (filter && filter.startsWith("email:$eq.")) {
-        const email = filter.split("email:$eq.")[1];
+    if (filter && filter.includes("email:$eq.")) {
         // Ported from select/orderbycustomerselect.sql
         const baseQuery = `
             SELECT 
                 oi.id, oi.order_id, oi.bike_id, oi.number, oi.price, 
-                bm.name as model_name, o.order_date
+                bm.name as model_name, o.order_date,
+                o.project_id, c.email as email
             FROM orders o
             JOIN customers c ON o.customer_id = c.id
             JOIN order_items oi ON o.id = oi.order_id
             JOIN bikes b ON oi.bike_id = b.id
             JOIN bike_models bm ON b.model_id = bm.id
-            WHERE c.email = ?
         `;
         const countQuery = `
             SELECT COUNT(*)
@@ -30,15 +29,14 @@ export const getOrders = async (req: Request, env: Env) => {
             JOIN order_items oi ON o.id = oi.order_id
             JOIN bikes b ON oi.bike_id = b.id
             JOIN bike_models bm ON b.model_id = bm.id
-            WHERE c.email = ?
         `;
-        return await queryWithPagination(req, env, baseQuery, countQuery, [email]);
+        return await queryWithPagination(req, env, baseQuery, countQuery);
     }
 
     // Default GET
     const baseQuery = `
         SELECT o.id, o.order_date, o.project_id, o.customer_id, 
-               c.name as customer_name, c.email as customer_email
+               c.name as customer_name, c.email as email
         FROM orders o
         JOIN customers c ON o.customer_id = c.id
     `;
@@ -117,30 +115,23 @@ export const ordersHandler = async (req: Request, env: Env) => {
 // --- Order Items ---
 
 export const getOrderItems = async (req: Request, env: Env) => {
-    const url = new URL(req.url);
-    const filter = url.searchParams.get("filter");
-
-    if (filter && filter.startsWith("order_id:$eq.")) {
-        const orderId = filter.split("order_id:$eq.")[1];
-        const baseQuery = `
-            SELECT oi.id, oi.order_id, oi.bike_id, oi.number, oi.price, bm.name as model_name
-            FROM order_items oi
-            JOIN bikes b ON oi.bike_id = b.id
-            JOIN bike_models bm ON b.model_id = bm.id
-            WHERE oi.order_id = ?
-        `;
-        const countQuery = `
-            SELECT COUNT(*)
-            FROM order_items oi
-            JOIN bikes b ON oi.bike_id = b.id
-            JOIN bike_models bm ON b.model_id = bm.id
-            WHERE oi.order_id = ?
-        `;
-        return await queryWithPagination(req, env, baseQuery, countQuery, [orderId]);
-    }
-
-    const baseQuery = "SELECT * FROM order_items";
-    const countQuery = "SELECT COUNT(*) FROM order_items";
+    const baseQuery = `
+        SELECT 
+            oi.id, oi.order_id, oi.bike_id, oi.number, oi.price, 
+            bm.name as model_name,
+            o.project_id 
+        FROM order_items oi
+        JOIN orders o ON oi.order_id = o.id
+        JOIN bikes b ON oi.bike_id = b.id
+        JOIN bike_models bm ON b.model_id = bm.id
+    `;
+    const countQuery = `
+        SELECT COUNT(*)
+        FROM order_items oi
+        JOIN orders o ON oi.order_id = o.id
+        JOIN bikes b ON oi.bike_id = b.id
+        JOIN bike_models bm ON b.model_id = bm.id
+    `;
     return await queryWithPagination(req, env, baseQuery, countQuery);
 };
 
