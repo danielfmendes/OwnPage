@@ -3,23 +3,23 @@ import {
     DialogHeader,
     DialogTitle
 } from "@/components/ui/dialog"
-import {Card, CardContent} from "@/components/ui/card"
-import {useEffect, useState} from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { useEffect, useState } from "react"
 import InputField from "@/components/helpers/InputField";
-import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
+import { ButtonLoading } from "@/components/helpers/buttons/ButtonLoading";
 import {
     Tabs,
     TabsContent,
     TabsList,
     TabsTrigger
 } from "@/components/ui/tabs"
-import type {CustomColumnDef} from "@/models/datatable/column";
-import {useNotification} from "@/components/helpers/NotificationProvider";
-import {SimpleTable} from "@/components/helpers/SimpleTable";
-import {useTranslation} from "react-i18next";
-import {type Customer, CustomersService, type OrderItemsWithBikeAndDate, OrdersService} from "@/models/api";
+import type { CustomColumnDef } from "@/models/datatable/column";
+import { useNotification } from "@/components/helpers/NotificationProvider";
+import { SimpleTable } from "@/components/helpers/SimpleTable";
+import { useTranslation } from "react-i18next";
+import { type Customer, CustomersService, type OrderItemsWithBikeAndDate, OrdersService } from "@/models/api";
 import FilterManager from "@/utils/filtermanager";
-import {isRoleUserForProject} from "@/utils/helpers";
+import { isRoleUserForProject } from "@/utils/helpers";
 
 interface Props {
     rowData: Customer,
@@ -27,9 +27,9 @@ interface Props {
     onRefresh: () => void,
 }
 
-export default function CustomerDetailContent({rowData, onClose, onRefresh}: Props) {
-    const {t} = useTranslation();
-    const {addNotification} = useNotification();
+export default function CustomerDetailContent({ rowData, onClose, onRefresh }: Props) {
+    const { t } = useTranslation();
+    const { addNotification } = useNotification();
     const filterManager = new FilterManager();
     const isDisabled = isRoleUserForProject(rowData?.project_id!)
 
@@ -48,11 +48,11 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
     const fetchData = () => {
         setIsLoadingData(true);
         filterManager.addFilter("email", [rowData.email]);
-        const filterString = filterManager.getFilterStringWithProjectIds();
+        const filterString = filterManager.getFilterString();
         OrdersService.getOrders(filterString === "" ? undefined : filterString)
-            .then((orders) => {
-                const ordersWithBikeAndDate = orders as OrderItemsWithBikeAndDate[];
-                setData(ordersWithBikeAndDate);
+            .then((response: any) => {
+                const items = response.items || response;
+                setData(items);
             })
             .catch(err => addNotification(`Failed to load orders${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingData(false));
@@ -86,7 +86,7 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
             accessorKey: "order_date",
             header: t("label.order_date"),
             widthPercent: 30,
-            cell: ({row}) => {
+            cell: ({ row }) => {
                 const date = new Date(row.getValue("order_date"))
                 return date.toLocaleDateString()
             },
@@ -123,8 +123,8 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
                 <TabsContent value="info">
                     <Card className="mt-4">
                         <CardContent className="space-y-4 pt-6">
-                            <InputField label={t("label.email")} value={rowData.email}/>
-                            <InputField label={t("label.first_name")} value={rowData.first_name}/>
+                            <InputField label={t("label.email")} value={rowData.email} />
+                            <InputField label={t("label.first_name")} value={rowData.first_name} />
                             <InputField
                                 label={t("label.last_name")}
                                 placeholder={t("placeholder.name")}
@@ -160,7 +160,7 @@ export default function CustomerDetailContent({rowData, onClose, onRefresh}: Pro
                     <Card className="mt-4">
                         <CardContent className="pt-4">
                             <h3 className="text-lg font-semibold mb-4">{t("orders.history")}</h3>
-                            <SimpleTable data={data} columns={columns} isLoading={isLoadingData} maxHeight={300} singleData={true}/>
+                            <SimpleTable data={data} columns={columns} isLoading={isLoadingData} maxHeight={300} singleData={true} />
                         </CardContent>
                     </Card>
                 </TabsContent>
