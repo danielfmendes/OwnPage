@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useNotification } from "@/components/helpers/NotificationProvider";
 import { useUserStore } from "@/utils/userstate";
 import { useRoleStore } from "@/utils/roleManagementState";
+import { SessionProvider } from "@/context/SessionProvider";
 import {
     RoleManagementsService,
     type RoleManagementListResponse,
@@ -132,8 +133,10 @@ export default function DWHLayout() {
     }
 
     return (
-        <div>
-            <Outlet />
-        </div>
+        <SessionProvider>
+            <div>
+                <Outlet />
+            </div>
+        </SessionProvider>
     );
 }

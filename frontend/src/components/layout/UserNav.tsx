@@ -1,8 +1,8 @@
-import {useState} from "react";
-import {Link, useNavigate} from "react-router-dom";
-import {BookA, Check, ChevronDown, ChevronRight, LogOut, User as UserIcon} from "lucide-react";
-import {Button} from "@/components/ui/button";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { BookA, Check, ChevronDown, ChevronRight, LogOut, User as UserIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     Tooltip,
     TooltipContent,
@@ -18,24 +18,31 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import {useTheme} from "next-themes";
-import {MoonIcon, SunIcon} from "lucide-react";
-import {Loader2} from "lucide-react";
-import {useUserStore} from "@/utils/userstate";
-import {handleLogOut} from "@/utils/helpers";
-import {useNotification} from "@/components/helpers/NotificationProvider";
-import {useTranslation} from "react-i18next";
+import { useTheme } from "next-themes";
+import { MoonIcon, SunIcon } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { useUserStore } from "@/utils/userstate";
+import { handleLogOut } from "@/utils/helpers";
+import { useNotification } from "@/components/helpers/NotificationProvider";
+import { useTranslation } from "react-i18next";
 import Language from "@/utils/language";
+import { useSession } from "@/context/SessionProvider";
 
 export function UserNav() {
-    const {t, i18n} = useTranslation();
-    const {setTheme, theme} = useTheme();
-    const {addNotification} = useNotification();
+    const { t, i18n } = useTranslation();
+    const { setTheme, theme } = useTheme();
+    const { addNotification } = useNotification();
     const navigate = useNavigate();
     const urlParams = new URLSearchParams(window.location.search);
     const currentQuery = urlParams.get('project_id') ? `?project_id=${urlParams.get('project_id')}` : "";
     const user = useUserStore((state) => state.user);
     const isLoading = useUserStore((state) => state.isLoading);
+    const { timeRemaining } = useSession();
+
+    // Format timeRemaining to MM:SS
+    const minutes = Math.floor(timeRemaining / 60000);
+    const seconds = Math.floor((timeRemaining % 60000) / 1000);
+    const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
     const handleLogout = () => {
         handleLogOut(navigate, addNotification);
@@ -46,9 +53,9 @@ export function UserNav() {
 
     // See flags here: https://github.com/HatScripts/circle-flags/tree/gh-pages/flags
     const languages = [
-        {code: "en", label: "English", flag: "/flags/gb.svg"},
-        {code: "de", label: "Deutsch", flag: "/flags/de.svg"},
-        {code: "pt", label: "Português", flag: "/flags/pt.svg"},
+        { code: "en", label: "English", flag: "/flags/gb.svg" },
+        { code: "de", label: "Deutsch", flag: "/flags/de.svg" },
+        { code: "pt", label: "Português", flag: "/flags/pt.svg" },
     ];
 
     return (
@@ -63,10 +70,10 @@ export function UserNav() {
                                 disabled={isLoading}
                             >
                                 <Avatar className="h-8 w-8">
-                                    <AvatarImage src="#" alt="Avatar"/>
+                                    <AvatarImage src="#" alt="Avatar" />
                                     <AvatarFallback className="bg-transparent">
                                         {isLoading ? (
-                                            <Loader2 className="animate-spin h-4 w-4 text-muted-foreground"/>
+                                            <Loader2 className="animate-spin h-4 w-4 text-muted-foreground" />
                                         ) : (
                                             user?.username
                                                 ?.split(" ")
@@ -85,16 +92,24 @@ export function UserNav() {
 
             <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{user?.username}</p>
-                        <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+                    <div className="flex flex-col space-y-2">
+                        <div className="flex flex-col space-y-1">
+                            <p className="text-sm font-medium leading-none">{user?.username}</p>
+                            <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+                        </div>
+                        <div className="flex items-center justify-between bg-secondary/50 p-2 rounded-md">
+                            <span className="text-xs font-medium text-muted-foreground">{t("session_timeout", "Session expires in")}</span>
+                            <span className={`text-xs font-bold ${minutes < 2 ? 'text-destructive' : 'text-primary'}`}>
+                                {formattedTime}
+                            </span>
+                        </div>
                     </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator/>
+                <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                     <DropdownMenuItem className="hover:cursor-pointer" asChild>
                         <Link to={`/dwh/rolemanagement${currentQuery}`} className="flex items-center">
-                            <UserIcon className="w-4 h-4 mr-1 text-muted-foreground"/>
+                            <UserIcon className="w-4 h-4 mr-1 text-muted-foreground" />
                             {t("menu.role_management")}
                         </Link>
                     </DropdownMenuItem>
@@ -107,15 +122,15 @@ export function UserNav() {
                         }}
                     >
                         <div className="flex items-center">
-                            <BookA className="w-4 h-4 mr-3 text-muted-foreground"/>
+                            <BookA className="w-4 h-4 mr-3 text-muted-foreground" />
                             {t("placeholder.language")}
                         </div>
                         <div className="flex items-center space-x-1 text-muted-foreground">
                             <span className="text-xs font-medium">{currentLang}</span>
                             {showLanguageCard ? (
-                                <ChevronDown className="w-4 h-4"/>
+                                <ChevronDown className="w-4 h-4" />
                             ) : (
-                                <ChevronRight className="w-4 h-4"/>
+                                <ChevronRight className="w-4 h-4" />
                             )}
                         </div>
                     </div>
@@ -132,12 +147,11 @@ export function UserNav() {
                                         setShowLanguageCard(false);
                                     }}
                                 >
-                                    <img src={lang.flag} alt={lang.label} className="w-5 h-5 rounded-full"/>
+                                    <img src={lang.flag} alt={lang.label} className="w-5 h-5 rounded-full" />
                                     <span className="flex-1 text-left">{lang.label}</span>
                                     <Check
-                                        className={`w-4 h-4 ${
-                                            i18n.language === lang.code ? 'text-green-500' : 'invisible'
-                                        }`}
+                                        className={`w-4 h-4 ${i18n.language === lang.code ? 'text-green-500' : 'invisible'
+                                            }`}
                                     />
                                 </Button>
                             ))}
@@ -147,17 +161,17 @@ export function UserNav() {
                     <DropdownMenuItem className="hover:cursor-pointer" asChild>
                         <div onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
                             {theme === "dark" ? (
-                                <SunIcon className="w-4 h-4 mr-1 text-muted-foreground"/>
+                                <SunIcon className="w-4 h-4 mr-1 text-muted-foreground" />
                             ) : (
-                                <MoonIcon className="w-4 h-4 mr-1 text-muted-foreground"/>
+                                <MoonIcon className="w-4 h-4 mr-1 text-muted-foreground" />
                             )}
                             {t("switch_theme")}
                         </div>
                     </DropdownMenuItem>
                 </DropdownMenuGroup>
-                <DropdownMenuSeparator/>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="hover:cursor-pointer">
-                    <LogOut className="w-4 h-4 mr-3 text-muted-foreground"/>
+                    <LogOut className="w-4 h-4 mr-3 text-muted-foreground" />
                     {t("button.sign_out")}
                 </DropdownMenuItem>
             </DropdownMenuContent>
