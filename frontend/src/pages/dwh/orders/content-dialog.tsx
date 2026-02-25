@@ -1,8 +1,8 @@
-import {useEffect, useState} from "react";
-import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
-import {ButtonLoading} from "@/components/helpers/buttons/ButtonLoading";
-import {DeleteButton} from "@/components/helpers/buttons/DeleteButton";
-import {useNotification} from "@/components/helpers/NotificationProvider";
+import { useEffect, useState } from "react";
+import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ButtonLoading } from "@/components/helpers/buttons/ButtonLoading";
+import { DeleteButton } from "@/components/helpers/buttons/DeleteButton";
+import { useNotification } from "@/components/helpers/NotificationProvider";
 import InputField from "@/components/helpers/InputField";
 import {
     type Order,
@@ -12,19 +12,19 @@ import {
     type OrderWithCustomer,
 } from "@/models/api";
 import ProjectIDSelect from "@/components/helpers/selects/ProjectIDSelect";
-import {DatePicker} from "@/components/helpers/datepicker/DatePicker";
+import { DatePicker } from "@/components/helpers/datepicker/DatePicker";
 import CustomerNameComboBox from "@/components/helpers/selects/CustomerNameComboBox";
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import {SimpleTable} from "@/components/helpers/SimpleTable";
-import {type CustomColumnDef} from "@/models/datatable/column";
-import {Pencil} from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SimpleTable } from "@/components/helpers/SimpleTable";
+import { type CustomColumnDef } from "@/models/datatable/column";
+import { Pencil } from "lucide-react";
 import ModelNameSelect from "@/components/helpers/selects/ModelNameSelect";
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import {Button} from "@/components/ui/button";
-import {useTranslation} from "react-i18next";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 import FilterManager from "@/utils/filtermanager";
-import {isRoleUserForProject} from "@/utils/helpers";
-import {useIsMobile} from "@/utils/use-mobile";
+import { isRoleUserForProject } from "@/utils/helpers";
+import { useIsMobile } from "@/utils/use-mobile";
 
 interface Props {
     rowData?: OrderWithCustomer;
@@ -32,9 +32,9 @@ interface Props {
     onRefresh: () => void;
 }
 
-export default function OrderDialogContent({rowData, onClose, onRefresh}: Props) {
-    const {t} = useTranslation();
-    const {addNotification} = useNotification();
+export default function OrderDialogContent({ rowData, onClose, onRefresh }: Props) {
+    const { t } = useTranslation();
+    const { addNotification } = useNotification();
     const filterManager = new FilterManager();
     const isEditMode = !!rowData;
     const isDisabled = isRoleUserForProject(rowData?.project_id!)
@@ -90,10 +90,13 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
     const fetchOrderItems = () => {
         setIsLoadingData(true);
         filterManager.addFilter("order_id", [rowData?.id]);
-        const filterString = filterManager.getFilterStringWithProjectIds();
+        // Remove project scope filtering here so when we query for order_id=100 we don't return 0 
+        // results just because the user has a global filter set for project=2
+        const filterString = filterManager.getFilterString();
         OrdersService.getOrderItems(filterString === "" ? undefined : filterString)
-            .then((orders: OrderItemsWithBikeName[]) => {
-                setData(orders);
+            .then((response: any) => {
+                const items = response.items || response;
+                setData(items);
             })
             .catch(err => addNotification(`Failed to load orderitems${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setIsLoadingData(false));
@@ -206,7 +209,7 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
         {
             id: "actions",
             widthPercent: 20,
-            cell: ({row}) => {
+            cell: ({ row }) => {
                 const orderItem = row.original;
                 const [localEditNumber, setLocalEditNumber] = useState<number>(orderItem.number);
                 const [localEditPrice, setLocalEditPrice] = useState<number>(orderItem.price);
@@ -231,13 +234,12 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
                         >
                             <PopoverTrigger asChild>
                                 <Button
-                                    className={`p-2 rounded ${
-                                        editItem?.id === orderItem.id ? "text-white dark:text-black" : "text-black dark:text-white"
-                                    }`}
+                                    className={`p-2 rounded ${editItem?.id === orderItem.id ? "text-white dark:text-black" : "text-black dark:text-white"
+                                        }`}
                                     variant={editItem?.id === orderItem.id ? "default" : "secondary"}
                                     disabled={isDisabled}
                                 >
-                                    <Pencil className="w-4 h-4"/>
+                                    <Pencil className="w-4 h-4" />
                                 </Button>
                             </PopoverTrigger>
                             {openPopoverId === orderItem.id && (
@@ -295,10 +297,10 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
 
                         <TabsContent value="info">
                             <div className="space-y-3">
-                                <InputField label="Project" value={rowData?.project_id}/>
+                                <InputField label="Project" value={rowData?.project_id} />
                                 <div className="space-y-1">
                                     <label className="block text-sm font-medium">{t("label.order_date")}</label>
-                                    <DatePicker date={orderDate} setDate={setOrderDate} position="right"/>
+                                    <DatePicker date={orderDate} setDate={setOrderDate} position="right" />
                                 </div>
                                 <CustomerNameComboBox
                                     customerID={customerId}
@@ -346,7 +348,7 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
                                     {t("button.add_item")}
                                 </ButtonLoading>
                             </div>
-                            <SimpleTable data={data} columns={columns} isLoading={isLoadingData} singleData={true}/>
+                            <SimpleTable data={data} columns={columns} isLoading={isLoadingData} singleData={true} />
                         </TabsContent>
                     </Tabs>
                 </>
@@ -359,7 +361,7 @@ export default function OrderDialogContent({rowData, onClose, onRefresh}: Props)
 
                     <div className="space-y-1">
                         <label className="block text-sm font-medium">{t("label.order_date")}</label>
-                        <DatePicker date={orderDate} setDate={setOrderDate}/>
+                        <DatePicker date={orderDate} setDate={setOrderDate} />
                     </div>
 
                     <CustomerNameComboBox
