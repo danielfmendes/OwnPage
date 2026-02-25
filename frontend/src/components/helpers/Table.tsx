@@ -41,6 +41,7 @@ import FilterManager, { type FilterType } from "@/utils/filtermanager";
 import { useNavigate } from "react-router-dom";
 import { useDataTableStore } from "@/models/datatable/dataTableStore";
 import MobileFilterDialog from "@/components/helpers/MobileFilterBar";
+import { useRoleStore } from "@/utils/roleManagementState";
 
 interface DataTableProps<TData> {
     title: string;
@@ -76,6 +77,8 @@ export default function DataTable<TData>({
     const [selectedRow, setSelectedRow] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [refreshSignal, setRefreshSignal] = useState(0);
+
+    const selectedRoles = useRoleStore((state) => state.selectedRoles);
 
     const {
         filterManager,
@@ -122,6 +125,7 @@ export default function DataTable<TData>({
         pagination.itemsPerPage,
         sort.items.map(item => `${item.key}=${item.order}`).join(","),
         filterManager.getFilterString(),
+        selectedRoles.map(r => r.project_id).join(","),
     ]);
 
     const handleRowClick = (row: any) => {
