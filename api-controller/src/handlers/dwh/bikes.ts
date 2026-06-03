@@ -1,5 +1,6 @@
 import { Env } from "../../types";
 import { queryWithPagination } from "./pagination";
+import { readJson, requireProjectRole, resolveProjectId } from "../../utils/auth";
 
 // Helper for error responses
 const errorResponse = (msg: string, status = 400) => new Response(msg, { status });
@@ -28,10 +29,11 @@ export const getBikes = async (req: Request, env: Env) => {
 
 // POST /bikes
 export const insertBike = async (req: Request, env: Env) => {
+    const bike: any = await readJson(req);
+    await requireProjectRole(req, env, bike.project_id, "admin");
     try {
-        const bike: any = await req.json();
         const query = `
-            INSERT INTO bikes (project_id, model_id, serial_number, production_date, quantity, warehouse_location) 
+            INSERT INTO bikes (project_id, model_id, serial_number, production_date, quantity, warehouse_location)
             VALUES (?, ?, ?, ?, ?, ?)
         `;
         await env.DB.prepare(query)
@@ -39,19 +41,20 @@ export const insertBike = async (req: Request, env: Env) => {
             .run();
         return new Response("Bike created", { status: 201 });
     } catch (e) {
-        return errorResponse("Error processing request: " + e);
+        console.error("insertBike failed:", e);
+        return errorResponse("Could not create bike", 500);
     }
 };
 
 // PUT /bikes
 export const updateBike = async (req: Request, env: Env) => {
+    const bike: any = await readJson(req);
+    if (!bike.id) return errorResponse("ID missing");
+    await requireProjectRole(req, env, bike.project_id, "admin");
     try {
-        const bike: any = await req.json();
-        if (!bike.id) return errorResponse("ID missing");
-
         const query = `
-            UPDATE bikes 
-            SET model_id = ?, serial_number = ?, production_date = ?, quantity = ?, warehouse_location = ?, project_id = ? 
+            UPDATE bikes
+            SET model_id = ?, serial_number = ?, production_date = ?, quantity = ?, warehouse_location = ?, project_id = ?
             WHERE id = ?
         `;
         await env.DB.prepare(query)
@@ -59,7 +62,8 @@ export const updateBike = async (req: Request, env: Env) => {
             .run();
         return new Response("Bike updated", { status: 200 });
     } catch (e) {
-        return errorResponse("Error processing request: " + e);
+        console.error("updateBike failed:", e);
+        return errorResponse("Could not update bike", 500);
     }
 };
 
@@ -70,6 +74,10 @@ export const deleteBike = async (req: Request, env: Env) => {
     const cascade = url.searchParams.get("cascade") === "true";
 
     if (!id) return errorResponse("Bad request – missing or invalid ID");
+
+    // Derive the project from the row, then require admin on it (mirrors Go's projectIdQuery).
+    const projectId = await resolveProjectId(env, "SELECT project_id FROM bikes WHERE id = ?", id);
+    await requireProjectRole(req, env, projectId, "admin");
 
     try {
         if (cascade) {

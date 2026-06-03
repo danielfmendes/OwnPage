@@ -1,5 +1,6 @@
 import { Env } from "../../types";
 import { queryWithPagination } from "./pagination";
+import { getAllowedProjectIds, readJson, requireProjectRole, requireUser, resolveProjectId } from "../../utils/auth";
 
 // Helper for error responses
 const errorResponse = (msg: string, status = 400) => new Response(msg, { status });
@@ -10,10 +11,15 @@ export const getOrders = async (req: Request, env: Env) => {
     const filter = url.searchParams.get("filter");
 
     if (filter && filter.includes("email:$eq.")) {
-        // Ported from select/orderbycustomerselect.sql
+        // Ported from select/orderbycustomerselect.sql — scoped to the caller's projects
+        // (the Go query filtered by `o.project_id = ANY($2)`).
+        const userEmail = await requireUser(req, env);
+        const allowed = await getAllowedProjectIds(env, userEmail, "user");
+        if (allowed.length === 0) return Response.json({ items: [], totalCount: 0 });
+        const placeholders = allowed.map(() => "?").join(", ");
         const baseQuery = `
-            SELECT 
-                oi.id, oi.order_id, oi.bike_id, oi.number, oi.price, 
+            SELECT
+                oi.id, oi.order_id, oi.bike_id, oi.number, oi.price,
                 bm.name as model_name, o.order_date,
                 o.project_id, c.email as email
             FROM orders o
@@ -21,6 +27,7 @@ export const getOrders = async (req: Request, env: Env) => {
             JOIN order_items oi ON o.id = oi.order_id
             JOIN bikes b ON oi.bike_id = b.id
             JOIN bike_models bm ON b.model_id = bm.id
+            WHERE o.project_id IN (${placeholders})
         `;
         const countQuery = `
             SELECT COUNT(*)
@@ -29,8 +36,9 @@ export const getOrders = async (req: Request, env: Env) => {
             JOIN order_items oi ON o.id = oi.order_id
             JOIN bikes b ON oi.bike_id = b.id
             JOIN bike_models bm ON b.model_id = bm.id
+            WHERE o.project_id IN (${placeholders})
         `;
-        return await queryWithPagination(req, env, baseQuery, countQuery);
+        return await queryWithPagination(req, env, baseQuery, countQuery, allowed);
     }
 
     // Default GET
@@ -50,28 +58,32 @@ export const getOrders = async (req: Request, env: Env) => {
 
 // POST /orders
 export const insertOrder = async (req: Request, env: Env) => {
+    const order: any = await readJson(req);
+    await requireProjectRole(req, env, order.project_id, "admin");
     try {
-        const order: any = await req.json();
         await env.DB.prepare(`INSERT INTO orders (customer_id, order_date, project_id) VALUES (?, ?, ?)`)
             .bind(order.customer_id, order.order_date, order.project_id)
             .run();
         return new Response("Order created", { status: 201 });
     } catch (e) {
-        return errorResponse("Error: " + e);
+        console.error("insertOrder failed:", e);
+        return errorResponse("Could not create order", 500);
     }
 };
 
 // PUT /orders
 export const updateOrder = async (req: Request, env: Env) => {
+    const order: any = await readJson(req);
+    if (!order.id) return errorResponse("ID missing");
+    await requireProjectRole(req, env, order.project_id, "admin");
     try {
-        const order: any = await req.json();
-        if (!order.id) return errorResponse("ID missing");
         await env.DB.prepare(`UPDATE orders SET order_date = ?, customer_id = ?, project_id = ? WHERE id = ?`)
             .bind(order.order_date, order.customer_id, order.project_id, order.id)
             .run();
         return new Response("Order updated", { status: 200 });
     } catch (e) {
-        return errorResponse("Error: " + e);
+        console.error("updateOrder failed:", e);
+        return errorResponse("Could not update order", 500);
     }
 };
 
@@ -82,6 +94,9 @@ export const deleteOrder = async (req: Request, env: Env) => {
     const cascade = url.searchParams.get("cascade") === "true";
 
     if (!id) return errorResponse("ID missing");
+
+    const projectId = await resolveProjectId(env, "SELECT project_id FROM orders WHERE id = ?", id);
+    await requireProjectRole(req, env, projectId, "admin");
 
     try {
         if (cascade) {
@@ -136,27 +151,34 @@ export const getOrderItems = async (req: Request, env: Env) => {
 };
 
 export const insertOrderItem = async (req: Request, env: Env) => {
+    const item: any = await readJson(req);
+    // The project lives on the parent order (mirrors Go's orderitems.go projectIdQuery).
+    const projectId = await resolveProjectId(env, "SELECT project_id FROM orders WHERE id = ?", item.order_id);
+    await requireProjectRole(req, env, projectId, "admin");
     try {
-        const item: any = await req.json();
         await env.DB.prepare(`INSERT INTO order_items (order_id, bike_id, number, price) VALUES (?, ?, ?, ?)`)
             .bind(item.order_id, item.bike_id, item.number, item.price)
             .run();
         return new Response("Order item created", { status: 201 });
     } catch (e) {
-        return errorResponse("Error: " + e);
+        console.error("insertOrderItem failed:", e);
+        return errorResponse("Could not create order item", 500);
     }
 };
 
 export const updateOrderItem = async (req: Request, env: Env) => {
+    const item: any = await readJson(req);
+    if (!item.id) return errorResponse("ID missing");
+    const projectId = await resolveProjectId(env, "SELECT project_id FROM orders WHERE id = ?", item.order_id);
+    await requireProjectRole(req, env, projectId, "admin");
     try {
-        const item: any = await req.json();
-        if (!item.id) return errorResponse("ID missing");
         await env.DB.prepare(`UPDATE order_items SET order_id = ?, bike_id = ?, number = ?, price = ? WHERE id = ?`)
             .bind(item.order_id, item.bike_id, item.number, item.price, item.id)
             .run();
         return new Response("Order item updated", { status: 200 });
     } catch (e) {
-        return errorResponse("Error: " + e);
+        console.error("updateOrderItem failed:", e);
+        return errorResponse("Could not update order item", 500);
     }
 };
 
@@ -164,6 +186,13 @@ export const deleteOrderItem = async (req: Request, env: Env) => {
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
     if (!id) return errorResponse("ID missing");
+
+    const projectId = await resolveProjectId(
+        env,
+        "SELECT o.project_id FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE oi.id = ?",
+        id
+    );
+    await requireProjectRole(req, env, projectId, "admin");
 
     try {
         await env.DB.prepare("DELETE FROM order_items WHERE id = ?").bind(id).run();

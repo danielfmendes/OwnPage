@@ -1,5 +1,6 @@
 import { Env } from "../../types";
 import { GraphMeta, GraphData, CityData, BikeSales } from "../../models";
+import { getAllowedProjectIds, HttpError, requireUser } from "../../utils/auth";
 
 // Helper for error responses
 const errorResponse = (msg: string, status = 400) => new Response(msg, { status });
@@ -23,6 +24,25 @@ const parseProjectIds = (url: URL): number[] => {
     const eqMatch = filter.match(/project_id:\$eq\.(\d+)/);
     if (eqMatch) return [Number(eqMatch[1])];
     return [];
+};
+
+/**
+ * Resolve which project IDs this request may aggregate over (port of Go's filterProjectIDs):
+ * the requested IDs intersected with the caller's accessible projects. If the client requests
+ * none, fall back to all of the caller's projects. Throws 403 if they request only projects they
+ * cannot access. An empty array means "this user has no projects" → handlers return empty data.
+ */
+const scopedProjectIds = async (req: Request, env: Env): Promise<number[]> => {
+    const email = await requireUser(req, env);
+    const allowed = await getAllowedProjectIds(env, email, "user");
+    const requested = parseProjectIds(new URL(req.url));
+    if (requested.length === 0) return allowed;
+    const allowedSet = new Set(allowed);
+    const filtered = requested.filter(id => allowedSet.has(id));
+    if (filtered.length === 0) {
+        throw new HttpError(403, "You don't have access to the requested project(s)");
+    }
+    return filtered;
 };
 
 // Returns { sql: " AND o.project_id IN (?,?)", bindings: [1,2] } or empty
@@ -49,7 +69,10 @@ export const getGraphMeta = async (req: Request, env: Env) => {
     if (!range) return errorResponse("Range missing");
 
     const mods = getModifiers(range);
-    const projectIds = parseProjectIds(url);
+    const projectIds = await scopedProjectIds(req, env);
+    if (projectIds.length === 0) {
+        return Response.json([{ current_revenue: 0, previous_revenue: 0, current_sales: 0, previous_sales: 0 }]);
+    }
     const proj = buildProjectFilter(projectIds, "AND");
 
     let query: string;
@@ -57,7 +80,7 @@ export const getGraphMeta = async (req: Request, env: Env) => {
 
     if (mods.current) {
         query = `
-            SELECT 
+            SELECT
                 COALESCE((SELECT SUM(oi.price * oi.number) FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE date(o.order_date) >= date('now', ?)${proj.sql} AND date(o.order_date) < date('now', '+1 day')), 0) as current_revenue,
                 COALESCE((SELECT SUM(oi.price * oi.number) FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE date(o.order_date) >= date('now', ?) AND date(o.order_date) < date('now', ?)${proj.sql}), 0) as previous_revenue,
                 COALESCE((SELECT SUM(oi.number) FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE date(o.order_date) >= date('now', ?)${proj.sql} AND date(o.order_date) < date('now', '+1 day')), 0) as current_sales,
@@ -91,7 +114,8 @@ export const getGraphData = async (req: Request, env: Env) => {
     if (!range) return errorResponse("Range missing");
 
     const mods = getModifiers(range);
-    const projectIds = parseProjectIds(url);
+    const projectIds = await scopedProjectIds(req, env);
+    if (projectIds.length === 0) return Response.json([]);
     const proj = buildProjectFilter(projectIds, "AND");
 
     let query = `
@@ -125,7 +149,8 @@ export const getCityData = async (req: Request, env: Env) => {
     if (!range) return errorResponse("Range missing");
 
     const mods = getModifiers(range);
-    const projectIds = parseProjectIds(url);
+    const projectIds = await scopedProjectIds(req, env);
+    if (projectIds.length === 0) return Response.json([]);
     const proj = buildProjectFilter(projectIds, "AND");
 
     let query: string;
@@ -170,7 +195,8 @@ export const getBikeSales = async (req: Request, env: Env) => {
     if (!range) return errorResponse("Range missing");
 
     const mods = getModifiers(range);
-    const projectIds = parseProjectIds(url);
+    const projectIds = await scopedProjectIds(req, env);
+    if (projectIds.length === 0) return Response.json([]);
     const proj = buildProjectFilter(projectIds, "AND");
 
     let query = `
