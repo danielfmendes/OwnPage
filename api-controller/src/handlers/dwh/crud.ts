@@ -1,9 +1,26 @@
 import { Env } from "../../types";
 import { queryWithPagination } from "./pagination";
-import { getValidUserEmail } from "../../utils/jwt";
+import {
+    getAllowedProjectIds,
+    readJson,
+    requireProjectRole,
+    requireUser,
+    resolveProjectId,
+} from "../../utils/auth";
+
+interface CrudOptions {
+    // Column on this table that holds the owning project_id. When set, writes require
+    // admin on that project (mirrors Go's HandleInsert/Update/Delete + ValidateProjectAccess).
+    projectColumn?: string;
+    // When true the table is read-only (GET only) — writes return 405. Matches the Go
+    // controller, where bike_models / components / users have no insert/update/delete handlers.
+    readOnly?: boolean;
+}
+
+const methodNotAllowed = () => new Response("Method not allowed", { status: 405 });
 
 // Generic CRUD helper
-const createCrudHandlers = (table: string, columns: string[]) => {
+const createCrudHandlers = (table: string, columns: string[], options: CrudOptions = {}) => {
     return {
         getAll: async (req: Request, env: Env) => {
             const baseQuery = `SELECT * FROM ${table}`;
@@ -11,8 +28,12 @@ const createCrudHandlers = (table: string, columns: string[]) => {
             return await queryWithPagination(req, env, baseQuery, countQuery);
         },
         insert: async (req: Request, env: Env) => {
+            if (options.readOnly) return methodNotAllowed();
+            const data: any = await readJson(req);
+            if (options.projectColumn) {
+                await requireProjectRole(req, env, data[options.projectColumn], "admin");
+            }
             try {
-                const data: any = await req.json();
                 const placeholders = columns.map(() => "?").join(", ");
                 const values = columns.map(col => data[col]);
                 await env.DB.prepare(`INSERT INTO ${table} (${columns.join(", ")}) VALUES (${placeholders})`)
@@ -20,13 +41,18 @@ const createCrudHandlers = (table: string, columns: string[]) => {
                     .run();
                 return new Response("Created", { status: 201 });
             } catch (e) {
-                return new Response("Error: " + e, { status: 400 });
+                console.error(`insert ${table} failed:`, e);
+                return new Response("Could not create record", { status: 500 });
             }
         },
         update: async (req: Request, env: Env) => {
+            if (options.readOnly) return methodNotAllowed();
+            const data: any = await readJson(req);
+            if (!data.id) return new Response("ID missing", { status: 400 });
+            if (options.projectColumn) {
+                await requireProjectRole(req, env, data[options.projectColumn], "admin");
+            }
             try {
-                const data: any = await req.json();
-                if (!data.id) return new Response("ID missing", { status: 400 });
                 const setClause = columns.map(col => `${col} = ?`).join(", ");
                 const values = columns.map(col => data[col]);
                 await env.DB.prepare(`UPDATE ${table} SET ${setClause} WHERE id = ?`)
@@ -34,14 +60,26 @@ const createCrudHandlers = (table: string, columns: string[]) => {
                     .run();
                 return new Response("Updated", { status: 200 });
             } catch (e) {
-                return new Response("Error: " + e, { status: 400 });
+                console.error(`update ${table} failed:`, e);
+                return new Response("Could not update record", { status: 500 });
             }
         },
         delete: async (req: Request, env: Env) => {
+            if (options.readOnly) return methodNotAllowed();
             const url = new URL(req.url);
             const id = url.searchParams.get("id");
             const cascade = url.searchParams.get("cascade") === "true";
             if (!id) return new Response("Bad request – missing or invalid ID", { status: 400 });
+
+            if (options.projectColumn) {
+                const projectId = await resolveProjectId(
+                    env,
+                    `SELECT ${options.projectColumn} AS project_id FROM ${table} WHERE id = ?`,
+                    id
+                );
+                await requireProjectRole(req, env, projectId, "admin");
+            }
+
             try {
                 if (cascade) {
                     // Define cascade dependencies per table
@@ -80,27 +118,28 @@ const createCrudHandlers = (table: string, columns: string[]) => {
                 if (msg.includes("FOREIGN KEY") || msg.includes("FOREIGN_KEY") || msg.includes("SQLITE_CONSTRAINT")) {
                     return new Response("Conflict – related data exists; use cascade=true to force delete", { status: 409 });
                 }
-                return new Response("Error: " + msg, { status: 500 });
+                console.error(`delete ${table} failed:`, e);
+                return new Response("Could not delete record", { status: 500 });
             }
         },
         handler: async (req: Request, env: Env) => {
-            const handlers = createCrudHandlers(table, columns);
+            const handlers = createCrudHandlers(table, columns, options);
             switch (req.method) {
                 case "GET": return handlers.getAll(req, env);
                 case "POST": return handlers.insert(req, env);
                 case "PUT": return handlers.update(req, env);
                 case "DELETE": return handlers.delete(req, env);
-                default: return new Response("Method not allowed", { status: 405 });
+                default: return methodNotAllowed();
             }
         }
     };
 };
 
-// Bike Models
+// Bike Models — read-only in the Go controller (GetBikeModels only)
 export const bikeModelsHandler = (req: Request, env: Env) =>
-    createCrudHandlers("bike_models", ["name", "saddle_id", "frame_id", "fork_id"]).handler(req, env);
+    createCrudHandlers("bike_models", ["name", "saddle_id", "frame_id", "fork_id"], { readOnly: true }).handler(req, env);
 
-// Components – queries saddles, frames, or forks based on ?filter=type:$eq.{type}
+// Components – queries saddles, frames, or forks based on ?filter=type:$eq.{type}. Read-only (matches Go).
 export const componentsHandler = async (req: Request, env: Env) => {
     const url = new URL(req.url);
     const filter = url.searchParams.get("filter") || "";
@@ -124,49 +163,78 @@ export const componentsHandler = async (req: Request, env: Env) => {
         return Response.json(results);
     }
 
-    return createCrudHandlers(tableName, ["name"]).handler(req, env);
+    return methodNotAllowed();
 }
 
-// Customers
+// Customers — writes require admin on the row's project_id
 export const customersHandler = (req: Request, env: Env) =>
-    createCrudHandlers("customers", ["email", "first_name", "name", "dob", "city", "project_id"]).handler(req, env);
+    createCrudHandlers(
+        "customers",
+        ["email", "first_name", "name", "dob", "city", "project_id"],
+        { projectColumn: "project_id" }
+    ).handler(req, env);
 
-// Projects — custom handler to auto-assign creator role on creation
+// Projects — GET is scoped to the caller's projects; POST auto-assigns creator; PUT/DELETE
+// require the creator role on the target project.
 export const projectsHandler = async (req: Request, env: Env) => {
+    if (req.method === "GET") {
+        // Mirrors Go's GetProjectsForUserByRole: only projects where the caller has >= requiredRole.
+        const email = await requireUser(req, env);
+        const url = new URL(req.url);
+        const requiredRole = url.searchParams.get("requiredRole") || "user";
+        const ids = await getAllowedProjectIds(env, email, requiredRole);
+        if (ids.length === 0) return Response.json([]);
+        const placeholders = ids.map(() => "?").join(", ");
+        const { results } = await env.DB.prepare(
+            `SELECT id, name FROM projects WHERE id IN (${placeholders})`
+        ).bind(...ids).all();
+        return Response.json(results);
+    }
+
     if (req.method === "POST") {
+        // Creating a project is allowed for any authenticated user; they become its creator.
+        const email = await requireUser(req, env);
+        const data: any = await readJson(req);
         try {
-            const data: any = await req.json();
-
-            // Extract user email from JWT
-            const userEmail = await getValidUserEmail(req, env);
-
-            // Insert project
             const result = await env.DB.prepare("INSERT INTO projects (name) VALUES (?)").bind(data.name).run();
             const projectId = result.meta?.last_row_id;
-
-            // Auto-assign creator role if we have the user email and project ID
-            if (userEmail && projectId) {
+            if (projectId) {
                 await env.DB.prepare(
                     "INSERT INTO role_management (useremail, project_id, role) VALUES (?, ?, 'creator')"
-                ).bind(userEmail, projectId).run();
+                ).bind(email, projectId).run();
             }
-
             return new Response("Created", { status: 201 });
         } catch (e) {
-            return new Response("Error: " + e, { status: 400 });
+            console.error("create project failed:", e);
+            return new Response("Could not create project", { status: 500 });
         }
     }
 
-    // Delegate all other methods to the generic CRUD handler
-    return createCrudHandlers("projects", ["name"]).handler(req, env);
+    if (req.method === "PUT") {
+        const data: any = await readJson(req);
+        if (!data.id) return new Response("ID missing", { status: 400 });
+        // The project IS the resource — require creator on it.
+        await requireProjectRole(req, env, data.id, "creator");
+        return createCrudHandlers("projects", ["name"]).update(req, env);
+    }
+
+    if (req.method === "DELETE") {
+        const url = new URL(req.url);
+        const id = url.searchParams.get("id");
+        if (!id) return new Response("Bad request – missing or invalid ID", { status: 400 });
+        await requireProjectRole(req, env, id, "creator");
+        return createCrudHandlers("projects", ["name"]).delete(req, env);
+    }
+
+    return methodNotAllowed();
 };
 
-// Users (Simplified - use Auth for real logic)
+// Users — read-only here (registration/auth is handled by /auth). Matches Go's GetUsers/GetUser.
 export const usersHandler = (req: Request, env: Env) =>
-    createCrudHandlers("users", ["username", "email", "dob", "is_verified"]).handler(req, env);
+    createCrudHandlers("users", ["username", "email", "dob", "is_verified"], { readOnly: true }).handler(req, env);
 
 export const userHandler = async (req: Request, env: Env) => {
-    if (req.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
+    if (req.method !== "GET") return methodNotAllowed();
 
     const url = new URL(req.url);
     const filter = url.searchParams.get("filter");
@@ -181,7 +249,10 @@ export const userHandler = async (req: Request, env: Env) => {
     return new Response("Filter missing or invalid", { status: 400 });
 };
 
-// Warehouse Parts
+// Warehouse Parts — writes require admin on the row's project_id
 export const warehousePartsHandler = (req: Request, env: Env) =>
-    createCrudHandlers("warehouse_parts", ["part_type", "part_id", "quantity", "storage_location", "project_id"]).handler(req, env);
-
+    createCrudHandlers(
+        "warehouse_parts",
+        ["part_type", "part_id", "quantity", "storage_location", "project_id"],
+        { projectColumn: "project_id" }
+    ).handler(req, env);
