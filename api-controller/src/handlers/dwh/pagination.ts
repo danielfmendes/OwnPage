@@ -55,6 +55,23 @@ function appendFilters(query: string, conditions: string[]): string {
     return `SELECT * FROM (${query}) AS _filtered WHERE ${whereClause}`;
 }
 
+// Build an ORDER BY clause from the frontend's orderBy param (port of Go's applyPaginationAndSorting).
+// Format: "col=dir" comma-separated, e.g. "customer_name=asc,project_id=desc".
+// Columns/directions are whitelisted because the clause is string-built (no bind for identifiers).
+function buildOrderClause(orderByParam: string | null): string {
+    if (!orderByParam) return "";
+    const parts: string[] = [];
+    for (const segment of orderByParam.split(",")) {
+        const [rawCol, rawDir] = segment.split("=");
+        const col = (rawCol || "").trim();
+        const dir = (rawDir || "asc").trim().toLowerCase();
+        if (!/^[A-Za-z0-9_]+$/.test(col)) continue;
+        const safeDir = dir === "desc" ? "DESC" : "ASC";
+        parts.push(`${col} ${safeDir}`);
+    }
+    return parts.length ? ` ORDER BY ${parts.join(", ")}` : "";
+}
+
 export const queryWithPagination = async <T = any>(
     req: Request,
     env: Env,
@@ -74,11 +91,12 @@ export const queryWithPagination = async <T = any>(
             ? `SELECT COUNT(*) AS count FROM (${filteredBaseQuery})`
             : countQuery;
 
-        // Merge filter bindings before existing bindings
-        // For filteredCountQuery when derived from filteredBaseQuery, we need filterBindings + bindings
-        const allBindings = [...filterBindings, ...bindings];
-        // Count query needs double filterBindings when derived from filteredBaseQuery (subquery has its own set)
-        const countBindings = conditions.length > 0 ? [...filterBindings, ...bindings] : [...bindings];
+        // Binding order must match the SQL: the base query's own placeholders come first (they sit
+        // inside the wrapped subquery), then the filter placeholders in the outer WHERE.
+        const allBindings = [...bindings, ...filterBindings];
+        // When derived from filteredBaseQuery the count query embeds the same base+filter placeholders;
+        // when there's no filter we use the caller's countQuery, which only needs the base bindings.
+        const countBindings = conditions.length > 0 ? [...bindings, ...filterBindings] : [...bindings];
 
         // Handle countBy parameter for filter dropdowns
         const countBy = url.searchParams.get("countBy");
@@ -101,7 +119,8 @@ export const queryWithPagination = async <T = any>(
 
         const offset = (page - 1) * pageSize;
 
-        const paginatedQuery = `${filteredBaseQuery} LIMIT ? OFFSET ?`;
+        const orderClause = buildOrderClause(url.searchParams.get("orderBy"));
+        const paginatedQuery = `${filteredBaseQuery}${orderClause} LIMIT ? OFFSET ?`;
 
         const [countResult, itemsResult] = await env.DB.batch([
             env.DB.prepare(filteredCountQuery).bind(...countBindings),

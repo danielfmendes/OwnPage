@@ -25,6 +25,39 @@ const getCookieOptions = (req: Request) => {
     return `HttpOnly; Path=/; Max-Age=900; SameSite=${isSecure ? 'None' : 'Lax'}${isSecure ? '; Secure' : ''}`;
 };
 
+// Sends the verification email via the Resend HTTP API (Workers have no SMTP, unlike the Go code's
+// smtp.gmail.com). Skipped when DISABLE_EMAILS=true or when no provider is configured (local/dev),
+// so registration still works without an email account — parity with Go's DISABLE_EMAILS gate.
+const sendVerificationEmail = async (env: Env, toEmail: string, token: string) => {
+    if (env.DISABLE_EMAILS === "true") return;
+    if (!env.RESEND_API_KEY || !env.EMAIL_FROM) {
+        console.warn("Verification email not sent: RESEND_API_KEY / EMAIL_FROM not configured");
+        return;
+    }
+    const base = (env.APP_BASE_URL || "").replace(/\/$/, "");
+    const link = `${base}/dwh/auth/verify?token=${token}`;
+    try {
+        const res = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${env.RESEND_API_KEY}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                from: env.EMAIL_FROM,
+                to: toEmail,
+                subject: "Please confirm your e-mail address for NebulaDW",
+                html: `<p>Welcome to NebulaDW!</p><p>Please confirm your e-mail address by clicking <a href="${link}">this link</a>.</p>`,
+            }),
+        });
+        if (!res.ok) {
+            console.error("Verification email failed:", res.status, await res.text());
+        }
+    } catch (e) {
+        console.error("Verification email error:", e);
+    }
+};
+
 // POST /auth/register
 export const handleRegister = async (req: Request, env: Env) => {
     try {
@@ -48,7 +81,8 @@ export const handleRegister = async (req: Request, env: Env) => {
             .bind(user.username, user.email, hashedPassword, user.dob, verificationExpires, verificationToken)
             .run();
 
-        // TODO: Send verification email (requires external service like SendGrid/MailChannels in Worker)
+        // Send the verification email (no-op when emails are disabled / unconfigured).
+        await sendVerificationEmail(env, user.email, verificationToken);
 
         const token = await createJWT(user.email, env.JWT_SECRET);
 
@@ -185,12 +219,39 @@ export const handleMe = async (req: Request, env: Env) => {
     }
 }
 
+// GET /auth/verify?token=...  (port of Go's HandleEmailVerification)
+export const handleVerify = async (req: Request, env: Env) => {
+    const url = new URL(req.url);
+    const token = url.searchParams.get("token");
+    if (!token) return errorResponse("Verification token missing", 400);
+
+    const user = await env.DB.prepare(
+        "SELECT email, verification_expires FROM users WHERE verification_token = ?"
+    ).bind(token).first<{ email: string; verification_expires: string | null }>();
+
+    if (!user) return errorResponse("Invalid or expired verification token", 400);
+
+    if (user.verification_expires && new Date(user.verification_expires).getTime() < Date.now()) {
+        return errorResponse("Verification token has expired", 400);
+    }
+
+    await env.DB.prepare(
+        "UPDATE users SET is_verified = TRUE, verification_token = NULL, verification_expires = NULL WHERE verification_token = ?"
+    ).bind(token).run();
+
+    return new Response("Email successfully confirmed! You can now log in.", {
+        status: 200,
+        headers: { "Content-Type": "text/plain" },
+    });
+};
+
 export const authHandler = async (subPath: string, req: Request, env: Env) => {
     // subPath is expected to be "/auth/register" or "/auth/login" or "/auth/refresh" or "/auth/me"
     if (subPath.startsWith("/auth/register")) return handleRegister(req, env);
     if (subPath.startsWith("/auth/login")) return handleLogin(req, env);
     if (subPath.startsWith("/auth/refresh")) return handleRefresh(req, env);
     if (subPath.startsWith("/auth/logout")) return handleLogout(req, env);
+    if (subPath.startsWith("/auth/verify")) return handleVerify(req, env);
     if (subPath.startsWith("/auth/me")) return handleMe(req, env);
 
     return errorResponse(`Auth method "${subPath}" not found`, 404);
