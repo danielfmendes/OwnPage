@@ -1,18 +1,24 @@
-// Configurable, project-agnostic dashboard. The user adds widgets (entity + group-by + aggregate +
-// chart type); each widget calls /dwh/aggregate and renders with recharts. Widget config is stored
-// per-project in localStorage (v1 — no server-side dashboard table yet).
+// Configurable dashboard with draggable + resizable panels (react-grid-layout). Each widget calls
+// /dwh/aggregate and renders with recharts. Both the widget configs and the grid layout (positions
+// + sizes) are persisted per-project in localStorage. "Default panels" generates a starter set from
+// the project's entities.
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useActiveProject } from "@/utils/useActiveProject";
+import GridLayout, { WidthProvider, type Layout } from "react-grid-layout";
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
 import {
     Bar, BarChart, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 import ContentLayout from "@/components/layout/ContentLayout";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, LayoutGrid, GripVertical } from "lucide-react";
+import { useActiveProject } from "@/utils/useActiveProject";
 import { dwhClient } from "@/models/dwh/dwhClient";
 import type { DwhEntity } from "@/models/dwh/types";
+
+const ReactGridLayout = WidthProvider(GridLayout);
 
 interface Widget {
     id: string;
@@ -21,6 +27,14 @@ interface Widget {
     fn: "count" | "sum" | "avg";
     measure?: string;
     chart: "bar" | "line";
+}
+
+const DEFAULT_W = 6;
+const DEFAULT_H = 9;
+
+// Place a new widget at the bottom of the grid (y = Infinity lets RGL drop it below everything).
+function defaultLayoutItem(id: string): Layout {
+    return { i: id, x: 0, y: Infinity, w: DEFAULT_W, h: DEFAULT_H, minW: 3, minH: 5 };
 }
 
 function WidgetCard({ projectId, widget, onRemove }: { projectId: number; widget: Widget; onRemove: () => void }) {
@@ -34,40 +48,49 @@ function WidgetCard({ projectId, widget, onRemove }: { projectId: number; widget
     }, [projectId, widget]);
 
     return (
-        <div className="rounded-xl border p-4 bg-card">
-            <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-sm">
-                    {widget.fn}{widget.measure ? `(${widget.measure})` : ""} of {widget.entity} by {widget.groupBy}
-                </h3>
-                <Button variant="ghost" size="icon" className="text-red-500 h-7 w-7" onClick={onRemove}><Trash2 className="h-4 w-4" /></Button>
+        <div className="h-full flex flex-col rounded-xl border bg-card overflow-hidden">
+            <div className="drag-handle flex items-center justify-between px-3 py-2 border-b cursor-move bg-muted/30">
+                <div className="flex items-center gap-1 min-w-0">
+                    <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <h3 className="font-semibold text-sm truncate">
+                        {widget.fn}{widget.measure ? `(${widget.measure})` : ""} of {widget.entity} by {widget.groupBy}
+                    </h3>
+                </div>
+                <Button variant="ghost" size="icon" className="no-drag text-red-500 h-6 w-6 shrink-0" onClick={onRemove}>
+                    <Trash2 className="h-4 w-4" />
+                </Button>
             </div>
-            {error ? <p className="text-sm text-red-600">{error}</p> : (
-                <ResponsiveContainer width="100%" height={220}>
-                    {widget.chart === "line" ? (
-                        <LineChart data={data}>
-                            <XAxis dataKey="value" fontSize={11} /><YAxis fontSize={11} /><Tooltip />
-                            <Line type="monotone" dataKey="total" stroke="#6366f1" />
-                        </LineChart>
-                    ) : (
-                        <BarChart data={data}>
-                            <XAxis dataKey="value" fontSize={11} /><YAxis fontSize={11} /><Tooltip />
-                            <Bar dataKey="total" fill="#6366f1" />
-                        </BarChart>
-                    )}
-                </ResponsiveContainer>
-            )}
+            <div className="flex-1 min-h-0 p-2">
+                {error ? <p className="text-sm text-red-600">{error}</p> : (
+                    <ResponsiveContainer width="100%" height="100%">
+                        {widget.chart === "line" ? (
+                            <LineChart data={data}>
+                                <XAxis dataKey="value" fontSize={11} /><YAxis fontSize={11} /><Tooltip />
+                                <Line type="monotone" dataKey="total" stroke="#6366f1" />
+                            </LineChart>
+                        ) : (
+                            <BarChart data={data}>
+                                <XAxis dataKey="value" fontSize={11} /><YAxis fontSize={11} /><Tooltip />
+                                <Bar dataKey="total" fill="#6366f1" />
+                            </BarChart>
+                        )}
+                    </ResponsiveContainer>
+                )}
+            </div>
         </div>
     );
 }
 
 export default function GenericDashboard() {
     const { projectId } = useActiveProject();
-    const storageKey = `dwh_dashboard_${projectId}`;
+    const widgetsKey = `dwh_dashboard_${projectId}`;
+    const layoutKey = `dwh_dashboard_layout_${projectId}`;
 
     const [entities, setEntities] = useState<DwhEntity[]>([]);
     const [widgets, setWidgets] = useState<Widget[]>([]);
+    const [layout, setLayout] = useState<Layout[]>([]);
 
-    // form state
+    // add-widget form state
     const [fEntity, setFEntity] = useState("");
     const [fGroupBy, setFGroupBy] = useState("");
     const [fFn, setFFn] = useState<Widget["fn"]>("count");
@@ -77,25 +100,60 @@ export default function GenericDashboard() {
     useEffect(() => {
         if (!projectId) return;
         dwhClient.listEntities(projectId).then(setEntities).catch(() => setEntities([]));
-        try { setWidgets(JSON.parse(localStorage.getItem(storageKey) || "[]")); } catch { setWidgets([]); }
-    }, [projectId, storageKey]);
+        try { setWidgets(JSON.parse(localStorage.getItem(widgetsKey) || "[]")); } catch { setWidgets([]); }
+        try { setLayout(JSON.parse(localStorage.getItem(layoutKey) || "[]")); } catch { setLayout([]); }
+    }, [projectId, widgetsKey, layoutKey]);
 
-    const persist = useCallback((next: Widget[]) => {
+    const persistWidgets = useCallback((next: Widget[]) => {
         setWidgets(next);
-        localStorage.setItem(storageKey, JSON.stringify(next));
-    }, [storageKey]);
+        localStorage.setItem(widgetsKey, JSON.stringify(next));
+    }, [widgetsKey]);
+
+    const persistLayout = useCallback((next: Layout[]) => {
+        setLayout(next);
+        localStorage.setItem(layoutKey, JSON.stringify(next));
+    }, [layoutKey]);
+
+    // Every widget needs a layout entry; fill any missing ones (e.g. legacy saved widgets).
+    const effectiveLayout = useMemo<Layout[]>(() => {
+        const byId = new Map(layout.map((l) => [l.i, l]));
+        return widgets.map((w) => byId.get(w.id) ?? defaultLayoutItem(w.id));
+    }, [widgets, layout]);
 
     const cols = useMemo(() => entities.find((e) => e.name === fEntity)?.columns ?? [], [entities, fEntity]);
 
     const addWidget = () => {
         if (!fEntity || !fGroupBy) return;
-        const w: Widget = {
-            id: `${fEntity}-${Date.now()}`,
-            entity: fEntity, groupBy: fGroupBy, fn: fFn,
-            measure: fFn === "count" ? undefined : fMeasure || undefined,
-            chart: fChart,
-        };
-        persist([...widgets, w]);
+        const id = `${fEntity}-${Date.now()}`;
+        persistWidgets([...widgets, {
+            id, entity: fEntity, groupBy: fGroupBy, fn: fFn,
+            measure: fFn === "count" ? undefined : fMeasure || undefined, chart: fChart,
+        }]);
+        persistLayout([...effectiveLayout, defaultLayoutItem(id)]);
+    };
+
+    const removeWidget = (id: string) => {
+        persistWidgets(widgets.filter((w) => w.id !== id));
+        persistLayout(effectiveLayout.filter((l) => l.i !== id));
+    };
+
+    // Generate a tidy starter set: one count-by widget per entity (using a sensible group column),
+    // laid out two per row.
+    const addDefaultPanels = () => {
+        const groupable = (e: DwhEntity) =>
+            e.columns.find((c) => !c.is_system && ["text", "boolean", "date"].includes(c.data_type))
+            ?? e.columns.find((c) => !c.is_system && c.data_type === "integer");
+        const next: Widget[] = [];
+        const nextLayout: Layout[] = [];
+        entities.slice(0, 6).forEach((e, i) => {
+            const g = groupable(e);
+            if (!g) return;
+            const id = `${e.name}-default-${i}`;
+            next.push({ id, entity: e.name, groupBy: g.name, fn: "count", chart: "bar" });
+            nextLayout.push({ i: id, x: (i % 2) * DEFAULT_W, y: Math.floor(i / 2) * DEFAULT_H, w: DEFAULT_W, h: DEFAULT_H, minW: 3, minH: 5 });
+        });
+        persistWidgets(next);
+        persistLayout(nextLayout);
     };
 
     if (!projectId) {
@@ -111,7 +169,12 @@ export default function GenericDashboard() {
     return (
         <ContentLayout title="Dashboard">
             <div className="rounded-xl border p-4 bg-card mb-4">
-                <h3 className="font-semibold mb-3">Add widget</h3>
+                <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold">Add widget</h3>
+                    <Button variant="outline" size="sm" onClick={addDefaultPanels}>
+                        <LayoutGrid className="h-4 w-4 mr-1" /> Default panels
+                    </Button>
+                </div>
                 <div className="flex flex-wrap items-end gap-2">
                     <Select value={fEntity} onValueChange={(v) => { setFEntity(v); setFGroupBy(""); setFMeasure(""); }}>
                         <SelectTrigger className="w-40"><SelectValue placeholder="Entity" /></SelectTrigger>
@@ -144,14 +207,28 @@ export default function GenericDashboard() {
                     </Select>
                     <Button onClick={addWidget} disabled={!fEntity || !fGroupBy}><Plus className="h-4 w-4 mr-1" /> Add</Button>
                 </div>
+                <p className="text-xs text-muted-foreground mt-2">Drag a panel by its title bar to move it; drag the bottom-right corner to resize. Your layout is saved automatically.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {widgets.map((w) => (
-                    <WidgetCard key={w.id} projectId={projectId} widget={w} onRemove={() => persist(widgets.filter((x) => x.id !== w.id))} />
-                ))}
-            </div>
-            {widgets.length === 0 && <p className="text-muted-foreground text-sm mt-4">No widgets yet — add one above.</p>}
+            {widgets.length === 0 ? (
+                <p className="text-muted-foreground text-sm mt-4">No widgets yet — add one above or click <span className="font-medium">Default panels</span>.</p>
+            ) : (
+                <ReactGridLayout
+                    className="layout"
+                    layout={effectiveLayout}
+                    cols={12}
+                    rowHeight={30}
+                    draggableHandle=".drag-handle"
+                    draggableCancel=".no-drag"
+                    onLayoutChange={(l) => persistLayout(l)}
+                >
+                    {widgets.map((w) => (
+                        <div key={w.id}>
+                            <WidgetCard projectId={projectId} widget={w} onRemove={() => removeWidget(w.id)} />
+                        </div>
+                    ))}
+                </ReactGridLayout>
+            )}
         </ContentLayout>
     );
 }
