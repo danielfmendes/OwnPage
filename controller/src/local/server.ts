@@ -52,6 +52,7 @@ const env = {
     DB: db,
     CHAT_DB: db,
     AI: aiStub,
+    DB_DIALECT: "postgres",
     JWT_SECRET: process.env.JWT_SECRET || "local_development_super_secret_key",
     DISABLE_EMAILS: process.env.DISABLE_EMAILS || "true",
     APP_BASE_URL: process.env.APP_BASE_URL,
