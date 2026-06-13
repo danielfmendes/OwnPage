@@ -88,7 +88,7 @@ export const queryWithPagination = async <T = any>(
         const filteredBaseQuery = appendFilters(baseQuery, conditions);
         // Derive count from filtered base query (not from countQuery which loses column names)
         const filteredCountQuery = conditions.length > 0
-            ? `SELECT COUNT(*) AS count FROM (${filteredBaseQuery})`
+            ? `SELECT COUNT(*) AS count FROM (${filteredBaseQuery}) AS sub`
             : countQuery;
 
         // Binding order must match the SQL: the base query's own placeholders come first (they sit

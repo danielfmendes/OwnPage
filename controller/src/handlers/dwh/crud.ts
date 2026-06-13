@@ -115,7 +115,9 @@ const createCrudHandlers = (table: string, columns: string[], options: CrudOptio
                 return new Response("Deleted", { status: 200 });
             } catch (e: any) {
                 const msg = String(e);
-                if (msg.includes("FOREIGN KEY") || msg.includes("FOREIGN_KEY") || msg.includes("SQLITE_CONSTRAINT")) {
+                // D1/SQLite reports "FOREIGN KEY"/"SQLITE_CONSTRAINT"; Postgres reports a lowercase
+                // "foreign key" message (and code 23503). Match both so the 409 path works locally too.
+                if (/foreign[_ ]key/i.test(msg) || msg.includes("SQLITE_CONSTRAINT") || (e && (e as any).code === "23503")) {
                     return new Response("Conflict – related data exists; use cascade=true to force delete", { status: 409 });
                 }
                 console.error(`delete ${table} failed:`, e);
