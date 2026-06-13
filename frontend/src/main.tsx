@@ -21,6 +21,7 @@ import OrderPage from "@/pages/dwh/orders/page";
 import PartsStoragePage from "@/pages/dwh/partsstorage/page";
 import RoleManagementPage from "@/pages/dwh/rolemanagement/page";
 import WareHousePage from "@/pages/dwh/warehouse/page";
+import EntityDataPage from "@/pages/dwh/entity/page";
 import PrivacyPage from "@/pages/privacy/page";
 import ImprintPage from "@/pages/imprint/page";
 import ChatLogin from "@/pages/chat/ChatLogin.tsx";
@@ -63,6 +64,9 @@ createRoot(document.getElementById('root')!).render(
                                 <Route path="partsstorage" element={<PartsStoragePage />} />
                                 <Route path="rolemanagement" element={<RoleManagementPage />} />
                                 <Route path="warehouse" element={<WareHousePage />} />
+                                {/* Generic, catalog-driven data page for any user-defined entity */}
+                                <Route path="p/:projectId/:entity" element={<EntityDataPage />} />
+                                {/* schema builder & SQL console added in later slices */}
                             </Route>
                         </Route>
                     </Routes>
