@@ -66,6 +66,22 @@ export function ProjectDialog({ onClose }: Props) {
         if (sch == null) { setSelected(projects.slice(0, 1)); return; }
         setSelected(projects.filter((p) => schemaOf(p) === sch));
     };
+
+    // A project is locked when a selection from a DIFFERENT schema exists (can't combine schemas).
+    const isLocked = (project: RoleManagementWithName) =>
+        currentSchema != null && schemaOf(project) !== currentSchema;
+
+    // Group projects by schema for clear sectioning.
+    const groups = useMemo(() => {
+        const m = new Map<string, { label: string; items: RoleManagementWithName[] }>();
+        for (const p of projects) {
+            const key = String(schemaOf(p) ?? "none");
+            const label = (p as any).schema_name ?? "No schema";
+            if (!m.has(key)) m.set(key, { label, items: [] });
+            m.get(key)!.items.push(p);
+        }
+        return Array.from(m.values());
+    }, [projects]);
     const deselectAll = () => setSelected([]);
     const removeSelection = (project: RoleManagementWithName) =>
         setSelected((prev) => prev.filter((p) => p.project_id !== project.project_id));
@@ -97,28 +113,43 @@ export function ProjectDialog({ onClose }: Props) {
                                 {t("button.select_all")}
                             </Button>
                         </div>
+                        {currentSchema != null && (
+                            <p className="text-xs text-muted-foreground mb-2">
+                                Only projects of one schema can be combined. Clear the selection to choose a different schema's projects.
+                            </p>
+                        )}
                         <ScrollArea className="h-48 pr-2">
-                            <ul className="space-y-1">
-                                {projects.map((project) => (
-                                    <li
-                                        key={project.project_id}
-                                        className="flex items-center gap-2 px-2 py-1 rounded hover:bg-muted cursor-pointer"
-                                        onClick={() => toggleSelection(project)}
-                                    >
-                                        <Checkbox
-                                            checked={isSelected(project)}
-                                            onClick={(e) => e.stopPropagation()}
-                                            onCheckedChange={() => toggleSelection(project)}
-                                        />
-                                        <div>
-                                            <div>{project.project_name}</div>
-                                            <div className="text-xs text-muted-foreground">
-                                                {(project as any).schema_name ?? "no schema"} · {project.role}
-                                            </div>
-                                        </div>
-                                    </li>
+                            <div className="space-y-3">
+                                {groups.map((g) => (
+                                    <div key={g.label}>
+                                        <div className="px-2 pb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{g.label}</div>
+                                        <ul className="space-y-1">
+                                            {g.items.map((project) => {
+                                                const locked = isLocked(project);
+                                                return (
+                                                    <li
+                                                        key={project.project_id}
+                                                        className={`flex items-center gap-2 px-2 py-1 rounded ${locked ? "opacity-50 cursor-not-allowed" : "hover:bg-muted cursor-pointer"}`}
+                                                        onClick={() => !locked && toggleSelection(project)}
+                                                        title={locked ? "Different schema — clear the selection first" : undefined}
+                                                    >
+                                                        <Checkbox
+                                                            checked={isSelected(project)}
+                                                            disabled={locked}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            onCheckedChange={() => !locked && toggleSelection(project)}
+                                                        />
+                                                        <div>
+                                                            <div>{project.project_name}</div>
+                                                            <div className="text-xs text-muted-foreground">{project.role}</div>
+                                                        </div>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </div>
                                 ))}
-                            </ul>
+                            </div>
                         </ScrollArea>
                     </AccordionContent>
                 </AccordionItem>

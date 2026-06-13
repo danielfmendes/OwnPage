@@ -65,11 +65,19 @@ function WidgetCard({ schemaId, projectIds, widget, editMode, onRemove, onChange
 }) {
     const [data, setData] = useState<Array<{ value: string; total: number }>>([]);
     const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+    const projectKey = projectIds.join(",");
     useEffect(() => {
+        if (!schemaId) return;
+        let ignore = false; // drop stale responses (projectIds is a fresh array each render)
+        setLoading(true);
         dwhClient.aggregate(widget.entity, schemaId, projectIds, { groupBy: widget.groupBy, fn: widget.fn, measure: widget.measure })
-            .then((rows) => setData(rows.map((r) => ({ value: String(r.value), total: Number(r.total) }))))
-            .catch((e: any) => setError(e?.message ?? String(e)));
-    }, [schemaId, projectIds, widget]);
+            .then((rows) => { if (!ignore) { setData(rows.map((r) => ({ value: String(r.value), total: Number(r.total) }))); setError(null); } })
+            .catch((e: any) => { if (!ignore) setError(e?.message ?? String(e)); })
+            .finally(() => { if (!ignore) setLoading(false); });
+        return () => { ignore = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [schemaId, projectKey, widget.entity, widget.groupBy, widget.fn, widget.measure]);
 
     return (
         <div className="h-full flex flex-col rounded-xl border bg-card overflow-hidden">
@@ -94,8 +102,14 @@ function WidgetCard({ schemaId, projectIds, widget, editMode, onRemove, onChange
                     </div>
                 )}
             </div>
-            <div className="flex-1 min-h-0 p-2">
-                {error ? <p className="text-sm text-red-600">{error}</p> : (
+            <div className="flex-1 min-h-0 p-2 flex items-center justify-center">
+                {error ? (
+                    <p className="text-sm text-red-600 text-center px-2">{error}</p>
+                ) : loading ? (
+                    <p className="text-sm text-muted-foreground">Loading…</p>
+                ) : data.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No data for the current selection</p>
+                ) : (
                     <ResponsiveContainer width="100%" height="100%"><Chart widget={widget} data={data} /></ResponsiveContainer>
                 )}
             </div>
@@ -104,7 +118,9 @@ function WidgetCard({ schemaId, projectIds, widget, editMode, onRemove, onChange
 }
 
 export default function GenericDashboard() {
-    const { schemaId, schemaName, projectIds, canWrite } = useActiveSchema();
+    const { schemaId, schemaName, projectIds, isCreator } = useActiveSchema();
+    // Only the schema's creator may edit the shared dashboard.
+    const canWrite = isCreator;
     const [entities, setEntities] = useState<DwhEntity[]>([]);
     const [widgets, setWidgets] = useState<Widget[]>([]);
     const [layout, setLayout] = useState<Layout[]>([]);
