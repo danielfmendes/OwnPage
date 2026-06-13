@@ -28,7 +28,11 @@ interface Widget {
 
 const DEFAULT_W = 6;
 const DEFAULT_H = 9;
-const defaultLayoutItem = (id: string): Layout => ({ i: id, x: 0, y: Infinity, w: DEFAULT_W, h: DEFAULT_H, minW: 3, minH: 5 });
+// Place a new panel in the next 2-per-row slot so panels sit side by side (not stacked).
+const slotLayoutItem = (id: string, index: number): Layout => ({
+    i: id, x: (index % 2) * DEFAULT_W, y: Math.floor(index / 2) * DEFAULT_H, w: DEFAULT_W, h: DEFAULT_H, minW: 3, minH: 5,
+});
+const defaultLayoutItem = (id: string): Layout => slotLayoutItem(id, 0);
 
 function WidgetCard({ schemaId, projectIds, widget, onRemove, canWrite }: { schemaId: number; projectIds: number[]; widget: Widget; onRemove: () => void; canWrite: boolean }) {
     const [data, setData] = useState<Array<{ value: string; total: number }>>([]);
@@ -109,10 +113,11 @@ export default function GenericDashboard() {
         const id = `${fEntity}-${Date.now()}`;
         persist(
             [...widgets, { id, entity: fEntity, groupBy: fGroupBy, fn: fFn, measure: fFn === "count" ? undefined : fMeasure || undefined, chart: fChart }],
-            [...effectiveLayout, defaultLayoutItem(id)],
+            [...effectiveLayout, slotLayoutItem(id, effectiveLayout.length)],
         );
     };
     const removeWidget = (id: string) => persist(widgets.filter((w) => w.id !== id), effectiveLayout.filter((l) => l.i !== id));
+    const tidy = () => persist(widgets, widgets.map((w, i) => slotLayoutItem(w.id, i)));
 
     const addDefaultPanels = () => {
         const groupable = (e: DwhEntity) =>
@@ -140,7 +145,10 @@ export default function GenericDashboard() {
                 <div className="rounded-xl border p-4 bg-card mb-4">
                     <div className="flex items-center justify-between mb-3">
                         <h3 className="font-semibold">Add widget</h3>
-                        <Button variant="outline" size="sm" onClick={addDefaultPanels}><LayoutGrid className="h-4 w-4 mr-1" /> Default panels</Button>
+                        <div className="flex gap-2">
+                            <Button variant="outline" size="sm" onClick={tidy} disabled={widgets.length === 0}><LayoutGrid className="h-4 w-4 mr-1" /> Tidy</Button>
+                            <Button variant="outline" size="sm" onClick={addDefaultPanels}>Default panels</Button>
+                        </div>
                     </div>
                     <div className="flex flex-wrap items-end gap-2">
                         <Select value={fEntity} onValueChange={(v) => { setFEntity(v); setFGroupBy(""); setFMeasure(""); }}>
