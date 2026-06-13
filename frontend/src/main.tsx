@@ -16,7 +16,7 @@ import LoginCard from "@/pages/dwh/login/page";
 import DWHLayout from "@/pages/dwh/layout";
 import RegisterCard from "@/pages/dwh/register/page";
 import CustomerPage from "@/pages/dwh/customer/page";
-import DashboardPage from "@/pages/dwh/dashboard/page";
+import GenericDashboard from "@/pages/dwh/dashboard/GenericDashboard";
 import OrderPage from "@/pages/dwh/orders/page";
 import PartsStoragePage from "@/pages/dwh/partsstorage/page";
 import RoleManagementPage from "@/pages/dwh/rolemanagement/page";
@@ -61,7 +61,7 @@ createRoot(document.getElementById('root')!).render(
                                 <Route path="login" element={<LoginCard />} />
                                 <Route path="register" element={<RegisterCard />} />
                                 <Route path="customer" element={<CustomerPage />} />
-                                <Route path="dashboard" element={<DashboardPage />} />
+                                <Route path="dashboard" element={<GenericDashboard />} />
                                 <Route path="orders" element={<OrderPage />} />
                                 <Route path="partsstorage" element={<PartsStoragePage />} />
                                 <Route path="rolemanagement" element={<RoleManagementPage />} />
