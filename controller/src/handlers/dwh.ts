@@ -13,6 +13,7 @@ import { ordersHandler, orderItemsHandler } from "./dwh/orders";
 import { partCostsHandler, roleManagementHandler } from "./dwh/roles_and_costs";
 import { authHandler } from "./dwh/auth";
 import { dashboardHandler } from "./dwh/dashboard";
+import { entitiesHandler } from "./dwh/schema/entities";
 import { requireUser, toResponse } from "../utils/auth";
 
 export async function dwhHandler(fullPath: string, env: Env, request: Request): Promise<Response> {
@@ -33,6 +34,10 @@ export async function dwhHandler(fullPath: string, env: Env, request: Request): 
             return await dashboardHandler(request, env);
         }
 
+        // --- Generic, user-definable DWH (catalog-driven) ---
+        if (path.startsWith("/entities")) return await entitiesHandler(request, env);
+
+        // --- Legacy bike-domain handlers (retired once the demo runs through the generic system) ---
         if (path.startsWith("/bikemodels")) return await bikeModelsHandler(request, env);
         if (path.startsWith("/bikes")) return await bikeHandler(request, env);
         if (path.startsWith("/components")) return await componentsHandler(request, env);
