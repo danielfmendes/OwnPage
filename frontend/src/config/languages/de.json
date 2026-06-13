@@ -18,7 +18,9 @@
     "next": "Weiter",
     "select_all": "Alle auswählen",
     "deselect_all": "Auswahl aufheben",
-    "clear_selection": "Auswahl löschen"
+    "clear_selection": "Auswahl löschen",
+    "new_project": "Neues Projekt",
+    "create_project": "Neues Projekt erstellen"
   },
   "switch_theme": "Design wechseln",
   "error": {
@@ -116,7 +118,12 @@
     "warehouse": "Lager",
     "parts_storage": "Teilelager",
     "role_management": "Rollenverwaltung",
-    "profile": "Profil"
+    "profile": "Profil",
+    "schema": "Schema",
+    "sql": "SQL",
+    "roles": "Rollen",
+    "schema_management": "Schema-Verwaltung",
+    "data": "Daten"
   },
   "home": "Startseite",
   "from_time_period": "{{change}} seit {{time}}",

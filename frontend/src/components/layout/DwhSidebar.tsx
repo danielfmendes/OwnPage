@@ -36,16 +36,12 @@ export function DwhSidebar({isOpen}: DwhSidebarProps) {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Extract project_id from URL search params once
-    const urlParams = new URLSearchParams(window.location.search);
-    const projectId = urlParams.get("project_id");
-    const currentQuery = projectId ? `?project_id=${projectId}` : "";
-
     const handleLogout = () => {
         handleLogOut(navigate, addNotification);
     };
 
-    // Load the active SCHEMA's entities for the dynamic data links.
+    // Load the active SCHEMA's entities for the dynamic data links. The active project/schema lives in
+    // the persisted store (useActiveSchema), so links don't need any ?project_id= query param.
     const {schemaId} = useActiveSchema();
     const [entities, setEntities] = useState<DwhEntity[]>([]);
     useEffect(() => {
@@ -63,18 +59,41 @@ export function DwhSidebar({isOpen}: DwhSidebarProps) {
         };
     }, [schemaId]);
 
-    // Fixed platform links + one link per user-defined entity.
-    const items = [
-        {href: `/dwh/dashboard${currentQuery}`, label: t("menu.dashboard", {defaultValue: "Dashboard"}), icon: Gauge},
-        {href: `/dwh/schema${currentQuery}`, label: t("menu.schema", {defaultValue: "Schema"}), icon: Workflow},
-        {href: `/dwh/sql${currentQuery}`, label: t("menu.sql", {defaultValue: "SQL"}), icon: Terminal},
-        {href: `/dwh/rolemanagement${currentQuery}`, label: t("menu.roles", {defaultValue: "Roles"}), icon: Users},
-        ...entities.map((e) => ({
-            href: `/dwh/data/${e.name}${currentQuery}`,
-            label: e.display_name || e.name,
-            icon: Table2,
-        })),
+    // Fixed platform links, then one "Data" link per user-defined entity.
+    const platformItems = [
+        {href: "/dwh/dashboard", label: t("menu.dashboard", {defaultValue: "Dashboard"}), icon: Gauge},
+        {href: "/dwh/schema", label: t("menu.schema", {defaultValue: "Schema"}), icon: Workflow},
+        {href: "/dwh/sql", label: t("menu.sql", {defaultValue: "SQL"}), icon: Terminal},
+        {href: "/dwh/rolemanagement", label: t("menu.roles", {defaultValue: "Roles"}), icon: Users},
     ];
+    const dataItems = entities.map((e) => ({
+        href: `/dwh/data/${e.name}`,
+        label: e.display_name || e.name,
+        icon: Table2,
+    }));
+
+    const renderItem = ({href, label, icon: Icon}: { href: string; label: string; icon: typeof Gauge }) => {
+        const isActive = location.pathname === href;
+        return (
+            <SidebarMenuButton
+                key={label}
+                tooltip={label}
+                onClick={() => navigate(href)}
+                className={cn(
+                    isOpen ? "flex items-center gap-3 w-full min-h-[44px] px-3 py-2 rounded-md" : "",
+                    isActive ? "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary" : "hover:bg-muted"
+                )}
+            >
+                {Icon && (
+                    <Icon
+                        className={cn("w-5 shrink-0 transition-all duration-200 ease-in-out", isOpen ? "h-7" : "h-5", isActive && "text-sidebar-primary-foreground")}
+                        aria-hidden="true"
+                    />
+                )}
+                <span className={cn("text-sm font-medium truncate", isActive && "text-sidebar-primary-foreground")}>{label}</span>
+            </SidebarMenuButton>
+        );
+    };
 
     return (
         <Sidebar collapsible="icon" variant="sidebar">
@@ -99,44 +118,14 @@ export function DwhSidebar({isOpen}: DwhSidebarProps) {
 
             <SidebarContent className={isOpen ? "mt-2" : "mt-4"}>
                 <SidebarGroup className={isOpen ? "gap-1" : "gap-2"}>
-                    {items.map(({href, label, icon: Icon}) => {
-                        const itemPath = href.split("?")[0];
-                        const isActive = location.pathname === itemPath;
-
-                        return (
-                            <SidebarMenuButton
-                                key={label}
-                                tooltip={label}
-                                onClick={() => navigate(href)}
-                                className={cn(
-                                    isOpen ? "flex items-center gap-3 w-full min-h-[44px] px-3 py-2 rounded-md" : "",
-                                    isActive
-                                        ? "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary"
-                                        : "hover:bg-muted"
-                                )}
-                            >
-                                {Icon && (
-                                    <Icon
-                                        className={cn(
-                                            "w-5 shrink-0 transition-all duration-200 ease-in-out",
-                                            isOpen ? "h-7" : "h-5",
-                                            isActive && "text-sidebar-primary-foreground"
-                                        )}
-                                        aria-hidden="true"
-                                    />
-                                )}
-                                <span
-                                    className={cn(
-                                        "text-sm font-medium truncate",
-                                        isActive && "text-sidebar-primary-foreground"
-                                    )}
-                                >
-                                    {label}
-                                </span>
-                            </SidebarMenuButton>
-                        );
-                    })}
+                    {platformItems.map(renderItem)}
                 </SidebarGroup>
+                {dataItems.length > 0 && (
+                    <SidebarGroup className={isOpen ? "gap-1" : "gap-2"}>
+                        {isOpen && <div className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("menu.data", {defaultValue: "Data"})}</div>}
+                        {dataItems.map(renderItem)}
+                    </SidebarGroup>
+                )}
             </SidebarContent>
 
             <SidebarFooter>

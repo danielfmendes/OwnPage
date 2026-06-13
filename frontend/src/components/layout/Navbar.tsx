@@ -3,7 +3,7 @@ import {Dialog, DialogContent, DialogTrigger} from "@/components/ui/dialog";
 import {type ReactNode, useState} from "react";
 import type {RoleManagementWithName} from "@/models/api";
 import {useTranslation} from "react-i18next";
-import {Folder, ChevronsUpDown, Plus} from "lucide-react";
+import {Folder, ChevronsUpDown} from "lucide-react";
 import {useRoleStore} from "@/utils/roleManagementState";
 import {UserNav} from "@/components/layout/UserNav";
 import {ProjectDialog} from "@/components/layout/ProjectDialog";
@@ -53,17 +53,15 @@ export function Navbar({title, children}: NavbarProps) {
                             </Button>
                         </DialogTrigger>
                         <DialogContent>
-                            <ProjectDialog onClose={() => setOpen(false)}/>
+                            <ProjectDialog
+                                onClose={() => setOpen(false)}
+                                onCreateNew={() => { setOpen(false); setNewOpen(true); }}
+                            />
                         </DialogContent>
                     </Dialog>
 
+                    {/* Create-project flow, opened from inside the project picker */}
                     <Dialog open={newOpen} onOpenChange={setNewOpen}>
-                        <DialogTrigger asChild>
-                            <Button variant="default" size="sm" className="flex items-center gap-1" onClick={() => setNewOpen(true)}>
-                                <Plus className="w-4 h-4"/>
-                                <span className="hidden md:inline">{t("button.new_project", {defaultValue: "New project"})}</span>
-                            </Button>
-                        </DialogTrigger>
                         <AddProjektDialogContent onClose={() => setNewOpen(false)} onRefresh={() => setNewOpen(false)}/>
                     </Dialog>
 

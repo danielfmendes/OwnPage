@@ -16,7 +16,7 @@ export default function DWHLayout() {
     const navigate = useNavigate();
     const location = useLocation();
     const hideSidebar = ['/dwh/login', '/dwh/register'].includes(location.pathname);
-    const hasDataTable = ['/dwh/orders', '/dwh/customers', '/dwh/warehouse', '/dwh/partsstorage', '/dwh/rolemanagement'].includes(location.pathname);
+    const hasDataTable = ['/dwh/rolemanagement'].includes(location.pathname);
     const { addNotification } = useNotification();
 
     // User State

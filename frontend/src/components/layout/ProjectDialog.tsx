@@ -4,16 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trash, X } from "lucide-react";
+import { Trash, X, Plus } from "lucide-react";
 import type { RoleManagementWithName } from "@/models/api";
 import { useRoleStore } from "@/utils/roleManagementState";
 import { useTranslation } from "react-i18next";
 
 interface Props {
     onClose: () => void;
+    onCreateNew?: () => void;
 }
 
-export function ProjectDialog({ onClose }: Props) {
+export function ProjectDialog({ onClose, onCreateNew }: Props) {
     const { t } = useTranslation();
     const rawProjects: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const setSelectedStore = useRoleStore((state) => state.setSelectedRoles);
@@ -103,6 +104,13 @@ export function ProjectDialog({ onClose }: Props) {
                 <DialogTitle>{t("projectDialog.title")}</DialogTitle>
                 <DialogDescription>{t("projectDialog.description")}</DialogDescription>
             </DialogHeader>
+
+            {onCreateNew && (
+                <Button variant="outline" className="w-full flex items-center gap-2" onClick={onCreateNew}>
+                    <Plus className="w-4 h-4" />
+                    {t("button.create_project", { defaultValue: "Create new project" })}
+                </Button>
+            )}
 
             <Accordion type="single" collapsible className="w-full space-y-4">
                 <AccordionItem value="refine">

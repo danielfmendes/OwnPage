@@ -177,17 +177,3 @@ export const roleManagementHandler = async (req: Request, env: Env) => {
 
     return errorResponse("Method not allowed", 405);
 };
-
-// --- Part Costs ---
-// Scoped to the caller's projects (port of Go's HandleGetWithProjectIDs).
-export const partCostsHandler = async (req: Request, env: Env) => {
-    const email = await requireUser(req, env);
-    const allowed = await getAllowedProjectIds(env, email, "user");
-    if (allowed.length === 0) {
-        return Response.json({ items: [], totalCount: 0 });
-    }
-    const placeholders = allowed.map(() => "?").join(", ");
-    const baseQuery = `SELECT * FROM part_costs WHERE project_id IN (${placeholders})`;
-    const countQuery = `SELECT COUNT(*) FROM part_costs WHERE project_id IN (${placeholders})`;
-    return await queryWithPagination(req, env, baseQuery, countQuery, allowed);
-};
