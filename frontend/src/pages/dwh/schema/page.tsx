@@ -2,7 +2,7 @@
 // current project's catalog and share a single reload.
 
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useActiveProject } from "@/utils/useActiveProject";
 import ContentLayout from "@/components/layout/ContentLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNotification } from "@/components/helpers/NotificationProvider";
@@ -12,8 +12,7 @@ import SchemaBuilder from "./SchemaBuilder";
 import ErPlayground from "./ErPlayground";
 
 export default function SchemaPage() {
-    const [searchParams] = useSearchParams();
-    const projectId = Number(searchParams.get("project_id"));
+    const { projectId, projectName } = useActiveProject();
     const { addNotification } = useNotification();
     const [entities, setEntities] = useState<DwhEntity[]>([]);
 
@@ -27,11 +26,17 @@ export default function SchemaPage() {
     useEffect(() => { reload(); }, [reload]);
 
     if (!projectId) {
-        return <ContentLayout title="Schema"><div className="p-6 text-muted-foreground">Select a project first.</div></ContentLayout>;
+        return (
+            <ContentLayout title="Schema">
+                <div className="p-8 text-center text-muted-foreground">
+                    No project selected. Use the <span className="font-medium text-foreground">project picker</span> at the top to choose one.
+                </div>
+            </ContentLayout>
+        );
     }
 
     return (
-        <ContentLayout title="Schema">
+        <ContentLayout title={projectName ? `Schema · ${projectName}` : "Schema"}>
             <Tabs defaultValue="builder" className="w-full">
                 <TabsList>
                     <TabsTrigger value="builder">Builder</TabsTrigger>
