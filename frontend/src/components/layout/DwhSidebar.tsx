@@ -1,13 +1,16 @@
 import {
     Gauge,
-    PackageCheck,
-    PersonStanding,
-    ArchiveIcon,
-    BoxIcon,
     LogOut,
     Box,
+    Table2,
+    Workflow,
+    Terminal,
+    Users,
 } from "lucide-react";
+import {useEffect, useState} from "react";
 import {useNavigate, useLocation} from "react-router-dom";
+import {dwhClient} from "@/models/dwh/dwhClient";
+import type {DwhEntity} from "@/models/dwh/types";
 import {
     Sidebar,
     SidebarContent,
@@ -41,12 +44,34 @@ export function DwhSidebar({isOpen}: DwhSidebarProps) {
         handleLogOut(navigate, addNotification);
     };
 
+    // Load the current project's user-defined entities for the dynamic data links.
+    const [entities, setEntities] = useState<DwhEntity[]>([]);
+    useEffect(() => {
+        if (!projectId) {
+            setEntities([]);
+            return;
+        }
+        let active = true;
+        dwhClient
+            .listEntities(Number(projectId))
+            .then((es) => active && setEntities(es))
+            .catch(() => active && setEntities([]));
+        return () => {
+            active = false;
+        };
+    }, [projectId]);
+
+    // Fixed platform links + one link per user-defined entity.
     const items = [
-        {href: `/dwh/dashboard${currentQuery}`, label: t("menu.dashboard"), icon: Gauge},
-        {href: `/dwh/orders${currentQuery}`, label: t("menu.orders"), icon: PackageCheck},
-        {href: `/dwh/customer${currentQuery}`, label: t("menu.customer"), icon: PersonStanding},
-        {href: `/dwh/warehouse${currentQuery}`, label: t("menu.warehouse"), icon: ArchiveIcon},
-        {href: `/dwh/partsstorage${currentQuery}`, label: t("menu.parts_storage"), icon: BoxIcon},
+        {href: `/dwh/dashboard${currentQuery}`, label: t("menu.dashboard", {defaultValue: "Dashboard"}), icon: Gauge},
+        {href: `/dwh/schema${currentQuery}`, label: t("menu.schema", {defaultValue: "Schema"}), icon: Workflow},
+        {href: `/dwh/sql${currentQuery}`, label: t("menu.sql", {defaultValue: "SQL"}), icon: Terminal},
+        {href: `/dwh/rolemanagement${currentQuery}`, label: t("menu.roles", {defaultValue: "Roles"}), icon: Users},
+        ...entities.map((e) => ({
+            href: `/dwh/p/${e.project_id}/${e.name}${currentQuery}`,
+            label: e.display_name || e.name,
+            icon: Table2,
+        })),
     ];
 
     return (
