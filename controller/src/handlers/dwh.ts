@@ -17,6 +17,7 @@ import { entitiesHandler } from "./dwh/schema/entities";
 import { columnsHandler } from "./dwh/schema/columns";
 import { relationshipsHandler } from "./dwh/schema/relationships";
 import { dataHandler } from "./dwh/data/data";
+import { sqlConsoleHandler } from "./dwh/sql/console";
 import { requireUser, toResponse } from "../utils/auth";
 
 export async function dwhHandler(fullPath: string, env: Env, request: Request): Promise<Response> {
@@ -42,6 +43,7 @@ export async function dwhHandler(fullPath: string, env: Env, request: Request): 
         if (path.startsWith("/columns")) return await columnsHandler(request, env);
         if (path.startsWith("/relationships")) return await relationshipsHandler(request, env);
         if (path.startsWith("/data/")) return await dataHandler(request, env, path);
+        if (path.startsWith("/sql")) return await sqlConsoleHandler(request, env);
 
         // --- Legacy bike-domain handlers (retired once the demo runs through the generic system) ---
         if (path.startsWith("/bikemodels")) return await bikeModelsHandler(request, env);

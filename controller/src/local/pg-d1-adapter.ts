@@ -163,4 +163,20 @@ export class PgD1Database {
         const res = await this.pool.query(translate(sql));
         return { count: res.rowCount ?? 0, duration: 0 };
     }
+
+    // Run a query inside a read-only transaction on a dedicated client — used by the SQL console so
+    // any write that slips past the guard is still rejected by Postgres. Rolls back unconditionally.
+    async queryReadOnly(sql: string, params: any[] = []): Promise<Record<string, any>[]> {
+        const client: PoolClient = await this.pool.connect();
+        try {
+            await client.query("BEGIN");
+            await client.query("SET TRANSACTION READ ONLY");
+            await client.query("SET LOCAL statement_timeout = 5000");
+            const res = await client.query(translate(sql), params);
+            return res.rows;
+        } finally {
+            try { await client.query("ROLLBACK"); } catch { /* ignore */ }
+            client.release();
+        }
+    }
 }

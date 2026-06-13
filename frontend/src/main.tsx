@@ -23,6 +23,7 @@ import RoleManagementPage from "@/pages/dwh/rolemanagement/page";
 import WareHousePage from "@/pages/dwh/warehouse/page";
 import EntityDataPage from "@/pages/dwh/entity/page";
 import SchemaPage from "@/pages/dwh/schema/page";
+import SqlConsolePage from "@/pages/dwh/sql/page";
 import PrivacyPage from "@/pages/privacy/page";
 import ImprintPage from "@/pages/imprint/page";
 import ChatLogin from "@/pages/chat/ChatLogin.tsx";
@@ -68,7 +69,7 @@ createRoot(document.getElementById('root')!).render(
                                 {/* Generic, catalog-driven data page for any user-defined entity */}
                                 <Route path="p/:projectId/:entity" element={<EntityDataPage />} />
                                 <Route path="schema" element={<SchemaPage />} />
-                                {/* SQL console added in a later slice */}
+                                <Route path="sql" element={<SqlConsolePage />} />
                             </Route>
                         </Route>
                     </Routes>

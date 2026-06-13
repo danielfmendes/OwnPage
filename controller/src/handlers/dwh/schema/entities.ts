@@ -183,7 +183,40 @@ const handleDelete = async (req: Request, env: Env) => {
     return new Response("Deleted", { status: 200 });
 };
 
+// GET /dwh/entities/ddl?id=N → the generated CREATE TABLE for an entity (read-only, for the viewer).
+const handleDdl = async (req: Request, env: Env) => {
+    const id = Number(new URL(req.url).searchParams.get("id"));
+    if (!id) throw new HttpError(400, "id is required");
+    const entity = await getEntityById(env, id);
+    if (!entity) throw new HttpError(404, "Entity not found");
+    await requireProjectRole(req, env, entity.project_id, "user");
+
+    const dialect = resolveDialect(env.DB_DIALECT);
+    const columns = await getColumns(env, entity.id);
+    const specs: ColumnSpec[] = [];
+    for (const c of columns) {
+        if (c.is_system) continue;
+        let refPhysical: string | null = null;
+        if (c.data_type === "reference" && c.ref_entity_id) {
+            const target = await getEntityById(env, c.ref_entity_id);
+            refPhysical = target?.physical_table ?? null;
+        }
+        specs.push({
+            name: c.name,
+            data_type: c.data_type,
+            is_nullable: !!c.is_nullable,
+            is_unique: !!c.is_unique,
+            default_value: c.default_value,
+            ref_physical_table: refPhysical,
+        });
+    }
+    return Response.json({ ddl: createTableSQL(entity.physical_table, specs, dialect) });
+};
+
 export const entitiesHandler = async (req: Request, env: Env) => {
+    if (new URL(req.url).pathname.endsWith("/entities/ddl")) {
+        return handleDdl(req, env);
+    }
     switch (req.method) {
         case "GET": return handleList(req, env);
         case "POST": return handleCreate(req, env);
