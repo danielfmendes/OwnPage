@@ -1,11 +1,10 @@
-// SQL console endpoint: POST /dwh/sql { projectId, sql }. Runs a scoped, read-only query against
-// the caller's project tables (see guard.ts). On Postgres it additionally executes inside a
-// read-only transaction; on D1 the guard (single SELECT + table allowlist + LIMIT) is the control.
+// SQL console endpoint: POST /dwh/sql { schemaId, sql }. Runs a scoped, read-only query against the
+// schema's tables (see guard.ts). On Postgres it additionally runs in a read-only transaction.
 
 import { Env } from "../../../types";
-import { HttpError, readJson, requireProjectRole } from "../../../utils/auth";
+import { HttpError, readJson, requireSchemaRead } from "../../../utils/auth";
 import { resolveDialect } from "../schema/ddl";
-import { physicalTablesForProject } from "../schema/catalog";
+import { physicalTablesForSchema } from "../schema/catalog";
 import { assertTablesAllowed, validateReadOnly, wrapWithLimit } from "./guard";
 
 const methodNotAllowed = () => new Response("Method not allowed", { status: 405 });
@@ -13,12 +12,12 @@ const methodNotAllowed = () => new Response("Method not allowed", { status: 405 
 export const sqlConsoleHandler = async (req: Request, env: Env): Promise<Response> => {
     if (req.method !== "POST") return methodNotAllowed();
 
-    const body = await readJson<{ projectId: number; sql: string }>(req);
-    if (!body.projectId) throw new HttpError(400, "projectId is required");
-    await requireProjectRole(req, env, body.projectId, "user");
+    const body = await readJson<{ schemaId: number; sql: string }>(req);
+    if (!body.schemaId) throw new HttpError(400, "schemaId is required");
+    await requireSchemaRead(req, env, body.schemaId);
 
     const clean = validateReadOnly(body.sql || "");
-    const allowed = await physicalTablesForProject(env, body.projectId);
+    const allowed = await physicalTablesForSchema(env, body.schemaId);
     assertTablesAllowed(clean, allowed);
     const finalSql = wrapWithLimit(clean);
 
@@ -31,7 +30,6 @@ export const sqlConsoleHandler = async (req: Request, env: Env): Promise<Respons
         const r = await env.DB.prepare(finalSql).all<Record<string, any>>();
         rows = r.results;
     }
-
     const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
     return Response.json({ columns, rows });
 };

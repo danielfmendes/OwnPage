@@ -163,3 +163,52 @@ export async function canModifyRole(
 
     return null; // creator can do anything
 }
+
+// --- Schema access (derived from per-project roles) ------------------------------------
+// Roles stay per-project; schema access is inferred: you can READ a schema if you hold any role on a
+// project using it, and WRITE it if you hold admin/creator on such a project. Editing a schema
+// affects every project that shares it.
+
+export async function getSchemaAccess(
+    env: Env,
+    email: string,
+): Promise<Map<number, { canRead: boolean; canWrite: boolean }>> {
+    const { results } = await env.DB.prepare(
+        `SELECT p.schema_id AS schema_id, rm.role AS role
+         FROM role_management rm
+                  JOIN projects p ON rm.project_id = p.id
+         WHERE rm.useremail = ? AND p.schema_id IS NOT NULL`
+    ).bind(email).all<{ schema_id: number; role: string }>();
+
+    const map = new Map<number, { canRead: boolean; canWrite: boolean }>();
+    for (const r of results) {
+        const cur = map.get(r.schema_id) ?? { canRead: false, canWrite: false };
+        cur.canRead = true;
+        if (r.role === "admin" || r.role === "creator") cur.canWrite = true;
+        map.set(r.schema_id, cur);
+    }
+    return map;
+}
+
+export async function getWritableSchemaIds(env: Env, email: string): Promise<number[]> {
+    const access = await getSchemaAccess(env, email);
+    return [...access.entries()].filter(([, a]) => a.canWrite).map(([id]) => id);
+}
+
+export async function requireSchemaRead(req: Request, env: Env, schemaId: number | string): Promise<string> {
+    const email = await requireUser(req, env);
+    const access = await getSchemaAccess(env, email);
+    if (!access.get(Number(schemaId))?.canRead) {
+        throw new HttpError(403, "You don't have access to this schema");
+    }
+    return email;
+}
+
+export async function requireSchemaWrite(req: Request, env: Env, schemaId: number | string): Promise<string> {
+    const email = await requireUser(req, env);
+    const access = await getSchemaAccess(env, email);
+    if (!access.get(Number(schemaId))?.canWrite) {
+        throw new HttpError(403, "You need write access to this schema");
+    }
+    return email;
+}

@@ -1,9 +1,8 @@
-// Column endpoints: POST /dwh/columns (add a column to an entity via ALTER TABLE ADD COLUMN) and
-// DELETE /dwh/columns?id= (drop a column). Reference-typed columns are the FK mechanism and are
-// usually created via /dwh/relationships, but POST here also accepts them.
+// Column endpoints (schema-scoped): POST /dwh/columns (ALTER ADD COLUMN), DELETE /dwh/columns?id=,
+// GET /dwh/columns/impact?id= (non-null count for the destructive-change warning). Auth: schema write.
 
 import { Env } from "../../../types";
-import { HttpError, readJson, requireProjectRole } from "../../../utils/auth";
+import { HttpError, readJson, requireSchemaWrite } from "../../../utils/auth";
 import {
     addColumnSQL,
     addReferenceColumnSQLNoConstraint,
@@ -30,12 +29,10 @@ interface AddColumnBody {
     on_delete?: string | null;
 }
 
-// Shared by columns.ts and relationships.ts: validate, ALTER the physical table, record metadata.
-// Auth (admin on the entity's project) is the CALLER's responsibility — it has the Request.
+// Shared by columns.ts and relationships.ts. Auth is the CALLER's responsibility.
 export async function addColumnToEntity(env: Env, body: AddColumnBody): Promise<Response> {
     const entity = await getEntityById(env, body.entity_id);
     if (!entity) throw new HttpError(404, "Entity not found");
-
     if (!DATA_TYPES.includes(body.data_type)) throw new HttpError(400, `Invalid data_type "${body.data_type}"`);
     const name = safeColumnName((body.name || "").toLowerCase());
 
@@ -50,8 +47,8 @@ export async function addColumnToEntity(env: Env, body: AddColumnBody): Promise<
     if (body.data_type === "reference") {
         if (!body.ref_entity_id) throw new HttpError(400, "Reference column needs ref_entity_id");
         const target = await getEntityById(env, body.ref_entity_id);
-        if (!target || target.project_id !== entity.project_id) {
-            throw new HttpError(400, "Reference target not found in this project");
+        if (!target || target.schema_id !== entity.schema_id) {
+            throw new HttpError(400, "Reference target not found in this schema");
         }
         refPhysical = target.physical_table;
         refEntityId = target.id;
@@ -67,8 +64,6 @@ export async function addColumnToEntity(env: Env, body: AddColumnBody): Promise<
         ref_physical_table: refPhysical,
     };
 
-    // Apply DDL. For reference columns, fall back to a constraint-less integer column if the engine
-    // rejects the inline REFERENCES (some D1 cases) — the FK then lives only in the catalog.
     try {
         await env.DB.prepare(addColumnSQL(entity.physical_table, spec, dialect)).run();
     } catch (e) {
@@ -96,26 +91,27 @@ const handleAdd = async (req: Request, env: Env) => {
     const body = await readJson<AddColumnBody>(req);
     const entity = await getEntityById(env, body.entity_id);
     if (!entity) throw new HttpError(404, "Entity not found");
-    await requireProjectRole(req, env, entity.project_id, "admin");
+    await requireSchemaWrite(req, env, entity.schema_id);
     return addColumnToEntity(env, body);
 };
+
+async function loadColumn(env: Env, id: number) {
+    const col = await env.DB.prepare("SELECT * FROM dwh_columns WHERE id = ?").bind(id).first<any>();
+    if (!col) throw new HttpError(404, "Column not found");
+    const entity = await getEntityById(env, col.entity_id);
+    if (!entity) throw new HttpError(404, "Entity not found");
+    return { col, entity };
+}
 
 const handleDelete = async (req: Request, env: Env) => {
     const id = Number(new URL(req.url).searchParams.get("id"));
     if (!id) throw new HttpError(400, "id is required");
-    const col = await env.DB.prepare("SELECT * FROM dwh_columns WHERE id = ?").bind(id).first<any>();
-    if (!col) throw new HttpError(404, "Column not found");
+    const { col, entity } = await loadColumn(env, id);
     if (col.is_system) throw new HttpError(400, "System columns cannot be deleted");
-    const entity = await getEntityById(env, col.entity_id);
-    if (!entity) throw new HttpError(404, "Entity not found");
-    await requireProjectRole(req, env, entity.project_id, "admin");
+    await requireSchemaWrite(req, env, entity.schema_id);
 
-    // Drop the physical column (SQLite 3.35+/D1 and Postgres both support DROP COLUMN). If it fails
-    // we still remove the catalog row so the UI stays consistent.
     try {
-        await env.DB.prepare(
-            `ALTER TABLE ${safeIdent(entity.physical_table)} DROP COLUMN ${safeIdent(col.name)}`
-        ).run();
+        await env.DB.prepare(`ALTER TABLE ${safeIdent(entity.physical_table)} DROP COLUMN ${safeIdent(col.name)}`).run();
     } catch (e) {
         console.error("drop column failed (removing catalog row anyway):", e);
     }
@@ -123,7 +119,30 @@ const handleDelete = async (req: Request, env: Env) => {
     return new Response("Deleted", { status: 200 });
 };
 
+// GET /dwh/columns/impact?id= → how many rows have a non-null value in this column (what gets lost).
+const handleImpact = async (req: Request, env: Env) => {
+    const id = Number(new URL(req.url).searchParams.get("id"));
+    if (!id) throw new HttpError(400, "id is required");
+    const { col, entity } = await loadColumn(env, id);
+    await requireSchemaWrite(req, env, entity.schema_id);
+    if (col.is_system) {
+        return Response.json({ destructive: true, affectedRows: 0, reason: "System column cannot be removed." });
+    }
+    const row = await env.DB.prepare(
+        `SELECT COUNT(*) AS n FROM ${safeIdent(entity.physical_table)} WHERE ${safeIdent(col.name)} IS NOT NULL`
+    ).first<{ n: number }>();
+    const rows = Number(row?.n ?? 0);
+    return Response.json({
+        destructive: rows > 0,
+        affectedRows: rows,
+        reason: rows > 0
+            ? `Dropping "${col.name}" permanently deletes data in ${rows} row(s).`
+            : `Dropping "${col.name}" is safe — no rows have a value.`,
+    });
+};
+
 export const columnsHandler = async (req: Request, env: Env) => {
+    if (new URL(req.url).pathname.endsWith("/columns/impact")) return handleImpact(req, env);
     switch (req.method) {
         case "POST": return handleAdd(req, env);
         case "DELETE": return handleDelete(req, env);
