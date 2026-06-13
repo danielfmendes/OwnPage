@@ -22,7 +22,9 @@ export function useActiveSchema() {
     const projectIds = sameSchema.map((r) => r.project_id as number).filter((n) => n != null);
     const writeProjectId = projectIds.length === 1 ? projectIds[0] : undefined;
     const canWrite = sameSchema.some((r) => r.role === "admin" || r.role === "creator");
+    // Editing the shared (schema-level) dashboard is limited to the schema's creator.
+    const isCreator = sameSchema.some((r) => r.role === "creator");
     const schemaName = schemaId ? (withSchema[0].schema_name ?? undefined) : undefined;
 
-    return { schemaId, schemaName, projectIds, writeProjectId, canWrite, selectedCount: selectedRoles.length };
+    return { schemaId, schemaName, projectIds, writeProjectId, canWrite, isCreator, selectedCount: selectedRoles.length };
 }
