@@ -11,6 +11,7 @@ import {useEffect, useState} from "react";
 import {useNavigate, useLocation} from "react-router-dom";
 import {dwhClient} from "@/models/dwh/dwhClient";
 import type {DwhEntity} from "@/models/dwh/types";
+import {useActiveProject} from "@/utils/useActiveProject";
 import {
     Sidebar,
     SidebarContent,
@@ -44,22 +45,24 @@ export function DwhSidebar({isOpen}: DwhSidebarProps) {
         handleLogOut(navigate, addNotification);
     };
 
-    // Load the current project's user-defined entities for the dynamic data links.
+    // Load the active project's user-defined entities for the dynamic data links. The active
+    // project comes from the global picker (store), not the URL (which uses filter syntax).
+    const {projectId: activeProjectId} = useActiveProject();
     const [entities, setEntities] = useState<DwhEntity[]>([]);
     useEffect(() => {
-        if (!projectId) {
+        if (!activeProjectId) {
             setEntities([]);
             return;
         }
         let active = true;
         dwhClient
-            .listEntities(Number(projectId))
+            .listEntities(activeProjectId)
             .then((es) => active && setEntities(es))
             .catch(() => active && setEntities([]));
         return () => {
             active = false;
         };
-    }, [projectId]);
+    }, [activeProjectId]);
 
     // Fixed platform links + one link per user-defined entity.
     const items = [

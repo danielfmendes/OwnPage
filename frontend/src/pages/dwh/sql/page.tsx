@@ -3,7 +3,7 @@
 // builder, not raw SQL.
 
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useActiveProject } from "@/utils/useActiveProject";
 import Editor from "@monaco-editor/react";
 import ContentLayout from "@/components/layout/ContentLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,8 +14,7 @@ import { dwhClient } from "@/models/dwh/dwhClient";
 import type { DwhEntity } from "@/models/dwh/types";
 
 export default function SqlConsolePage() {
-    const [searchParams] = useSearchParams();
-    const projectId = Number(searchParams.get("project_id"));
+    const { projectId } = useActiveProject();
 
     const [sql, setSql] = useState("SELECT 1;");
     const [result, setResult] = useState<{ columns: string[]; rows: Record<string, any>[] } | null>(null);
@@ -32,6 +31,7 @@ export default function SqlConsolePage() {
     }, [projectId]);
 
     const run = useCallback(async () => {
+        if (!projectId) return;
         setRunning(true); setError(null);
         try {
             const res = await dwhClient.runSql(projectId, sql);
@@ -51,7 +51,13 @@ export default function SqlConsolePage() {
     }, []);
 
     if (!projectId) {
-        return <ContentLayout title="SQL"><div className="p-6 text-muted-foreground">Select a project first.</div></ContentLayout>;
+        return (
+            <ContentLayout title="SQL">
+                <div className="p-8 text-center text-muted-foreground">
+                    No project selected. Use the <span className="font-medium text-foreground">project picker</span> at the top to choose one.
+                </div>
+            </ContentLayout>
+        );
     }
 
     return (

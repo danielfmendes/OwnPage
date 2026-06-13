@@ -3,7 +3,7 @@
 // per-project in localStorage (v1 — no server-side dashboard table yet).
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useActiveProject } from "@/utils/useActiveProject";
 import {
     Bar, BarChart, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
@@ -61,8 +61,7 @@ function WidgetCard({ projectId, widget, onRemove }: { projectId: number; widget
 }
 
 export default function GenericDashboard() {
-    const [searchParams] = useSearchParams();
-    const projectId = Number(searchParams.get("project_id"));
+    const { projectId } = useActiveProject();
     const storageKey = `dwh_dashboard_${projectId}`;
 
     const [entities, setEntities] = useState<DwhEntity[]>([]);
@@ -100,7 +99,13 @@ export default function GenericDashboard() {
     };
 
     if (!projectId) {
-        return <ContentLayout title="Dashboard"><div className="p-6 text-muted-foreground">Select a project first.</div></ContentLayout>;
+        return (
+            <ContentLayout title="Dashboard">
+                <div className="p-8 text-center text-muted-foreground">
+                    No project selected. Use the <span className="font-medium text-foreground">project picker</span> at the top to choose one.
+                </div>
+            </ContentLayout>
+        );
     }
 
     return (
