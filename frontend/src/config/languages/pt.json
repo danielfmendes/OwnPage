@@ -18,7 +18,9 @@
     "next": "Próximo",
     "select_all": "Selecionar tudo",
     "deselect_all": "Desmarcar tudo",
-    "clear_selection": "Limpar seleção"
+    "clear_selection": "Limpar seleção",
+    "new_project": "Novo projeto",
+    "create_project": "Criar novo projeto"
   },
   "switch_theme": "Trocar tema",
   "error": {
@@ -116,7 +118,12 @@
     "warehouse": "Armazém",
     "parts_storage": "Estoque de peças",
     "role_management": "Gestão de funções",
-    "profile": "Perfil"
+    "profile": "Perfil",
+    "schema": "Esquema",
+    "sql": "SQL",
+    "roles": "Funções",
+    "schema_management": "Gestão de esquema",
+    "data": "Dados"
   },
   "home": "Início",
   "from_time_period": "{{change}} desde {{time}}",

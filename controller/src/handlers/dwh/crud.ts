@@ -140,45 +140,6 @@ const createCrudHandlers = (table: string, columns: string[], options: CrudOptio
     };
 };
 
-// Bike Models — read-only in the Go controller (GetBikeModels only)
-export const bikeModelsHandler = (req: Request, env: Env) =>
-    createCrudHandlers("bike_models", ["name", "saddle_id", "frame_id", "fork_id"], { readOnly: true }).handler(req, env);
-
-// Components – queries saddles, frames, or forks based on ?filter=type:$eq.{type}. Read-only (matches Go).
-export const componentsHandler = async (req: Request, env: Env) => {
-    const url = new URL(req.url);
-    const filter = url.searchParams.get("filter") || "";
-
-    // Parse type from filter string like "type:$eq.forks"
-    let tableName = "";
-    const typeMatch = filter.match(/type:\$eq\.(\w+)/);
-    if (typeMatch) {
-        const type = typeMatch[1].toLowerCase();
-        if (type === "saddles" || type === "saddle") tableName = "saddles";
-        else if (type === "frames" || type === "frame") tableName = "frames";
-        else if (type === "forks" || type === "fork") tableName = "forks";
-    }
-
-    if (!tableName) {
-        return new Response("Missing or invalid type filter. Use ?filter=type:$eq.saddles|frames|forks", { status: 400 });
-    }
-
-    if (req.method === "GET") {
-        const { results } = await env.DB.prepare(`SELECT * FROM ${tableName}`).all();
-        return Response.json(results);
-    }
-
-    return methodNotAllowed();
-}
-
-// Customers — writes require admin on the row's project_id
-export const customersHandler = (req: Request, env: Env) =>
-    createCrudHandlers(
-        "customers",
-        ["email", "first_name", "name", "dob", "city", "project_id"],
-        { projectColumn: "project_id" }
-    ).handler(req, env);
-
 // Projects — GET is scoped to the caller's projects; POST auto-assigns creator; PUT/DELETE
 // require the creator role on the target project.
 export const projectsHandler = async (req: Request, env: Env) => {
@@ -191,7 +152,10 @@ export const projectsHandler = async (req: Request, env: Env) => {
         if (ids.length === 0) return Response.json([]);
         const placeholders = ids.map(() => "?").join(", ");
         const { results } = await env.DB.prepare(
-            `SELECT id, name FROM projects WHERE id IN (${placeholders})`
+            `SELECT p.id, p.name, p.schema_id, s.name AS schema_name
+             FROM projects p
+                      LEFT JOIN dwh_schemas s ON s.id = p.schema_id
+             WHERE p.id IN (${placeholders})`
         ).bind(...ids).all();
         return Response.json(results);
     }
@@ -243,7 +207,11 @@ export const projectsHandler = async (req: Request, env: Env) => {
         const id = url.searchParams.get("id");
         if (!id) return new Response("Bad request – missing or invalid ID", { status: 400 });
         await requireProjectRole(req, env, id, "creator");
-        return createCrudHandlers("projects", ["name"]).delete(req, env);
+        // Remove the project's role assignments and the project itself. The schema's physical tables are
+        // shared with other projects, so they are deliberately left untouched.
+        await env.DB.prepare("DELETE FROM role_management WHERE project_id = ?").bind(id).run();
+        await env.DB.prepare("DELETE FROM projects WHERE id = ?").bind(id).run();
+        return new Response("Deleted", { status: 200 });
     }
 
     return methodNotAllowed();
@@ -268,11 +236,3 @@ export const userHandler = async (req: Request, env: Env) => {
 
     return new Response("Filter missing or invalid", { status: 400 });
 };
-
-// Warehouse Parts — writes require admin on the row's project_id
-export const warehousePartsHandler = (req: Request, env: Env) =>
-    createCrudHandlers(
-        "warehouse_parts",
-        ["part_type", "part_id", "quantity", "storage_location", "project_id"],
-        { projectColumn: "project_id" }
-    ).handler(req, env);
