@@ -1,17 +1,23 @@
 {
-  "name": "api-controller",
+  "name": "controller",
   "type": "module",
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260124.0",
     "@types/bcryptjs": "^2.4.6",
-    "@types/jsonwebtoken": "^9.0.10"
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/pg": "^8.11.10",
+    "dotenv": "^16.4.7",
+    "tsx": "^4.19.2"
   },
   "dependencies": {
+    "@whatwg-node/server": "^0.9.71",
     "bcryptjs": "^3.0.3",
-    "jose": "^6.1.3"
+    "jose": "^6.1.3",
+    "pg": "^8.13.1"
   },
   "scripts": {
     "dev": "wrangler dev",
+    "dev:local": "tsx watch src/local/server.ts",
     "deploy": "wrangler deploy",
     "build": "tsc -b"
   }
