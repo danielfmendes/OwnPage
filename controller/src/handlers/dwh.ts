@@ -14,6 +14,9 @@ import { partCostsHandler, roleManagementHandler } from "./dwh/roles_and_costs";
 import { authHandler } from "./dwh/auth";
 import { dashboardHandler } from "./dwh/dashboard";
 import { entitiesHandler } from "./dwh/schema/entities";
+import { columnsHandler } from "./dwh/schema/columns";
+import { relationshipsHandler } from "./dwh/schema/relationships";
+import { dataHandler } from "./dwh/data/data";
 import { requireUser, toResponse } from "../utils/auth";
 
 export async function dwhHandler(fullPath: string, env: Env, request: Request): Promise<Response> {
@@ -36,6 +39,9 @@ export async function dwhHandler(fullPath: string, env: Env, request: Request): 
 
         // --- Generic, user-definable DWH (catalog-driven) ---
         if (path.startsWith("/entities")) return await entitiesHandler(request, env);
+        if (path.startsWith("/columns")) return await columnsHandler(request, env);
+        if (path.startsWith("/relationships")) return await relationshipsHandler(request, env);
+        if (path.startsWith("/data/")) return await dataHandler(request, env, path);
 
         // --- Legacy bike-domain handlers (retired once the demo runs through the generic system) ---
         if (path.startsWith("/bikemodels")) return await bikeModelsHandler(request, env);
