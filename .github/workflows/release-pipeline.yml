@@ -20,7 +20,7 @@ jobs:
           npm install
           npx wrangler deploy
           echo "$JWT_SECRET" | npx wrangler secret put JWT_SECRET
-        working-directory: api-controller
+        working-directory: controller
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
