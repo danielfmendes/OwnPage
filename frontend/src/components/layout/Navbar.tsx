@@ -3,10 +3,11 @@ import {Dialog, DialogContent, DialogTrigger} from "@/components/ui/dialog";
 import {type ReactNode, useState} from "react";
 import type {RoleManagementWithName} from "@/models/api";
 import {useTranslation} from "react-i18next";
-import {Folder, ChevronsUpDown} from "lucide-react";
+import {Folder, ChevronsUpDown, Plus} from "lucide-react";
 import {useRoleStore} from "@/utils/roleManagementState";
 import {UserNav} from "@/components/layout/UserNav";
 import {ProjectDialog} from "@/components/layout/ProjectDialog";
+import AddProjektDialogContent from "@/pages/dwh/rolemanagement/add-project-dialog";
 
 type NavbarProps = {
     title?: string;
@@ -16,6 +17,7 @@ type NavbarProps = {
 export function Navbar({title, children}: NavbarProps) {
     const {t} = useTranslation();
     const [open, setOpen] = useState(false);
+    const [newOpen, setNewOpen] = useState(false);
     const roles: RoleManagementWithName[] = useRoleStore((state) => state.selectedRoles);
 
     // Show the actual project name when exactly one is selected so the active project is always
@@ -54,6 +56,17 @@ export function Navbar({title, children}: NavbarProps) {
                             <ProjectDialog onClose={() => setOpen(false)}/>
                         </DialogContent>
                     </Dialog>
+
+                    <Dialog open={newOpen} onOpenChange={setNewOpen}>
+                        <DialogTrigger asChild>
+                            <Button variant="default" size="sm" className="flex items-center gap-1" onClick={() => setNewOpen(true)}>
+                                <Plus className="w-4 h-4"/>
+                                <span className="hidden md:inline">{t("button.new_project", {defaultValue: "New project"})}</span>
+                            </Button>
+                        </DialogTrigger>
+                        <AddProjektDialogContent onClose={() => setNewOpen(false)} onRefresh={() => setNewOpen(false)}/>
+                    </Dialog>
+
                     <h1 className="font-bold">{title}</h1>
                 </div>
                 <div className="flex flex-1 items-center justify-end">
