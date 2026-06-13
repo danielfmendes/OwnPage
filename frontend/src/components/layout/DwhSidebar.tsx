@@ -11,7 +11,7 @@ import {useEffect, useState} from "react";
 import {useNavigate, useLocation} from "react-router-dom";
 import {dwhClient} from "@/models/dwh/dwhClient";
 import type {DwhEntity} from "@/models/dwh/types";
-import {useActiveProject} from "@/utils/useActiveProject";
+import {useActiveSchema} from "@/utils/useActiveSchema";
 import {
     Sidebar,
     SidebarContent,
@@ -45,24 +45,23 @@ export function DwhSidebar({isOpen}: DwhSidebarProps) {
         handleLogOut(navigate, addNotification);
     };
 
-    // Load the active project's user-defined entities for the dynamic data links. The active
-    // project comes from the global picker (store), not the URL (which uses filter syntax).
-    const {projectId: activeProjectId} = useActiveProject();
+    // Load the active SCHEMA's entities for the dynamic data links.
+    const {schemaId} = useActiveSchema();
     const [entities, setEntities] = useState<DwhEntity[]>([]);
     useEffect(() => {
-        if (!activeProjectId) {
+        if (!schemaId) {
             setEntities([]);
             return;
         }
         let active = true;
         dwhClient
-            .listEntities(activeProjectId)
+            .listEntities(schemaId)
             .then((es) => active && setEntities(es))
             .catch(() => active && setEntities([]));
         return () => {
             active = false;
         };
-    }, [activeProjectId]);
+    }, [schemaId]);
 
     // Fixed platform links + one link per user-defined entity.
     const items = [
@@ -71,7 +70,7 @@ export function DwhSidebar({isOpen}: DwhSidebarProps) {
         {href: `/dwh/sql${currentQuery}`, label: t("menu.sql", {defaultValue: "SQL"}), icon: Terminal},
         {href: `/dwh/rolemanagement${currentQuery}`, label: t("menu.roles", {defaultValue: "Roles"}), icon: Users},
         ...entities.map((e) => ({
-            href: `/dwh/p/${e.project_id}/${e.name}${currentQuery}`,
+            href: `/dwh/data/${e.name}${currentQuery}`,
             label: e.display_name || e.name,
             icon: Table2,
         })),

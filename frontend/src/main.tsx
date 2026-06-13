@@ -15,12 +15,8 @@ import Home from "@/pages/page";
 import LoginCard from "@/pages/dwh/login/page";
 import DWHLayout from "@/pages/dwh/layout";
 import RegisterCard from "@/pages/dwh/register/page";
-import CustomerPage from "@/pages/dwh/customer/page";
 import GenericDashboard from "@/pages/dwh/dashboard/GenericDashboard";
-import OrderPage from "@/pages/dwh/orders/page";
-import PartsStoragePage from "@/pages/dwh/partsstorage/page";
 import RoleManagementPage from "@/pages/dwh/rolemanagement/page";
-import WareHousePage from "@/pages/dwh/warehouse/page";
 import EntityDataPage from "@/pages/dwh/entity/page";
 import SchemaPage from "@/pages/dwh/schema/page";
 import SqlConsolePage from "@/pages/dwh/sql/page";
@@ -60,14 +56,10 @@ createRoot(document.getElementById('root')!).render(
                             <Route path="/dwh" element={<DWHLayout />}>
                                 <Route path="login" element={<LoginCard />} />
                                 <Route path="register" element={<RegisterCard />} />
-                                <Route path="customer" element={<CustomerPage />} />
                                 <Route path="dashboard" element={<GenericDashboard />} />
-                                <Route path="orders" element={<OrderPage />} />
-                                <Route path="partsstorage" element={<PartsStoragePage />} />
                                 <Route path="rolemanagement" element={<RoleManagementPage />} />
-                                <Route path="warehouse" element={<WareHousePage />} />
-                                {/* Generic, catalog-driven data page for any user-defined entity */}
-                                <Route path="p/:projectId/:entity" element={<EntityDataPage />} />
+                                {/* Generic, catalog-driven data page for any entity of the active schema */}
+                                <Route path="data/:entity" element={<EntityDataPage />} />
                                 <Route path="schema" element={<SchemaPage />} />
                                 <Route path="sql" element={<SqlConsolePage />} />
                             </Route>

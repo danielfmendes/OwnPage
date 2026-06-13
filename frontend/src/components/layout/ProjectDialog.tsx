@@ -45,15 +45,27 @@ export function ProjectDialog({ onClose }: Props) {
     const isSelected = (project: RoleManagementWithName) =>
         selected.some((p) => p.project_id === project.project_id);
 
+    // Only projects sharing ONE schema can be selected together (so their data compiles). Picking a
+    // project from a different schema switches the whole selection to that schema.
+    const schemaOf = (p: RoleManagementWithName) => (p as any).schema_id ?? null;
+    const currentSchema = selected.length ? schemaOf(selected[0]) : null;
+
     const toggleSelection = (project: RoleManagementWithName) => {
-        setSelected((prev) =>
-            isSelected(project)
-                ? prev.filter((p) => p.project_id !== project.project_id)
-                : [...prev, project]
-        );
+        const ps = schemaOf(project);
+        if (isSelected(project)) {
+            setSelected((prev) => prev.filter((p) => p.project_id !== project.project_id));
+        } else if (currentSchema == null || ps === currentSchema) {
+            setSelected((prev) => [...prev, project]);
+        } else {
+            setSelected([project]); // different schema → switch
+        }
     };
 
-    const selectAll = () => setSelected(projects);
+    const selectAll = () => {
+        const sch = selected.length ? currentSchema : (projects[0] ? schemaOf(projects[0]) : null);
+        if (sch == null) { setSelected(projects.slice(0, 1)); return; }
+        setSelected(projects.filter((p) => schemaOf(p) === sch));
+    };
     const deselectAll = () => setSelected([]);
     const removeSelection = (project: RoleManagementWithName) =>
         setSelected((prev) => prev.filter((p) => p.project_id !== project.project_id));
@@ -101,7 +113,7 @@ export function ProjectDialog({ onClose }: Props) {
                                         <div>
                                             <div>{project.project_name}</div>
                                             <div className="text-xs text-muted-foreground">
-                                                {t("label.role")}: {project.role}
+                                                {(project as any).schema_name ?? "no schema"} · {project.role}
                                             </div>
                                         </div>
                                     </li>

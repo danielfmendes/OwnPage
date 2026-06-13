@@ -1,5 +1,5 @@
-// Types mirroring the backend DWH catalog (controller/src/handlers/dwh/schema/catalog.ts).
-// Booleans arrive as 0/1 from D1 or true/false from Postgres — treat them as truthy.
+// Types mirroring the schema-centric DWH catalog. Entities belong to a SCHEMA; many projects share
+// a schema. Booleans arrive as 0/1 (D1) or true/false (Postgres) — treat as truthy.
 
 export type DwhDataType =
     | "text"
@@ -27,7 +27,7 @@ export interface DwhColumn {
 
 export interface DwhEntity {
     id: number;
-    project_id: number;
+    schema_id: number;
     name: string;
     display_name: string | null;
     physical_table: string;
@@ -35,6 +35,19 @@ export interface DwhEntity {
     is_managed: boolean | number;
     created_at: string;
     columns: DwhColumn[];
+}
+
+export interface DwhSchema {
+    id: number;
+    name: string;
+    canWrite?: boolean;
+}
+
+export interface ImpactResult {
+    destructive: boolean;
+    affectedRows: number;
+    affectedProjects?: number;
+    reason: string;
 }
 
 export type DwhRow = Record<string, any>;

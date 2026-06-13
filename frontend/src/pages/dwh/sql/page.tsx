@@ -3,7 +3,7 @@
 // builder, not raw SQL.
 
 import { useCallback, useEffect, useState } from "react";
-import { useActiveProject } from "@/utils/useActiveProject";
+import { useActiveSchema } from "@/utils/useActiveSchema";
 import Editor from "@monaco-editor/react";
 import ContentLayout from "@/components/layout/ContentLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,7 +14,7 @@ import { dwhClient } from "@/models/dwh/dwhClient";
 import type { DwhEntity } from "@/models/dwh/types";
 
 export default function SqlConsolePage() {
-    const { projectId } = useActiveProject();
+    const { schemaId } = useActiveSchema();
 
     const [sql, setSql] = useState("SELECT 1;");
     const [result, setResult] = useState<{ columns: string[]; rows: Record<string, any>[] } | null>(null);
@@ -26,15 +26,15 @@ export default function SqlConsolePage() {
     const [ddl, setDdl] = useState("");
 
     useEffect(() => {
-        if (!projectId) return;
-        dwhClient.listEntities(projectId).then(setEntities).catch(() => setEntities([]));
-    }, [projectId]);
+        if (!schemaId) return;
+        dwhClient.listEntities(schemaId).then(setEntities).catch(() => setEntities([]));
+    }, [schemaId]);
 
     const run = useCallback(async () => {
-        if (!projectId) return;
+        if (!schemaId) return;
         setRunning(true); setError(null);
         try {
-            const res = await dwhClient.runSql(projectId, sql);
+            const res = await dwhClient.runSql(schemaId, sql);
             setResult(res);
         } catch (e: any) {
             setError(e?.message ?? String(e));
@@ -42,7 +42,7 @@ export default function SqlConsolePage() {
         } finally {
             setRunning(false);
         }
-    }, [projectId, sql]);
+    }, [schemaId, sql]);
 
     const loadDdl = useCallback((id: string) => {
         setDdlEntityId(id);
@@ -50,7 +50,7 @@ export default function SqlConsolePage() {
         dwhClient.getDdl(Number(id)).then((r) => setDdl(r.ddl)).catch((e: any) => setDdl(`-- ${e?.message ?? e}`));
     }, []);
 
-    if (!projectId) {
+    if (!schemaId) {
         return (
             <ContentLayout title="SQL">
                 <div className="p-8 text-center text-muted-foreground">

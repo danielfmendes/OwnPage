@@ -1,5 +1,5 @@
-// Generic data page: renders any user-defined entity (table + create/edit/delete) purely from its
-// catalog metadata, replacing the hardcoded per-entity pages. Reuses the shared DataTable.
+// Generic data page: renders any entity of the active schema. Reads compile across the selected
+// projects; Add/Edit is enabled only when exactly one project is selected (writes need one target).
 
 import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import { useParams } from "react-router-dom";
@@ -14,6 +14,7 @@ import { ButtonLoading } from "@/components/helpers/buttons/ButtonLoading";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { dwhClient, truthy } from "@/models/dwh/dwhClient";
+import { useActiveSchema } from "@/utils/useActiveSchema";
 import type { DwhColumn, DwhEntity, DwhRow } from "@/models/dwh/types";
 import GenericForm from "./GenericForm";
 
@@ -28,8 +29,8 @@ function renderCell(col: DwhColumn, value: any) {
 }
 
 export default function EntityDataPage() {
-    const { projectId: projectIdParam, entity: entityName } = useParams();
-    const projectId = Number(projectIdParam);
+    const { entity: entityName } = useParams();
+    const { schemaId, projectIds, writeProjectId, selectedCount } = useActiveSchema();
     const { t } = useTranslation();
     const { addNotification } = useNotification();
 
@@ -42,63 +43,50 @@ export default function EntityDataPage() {
     const [deleteId, setDeleteId] = useState<number | null>(null);
 
     async function itemsLoader(options: ItemsLoaderOptions): Promise<void> {
-        if (!entityName || !projectId) return;
+        if (!entityName || !schemaId) return;
         const filter = options.filterManager.getFilterString();
         const sort = options.sort.toCallOpts().join(",");
         const res = await dwhClient.getData(
-            entityName,
-            projectId,
+            entityName, schemaId, projectIds,
             filter === "" ? undefined : filter,
-            options.pagination.page,
-            options.pagination.itemsPerPage,
+            options.pagination.page, options.pagination.itemsPerPage,
             sort === "" ? undefined : sort,
         );
         setData(res.items ?? []);
         setTotalCount(res.totalCount ?? 0);
     }
-
     const refreshData = useRefreshData(itemsLoader);
 
-    // Load the entity's catalog metadata (columns) when the route changes.
     useEffect(() => {
         let active = true;
-        if (!projectId || !entityName) return;
-        dwhClient
-            .listEntities(projectId)
+        if (!schemaId || !entityName) return;
+        dwhClient.listEntities(schemaId)
             .then((entities) => {
                 if (!active) return;
-                const found = entities.find((e) => e.name === entityName) ?? null;
-                setEntityMeta(found);
-                if (!found) addNotification(`Entity "${entityName}" not found`, "error");
+                setEntityMeta(entities.find((e) => e.name === entityName) ?? null);
             })
             .catch((e) => active && addNotification(`${e?.message ?? e}`, "error"));
         return () => { active = false; };
-    }, [projectId, entityName]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [schemaId, entityName, projectIds.join(",")]);
 
     const deleteRow = (id: number, cascade = false) => {
-        if (!entityName) return;
-        if (cascade) setIsLoadingDeleteCascade(true);
-        else setLoadingDeleteId(id);
-        dwhClient
-            .deleteRow(entityName, projectId, id, cascade)
+        if (!entityName || !schemaId) return;
+        if (cascade) setIsLoadingDeleteCascade(true); else setLoadingDeleteId(id);
+        dwhClient.deleteRow(entityName, schemaId, id, cascade)
             .then(async () => {
                 addNotification(`Deleted${cascade ? " with related data" : ""}`, "success");
                 await refreshData();
                 if (cascade) setShowCascadeDialog(false);
             })
             .catch((err: any) => {
-                if (err?.status === 409 && !cascade) {
-                    setShowCascadeDialog(true);
-                    setDeleteId(id);
-                    return;
-                }
+                if (err?.status === 409 && !cascade) { setShowCascadeDialog(true); setDeleteId(id); return; }
                 addNotification(`Failed to delete: ${err?.message ?? err}`, "error");
             })
-            .finally(() => {
-                if (cascade) setIsLoadingDeleteCascade(false);
-                else setLoadingDeleteId(null);
-            });
+            .finally(() => { if (cascade) setIsLoadingDeleteCascade(false); else setLoadingDeleteId(null); });
     };
+
+    const canWrite = writeProjectId !== undefined;
 
     const columns: CustomColumnDef<DwhRow>[] = useMemo(() => {
         if (!entityMeta) return [];
@@ -108,73 +96,58 @@ export default function EntityDataPage() {
             cell: ({ row }: any) => renderCell(c, row.getValue(c.name)),
         }));
         cols.push({
-            id: "actions",
-            enableHiding: false,
-            widthPercent: 5,
+            id: "actions", enableHiding: false, widthPercent: 5,
             cell: ({ row }: any) => (
                 <DeleteButton
                     onClick={(event: MouseEvent) => { event.stopPropagation(); deleteRow(row.original.id); }}
                     isLoading={loadingDeleteId === row.original.id}
+                    disabled={!canWrite}
                 />
             ),
         });
         return cols;
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [entityMeta, loadingDeleteId]);
+    }, [entityMeta, loadingDeleteId, canWrite]);
 
     const title = entityMeta?.display_name || entityName || "";
 
+    if (!schemaId) {
+        return <ContentLayout title={title}><div className="p-8 text-center text-muted-foreground">Select a project (with a schema) to view data.</div></ContentLayout>;
+    }
     if (!entityMeta) {
         return <ContentLayout title={title}><div className="p-6 text-muted-foreground">{t("loading", { defaultValue: "Loading…" })}</div></ContentLayout>;
     }
 
     return (
         <ContentLayout title={title}>
+            {!canWrite && (
+                <div className="mb-3 rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+                    {selectedCount > 1
+                        ? "Showing data compiled across several projects (read-only). Select a single project to add or edit rows."
+                        : "You don't have write access to this project."}
+                </div>
+            )}
             <DataTable
                 title={title}
                 columns={columns}
                 data={data}
                 itemsLoader={itemsLoader}
                 totalCount={totalCount}
-                rowDialogContent={(rowData, onClose) => (
-                    <GenericForm
-                        entityName={entityName!}
-                        projectId={projectId}
-                        columns={entityMeta.columns}
-                        mode="edit"
-                        initial={rowData}
-                        onClose={onClose}
-                        onSaved={refreshData}
-                    />
-                )}
-                addDialogContent={(onClose) => (
-                    <GenericForm
-                        entityName={entityName!}
-                        projectId={projectId}
-                        columns={entityMeta.columns}
-                        mode="create"
-                        onClose={onClose}
-                        onSaved={refreshData}
-                    />
-                )}
+                rowDialogContent={canWrite ? (rowData, onClose) => (
+                    <GenericForm entityName={entityName!} schemaId={schemaId} projectId={writeProjectId!} columns={entityMeta.columns} mode="edit" initial={rowData} onClose={onClose} onSaved={refreshData} />
+                ) : undefined}
+                addDialogContent={canWrite ? (onClose) => (
+                    <GenericForm entityName={entityName!} schemaId={schemaId} projectId={writeProjectId!} columns={entityMeta.columns} mode="create" onClose={onClose} onSaved={refreshData} />
+                ) : undefined}
             />
 
             {showCascadeDialog && (
                 <Dialog open={showCascadeDialog} onOpenChange={() => setShowCascadeDialog(false)}>
                     <DialogContent className="sm:max-w-[500px]">
-                        <DialogHeader>
-                            <DialogTitle className="text-center">{t("delete_references.info")}</DialogTitle>
-                        </DialogHeader>
+                        <DialogHeader><DialogTitle className="text-center">{t("delete_references.info")}</DialogTitle></DialogHeader>
                         <div className="flex justify-center space-x-4">
-                            <Button variant="outline" onClick={() => setShowCascadeDialog(false)} className="w-[40%]">
-                                {t("button.cancel")}
-                            </Button>
-                            <ButtonLoading
-                                isLoading={isLoadingDeleteCascade}
-                                onClick={() => deleteId !== null && deleteRow(deleteId, true)}
-                                className="w-[40%]"
-                                variant="destructive"
-                            >
+                            <Button variant="outline" onClick={() => setShowCascadeDialog(false)} className="w-[40%]">{t("button.cancel")}</Button>
+                            <ButtonLoading isLoading={isLoadingDeleteCascade} onClick={() => deleteId !== null && deleteRow(deleteId, true)} className="w-[40%]" variant="destructive">
                                 {t("delete_references.button")}
                             </ButtonLoading>
                         </div>

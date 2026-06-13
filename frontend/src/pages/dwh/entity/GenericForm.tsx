@@ -1,6 +1,4 @@
-// Auto-generated create/edit form for a user-defined entity. Builds one input per catalog column,
-// keyed off its data_type. Used as both the "add" dialog and the row-edit dialog of the generic
-// data page.
+// Auto-generated create/edit form for a user-defined entity. Writes target a single project.
 
 import { useState } from "react";
 import { DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -16,6 +14,7 @@ import { dwhClient, editableColumns, truthy } from "@/models/dwh/dwhClient";
 
 interface GenericFormProps {
     entityName: string;
+    schemaId: number;
     projectId: number;
     columns: DwhColumn[];
     mode: "create" | "edit";
@@ -35,7 +34,7 @@ function inputTypeFor(dt: DwhColumn["data_type"]): string {
     }
 }
 
-export default function GenericForm({ entityName, projectId, columns, mode, initial, onClose, onSaved }: GenericFormProps) {
+export default function GenericForm({ entityName, schemaId, projectId, columns, mode, initial, onClose, onSaved }: GenericFormProps) {
     const { t } = useTranslation();
     const { addNotification } = useNotification();
     const fields = editableColumns(columns);
@@ -49,32 +48,25 @@ export default function GenericForm({ entityName, projectId, columns, mode, init
         return seed;
     });
     const [saving, setSaving] = useState(false);
-
     const setField = (name: string, value: any) => setValues((prev) => ({ ...prev, [name]: value }));
 
     const submit = async () => {
         setSaving(true);
         try {
-            // Coerce values to their column type; drop empty optionals.
             const payload: DwhRow = {};
             for (const c of fields) {
                 const raw = values[c.name];
-                if (c.data_type === "boolean") {
-                    payload[c.name] = !!raw;
-                } else if (raw === "" || raw === null || raw === undefined) {
-                    // leave unset so DB default / NULL applies
-                } else if (c.data_type === "integer" || c.data_type === "real" || c.data_type === "reference") {
-                    payload[c.name] = Number(raw);
-                } else {
-                    payload[c.name] = raw;
-                }
+                if (c.data_type === "boolean") payload[c.name] = !!raw;
+                else if (raw === "" || raw === null || raw === undefined) { /* leave unset */ }
+                else if (c.data_type === "integer" || c.data_type === "real" || c.data_type === "reference") payload[c.name] = Number(raw);
+                else payload[c.name] = raw;
             }
             if (mode === "edit") {
                 payload.id = initial?.id;
-                await dwhClient.updateRow(entityName, projectId, payload);
+                await dwhClient.updateRow(entityName, schemaId, projectId, payload);
                 addNotification(t("messages.updated", { defaultValue: "Updated" }), "success");
             } else {
-                await dwhClient.createRow(entityName, projectId, payload);
+                await dwhClient.createRow(entityName, schemaId, projectId, payload);
                 addNotification(t("messages.created", { defaultValue: "Created" }), "success");
             }
             onSaved();
@@ -90,11 +82,9 @@ export default function GenericForm({ entityName, projectId, columns, mode, init
         <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
                 <DialogTitle>
-                    {mode === "edit" ? t("button.edit", { defaultValue: "Edit" }) : t("button.add", { defaultValue: "Add" })}
-                    {" "}{entityName}
+                    {mode === "edit" ? t("button.edit", { defaultValue: "Edit" }) : t("button.add", { defaultValue: "Add" })} {entityName}
                 </DialogTitle>
             </DialogHeader>
-
             <div className="grid gap-4 py-2 max-h-[60vh] overflow-y-auto">
                 {fields.map((c) => (
                     <div key={c.id} className="grid gap-1.5">
@@ -103,30 +93,16 @@ export default function GenericForm({ entityName, projectId, columns, mode, init
                             {c.data_type === "reference" && <span className="text-muted-foreground"> (id)</span>}
                         </Label>
                         {c.data_type === "boolean" ? (
-                            <Switch
-                                id={c.name}
-                                checked={!!values[c.name]}
-                                onCheckedChange={(v) => setField(c.name, v)}
-                            />
+                            <Switch id={c.name} checked={!!values[c.name]} onCheckedChange={(v) => setField(c.name, v)} />
                         ) : (
-                            <Input
-                                id={c.name}
-                                type={inputTypeFor(c.data_type)}
-                                value={values[c.name] ?? ""}
-                                onChange={(e) => setField(c.name, e.target.value)}
-                            />
+                            <Input id={c.name} type={inputTypeFor(c.data_type)} value={values[c.name] ?? ""} onChange={(e) => setField(c.name, e.target.value)} />
                         )}
                     </div>
                 ))}
             </div>
-
             <DialogFooter>
-                <Button variant="outline" onClick={onClose} disabled={saving}>
-                    {t("button.cancel", { defaultValue: "Cancel" })}
-                </Button>
-                <ButtonLoading isLoading={saving} onClick={submit}>
-                    {t("button.save", { defaultValue: "Save" })}
-                </ButtonLoading>
+                <Button variant="outline" onClick={onClose} disabled={saving}>{t("button.cancel", { defaultValue: "Cancel" })}</Button>
+                <ButtonLoading isLoading={saving} onClick={submit}>{t("button.save", { defaultValue: "Save" })}</ButtonLoading>
             </DialogFooter>
         </DialogContent>
     );

@@ -31,9 +31,11 @@ export const getRoleManagement = async (req: Request, env: Env) => {
             return errorResponse("You don't have access to this project", 403);
         }
         const { results } = await env.DB.prepare(`
-            SELECT useremail AS user_email, project_id, role, p.name as project_name
+            SELECT useremail AS user_email, project_id, role, p.name as project_name,
+                   p.schema_id AS schema_id, s.name AS schema_name
             FROM role_management
             JOIN projects p ON p.id = role_management.project_id
+            LEFT JOIN dwh_schemas s ON s.id = p.schema_id
             WHERE role_management.project_id = ?
         `).bind(projectId).all();
         return Response.json(results);
@@ -43,9 +45,11 @@ export const getRoleManagement = async (req: Request, env: Env) => {
     const userEmail = await requireUser(req, env);
 
     const baseQuery = `
-        SELECT useremail AS user_email, project_id, role, p.name as project_name
+        SELECT useremail AS user_email, project_id, role, p.name as project_name,
+               p.schema_id AS schema_id, s.name AS schema_name
         FROM role_management
         JOIN projects p ON p.id = role_management.project_id
+        LEFT JOIN dwh_schemas s ON s.id = p.schema_id
         WHERE useremail = ?
     `;
     const countQuery = `

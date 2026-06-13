@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BookA, Check, ChevronDown, ChevronRight, LogOut, User as UserIcon } from "lucide-react";
+import { BookA, Check, ChevronDown, ChevronRight, LogOut, User as UserIcon, Workflow } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -111,6 +111,13 @@ export function UserNav() {
                         <Link to={`/dwh/rolemanagement${currentQuery}`} className="flex items-center">
                             <UserIcon className="w-4 h-4 mr-1 text-muted-foreground" />
                             {t("menu.role_management")}
+                        </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem className="hover:cursor-pointer" asChild>
+                        <Link to={`/dwh/schema${currentQuery}`} className="flex items-center">
+                            <Workflow className="w-4 h-4 mr-1 text-muted-foreground" />
+                            {t("menu.schema_management", { defaultValue: "Schema management" })}
                         </Link>
                     </DropdownMenuItem>
 

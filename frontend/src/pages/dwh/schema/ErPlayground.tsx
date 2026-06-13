@@ -22,6 +22,7 @@ import type { DwhEntity } from "@/models/dwh/types";
 interface Props {
     entities: DwhEntity[];
     reload: () => void;
+    canWrite: boolean;
 }
 
 // Custom node: entity title + its columns, with connect handles on both sides.
@@ -46,7 +47,7 @@ function EntityNode({ data }: { data: { entity: DwhEntity } }) {
 
 const nodeTypes = { entity: EntityNode };
 
-export default function ErPlayground({ entities, reload }: Props) {
+export default function ErPlayground({ entities, reload, canWrite }: Props) {
     const { addNotification } = useNotification();
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -78,12 +79,13 @@ export default function ErPlayground({ entities, reload }: Props) {
     useEffect(() => { setNodes(built.ns); setEdges(built.es); }, [built, setNodes, setEdges]);
 
     const onConnect = useCallback((connection: Connection) => {
+        if (!canWrite) { addNotification("You need write access to add connections", "error"); return; }
         if (!connection.source || !connection.target || connection.source === connection.target) return;
         dwhClient
             .createRelationship({ from_entity_id: Number(connection.source), to_entity_id: Number(connection.target) })
             .then(() => { addNotification("Connection created", "success"); reload(); })
             .catch((e: any) => addNotification(`${e?.message ?? e}`, "error"));
-    }, [addNotification, reload]);
+    }, [addNotification, reload, canWrite]);
 
     return (
         <div className="h-[70vh] rounded-xl border">
