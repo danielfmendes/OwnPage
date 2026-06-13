@@ -1,0 +1,40 @@
+# Local development database for the API (controller running via `npm run dev:local`).
+# Postgres is exposed on host port 5433; Flyway applies the migrations in ./init on startup.
+#
+#   cd backend && docker compose up -d
+#
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres-container
+    environment:
+      POSTGRES_USER: fahrrad_user
+      POSTGRES_PASSWORD: geheim
+      POSTGRES_DB: fahrrad_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fahrrad_user -d fahrrad_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  flyway:
+    image: flyway/flyway
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - -url=jdbc:postgresql://postgres:5432/fahrrad_db
+      - -user=fahrrad_user
+      - -password=geheim
+      - -baselineOnMigrate=true
+      - -connectRetries=10
+      - migrate
+    volumes:
+      - ./init:/flyway/sql
+
+volumes:
+  pgdata:
