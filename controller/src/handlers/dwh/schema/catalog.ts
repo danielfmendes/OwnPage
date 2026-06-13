@@ -1,13 +1,20 @@
-// Read helpers over the DWH catalog (dwh_entities / dwh_columns). No writes here — entity/column/
-// relationship mutations live in entities.ts / columns.ts / relationships.ts. Booleans come back as
-// 0/1 on D1 and true/false on Postgres; callers treat them as truthy.
+// Read helpers over the DWH catalog (dwh_schemas / dwh_entities / dwh_columns). Schema-centric:
+// entities belong to a SCHEMA; many projects can share a schema. Booleans come back as 0/1 on D1 and
+// true/false on Postgres; callers treat them as truthy.
 
 import { Env } from "../../../types";
 import { DataType } from "./ddl";
 
+export interface SchemaRow {
+    id: number;
+    name: string;
+    created_by: string | null;
+    created_at: string;
+}
+
 export interface EntityRow {
     id: number;
-    project_id: number;
+    schema_id: number;
     name: string;
     display_name: string | null;
     physical_table: string;
@@ -31,19 +38,31 @@ export interface ColumnRow {
     is_system: number | boolean;
 }
 
-export async function listEntities(env: Env, projectId: number): Promise<EntityRow[]> {
-    const { results } = await env.DB.prepare(
-        "SELECT * FROM dwh_entities WHERE project_id = ? ORDER BY name"
-    ).bind(projectId).all<EntityRow>();
-    return results;
+// --- schemas ---------------------------------------------------------------------------
+
+export async function getSchemaById(env: Env, id: number): Promise<SchemaRow | null> {
+    return await env.DB.prepare("SELECT * FROM dwh_schemas WHERE id = ?").bind(id).first<SchemaRow>();
 }
 
-export async function listEntitiesForProjects(env: Env, projectIds: number[]): Promise<EntityRow[]> {
-    if (projectIds.length === 0) return [];
-    const placeholders = projectIds.map(() => "?").join(", ");
+export async function schemaIdForProject(env: Env, projectId: number): Promise<number | null> {
+    const row = await env.DB.prepare("SELECT schema_id FROM projects WHERE id = ?")
+        .bind(projectId).first<{ schema_id: number | null }>();
+    return row?.schema_id ?? null;
+}
+
+// Project ids that use a given schema (the discriminator values that compile together).
+export async function projectsForSchema(env: Env, schemaId: number): Promise<number[]> {
+    const { results } = await env.DB.prepare("SELECT id FROM projects WHERE schema_id = ?")
+        .bind(schemaId).all<{ id: number }>();
+    return results.map((r) => r.id);
+}
+
+// --- entities / columns ----------------------------------------------------------------
+
+export async function listEntities(env: Env, schemaId: number): Promise<EntityRow[]> {
     const { results } = await env.DB.prepare(
-        `SELECT * FROM dwh_entities WHERE project_id IN (${placeholders}) ORDER BY project_id, name`
-    ).bind(...projectIds).all<EntityRow>();
+        "SELECT * FROM dwh_entities WHERE schema_id = ? ORDER BY name"
+    ).bind(schemaId).all<EntityRow>();
     return results;
 }
 
@@ -51,10 +70,10 @@ export async function getEntityById(env: Env, id: number): Promise<EntityRow | n
     return await env.DB.prepare("SELECT * FROM dwh_entities WHERE id = ?").bind(id).first<EntityRow>();
 }
 
-export async function getEntityByName(env: Env, projectId: number, name: string): Promise<EntityRow | null> {
+export async function getEntityByName(env: Env, schemaId: number, name: string): Promise<EntityRow | null> {
     return await env.DB.prepare(
-        "SELECT * FROM dwh_entities WHERE project_id = ? AND name = ?"
-    ).bind(projectId, name).first<EntityRow>();
+        "SELECT * FROM dwh_entities WHERE schema_id = ? AND name = ?"
+    ).bind(schemaId, name).first<EntityRow>();
 }
 
 export async function getColumns(env: Env, entityId: number): Promise<ColumnRow[]> {
@@ -64,14 +83,14 @@ export async function getColumns(env: Env, entityId: number): Promise<ColumnRow[
     return results;
 }
 
-// Reference columns (in any entity) that point AT the given entity — i.e. its children, used for
-// app-level cascade/child-exists checks (we don't rely on DB-level FK enforcement on D1).
+// Reference columns (in any entity of the same schema) that point AT the given entity — its children,
+// used for app-level cascade/child-exists checks (D1 doesn't enforce FKs).
 export async function referencesTo(
     env: Env,
     entityId: number,
 ): Promise<Array<{ column: ColumnRow; entity: EntityRow }>> {
     const { results } = await env.DB.prepare(
-        `SELECT c.*, e.physical_table AS _e_physical_table, e.project_id AS _e_project_id,
+        `SELECT c.*, e.physical_table AS _e_physical_table, e.schema_id AS _e_schema_id,
                 e.name AS _e_name, e.id AS _e_id
          FROM dwh_columns c
                   JOIN dwh_entities e ON c.entity_id = e.id
@@ -81,17 +100,17 @@ export async function referencesTo(
         column: r as ColumnRow,
         entity: {
             id: r._e_id,
-            project_id: r._e_project_id,
+            schema_id: r._e_schema_id,
             name: r._e_name,
             physical_table: r._e_physical_table,
         } as EntityRow,
     }));
 }
 
-// Physical table names a project owns — the allowlist for the sandboxed SQL console.
-export async function physicalTablesForProject(env: Env, projectId: number): Promise<string[]> {
+// Physical table names a schema owns — the allowlist for the sandboxed SQL console.
+export async function physicalTablesForSchema(env: Env, schemaId: number): Promise<string[]> {
     const { results } = await env.DB.prepare(
-        "SELECT physical_table FROM dwh_entities WHERE project_id = ?"
-    ).bind(projectId).all<{ physical_table: string }>();
+        "SELECT physical_table FROM dwh_entities WHERE schema_id = ?"
+    ).bind(schemaId).all<{ physical_table: string }>();
     return results.map((r) => r.physical_table);
 }

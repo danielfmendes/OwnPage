@@ -2,11 +2,14 @@ import { Env } from "../../types";
 import { queryWithPagination } from "./pagination";
 import {
     getAllowedProjectIds,
+    getSchemaAccess,
+    HttpError,
     readJson,
     requireProjectRole,
     requireUser,
     resolveProjectId,
 } from "../../utils/auth";
+import { createSchemaWithEntities } from "./schema/schemas";
 
 interface CrudOptions {
     // Column on this table that holds the owning project_id. When set, writes require
@@ -195,18 +198,33 @@ export const projectsHandler = async (req: Request, env: Env) => {
 
     if (req.method === "POST") {
         // Creating a project is allowed for any authenticated user; they become its creator.
+        // A project references a SCHEMA: reuse an existing one you can write, or create a new one
+        // (from a structured definition or parsed CREATE TABLE SQL).
         const email = await requireUser(req, env);
         const data: any = await readJson(req);
         try {
-            const result = await env.DB.prepare("INSERT INTO projects (name) VALUES (?)").bind(data.name).run();
+            let schemaId: number | null = null;
+            if (data.schema_id) {
+                const access = await getSchemaAccess(env, email);
+                if (!access.get(Number(data.schema_id))?.canWrite) {
+                    return new Response("You need write access to that schema", { status: 403 });
+                }
+                schemaId = Number(data.schema_id);
+            } else if (data.new_schema) {
+                schemaId = await createSchemaWithEntities(env, email, data.new_schema);
+            }
+
+            const result = await env.DB.prepare("INSERT INTO projects (name, schema_id) VALUES (?, ?)")
+                .bind(data.name, schemaId).run();
             const projectId = result.meta?.last_row_id;
             if (projectId) {
                 await env.DB.prepare(
                     "INSERT INTO role_management (useremail, project_id, role) VALUES (?, ?, 'creator')"
                 ).bind(email, projectId).run();
             }
-            return new Response("Created", { status: 201 });
+            return Response.json({ id: projectId, schema_id: schemaId }, { status: 201 });
         } catch (e) {
+            if (e instanceof HttpError) return new Response(e.message, { status: e.status });
             console.error("create project failed:", e);
             return new Response("Could not create project", { status: 500 });
         }

@@ -1,9 +1,9 @@
-// Relationship endpoint: POST /dwh/relationships — the ER-playground "create connection". It adds a
-// nullable reference column on the source entity pointing at the target entity (the only FK form
-// SQLite/D1 allows post-creation). Deleting a relationship = deleting that column via /dwh/columns.
+// Relationship endpoint: POST /dwh/relationships — the ER-playground "create connection". Adds a
+// nullable reference column on the source entity pointing at the target (same schema). Deleting a
+// relationship = deleting that column via /dwh/columns.
 
 import { Env } from "../../../types";
-import { HttpError, readJson, requireProjectRole } from "../../../utils/auth";
+import { HttpError, readJson, requireSchemaWrite } from "../../../utils/auth";
 import { getEntityById } from "./catalog";
 import { addColumnToEntity } from "./columns";
 import { safeColumnName } from "./ddl";
@@ -22,18 +22,15 @@ const handleCreate = async (req: Request, env: Env) => {
     if (!body.from_entity_id || !body.to_entity_id) {
         throw new HttpError(400, "from_entity_id and to_entity_id are required");
     }
-
     const from = await getEntityById(env, body.from_entity_id);
     const to = await getEntityById(env, body.to_entity_id);
     if (!from || !to) throw new HttpError(404, "Source or target entity not found");
-    if (from.project_id !== to.project_id) {
-        throw new HttpError(400, "Both entities must belong to the same project");
+    if (from.schema_id !== to.schema_id) {
+        throw new HttpError(400, "Both entities must belong to the same schema");
     }
-    await requireProjectRole(req, env, from.project_id, "admin");
+    await requireSchemaWrite(req, env, from.schema_id);
 
-    // Default FK column name: <target>_id (e.g. owner_id). Validated like any column name.
     const columnName = safeColumnName((body.column_name || `${to.name}_id`).toLowerCase());
-
     return addColumnToEntity(env, {
         entity_id: from.id,
         name: columnName,

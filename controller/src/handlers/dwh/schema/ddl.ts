@@ -154,7 +154,8 @@ export function dropTableSQL(physicalTable: string): string {
     return `DROP TABLE IF EXISTS ${safeIdent(physicalTable)}`;
 }
 
-// Physical table name for a managed entity: d_{projectId}_{name}.
-export function physicalTableName(projectId: number, entityName: string): string {
-    return safeIdent(`d_${projectId}_${safeColumnName(entityName)}`);
+// Physical table name for a managed entity: s{schemaId}_{name}. Tables live per SCHEMA (shared by
+// all projects on that schema); rows are discriminated by a project_id column.
+export function physicalTableName(schemaId: number, entityName: string): string {
+    return safeIdent(`s_${schemaId}_${safeColumnName(entityName)}`);
 }
