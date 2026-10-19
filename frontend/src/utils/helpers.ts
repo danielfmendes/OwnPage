@@ -21,7 +21,7 @@ export const handleLogOut = async (
 
     // Give a tiny delay strictly for state flush if needed
     setTimeout(() => {
-        navigate("/dwh/login");
+        navigate("/login");
         addNotification("Successfully logged out.", "success");
     }, 50);
 };
@@ -34,3 +34,6 @@ export const isRoleUserForProject = (projectId: number, role: string = "user") =
 
 const apiUrl = import.meta.env.VITE_API_ENV || "http://localhost:8080";
 export default apiUrl;
+// Only same-site paths are accepted from ?next=, so the login page cannot redirect off-site
+export const safeNext = (next: string | null, fallback: string) =>
+    next && next.startsWith("/") && !next.startsWith("//") ? next : fallback;

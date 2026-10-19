@@ -44,7 +44,7 @@ export default function RegisterCard() {
 
         AuthsService.userRegister(newData)
             .then(() => {
-                navigate('/dwh/dashboard');
+                navigate('/login');
                 addNotification(
                     "Confirmation e-mail has been sent. Please confirm your account within 7 days (check your spam folder if necessary).",
                     "success"
@@ -59,7 +59,7 @@ export default function RegisterCard() {
     };
 
     return (
-        <DwhAuthLayout title="Create Account" subtitle="Set up your NebulaDW workspace">
+        <DwhAuthLayout title="Create Account" subtitle="Create your danielfreiremendes.com account">
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">
                     <Label className="text-[10px] uppercase tracking-widest text-zinc-500 ml-1">
@@ -135,7 +135,7 @@ export default function RegisterCard() {
                 <p className="text-zinc-500 text-xs">
                     {t("already_have_account", "Already have an account?")}{" "}
                     <Link
-                        to="/dwh/login"
+                        to="/login"
                         className="text-orange-600 dark:text-white font-semibold underline underline-offset-4 hover:opacity-80 transition-opacity"
                     >
                         Sign in

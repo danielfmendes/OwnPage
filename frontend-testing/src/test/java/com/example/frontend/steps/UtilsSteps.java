@@ -25,7 +25,7 @@ public class UtilsSteps {
 
     @Given("ich bin auf der Login-Seite")
     public void ichBinAufDerLoginSeite() {
-        openPage("/dwh/login");
+        openPage("/login");
         takeScreenshot("screenshots/login/login_page.png");
     }
 

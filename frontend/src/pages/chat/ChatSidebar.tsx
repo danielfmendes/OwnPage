@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Session } from "@/models/chat/chatApi.ts";
 import { useNavigate } from "react-router-dom";
+import { handleLogOut } from "@/utils/helpers";
+import { useNotification } from "@/components/helpers/NotificationProvider";
 
 interface ChatSidebarProps {
     isOpen: boolean;
@@ -15,10 +17,10 @@ interface ChatSidebarProps {
 
 export function ChatSidebar({ isOpen, setOpen, sessions, activeId, setActiveId, onCreateSession }: ChatSidebarProps) {
     const navigate = useNavigate();
+    const { addNotification } = useNotification();
 
     const handleSignOut = () => {
-        localStorage.removeItem("chat_token");
-        navigate("/chat/login");
+        handleLogOut(navigate, addNotification);
     };
 
     return (

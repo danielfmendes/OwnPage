@@ -6,7 +6,7 @@ import { OpenAPI } from "@/models/api/core/OpenAPI";
 import type { DwhEntity, DwhSchema, ImpactResult, DwhRow } from "./types";
 
 function apiBase(): string {
-    return `${OpenAPI.BASE}/api/dwh`;
+    return `${OpenAPI.BASE}/dwh`;
 }
 
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {

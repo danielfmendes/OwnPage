@@ -6,7 +6,8 @@ import { ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useNotification } from "@/components/helpers/NotificationProvider";
 import { useTranslation } from "react-i18next";
 import { AuthsService } from "@/models/api";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { safeNext } from "@/utils/helpers";
 import { DwhAuthLayout } from "@/pages/dwh/AuthLayout";
 
 export default function LoginCard() {
@@ -14,6 +15,7 @@ export default function LoginCard() {
     const { addNotification } = useNotification();
 
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingDemo, setIsLoadingDemo] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -37,7 +39,7 @@ export default function LoginCard() {
                 // When Using HttpOnly cookies, the token is not returned in the JSON, it is set securely in the response headers.
                 // It will only reach here if the request was successful (200 OK) due to the OpenAPI client throwing on 401s.
                 addNotification("Successfully logged in.", "success");
-                navigate('/dwh/dashboard');
+                navigate(safeNext(searchParams.get('next'), '/dwh/dashboard'));
             })
             .catch(err => {
                 setErrorMessagePassword(t("error.login"));
@@ -62,7 +64,7 @@ export default function LoginCard() {
     };
 
     return (
-        <DwhAuthLayout title="Welcome Back" subtitle="Sign in to your NebulaDW workspace">
+        <DwhAuthLayout title="Welcome Back" subtitle="Sign in to danielfreiremendes.com">
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">
                     <Label className="text-[10px] uppercase tracking-widest text-zinc-500 ml-1">
@@ -146,7 +148,7 @@ export default function LoginCard() {
                 <p className="text-zinc-500 text-xs">
                     {t("go_to_register", "Don't have an account?")}{" "}
                     <Link
-                        to="/dwh/register"
+                        to="/register"
                         className="text-orange-600 dark:text-white font-semibold underline underline-offset-4 hover:opacity-80 transition-opacity"
                     >
                         Create account

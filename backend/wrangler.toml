@@ -1,0 +1,44 @@
+name = "api-controller"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+
+[vars]
+DB_DIALECT = "sqlite"
+ALLOWED_ORIGIN = "https://danielfreiremendes.com"
+
+[ai]
+binding = "AI"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "db-prod"
+database_id = ""
+
+[[d1_databases]]
+binding = "CHAT_DB"
+database_name = "chat-db"
+database_id = ""
+
+[[d1_databases]]
+binding = "FEEDBACK_DB"
+database_name = "feedback-db"
+database_id = ""
+
+[[d1_databases]]
+binding = "AVALIA_DB"
+database_name = "habitacao_db"
+database_id = ""
+
+[[d1_databases]]
+binding = "SURVEY_DB"
+database_name = "cookie-db"
+database_id = ""
+
+[[vectorize]]
+binding = "VECTOR_INDEX"
+index_name = "feedback-index"
+
+[[workflows]]
+name = "feedback-ingestion-workflow"
+binding = "INGESTION_WORKFLOW"
+class_name = "IngestionWorkflow"

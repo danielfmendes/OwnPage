@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.app.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "tsBuildInfoFile": "../node_modules/.tmp/lisbon-house-prices.tsbuildinfo"
+  },
+  "include": ["src"]
+}
