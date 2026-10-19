@@ -1,4 +1,4 @@
-import {useState, useEffect} from "react";
+import {useState, useEffect, useCallback} from "react";
 import {useNavigate} from "react-router-dom";
 import {ChatSidebar} from "@/pages/chat/ChatSidebar.tsx";
 import {ChatHeader} from "@/pages/chat/ChatHeader.tsx";
@@ -13,6 +13,24 @@ export default function ChatPage() {
     const [sessions, setSessions] = useState<Session[]>([]);
     const [aiMode, setAiMode] = useState("balanced");
     const [userEmail, setUserEmail] = useState("");
+
+    const fetchSessions = useCallback(async () => {
+        try {
+            const data = await chatApi.getSessions();
+            setSessions(data);
+
+            const lastId = localStorage.getItem("last_session_id");
+            const exists = data.some((s) => s.id === lastId);
+
+            if (lastId && exists) {
+                setActiveSessionId(lastId);
+            } else if (data.length > 0) {
+                setActiveSessionId(data[0].id);
+            }
+        } catch (err) {
+            console.error("Failed to fetch sessions", err);
+        }
+    }, []);
 
     // 1. Auth Check & Initial Load: the shared login cookie is verified by the API
     useEffect(() => {
@@ -33,32 +51,15 @@ export default function ChatPage() {
         return () => {
             active = false;
         };
-    }, [navigate]);
+    }, [navigate, fetchSessions]);
 
-    // 2. Reset mode to balanced whenever the active session changes
-    useEffect(() => {
-        if (activeSessionId) {
-            setAiMode("balanced");
-        }
-    }, [activeSessionId]);
+    // 2. Reset mode to balanced whenever the active session changes (adjusted during render, not in an effect)
+    const [modeSessionId, setModeSessionId] = useState(activeSessionId);
+    if (modeSessionId !== activeSessionId) {
+        setModeSessionId(activeSessionId);
+        if (activeSessionId) setAiMode("balanced");
+    }
 
-    const fetchSessions = async () => {
-        try {
-            const data = await chatApi.getSessions();
-            setSessions(data);
-
-            const lastId = localStorage.getItem("last_session_id");
-            const exists = data.some((s) => s.id === lastId);
-
-            if (lastId && exists) {
-                setActiveSessionId(lastId);
-            } else if (data.length > 0) {
-                setActiveSessionId(data[0].id);
-            }
-        } catch (err) {
-            console.error("Failed to fetch sessions", err);
-        }
-    };
 
     const handleCreateSession = async () => {
         try {
@@ -102,6 +103,7 @@ export default function ChatPage() {
                 />
 
                 <MessageList
+                    key={activeSessionId}
                     sessionId={activeSessionId}
                     onNewMessageSent={fetchSessions}
                 />

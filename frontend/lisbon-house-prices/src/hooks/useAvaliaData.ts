@@ -81,6 +81,7 @@ export function useAvaliaData(
 
   useEffect(() => {
     if (!scope) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- mirrors the API result; cleared when there is no scope
       setData([]);
       setIsLoading(false);
       setError(null);

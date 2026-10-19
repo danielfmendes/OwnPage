@@ -50,4 +50,4 @@ export interface ImpactResult {
     reason: string;
 }
 
-export type DwhRow = Record<string, any>;
+export type DwhRow = Record<string, unknown>;

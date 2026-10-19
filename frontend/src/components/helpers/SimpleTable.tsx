@@ -3,6 +3,8 @@ import {
     useReactTable,
     getCoreRowModel,
     flexRender,
+    type CellContext,
+    type Table as TanstackTable,
 } from "@tanstack/react-table";
 import {
     Table,
@@ -16,17 +18,25 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
+import type { CustomColumnDef } from "@/models/datatable/column";
 
 interface SimpleTableProps<TData> {
     data: TData[];
-    columns: any[];
-    onRowClick?: (row: any) => void;
+    columns: CustomColumnDef<TData>[];
+    onRowClick?: (row: { original: TData }) => void;
     isLoading?: boolean;
     headers?: React.ReactNode;
-    table?: any;
+    table?: TanstackTable<TData>;
     maxHeight?: number;
     singleData?: boolean;
 }
+
+// Column configs are plain objects; these read the optional fields without assuming the column kind
+const accessorKeyOf = (col: object): string | undefined =>
+    "accessorKey" in col && typeof col.accessorKey === "string" ? col.accessorKey : undefined;
+
+const widthOf = (col: object): number | undefined =>
+    "widthPercent" in col && typeof col.widthPercent === "number" ? col.widthPercent : undefined;
 
 export function SimpleTable<TData>({
     data,
@@ -39,16 +49,25 @@ export function SimpleTable<TData>({
     singleData = false,
 }: SimpleTableProps<TData>) {
     const { t } = useTranslation();
-    const tableReact = table ?? useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
+    // Always called (also when `table` is passed) so hook order never changes between renders.
+    // TanStack's table API cannot be memoized by the React Compiler; rendering is unaffected.
+    // eslint-disable-next-line react-hooks/incompatible-library
+    const internalTable = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
+    const tableReact = table ?? internalTable;
     const visibleRows = tableReact.getRowModel().rows;
     const visibleColumnCount = tableReact.getVisibleFlatColumns().length;
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const [currentIndex, setCurrentIndex] = useState(0);
+    // Reset to the first item when the data changes (state is adjusted during render, not in an effect)
+    const [shownData, setShownData] = useState(data);
+    if (shownData !== data) {
+        setShownData(data);
+        setCurrentIndex(0);
+    }
 
     useEffect(() => {
         scrollRef.current?.scrollTo({ top: 0 });
-        setCurrentIndex(0);
     }, [data]);
 
     const actionsColIndex = useMemo(() => columns.findIndex((col) => col.id === "actions"), [columns]);
@@ -61,24 +80,26 @@ export function SimpleTable<TData>({
     const clickableMobileClasses = onRowClick ? "hover:bg-muted/20 transition-colors cursor-pointer" : "";
     const noHeaderKeys = ["email", "customer_email", "project_name"];
 
-    const renderCellContent = (col: any, rowData: any, hideHeaderKeys: string[] = []) => {
-        const key = col.accessorKey ?? col.id;
-        const showHeader = !hideHeaderKeys.includes(key);
-
-        const context = {
+    // Cell renderers only read `row.original` and `row.getValue`, so that is all that is provided here
+    const cellContext = (rowData: TData) =>
+        ({
             row: {
-                getValue: (k: string) => rowData[k],
+                getValue: (k: string) => (rowData as Record<string, unknown>)[k],
                 original: rowData,
             },
-        };
+        }) as unknown as CellContext<TData, unknown>;
 
-        const header = showHeader ? flexRender(col.header, {}) : null;
-        const content = col.cell ? flexRender(col.cell, context) : rowData[key];
+    const renderCellContent = (col: CustomColumnDef<TData>, rowData: TData, hideHeaderKeys: string[] = []) => {
+        const key = accessorKeyOf(col) ?? col.id;
+        const showHeader = !hideHeaderKeys.includes(key ?? "");
+
+        const header = showHeader ? flexRender(col.header, {} as never) : null;
+        const content = col.cell ? flexRender(col.cell, cellContext(rowData)) : ((rowData as Record<string, unknown>)[key ?? ""] as React.ReactNode);
 
         return { header, content };
     };
 
-    const renderTitle = (row: any) => {
+    const renderTitle = (row: TData) => {
         const { header, content } = renderCellContent(titleCol, row, noHeaderKeys);
         return (
             <span className="font-medium text-base truncate">
@@ -88,21 +109,21 @@ export function SimpleTable<TData>({
         );
     };
 
-    const renderMobileColumnDetails = (rowData: any) => {
+    const renderMobileColumnDetails = (rowData: TData) => {
         return (
             <div className="grid gap-2 text-sm">
                 {columns
                     .filter(
                         (col) =>
-                            col.accessorKey &&
-                            col.accessorKey !== titleCol.accessorKey &&
+                            accessorKeyOf(col) &&
+                            accessorKeyOf(col) !== accessorKeyOf(titleCol) &&
                             col.id !== "actions"
                     )
                     .map((col) => {
                         const { header, content } = renderCellContent(col, rowData);
                         return (
                             <div
-                                key={col.accessorKey ?? col.id}
+                                key={accessorKeyOf(col) ?? col.id}
                                 className="flex justify-between items-start py-1 border-b last:border-0"
                             >
                                 <span className="font-medium text-muted-foreground">{header}</span>
@@ -123,13 +144,13 @@ export function SimpleTable<TData>({
                     <TableHeader className="sticky top-0 z-10 bg-muted/50 shadow-sm border-b">
                         {headers
                             ? headers
-                            : tableReact.getHeaderGroups().map((headerGroup: any) => (
+                            : tableReact.getHeaderGroups().map((headerGroup) => (
                                 <TableRow key={headerGroup.id} className="hover:bg-transparent">
-                                    {headerGroup.headers.map((header: any) => (
+                                    {headerGroup.headers.map((header) => (
                                         <TableHead
                                             key={header.id}
                                             style={{
-                                                width: `${header.column.columnDef.widthPercent ?? (100 / visibleColumnCount)}%`,
+                                                width: `${widthOf(header.column.columnDef) ?? (100 / visibleColumnCount)}%`,
                                             }}
                                         >
                                             {!header.isPlaceholder && flexRender(header.column.columnDef.header, header.getContext())}
@@ -150,10 +171,10 @@ export function SimpleTable<TData>({
                             {isLoading && data.length === 0 ? (
                                 Array.from({ length: 10 }).map((_, idx) => (
                                     <TableRow key={idx} className="hover:bg-muted">
-                                        {columns.map((_, colIdx) => (
+                                        {columns.map((col, colIdx) => (
                                             <TableCell
                                                 key={colIdx}
-                                                style={{ width: `${columns[colIdx].widthPercent ?? (100 / visibleColumnCount)}%` }}
+                                                style={{ width: `${widthOf(col) ?? (100 / visibleColumnCount)}%` }}
                                             >
                                                 <Skeleton className="h-6 w-full" />
                                             </TableCell>
@@ -162,17 +183,17 @@ export function SimpleTable<TData>({
                                 ))
                             ) : data.length ? (
                                 <>
-                                    {visibleRows.map((row: any) => (
+                                    {visibleRows.map((row) => (
                                         <TableRow
                                             key={row.id}
                                             onClick={onRowClick ? () => onRowClick(row) : undefined}
                                             className={`transition-all duration-200 ${clickableClasses}`}
                                             style={{ animation: "fadeInRow 0.3s ease both" }}
                                         >
-                                            {row.getVisibleCells().map((cell: any) => (
+                                            {row.getVisibleCells().map((cell) => (
                                                 <TableCell
                                                     key={cell.id}
-                                                    style={{ width: `${cell.column.columnDef.widthPercent ?? (100 / visibleColumnCount)}%` }}
+                                                    style={{ width: `${widthOf(cell.column.columnDef) ?? (100 / visibleColumnCount)}%` }}
                                                 >
                                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                 </TableCell>
@@ -222,9 +243,7 @@ export function SimpleTable<TData>({
                                 <div className="flex items-center justify-between mb-3">
                                     {renderTitle(data[currentIndex])}
                                     {actionsColIndex !== -1 &&
-                                        flexRender(columns[actionsColIndex].cell, {
-                                            row: { original: data[currentIndex] },
-                                        })}
+                                        flexRender(columns[actionsColIndex].cell, cellContext(data[currentIndex]))}
                                 </div>
                                 {renderMobileColumnDetails(data[currentIndex])}
                             </div>
@@ -244,7 +263,7 @@ export function SimpleTable<TData>({
                         </div>
                     ) : (
                         // Standard Mobile View (List)
-                        data.map((row: any, index) => (
+                        data.map((row, index) => (
                             <div
                                 key={index}
                                 onClick={onRowClick ? () => onRowClick({ original: row }) : undefined}
@@ -253,9 +272,7 @@ export function SimpleTable<TData>({
                                 <div className="flex items-center justify-between mb-3">
                                     {renderTitle(row)}
                                     {actionsColIndex !== -1 &&
-                                        flexRender(columns[actionsColIndex].cell, {
-                                            row: { original: row },
-                                        })}
+                                        flexRender(columns[actionsColIndex].cell, cellContext(row))}
                                 </div>
                                 {renderMobileColumnDetails(row)}
                             </div>

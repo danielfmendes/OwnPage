@@ -12,7 +12,8 @@ export function ChannelIntensity({items}: ChannelIntensityProps) {
     const processedData = useMemo(() => {
         const topics = ['Auth', 'Billing', 'API', 'UI/UX'];
         const channels = ['Twitter', 'Discord', 'Github', 'Email'];
-        const matrix: any = {};
+        type Cell = { count: number; sumUrgency: number; criticals: number; highs: number; lows: number };
+        const matrix: Record<string, Record<string, Cell>> = {};
         topics.forEach(t => {
             matrix[t] = {};
             channels.forEach(c => {

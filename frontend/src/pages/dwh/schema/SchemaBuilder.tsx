@@ -1,3 +1,4 @@
+import { errorMessage } from "@/utils/helpers";
 // Form-based schema builder (schema-scoped). Create entities, add/remove columns, define references.
 // Destructive removals (drop column/entity) first call the impact endpoint and confirm with the
 // affected-row count before proceeding. Editing requires write access.
@@ -49,7 +50,7 @@ function AddColumnRow({ entity, entities, reload }: { entity: DwhEntity; entitie
             });
             setName(""); setType("text"); setRefId("");
             reload();
-        } catch (e: any) { addNotification(`${e?.message ?? e}`, "error"); } finally { setBusy(false); }
+        } catch (e) { addNotification(`${errorMessage(e)}`, "error"); } finally { setBusy(false); }
     };
 
     return (
@@ -89,7 +90,7 @@ export default function SchemaBuilder({ schemaId, entities, reload, canWrite }: 
         try {
             await dwhClient.createEntity({ schema_id: schemaId, name: newName.trim().toLowerCase(), display_name: newDisplay || undefined });
             setNewName(""); setNewDisplay(""); reload();
-        } catch (e: any) { addNotification(`${e?.message ?? e}`, "error"); } finally { setBusy(false); }
+        } catch (e) { addNotification(`${errorMessage(e)}`, "error"); } finally { setBusy(false); }
     };
 
     // Fetch impact first; if destructive, confirm; otherwise just do it.
@@ -98,7 +99,7 @@ export default function SchemaBuilder({ schemaId, entities, reload, canWrite }: 
             const impact = await impactFn();
             if (impact.destructive) setConfirm({ title, impact, onConfirm: action });
             else { await action(); reload(); }
-        } catch (e: any) { addNotification(`${e?.message ?? e}`, "error"); }
+        } catch (e) { addNotification(`${errorMessage(e)}`, "error"); }
     };
 
     const removeEntity = (id: number, name: string) =>
@@ -150,7 +151,7 @@ export default function SchemaBuilder({ schemaId, entities, reload, canWrite }: 
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setConfirm(null)}>Cancel</Button>
-                        <Button variant="destructive" onClick={async () => { const c = confirm!; setConfirm(null); try { await c.onConfirm(); reload(); } catch (e: any) { addNotification(`${e?.message ?? e}`, "error"); } }}>
+                        <Button variant="destructive" onClick={async () => { const c = confirm!; setConfirm(null); try { await c.onConfirm(); reload(); } catch (e) { addNotification(`${errorMessage(e)}`, "error"); } }}>
                             Delete anyway
                         </Button>
                     </DialogFooter>

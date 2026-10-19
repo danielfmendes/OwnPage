@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 import { geoMercator, geoPath, type GeoPermissibleObjects } from 'd3-geo';
 import { ArrowLeft, Info, Loader2, MapPin, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -153,7 +153,12 @@ export function LisbonMap() {
   }, [isDrilled, hasParishShapes, parishFeaturesForMuni, districtGeo.geography]);
 
   const [tip, setTip] = useState<Tip | null>(null);
-  useEffect(() => { setTip(null); }, [drilldown.municipio]);
+  // Clear the tooltip when the drilled municipality changes (adjusted during render, not in an effect)
+  const [tipMunicipio, setTipMunicipio] = useState(drilldown.municipio);
+  if (tipMunicipio !== drilldown.municipio) {
+    setTipMunicipio(drilldown.municipio);
+    setTip(null);
+  }
 
   function colorFor(value: number): string {
     if (value <= 0 || levelMax === levelMin) return 'rgba(148,163,184,0.4)';

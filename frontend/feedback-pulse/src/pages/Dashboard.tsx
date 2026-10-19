@@ -5,7 +5,7 @@ import {Activity, AlertTriangle, Zap, type LucideIcon} from "lucide-react";
 import {api, type FeedbackItem, type DashboardStats} from "@/lib/api";
 
 // Component Imports
-import {TopicLandscape} from "@/components/dashboard/TopicLandscape";
+import {TopicLandscape, type ClusterPoint} from "@/components/dashboard/TopicLandscape";
 import {ChannelIntensity} from "@/components/dashboard/ChannelIntensity";
 import {SentimentTrends} from "@/components/dashboard/SentimentTrends";
 import {TriageQueue} from "@/components/dashboard/TriageQueue";
@@ -113,8 +113,8 @@ export default function Dashboard() {
     const [isLoading, setIsLoading] = useState(true);
     const [stats, setStats] = useState<DashboardStats>({total: 0, critical: 0, top_sentiment: '-'});
     const [items, setItems] = useState<FeedbackItem[]>([]);
-    const [chartData, setChartData] = useState<any[]>([]);
-    const [clusterData, setClusterData] = useState<any[]>([]);
+    const [chartData, setChartData] = useState<Record<string, unknown>[]>([]);
+    const [clusterData, setClusterData] = useState<ClusterPoint[]>([]);
 
     const [filterUrgency, setFilterUrgency] = useState<number | null>(null);
     const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' }>({
@@ -193,6 +193,7 @@ export default function Dashboard() {
     }
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- the loading flag mirrors the dashboard request
         loadData();
         window.addEventListener("feedback-updated", loadData);
         return () => window.removeEventListener("feedback-updated", loadData);
@@ -211,13 +212,13 @@ export default function Dashboard() {
             if (filterUrgency === 5) res = res.filter(i => i.urgency_score === 5);
             else if (filterUrgency === 4) res = res.filter(i => i.urgency_score >= 4);
         }
-        res.sort((a: any, b: any) => {
-            let aVal = a[sortConfig.key];
-            let bVal = b[sortConfig.key];
+        res.sort((a, b) => {
+            let aVal: unknown = a[sortConfig.key as keyof FeedbackItem];
+            let bVal: unknown = b[sortConfig.key as keyof FeedbackItem];
             if (typeof aVal === 'string') aVal = aVal.toLowerCase();
             if (typeof bVal === 'string') bVal = bVal.toLowerCase();
-            if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-            if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+            if ((aVal as string | number) < (bVal as string | number)) return sortConfig.direction === 'asc' ? -1 : 1;
+            if ((aVal as string | number) > (bVal as string | number)) return sortConfig.direction === 'asc' ? 1 : -1;
             return 0;
         });
         return res;

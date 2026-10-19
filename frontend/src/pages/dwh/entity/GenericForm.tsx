@@ -1,3 +1,4 @@
+import { errorMessage } from "@/utils/helpers";
 // Auto-generated create/edit form for a user-defined entity. Writes target a single project.
 
 import { useState } from "react";
@@ -48,7 +49,7 @@ export default function GenericForm({ entityName, schemaId, projectId, columns, 
         return seed;
     });
     const [saving, setSaving] = useState(false);
-    const setField = (name: string, value: any) => setValues((prev) => ({ ...prev, [name]: value }));
+    const setField = (name: string, value: unknown) => setValues((prev) => ({ ...prev, [name]: value }));
 
     const submit = async () => {
         setSaving(true);
@@ -71,8 +72,8 @@ export default function GenericForm({ entityName, schemaId, projectId, columns, 
             }
             onSaved();
             onClose();
-        } catch (e: any) {
-            addNotification(`${e?.message ?? e}`, "error");
+        } catch (e) {
+            addNotification(`${errorMessage(e)}`, "error");
         } finally {
             setSaving(false);
         }
@@ -95,7 +96,7 @@ export default function GenericForm({ entityName, schemaId, projectId, columns, 
                         {c.data_type === "boolean" ? (
                             <Switch id={c.name} checked={!!values[c.name]} onCheckedChange={(v) => setField(c.name, v)} />
                         ) : (
-                            <Input id={c.name} type={inputTypeFor(c.data_type)} value={values[c.name] ?? ""} onChange={(e) => setField(c.name, e.target.value)} />
+                            <Input id={c.name} type={inputTypeFor(c.data_type)} value={String(values[c.name] ?? "")} onChange={(e) => setField(c.name, e.target.value)} />
                         )}
                     </div>
                 ))}

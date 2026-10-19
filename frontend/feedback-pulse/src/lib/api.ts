@@ -36,7 +36,7 @@ const request = async <T>(path: string, options?: RequestInit, defaultVal?: T): 
 };
 
 export const api = {
-    ingest: (payload: any) => request<{ success: boolean; id: string }>('/ingest', {
+    ingest: (payload: unknown) => request<{ success: boolean; id: string }>('/ingest', {
         method: 'POST',
         body: JSON.stringify(payload)
     }),

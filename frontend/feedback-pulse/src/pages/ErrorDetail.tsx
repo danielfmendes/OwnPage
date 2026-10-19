@@ -21,6 +21,7 @@ export default function ErrorDetail() {
     // 1. Fetch Data
     useEffect(() => {
         if (id) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- the loading flag mirrors the request
             setIsLoading(true);
             api.getDetail(id)
                 .then((data) => setItem(data))

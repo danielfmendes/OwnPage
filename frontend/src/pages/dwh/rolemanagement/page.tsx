@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import DataTable from "@/components/helpers/Table";
 import { type CustomColumnDef } from "@/models/datatable/column";
 import { RoleManagementsService, type RoleManagementWithName } from "@/models/api";
@@ -75,15 +75,18 @@ export default function RoleManagementPage() {
         },
     ]
 
+    // Read by the filter loaders when they run (never during render)
+    const getItemsLoaderOptions = useCallback(() => itemsLoaderOptionsRef.current, []);
+
     const filters: FilterDefinition[] = useMemo(() => {
-        const roleManagementFilterLoader = createRoleManagementFilterItemLoader(itemsLoaderOptionsRef);
+        // eslint-disable-next-line react-hooks/refs -- the loader reads the ref only when it runs, never during render
+        const roleManagementFilterLoader = createRoleManagementFilterItemLoader(getItemsLoaderOptions);
 
         return [
             roleManagementFilterLoader("project_name", { type: "search" }),
             roleManagementFilterLoader("role"),
         ];
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [getItemsLoaderOptions]);
 
     return (
         <ContentLayout title={t("menu.role_management")}>

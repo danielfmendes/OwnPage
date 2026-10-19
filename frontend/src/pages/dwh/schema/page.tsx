@@ -1,3 +1,4 @@
+import { errorMessage } from "@/utils/helpers";
 // Schema management: edit the ACTIVE schema's entities/columns/relationships (Builder + ER diagram).
 // Destructive edits warn with affected-row counts (see SchemaBuilder). Shared by all projects on the
 // schema, so editing needs write access.
@@ -19,7 +20,7 @@ export default function SchemaPage() {
 
     const reload = useCallback(() => {
         if (!schemaId) return;
-        dwhClient.listEntities(schemaId).then(setEntities).catch((e: any) => addNotification(`${e?.message ?? e}`, "error"));
+        dwhClient.listEntities(schemaId).then(setEntities).catch((e) => addNotification(`${errorMessage(e)}`, "error"));
     }, [schemaId, addNotification]);
 
     useEffect(() => { reload(); }, [reload]);

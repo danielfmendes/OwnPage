@@ -166,13 +166,14 @@ export function TimeMachine() {
   const [playing, setPlaying] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Snap to the newest month on first load / when list length changes.
-  useEffect(() => {
+  // Snap to the newest month on first load / when list length changes (adjusted during render, not in an effect)
+  const [snappedLength, setSnappedLength] = useState<number | null>(null);
+  if (snappedLength !== allMonths.length) {
+    setSnappedLength(allMonths.length);
     if (allMonths.length > 0 && (index >= allMonths.length || index === 0)) {
       setIndex(allMonths.length - 1);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allMonths.length]);
+  }
 
   useEffect(() => {
     if (!playing) return;
@@ -535,7 +536,7 @@ export function TimeMachine() {
                       borderRadius: '8px',
                       fontSize: '12px',
                     }}
-                    formatter={(value: any) => [`€${Number(value).toLocaleString('pt-PT')}/m²`, 'Price']}
+                    formatter={(value) => [`€${Number(value).toLocaleString('pt-PT')}/m²`, 'Price']}
                   />
                   <Bar dataKey="avgM2" radius={[0, 4, 4, 0]} isAnimationActive={false}>
                     {chartData.map((d, i) => (

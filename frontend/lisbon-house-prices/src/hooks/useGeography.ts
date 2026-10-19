@@ -30,6 +30,7 @@ export function useGeography(url: string | null): UseGeographyResult {
 
   useEffect(() => {
     if (!url) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- mirrors the geography request; cleared when there is no url
       setGeography(null);
       setStatus('idle');
       setError(null);

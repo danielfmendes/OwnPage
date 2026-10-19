@@ -1,3 +1,4 @@
+import { errorMessage } from "@/utils/helpers";
 // SQL console: a scoped, read-only query editor (Monaco) plus a generated-DDL viewer. Writes/DDL
 // are blocked server-side (see controller sql/guard.ts); structural changes go through the schema
 // builder, not raw SQL.
@@ -17,7 +18,7 @@ export default function SqlConsolePage() {
     const { schemaId } = useActiveSchema();
 
     const [sql, setSql] = useState("SELECT 1;");
-    const [result, setResult] = useState<{ columns: string[]; rows: Record<string, any>[] } | null>(null);
+    const [result, setResult] = useState<{ columns: string[]; rows: Record<string, unknown>[] } | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [running, setRunning] = useState(false);
 
@@ -36,8 +37,8 @@ export default function SqlConsolePage() {
         try {
             const res = await dwhClient.runSql(schemaId, sql);
             setResult(res);
-        } catch (e: any) {
-            setError(e?.message ?? String(e));
+        } catch (e) {
+            setError(errorMessage(e));
             setResult(null);
         } finally {
             setRunning(false);
@@ -47,7 +48,7 @@ export default function SqlConsolePage() {
     const loadDdl = useCallback((id: string) => {
         setDdlEntityId(id);
         if (!id) return;
-        dwhClient.getDdl(Number(id)).then((r) => setDdl(r.ddl)).catch((e: any) => setDdl(`-- ${e?.message ?? e}`));
+        dwhClient.getDdl(Number(id)).then((r) => setDdl(r.ddl)).catch((e) => setDdl(`-- ${errorMessage(e)}`));
     }, []);
 
     if (!schemaId) {

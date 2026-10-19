@@ -1,3 +1,4 @@
+import { errorMessage } from "@/utils/helpers";
 // New-project flow: name the project, then either reuse an existing schema you can write, or create
 // a NEW schema — by form (tables + columns + types) or by writing CREATE TABLE SQL (parsed server
 // side). On success the new project is selected so the app switches to it.
@@ -63,7 +64,7 @@ export default function AddProjektDialogContent({ onClose, onRefresh }: Props) {
         if (!projectName.trim()) { addNotification("Project name is required", "error"); return; }
         setSaving(true);
         try {
-            const body: any = { name: projectName.trim() };
+            const body: Parameters<typeof dwhClient.createProject>[0] = { name: projectName.trim() };
             if (mode === "existing") {
                 if (!existingSchemaId) { addNotification("Pick a schema", "error"); setSaving(false); return; }
                 body.schema_id = Number(existingSchemaId);
@@ -89,13 +90,13 @@ export default function AddProjektDialogContent({ onClose, onRefresh }: Props) {
             const rolesResp = await RoleManagementsService.getRoleManagements();
             const items = (rolesResp as RoleManagementListResponse).items || [];
             setRoles(items);
-            const mine = items.find((r: any) => r.project_id === created.id);
+            const mine = items.find((r) => r.project_id === created.id);
             if (mine) setSelectedRoles([mine]);
 
             onClose();
             onRefresh();
-        } catch (e: any) {
-            addNotification(`Failed to create project: ${e?.message ?? e}`, "error");
+        } catch (e) {
+            addNotification(`Failed to create project: ${errorMessage(e)}`, "error");
         } finally {
             setSaving(false);
         }

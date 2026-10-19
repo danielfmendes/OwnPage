@@ -35,7 +35,7 @@ export default function DWHLayout() {
 
     useEffect(() => {
         fromQueryParams(new URLSearchParams(location.search));
-    }, [location.search]);
+    }, [location.search, fromQueryParams]);
 
     useEffect(() => {
         if (!roles.length) return;
@@ -68,7 +68,7 @@ export default function DWHLayout() {
                 setSelectedRoles(newSelectedRoles);
             }
         }
-    }, [roles, location.search]);
+    }, [roles, location.search]); // eslint-disable-line react-hooks/exhaustive-deps -- runs when the roles or the URL change; the other inputs are read when it runs
 
     // Reconcile the persisted (localStorage) selection against freshly-loaded roles once: re-map to the
     // current role objects (so schema_name/role are up to date) and drop any project the user no longer
@@ -96,7 +96,7 @@ export default function DWHLayout() {
                 navigate(newSearch, { replace: true });
             }
         }
-    }, [roles, selectedRoles]);
+    }, [roles, selectedRoles]); // eslint-disable-line react-hooks/exhaustive-deps -- URL sync is limited to roles and the selection, so it does not re-run on every filter change
 
     useEffect(() => {
         if (hideSidebar) return;
@@ -138,7 +138,7 @@ export default function DWHLayout() {
                 setIsLoadingRole(false);
             });
 
-    }, [hideSidebar]);
+    }, [hideSidebar]); // eslint-disable-line react-hooks/exhaustive-deps -- the role load runs when the sidebar mode changes
 
     // Extract loading state
     const { isLoading: isLoadingUserStatus } = useUserStore();

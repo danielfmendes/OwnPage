@@ -1,3 +1,4 @@
+import { errorMessage } from "@/utils/helpers";
 // Schema-level dashboard with View / Edit modes. View mode is a clean, static board. Edit mode (for
 // writers) shows the add-widget bar, drag/resize, per-panel chart-type switch and size presets.
 // Widgets aggregate across the selected projects (compiled); config is saved server-side per schema.
@@ -70,10 +71,11 @@ function WidgetCard({ schemaId, projectIds, widget, editMode, onRemove, onChange
     useEffect(() => {
         if (!schemaId) return;
         let ignore = false; // drop stale responses (projectIds is a fresh array each render)
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- the loading flag mirrors the request
         setLoading(true);
         dwhClient.aggregate(widget.entity, schemaId, projectIds, { groupBy: widget.groupBy, fn: widget.fn, measure: widget.measure })
             .then((rows) => { if (!ignore) { setData(rows.map((r) => ({ value: String(r.value), total: Number(r.total) }))); setError(null); } })
-            .catch((e: any) => { if (!ignore) setError(e?.message ?? String(e)); })
+            .catch((e) => { if (!ignore) setError(errorMessage(e)); })
             .finally(() => { if (!ignore) setLoading(false); });
         return () => { ignore = true; };
         // eslint-disable-next-line react-hooks/exhaustive-deps

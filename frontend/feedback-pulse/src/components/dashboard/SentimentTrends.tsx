@@ -4,7 +4,7 @@ import {
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Activity} from "lucide-react";
 
-export function SentimentTrends({data}: { data: any[] }) {
+export function SentimentTrends({data}: { data: Record<string, unknown>[] }) {
     return (
         <Card
             className="border-zinc-200/60 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-900/50 backdrop-blur-sm flex flex-col h-[400px] min-w-0">

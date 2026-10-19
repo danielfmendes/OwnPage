@@ -36,6 +36,7 @@ function buildCells(): Cell[] {
     return cells;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- constant derived from the same cell layout, kept next to the component
 export const GALLERY_CELL_IDS = buildCells().map((c) => c.id);
 
 export function Gallery() {

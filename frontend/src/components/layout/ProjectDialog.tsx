@@ -6,6 +6,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Trash, X, Plus } from "lucide-react";
 import type { RoleManagementWithName } from "@/models/api";
+
+// Projects carry their schema; these fields are not in the generated RoleManagementWithName type
+type ProjectWithSchema = RoleManagementWithName & { schema_id?: number | null; schema_name?: string };
 import { useRoleStore } from "@/utils/roleManagementState";
 import { useTranslation } from "react-i18next";
 
@@ -48,7 +51,7 @@ export function ProjectDialog({ onClose, onCreateNew }: Props) {
 
     // Only projects sharing ONE schema can be selected together (so their data compiles). Picking a
     // project from a different schema switches the whole selection to that schema.
-    const schemaOf = (p: RoleManagementWithName) => (p as any).schema_id ?? null;
+    const schemaOf = (p: ProjectWithSchema) => p.schema_id ?? null;
     const currentSchema = selected.length ? schemaOf(selected[0]) : null;
 
     const toggleSelection = (project: RoleManagementWithName) => {
@@ -77,7 +80,7 @@ export function ProjectDialog({ onClose, onCreateNew }: Props) {
         const m = new Map<string, { label: string; items: RoleManagementWithName[] }>();
         for (const p of projects) {
             const key = String(schemaOf(p) ?? "none");
-            const label = (p as any).schema_name ?? "No schema";
+            const label = (p as ProjectWithSchema).schema_name ?? "No schema";
             if (!m.has(key)) m.set(key, { label, items: [] });
             m.get(key)!.items.push(p);
         }

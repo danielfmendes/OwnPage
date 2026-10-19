@@ -1,3 +1,4 @@
+import { errorMessage } from "@/utils/helpers";
 // Generic data page: renders any entity of the active schema. Reads compile across the selected
 // projects; Add/Edit is enabled only when exactly one project is selected (writes need one target).
 
@@ -18,11 +19,11 @@ import { useActiveSchema } from "@/utils/useActiveSchema";
 import type { DwhColumn, DwhEntity, DwhRow } from "@/models/dwh/types";
 import GenericForm from "./GenericForm";
 
-function renderCell(col: DwhColumn, value: any) {
+function renderCell(col: DwhColumn, value: unknown) {
     if (value === null || value === undefined) return "";
     if (col.data_type === "boolean") return truthy(value) ? "✓" : "—";
     if (col.data_type === "date" || col.data_type === "datetime") {
-        const d = new Date(value);
+        const d = new Date(value as string | number);
         return isNaN(d.getTime()) ? String(value) : d.toLocaleDateString();
     }
     return String(value);
@@ -65,7 +66,7 @@ export default function EntityDataPage() {
                 if (!active) return;
                 setEntityMeta(entities.find((e) => e.name === entityName) ?? null);
             })
-            .catch((e) => active && addNotification(`${e?.message ?? e}`, "error"));
+            .catch((e) => active && addNotification(`${errorMessage(e)}`, "error"));
         return () => { active = false; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [schemaId, entityName, projectIds.join(",")]);
@@ -79,9 +80,10 @@ export default function EntityDataPage() {
                 await refreshData();
                 if (cascade) setShowCascadeDialog(false);
             })
-            .catch((err: any) => {
-                if (err?.status === 409 && !cascade) { setShowCascadeDialog(true); setDeleteId(id); return; }
-                addNotification(`Failed to delete: ${err?.message ?? err}`, "error");
+            .catch((err: unknown) => {
+                const status = typeof err === "object" && err !== null && "status" in err ? err.status : undefined;
+                if (status === 409 && !cascade) { setShowCascadeDialog(true); setDeleteId(id); return; }
+                addNotification(`Failed to delete: ${errorMessage(err)}`, "error");
             })
             .finally(() => { if (cascade) setIsLoadingDeleteCascade(false); else setLoadingDeleteId(null); });
     };
@@ -93,13 +95,13 @@ export default function EntityDataPage() {
         const cols: CustomColumnDef<DwhRow>[] = entityMeta.columns.map((c) => ({
             accessorKey: c.name,
             header: c.display_name || c.name,
-            cell: ({ row }: any) => renderCell(c, row.getValue(c.name)),
+            cell: ({ row }) => renderCell(c, row.getValue(c.name)),
         }));
         cols.push({
             id: "actions", enableHiding: false, widthPercent: 5,
-            cell: ({ row }: any) => (
+            cell: ({ row }) => (
                 <DeleteButton
-                    onClick={(event: MouseEvent) => { event.stopPropagation(); deleteRow(row.original.id); }}
+                    onClick={(event: MouseEvent) => { event.stopPropagation(); deleteRow(row.original.id as number); }}
                     isLoading={loadingDeleteId === row.original.id}
                     disabled={!canWrite}
                 />

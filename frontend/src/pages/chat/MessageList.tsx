@@ -14,7 +14,8 @@ interface MessageListProps {
 export function MessageList({sessionId, onNewMessageSent}: MessageListProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
+    // Parent remounts this component per session (key), so history loading starts as true when a session is set
+    const [isLoading, setIsLoading] = useState(() => Boolean(sessionId));
     const [isStreaming, setIsStreaming] = useState(false);
 
     const scrollEndRef = useRef<HTMLDivElement>(null);
@@ -26,8 +27,19 @@ export function MessageList({sessionId, onNewMessageSent}: MessageListProps) {
     const isLoadingHistory = isLoading && messages.length === 0;
 
     useEffect(() => {
-        setMessages([]);
-        if (sessionId) fetchHistory();
+        if (!sessionId) return;
+        let active = true;
+        chatApi.getHistory(sessionId)
+            .then((data) => {
+                if (active) setMessages(data);
+            })
+            .catch((err) => console.error(err))
+            .finally(() => {
+                if (active) setIsLoading(false);
+            });
+        return () => {
+            active = false;
+        };
     }, [sessionId]);
 
     useEffect(() => {
@@ -35,18 +47,6 @@ export function MessageList({sessionId, onNewMessageSent}: MessageListProps) {
             scrollEndRef.current.scrollIntoView({behavior: "smooth"});
         }
     }, [messages, isLoading, isStreaming]);
-
-    const fetchHistory = async () => {
-        setIsLoading(true);
-        try {
-            const data = await chatApi.getHistory(sessionId);
-            setMessages(data);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     const handleSend = async () => {
         if (!input.trim() || isLoading || isLimitReached) return;

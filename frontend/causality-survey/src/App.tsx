@@ -68,6 +68,7 @@ function Survey() {
     // Capture the start time whenever a new round renders.
     useEffect(() => {
         if (phase === "choice") {
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- records when the round appears; it is only read on submit
             setStartTime(Date.now());
         }
     }, [phase, roundIndex]);

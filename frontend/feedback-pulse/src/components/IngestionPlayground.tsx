@@ -7,6 +7,9 @@ import {Tabs, TabsList, TabsTrigger, TabsContent} from "@/components/ui/tabs";
 import {Button} from "@/components/ui/button";
 import {Play, Loader2, CheckCircle2, AlertCircle, Braces, List, RefreshCw, Check, X} from "lucide-react";
 import {api} from "@/lib/api";
+
+// One shape for all three results: a single item, a bulk count, or an error
+type SimulateResult = { type?: 'single' | 'bulk'; success?: boolean; id?: string; count?: number; error?: string };
 import {INITIAL_LOAD_JSON, SINGLE_TEMPLATE} from "../lib/template.ts";
 
 export function IngestionPlayground() {
@@ -17,7 +20,7 @@ export function IngestionPlayground() {
     const [isLoading, setIsLoading] = useState(false);
     const [isPolling, setIsPolling] = useState(false);
 
-    const [response, setResponse] = useState<any>(null);
+    const [response, setResponse] = useState<SimulateResult | null>(null);
     const [progress, setProgress] = useState({current: 0, total: 0});
     const [open, setOpen] = useState(false);
     const [editorTheme, setEditorTheme] = useState("light");
@@ -59,14 +62,14 @@ export function IngestionPlayground() {
         setProgress({current: 0, total: 0});
     };
 
-    const wait = (ms: any) => new Promise(r => setTimeout(r, ms));
-    const waitForCompletion = async (id: any, maxAttempts = 20) => {
+    const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
+    const waitForCompletion = async (id: string, maxAttempts = 20) => {
         for (let i = 0; i < maxAttempts; i++) {
             try {
                 const {status} = await api.getStatus(id);
                 if (['complete', 'success'].includes(status)) return true;
                 if (['errored', 'failed'].includes(status)) return false;
-            } catch (e) { /* ignore network blips */
+            } catch { /* ignore network blips */
             }
             await wait(1000);
         }
@@ -124,7 +127,7 @@ export function IngestionPlayground() {
                 setHasUpdates(true);
                 setResponse({type: 'bulk', count: successCount});
             }
-        } catch (error) {
+        } catch {
             setIsLoading(false);
             setIsPolling(false);
             setResponse({error: "Failed to parse JSON or Network Error"});

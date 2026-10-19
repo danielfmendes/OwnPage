@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from "react";
+import {useMemo, useState} from "react";
 import {format, eachMonthOfInterval, startOfYear, endOfYear} from "date-fns";
 import type {DateRange} from "react-day-picker";
 
@@ -38,7 +38,10 @@ export function DatePickerCalender({
         dateObj?.getFullYear() ?? range?.from?.getFullYear() ?? new Date().getFullYear()
     );
 
-    useEffect(() => {
+    // Follow the selected date when it changes (adjusted during render, not in an effect)
+    const [syncedDate, setSyncedDate] = useState(date);
+    if (syncedDate !== date) {
+        setSyncedDate(date);
         if (dateObj) {
             setMonth(dateObj.getMonth());
             setYear(dateObj.getFullYear());
@@ -46,7 +49,7 @@ export function DatePickerCalender({
             setMonth(range.from.getMonth());
             setYear(range.from.getFullYear());
         }
-    }, [dateObj, range]);
+    }
 
     const years = useMemo(() => {
         const currentYear = new Date().getFullYear();
@@ -99,11 +102,11 @@ export function DatePickerCalender({
                 </Select>
             </div>
 
-            {/*@ts-ignore*/}
+            {/* @ts-expect-error -- the picker's date type depends on its mode (single or range), which this shared component cannot express */}
             <Calendar
                 mode={mode}
                 selected={date}
-                // @ts-ignore
+                // @ts-expect-error -- the picker's date type depends on its mode (single or range), which this shared component cannot express
                 onSelect={(selected) => setDate?.(selected)}
                 month={new Date(year, month)}
                 onMonthChange={(newMonth: Date) => {

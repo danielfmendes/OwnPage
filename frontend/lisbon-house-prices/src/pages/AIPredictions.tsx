@@ -273,7 +273,7 @@ export function AIPredictions() {
                     color: isDark ? '#f1f5f9' : '#0f172a',
                     fontSize: '12px',
                   }}
-                  formatter={(value: any, name: any) => [formatVal(value), name]}
+                  formatter={(value, name) => [formatVal(Number(value)), name]}
                 />
                 {splitMesAno && (
                   <ReferenceLine
@@ -294,7 +294,7 @@ export function AIPredictions() {
                     band only renders to the right of the split. */}
                 <Area
                   type="monotone"
-                  dataKey={(d: any) =>
+                  dataKey={(d) =>
                     d.lower != null && d.upper != null ? [d.lower, d.upper] : null
                   }
                   stroke="none"

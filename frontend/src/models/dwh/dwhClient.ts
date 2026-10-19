@@ -45,11 +45,17 @@ export interface NewColumn {
 
 const ids = (projectIds: number[]) => projectIds.join("|");
 
+// Table and column draft sent when a project creates a new schema
+export interface DwhEntityDraft {
+    name: string;
+    columns: { name: string; data_type: string; ref_table?: string }[];
+}
+
 export const dwhClient = {
     // --- schemas & projects ---
     listSchemas: () => request<DwhSchema[]>("GET", "/schemas"),
     getSchema: (id: number) => request<DwhSchema & { entities: DwhEntity[] }>("GET", `/schemas/${id}`),
-    createProject: (body: { name: string; schema_id?: number; new_schema?: { name: string; entities?: any[]; sql?: string } }) =>
+    createProject: (body: { name: string; schema_id?: number; new_schema?: { name: string; entities?: DwhEntityDraft[]; sql?: string } }) =>
         request<{ id: number; schema_id: number | null }>("POST", "/projects", body),
 
     // --- schema editing ---
@@ -89,9 +95,9 @@ export const dwhClient = {
         if (opts.fn) p.set("fn", opts.fn);
         return request<Array<{ value: string; total: number }>>("GET", `/aggregate/${entity}?${p.toString()}`);
     },
-    getDashboard: (schemaId: number) => request<{ config: any }>("GET", `/dashboards?schema_id=${schemaId}`),
+    getDashboard: (schemaId: number) => request<{ config: Record<string, unknown> }>("GET", `/dashboards?schema_id=${schemaId}`),
     saveDashboard: (schemaId: number, config: unknown) => request<void>("PUT", `/dashboards?schema_id=${schemaId}`, { config }),
 };
 
-export const truthy = (v: boolean | number | null | undefined): boolean => v === true || v === 1;
+export const truthy = (v: unknown): boolean => v === true || v === 1;
 export const editableColumns = <T extends { is_system: boolean | number }>(cols: T[]): T[] => cols.filter((c) => !truthy(c.is_system));

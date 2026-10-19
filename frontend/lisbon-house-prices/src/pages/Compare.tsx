@@ -354,19 +354,22 @@ export function Compare() {
 
   const [selected, setSelected] = useState<string[]>([]);
 
-  // Reset the selection whenever scope changes — the set of valid names differs.
-  useEffect(() => {
+  // Reset the selection whenever scope changes — the set of valid names differs (adjusted during render).
+  const [selectedScope, setSelectedScope] = useState(scope);
+  if (selectedScope !== scope) {
+    setSelectedScope(scope);
     setSelected([]);
-  }, [scope]);
+  }
 
-  // Seed with the three most expensive once data arrives (per scope).
-  useEffect(() => {
+  // Seed with the three most expensive once data arrives (per scope; adjusted during render).
+  const [seededFor, setSeededFor] = useState<typeof regionStats | null>(null);
+  if (seededFor !== regionStats) {
+    setSeededFor(regionStats);
     if (selected.length === 0 && regionStats.length > 0) {
       const top = [...regionStats].sort((a, b) => b.avg_m2 - a.avg_m2).slice(0, 3).map(s => s.name);
       setSelected(top);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [regionStats]);
+  }
 
   const selectedStats = useMemo(
     () => selected
@@ -638,7 +641,7 @@ export function Compare() {
                         color: isDark ? '#f1f5f9' : '#0f172a',
                         fontSize: '12px',
                       }}
-                      formatter={(value: any) => fmtM2(Number(value))}
+                      formatter={(value) => fmtM2(Number(value))}
                     />
                     <Legend
                       wrapperStyle={{ fontSize: '11px' }}

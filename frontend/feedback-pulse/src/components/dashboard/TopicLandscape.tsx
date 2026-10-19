@@ -1,10 +1,11 @@
 import {
     ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine
 } from 'recharts';
+import type {TooltipContentProps} from 'recharts';
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {LayoutGrid} from "lucide-react";
 
-const ClusterTooltip = ({active, payload}: any) => {
+const ClusterTooltip = ({active, payload}: Partial<TooltipContentProps>) => {
     if (active && payload && payload.length) {
         const data = payload[0].payload;
         return (
@@ -34,7 +35,10 @@ const ClusterTooltip = ({active, payload}: any) => {
     return null;
 };
 
-export function TopicLandscape({data}: { data: any[] }) {
+// One point per feedback item; x/y/z place it on the landscape, fill is its topic colour
+export type ClusterPoint = { x: number; y: number; z: number; fill: string; fullName: string; originalUrgency: number; sentiment: string };
+
+export function TopicLandscape({data}: { data: ClusterPoint[] }) {
     return (
         <Card
             className="border-zinc-200/60 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-900/50 backdrop-blur-sm flex flex-col h-[340px]">

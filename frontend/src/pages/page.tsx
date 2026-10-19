@@ -326,7 +326,16 @@ function ProjectCard({ title, desc, link, tag, isMigrating, reload }: ProjectCar
         : <Link to={link} className={className}>{cardContent}</Link>;
 }
 
-function TimelineItem({ title, institution, company, description, period, image }: any) {
+interface TimelineItemProps {
+    title: string;
+    institution?: string;
+    company?: string;
+    description?: string[];
+    period: string;
+    image: string;
+}
+
+function TimelineItem({ title, institution, company, description, period, image }: TimelineItemProps) {
     return (
         <div className="flex gap-5 items-start group">
             {/* Logo Container: Fixed original colors and proper fit */}

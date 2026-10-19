@@ -350,7 +350,7 @@ export function Rooms() {
                         fontSize: '12px',
                       }}
                       cursor={{ stroke: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.15)', strokeWidth: 1, strokeDasharray: '2 4' }}
-                      formatter={(value: any, name: any) => [fmtM2(Number(value)), name]}
+                      formatter={(value, name) => [fmtM2(Number(value)), name]}
                     />
                     <Legend wrapperStyle={{ fontSize: '11px' }} iconType="plainline" />
                     {ROOM_ORDER.map(key => (
@@ -413,7 +413,7 @@ export function Rooms() {
                         borderRadius: '8px',
                         fontSize: '12px',
                       }}
-                      formatter={(value: any, name: any) => [`${value}%`, name]}
+                      formatter={(value, name) => [`${value}%`, name]}
                     />
                     <Legend wrapperStyle={{ fontSize: '11px' }} />
                     {ROOM_ORDER.map(key => (

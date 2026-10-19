@@ -45,10 +45,7 @@ export function DwhSidebar({isOpen}: DwhSidebarProps) {
     const {schemaId} = useActiveSchema();
     const [entities, setEntities] = useState<DwhEntity[]>([]);
     useEffect(() => {
-        if (!schemaId) {
-            setEntities([]);
-            return;
-        }
+        if (!schemaId) return;
         let active = true;
         dwhClient
             .listEntities(schemaId)
@@ -66,7 +63,7 @@ export function DwhSidebar({isOpen}: DwhSidebarProps) {
         {href: "/dwh/sql", label: t("menu.sql", {defaultValue: "SQL"}), icon: Terminal},
         {href: "/dwh/rolemanagement", label: t("menu.roles", {defaultValue: "Roles"}), icon: Users},
     ];
-    const dataItems = entities.map((e) => ({
+    const dataItems = (schemaId ? entities : []).map((e) => ({
         href: `/dwh/data/${e.name}`,
         label: e.display_name || e.name,
         icon: Table2,

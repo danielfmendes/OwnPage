@@ -1,7 +1,6 @@
 import { defaultPageSize, Pagination } from "@/models/datatable/pagination";
 import { Sort } from "@/models/datatable/sort";
 import { useCallback } from "react";
-import { CancelablePromise } from "@/models/api";
 import FilterManager from "@/utils/filtermanager";
 
 export declare interface ItemsLoaderOptions {
@@ -30,7 +29,7 @@ export async function genericItemsLoader<T>(
         page: number,
         pageSize: number,
         sort: string | undefined
-    ) => CancelablePromise<any>,
+    ) => Promise<unknown>,
     setData: (items: T[]) => void,
     setTotalCount: (count: number) => void,
 ): Promise<void> {
@@ -39,12 +38,13 @@ export async function genericItemsLoader<T>(
         : options.filterManager.getFilterStringWithProjectIds();
     const sortString = options.sort.toCallOpts().join(",");
 
-    const result = await fetchFunction(
+    // Some endpoints return a count-by list instead of a paged list; the paged shape is the one used here
+    const result = (await fetchFunction(
         filterString === "" ? undefined : filterString,
         options.pagination.page,
         options.pagination.itemsPerPage,
         sortString === "" ? undefined : sortString
-    );
+    )) as { items?: T[]; totalCount?: number };
 
     setData(result.items ?? []);
     setTotalCount(result.totalCount ?? 0);

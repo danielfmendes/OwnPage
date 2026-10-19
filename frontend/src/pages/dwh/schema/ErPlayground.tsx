@@ -1,3 +1,4 @@
+import { errorMessage } from "@/utils/helpers";
 // Visual ER playground. Each entity is a node listing its columns; each reference column is an edge.
 // Dragging from one entity's handle to another creates a new FK (a reference column) via the
 // /relationships endpoint — i.e. you draw connections and the backend adds the column.
@@ -84,7 +85,7 @@ export default function ErPlayground({ entities, reload, canWrite }: Props) {
         dwhClient
             .createRelationship({ from_entity_id: Number(connection.source), to_entity_id: Number(connection.target) })
             .then(() => { addNotification("Connection created", "success"); reload(); })
-            .catch((e: any) => addNotification(`${e?.message ?? e}`, "error"));
+            .catch((e) => addNotification(`${errorMessage(e)}`, "error"));
     }, [addNotification, reload, canWrite]);
 
     return (

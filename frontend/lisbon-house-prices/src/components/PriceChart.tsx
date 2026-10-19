@@ -146,8 +146,13 @@ export function PriceChart() {
     }));
   }, [filteredData, metric, parentSeries, grandparentSeries]);
 
-  // Reset hover and anchor when data changes (new drill, new filter, etc.)
-  useEffect(() => { setHoverIndex(null); setAnchorIndex(null); }, [chartData]);
+  // Reset hover and anchor when data changes (new drill, new filter, etc.), adjusted during render
+  const [shownChartData, setShownChartData] = useState(chartData);
+  if (shownChartData !== chartData) {
+    setShownChartData(chartData);
+    setHoverIndex(null);
+    setAnchorIndex(null);
+  }
 
   const districtAvg = useMemo(() => {
     const baseline = filterRecords(districtData, tipoVenda, null, null);
@@ -321,13 +326,13 @@ export function PriceChart() {
               <ComposedChart
                 data={chartData}
                 margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
-                onMouseMove={(data: any) => {
+                onMouseMove={(data) => {
                   if (data?.isTooltipActive && data.activeTooltipIndex !== undefined) {
                     setHoverIndex(data.activeTooltipIndex as number);
                   }
                 }}
                 onMouseLeave={() => { setHoverIndex(null); setAnchorIndex(null); }}
-                onMouseDown={(data: any) => {
+                onMouseDown={(data) => {
                   if (data?.activeTooltipIndex !== undefined) {
                     setAnchorIndex(data.activeTooltipIndex as number);
                   }
