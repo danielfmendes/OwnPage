@@ -20,7 +20,7 @@ import { Sort, SortDirection, type SortDirectionType } from "@/models/datatable/
 interface MobileFilterProps<TData> {
     filters: FilterDefinition[];
     filterManager: FilterManager;
-    onChange: (key: string, selected: string[], type: FilterType) => void;
+    onChange: (key: string, selected: (string | number)[], type: FilterType) => void;
     columns: CustomColumnDef<TData>[];
     sort: Sort;
     updateSort: (key: string, sortDirection?: SortDirectionType) => void;
@@ -99,7 +99,7 @@ export default function MobileFilterDialog<TData>({
                         </h2>
                         <ul className="space-y-3">
                             {columns.map((col, idx) => {
-                                const colKey = (col as any).accessorKey || col.id;
+                                const colKey = ("accessorKey" in col && typeof col.accessorKey === "string" && col.accessorKey) || col.id;
                                 if (!colKey || colKey === "actions") return null;
                                 const currentDirection = getSortDirectionForKey(colKey);
 
@@ -109,7 +109,7 @@ export default function MobileFilterDialog<TData>({
                                         className="flex justify-between items-center border border-primary rounded-md p-3"
                                     >
                                         <span className="font-medium">
-                                            {col.header || colKey || "Unnamed"}
+                                            {(typeof col.header === "string" && col.header) || colKey || "Unnamed"}
                                         </span>
                                         <div className="flex gap-2 text-sm">
                                             {sortStates.map(({ label, value, display }) => (

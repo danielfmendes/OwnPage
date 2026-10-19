@@ -18,9 +18,14 @@ const ACTIVITY_DEBOUNCE_MS = 1000; // Throttle actvity updates to max once per s
 export function SessionProvider({ children }: { children: React.ReactNode }) {
     const navigate = useNavigate();
     const { addNotification } = useNotification();
-    const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
+    const [lastRefresh, setLastRefresh] = useState<number>(() => Date.now());
     const [timeRemaining, setTimeRemaining] = useState<number>(SESSION_TIMEOUT_MS);
-    const activityRef = useRef<number>(Date.now());
+    const activityRef = useRef<number>(0);
+
+    // The inactivity clock starts on mount; refs are only written outside of render
+    useEffect(() => {
+        activityRef.current = Date.now();
+    }, []);
 
     // Debounced activity updater
     const updateActivity = useCallback(() => {
@@ -108,6 +113,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- context hook exported next to its provider
 export function useSession() {
     const context = useContext(SessionContext);
     if (context === undefined) {

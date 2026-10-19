@@ -65,7 +65,7 @@ export function DatePicker({
                 <DatePickerCalender
                     mode={mode}
                     date={date}
-                    // @ts-ignore
+                    // @ts-expect-error -- the picker's date type depends on its mode (single or range), which this shared component cannot express
                     setDate={setDate}
                     position={position}
                     numberOfMonths={numberOfMonths}

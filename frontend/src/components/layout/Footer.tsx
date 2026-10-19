@@ -1,6 +1,6 @@
 import {Link, NavLink, useLocation} from "react-router-dom";
 import {useTranslation} from "react-i18next";
-import {GithubIcon, LinkedinIcon} from "lucide-react";
+import {GithubIcon, LinkedinIcon} from "lucide-legacy";
 import {social_links} from "@/config/personal.tsx";
 
 export function Footer() {

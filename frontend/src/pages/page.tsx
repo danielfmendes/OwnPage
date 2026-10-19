@@ -3,18 +3,17 @@ import {
     RocketIcon,
     BriefcaseIcon,
     GraduationCapIcon,
-    LinkedinIcon,
     MailIcon,
-    GithubIcon,
     Cpu,
     ArrowUpRight,
     ArrowRight,
     ExternalLink,
 } from "lucide-react";
+import { GithubIcon, LinkedinIcon } from "lucide-legacy";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { education, experience, selected_projects, skill_categories, social_links } from "@/config/personal.tsx";
+import { education, experience, selected_projects, skill_categories, social_links, uni_projects } from "@/config/personal.tsx";
 import { useTheme } from "next-themes";
 
 export default function Home() {
@@ -112,6 +111,31 @@ export default function Home() {
                                 desc={project.desc}
                                 link={project.link}
                                 tag={project.tag}
+                                reload={project.reload}
+                            />
+                        ))}
+                    </div>
+                </section>
+
+
+                {/* 2b. UNIVERSITY PROJECTS */}
+                <section className="space-y-10">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-primary/10 rounded-xl border border-primary/20">
+                            <RocketIcon className="h-6 w-6 text-primary" />
+                        </div>
+                        <h2 className="text-3xl md:text-4xl font-black tracking-tight">University Projects</h2>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8">
+                        {uni_projects.map((project, index) => (
+                            <ProjectCard
+                                key={index}
+                                title={project.title}
+                                desc={project.desc}
+                                link={project.link}
+                                tag={project.tag}
+                                reload={project.reload}
                             />
                         ))}
                     </div>
@@ -236,9 +260,10 @@ interface ProjectCardProps {
     link: string;
     tag: string;
     isMigrating?: boolean;
+    reload?: boolean;
 }
 
-function ProjectCard({ title, desc, link, tag, isMigrating }: ProjectCardProps) {
+function ProjectCard({ title, desc, link, tag, isMigrating, reload }: ProjectCardProps) {
     const isExternal = link.startsWith('http');
     const ActionIcon = isExternal ? ExternalLink : ArrowRight;
     const CornerIcon = isExternal ? ExternalLink : ArrowUpRight;
@@ -292,12 +317,25 @@ function ProjectCard({ title, desc, link, tag, isMigrating }: ProjectCardProps) 
 
     const className = "block h-full group outline-none cursor-pointer";
 
-    return isExternal
-        ? <a href={link} target="_blank" rel="noopener noreferrer" className={className}>{cardContent}</a>
+    if (isExternal) {
+        return <a href={link} target="_blank" rel="noopener noreferrer" className={className}>{cardContent}</a>;
+    }
+    // Sub-apps are separate deployments under the same origin, so they need a full page load
+    return reload
+        ? <a href={link} className={className}>{cardContent}</a>
         : <Link to={link} className={className}>{cardContent}</Link>;
 }
 
-function TimelineItem({ title, institution, company, description, period, image }: any) {
+interface TimelineItemProps {
+    title: string;
+    institution?: string;
+    company?: string;
+    description?: string[];
+    period: string;
+    image: string;
+}
+
+function TimelineItem({ title, institution, company, description, period, image }: TimelineItemProps) {
     return (
         <div className="flex gap-5 items-start group">
             {/* Logo Container: Fixed original colors and proper fit */}

@@ -17,13 +17,38 @@ export const selected_projects = [
         title: "Data Warehouse System",
         tag: "Enterprise BI",
         desc: "A multi-tenant data platform modeling complex bicycle manufacturing logic. Tracks component-level inventory (frames, forks) to final sales, featuring granular RBAC and real-time financial reporting on D1.",
-        link: "/dwh/login"
+        link: "/login"
     },
     {
         title: "Real-Time Feedback Pulse",
         tag: "Analytics / UX",
         desc: "A sophisticated dashboard monitoring customer sentiment via urgency scatter plots and signal intensity heatmaps. Features complex Recharts visualizations, dark mode support, and a high-performance triage queue.",
-        link: "https://cfchallenge.pages.dev/"
+        link: "/feedback-pulse",
+        reload: true
+    },
+];
+
+export const uni_projects = [
+    {
+        title: "APA Mock Exam",
+        tag: "Uni · Quiz",
+        desc: "A practice exam with MCQs, code questions and challenges, with history kept in the browser.",
+        link: "/apa-quiz",
+        reload: true
+    },
+    {
+        title: "Lisbon House Prices (Avalia)",
+        tag: "Uni · Hackathon",
+        desc: "A Lisbon housing market dashboard with maps and forecasts, built on Hono and D1.",
+        link: "/lisbon-house-prices",
+        reload: true
+    },
+    {
+        title: "Causality Survey",
+        tag: "Uni · Research",
+        desc: "A conjoint experiment on cookie-banner design: accept colour × position × environment.",
+        link: "/causality-survey",
+        reload: true
     },
 ];
 

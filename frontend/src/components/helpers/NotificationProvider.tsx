@@ -93,6 +93,7 @@ export const NotificationProvider = ({children}: { children: ReactNode }) => {
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components -- context hook exported next to its provider
 export const useNotification = () => {
     const context = useContext(NotificationContext);
     if (context === undefined) {

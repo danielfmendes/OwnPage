@@ -1,0 +1,362 @@
+[
+  {
+    "id": "code-e1",
+    "type": "code",
+    "category": "MLP",
+    "calculation": false,
+    "difficulty": "easy",
+    "codeLang": "python",
+    "code": "model = keras.Sequential([\n    layers.Dense(64, activation='relu', input_shape=(20,)),\n    layers.Dense(10, activation='sigmoid')\n])\nmodel.compile(optimizer='adam',\n              loss='categorical_crossentropy',\n              metrics=['accuracy'])",
+    "question": "This 10-class classifier has a bug. What is wrong?",
+    "options": [
+      "The output layer uses 'sigmoid'; a 10-class classifier needs 'softmax'.",
+      "The hidden layer should use 'tanh' rather than 'relu' here.",
+      "input_shape should be (10,) to match the number of classes.",
+      "The optimizer should be 'sgd' instead of 'adam' for classification."
+    ],
+    "correctIndex": 0,
+    "explanation": "For mutually-exclusive multiclass output you need 'softmax' so the 10 outputs form a probability distribution; 'sigmoid' treats each class independently."
+  },
+  {
+    "id": "code-e2",
+    "type": "code",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "easy",
+    "codeLang": "python",
+    "code": "model = keras.Sequential([\n    layers.Dense(128, activation='relu', input_shape=(784,)),\n    layers.Dense(10, activation='softmax')\n])\nmodel.compile(optimizer='adam', loss='mse', metrics=['accuracy'])",
+    "question": "What is wrong with this classification model?",
+    "options": [
+      "The loss is 'mse'; a softmax classifier should use cross-entropy.",
+      "The hidden layer has too many units (128) for 784 inputs.",
+      "'softmax' should be on the hidden layer, not the output.",
+      "The metric should be 'mae' instead of 'accuracy'."
+    ],
+    "correctIndex": 0,
+    "explanation": "MSE is a regression loss; a softmax classifier should be trained with (sparse_)categorical_crossentropy."
+  },
+  {
+    "id": "code-e3",
+    "type": "code",
+    "category": "MLP",
+    "calculation": false,
+    "difficulty": "easy",
+    "codeLang": "python",
+    "code": "import torch.nn as nn\n\n# 10-class digit classifier\nmodel = nn.Sequential(\n    nn.Flatten(),\n    nn.Linear(784, 128),\n    nn.ReLU(),\n    nn.Linear(128, 1)\n)\ncriterion = nn.CrossEntropyLoss()",
+    "question": "This digit classifier has a bug. What is wrong?",
+    "options": [
+      "The final layer outputs 1 unit, but a 10-class task needs 10.",
+      "nn.Flatten() must come after the first Linear layer.",
+      "ReLU should be placed before the first Linear layer.",
+      "CrossEntropyLoss requires a Softmax layer at the end."
+    ],
+    "correctIndex": 0,
+    "explanation": "A 10-class classifier must output 10 logits, so the last layer should be nn.Linear(128, 10). (CrossEntropyLoss takes raw logits, so no Softmax is needed.)"
+  },
+  {
+    "id": "code-e4",
+    "type": "code",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "easy",
+    "codeLang": "python",
+    "code": "from sklearn.linear_model import LogisticRegression\nfrom sklearn.metrics import accuracy_score\n\nclf = LogisticRegression()\npreds = clf.predict(X_test)\nprint(accuracy_score(y_test, preds))",
+    "question": "Why will this scikit-learn snippet fail / be meaningless?",
+    "options": [
+      "clf.predict is called before clf.fit; the model was never trained.",
+      "LogisticRegression cannot be used for classification tasks.",
+      "accuracy_score expects probabilities, not class labels.",
+      "X_test must be scaled with StandardScaler before predict."
+    ],
+    "correctIndex": 0,
+    "explanation": "You must call clf.fit(X_train, y_train) before predict; calling predict on an unfitted estimator raises NotFittedError."
+  },
+  {
+    "id": "code-e5",
+    "type": "code",
+    "category": "CNN",
+    "calculation": false,
+    "difficulty": "easy",
+    "codeLang": "python",
+    "code": "model = keras.Sequential([\n    layers.Conv2D(32, 3, activation='relu', input_shape=(28, 28, 1)),\n    layers.MaxPooling2D(2),\n    layers.Dense(10, activation='softmax')\n])",
+    "question": "This CNN raises a shape error. What is missing?",
+    "options": [
+      "A Flatten (or GlobalAveragePooling) layer is missing before Dense.",
+      "Conv2D should use 'softmax' instead of 'relu'.",
+      "MaxPooling2D needs an explicit strides argument to work.",
+      "input_shape should be (1, 28, 28) for a grayscale image."
+    ],
+    "correctIndex": 0,
+    "explanation": "Dense expects a 1-D feature vector, but the pooled conv output is still 3-D (H×W×C); insert Flatten or GlobalAveragePooling2D first."
+  },
+  {
+    "id": "code-m1",
+    "type": "code",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "codeLang": "python",
+    "code": "# y_train is a 1-D array of integer class labels, e.g. [3, 0, 7, ...]\nmodel.compile(optimizer='adam',\n              loss='categorical_crossentropy',\n              metrics=['accuracy'])\nmodel.fit(X_train, y_train, epochs=10)",
+    "question": "The labels are integers. What is the bug?",
+    "options": [
+      "Integer labels need 'sparse_categorical_crossentropy', not 'categorical_crossentropy'.",
+      "epochs=10 is far too many and guarantees overfitting.",
+      "The optimizer must be 'rmsprop' for categorical cross-entropy.",
+      "y_train should be cast to float32 before calling fit."
+    ],
+    "correctIndex": 0,
+    "explanation": "'categorical_crossentropy' expects one-hot labels; with integer class indices use 'sparse_categorical_crossentropy' (or one-hot encode the labels)."
+  },
+  {
+    "id": "code-m2",
+    "type": "code",
+    "category": "MLP",
+    "calculation": false,
+    "difficulty": "medium",
+    "codeLang": "python",
+    "code": "model = nn.Sequential(\n    nn.Linear(64, 32),\n    nn.ReLU(),\n    nn.Linear(32, 10),\n    nn.Softmax(dim=1)\n)\ncriterion = nn.CrossEntropyLoss()",
+    "question": "What is wrong with this PyTorch classifier?",
+    "options": [
+      "nn.CrossEntropyLoss expects raw logits, so the final Softmax is wrong.",
+      "Softmax should use dim=0 instead of dim=1 here.",
+      "ReLU should be replaced by Sigmoid before the output.",
+      "The first Linear layer should output 10 units, not 32."
+    ],
+    "correctIndex": 0,
+    "explanation": "nn.CrossEntropyLoss already applies log-softmax internally; adding nn.Softmax double-applies it and hurts training. Feed raw logits."
+  },
+  {
+    "id": "code-m3",
+    "type": "code",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "codeLang": "python",
+    "code": "for x, y in loader:\n    out = model(x)\n    loss = criterion(out, y)\n    loss.backward()\n    optimizer.step()",
+    "question": "This PyTorch training loop has a bug. What is missing?",
+    "options": [
+      "optimizer.zero_grad() is missing, so gradients accumulate across batches.",
+      "loss.backward() must be called after optimizer.step().",
+      "The output 'out' should be detached before computing the loss.",
+      "criterion(out, y) should be written as criterion(y, out)."
+    ],
+    "correctIndex": 0,
+    "explanation": "PyTorch accumulates gradients; without optimizer.zero_grad() each step adds to the previous batch's gradients, corrupting the updates."
+  },
+  {
+    "id": "code-m4",
+    "type": "code",
+    "category": "CNN",
+    "calculation": false,
+    "difficulty": "medium",
+    "codeLang": "python",
+    "code": "model = keras.Sequential([\n    layers.Conv2D(32, 3, activation='relu', padding='same',\n                  input_shape=(32, 32, 3)),\n    layers.MaxPooling2D(pool_size=2, strides=1),\n    layers.Flatten(),\n    layers.Dense(10, activation='softmax')\n])",
+    "question": "The model barely downsamples. What is the cause?",
+    "options": [
+      "strides=1 makes the pooling hardly downsample; it should be 2.",
+      "padding='same' is invalid for a Conv2D layer.",
+      "pool_size must equal the Conv2D kernel size of 3.",
+      "MaxPooling2D cannot follow a Conv2D with padding='same'."
+    ],
+    "correctIndex": 0,
+    "explanation": "With stride 1, a 2×2 pool slides one pixel at a time and only shrinks the map by 1; to halve the spatial size use strides=2 (the default)."
+  },
+  {
+    "id": "code-m5",
+    "type": "code",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "codeLang": "python",
+    "code": "scaler = StandardScaler()\nX_scaled = scaler.fit_transform(X)\nX_train, X_test, y_train, y_test = train_test_split(\n    X_scaled, y, test_size=0.2)\nmodel.fit(X_train, y_train)",
+    "question": "What methodological bug does this contain?",
+    "options": [
+      "The scaler is fit on all data before the split, leaking test info.",
+      "train_test_split must be called before importing StandardScaler.",
+      "test_size=0.2 is too small and is what causes the leakage.",
+      "fit_transform should be replaced by inverse_transform here."
+    ],
+    "correctIndex": 0,
+    "explanation": "fit_transform on the full X computes mean/std using the test rows, leaking information; fit the scaler on X_train only (ideally via a Pipeline)."
+  },
+  {
+    "id": "code-m6",
+    "type": "code",
+    "category": "RNN",
+    "calculation": false,
+    "difficulty": "medium",
+    "codeLang": "python",
+    "code": "model = keras.Sequential([\n    layers.LSTM(64, input_shape=(100, 8)),\n    layers.LSTM(32),\n    layers.Dense(1)\n])",
+    "question": "Stacking these LSTMs raises an error. Why?",
+    "options": [
+      "The first LSTM needs return_sequences=True to feed the second LSTM.",
+      "input_shape should be (8, 100) instead of (100, 8).",
+      "The second LSTM must have more units than the first.",
+      "A Flatten layer is required between the two LSTM layers."
+    ],
+    "correctIndex": 0,
+    "explanation": "By default an LSTM returns only its last hidden state (2-D). To stack another LSTM the first must output the full sequence via return_sequences=True (3-D)."
+  },
+  {
+    "id": "code-m7",
+    "type": "code",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "codeLang": "python",
+    "code": "# evaluation (model uses Dropout and BatchNorm)\nwith torch.no_grad():\n    preds = model(X_val)\nacc = (preds.argmax(1) == y_val).float().mean()",
+    "question": "Why might these validation numbers be unreliable?",
+    "options": [
+      "model.eval() was not called, so dropout/batchnorm stay in train mode.",
+      "torch.no_grad() disables the forward pass entirely.",
+      "argmax should use dim=0 to pick the predicted class.",
+      "preds must be passed through softmax before argmax."
+    ],
+    "correctIndex": 0,
+    "explanation": "Without model.eval(), Dropout keeps zeroing units and BatchNorm uses batch (not running) statistics, so evaluation is noisy and inconsistent."
+  },
+  {
+    "id": "code-m8",
+    "type": "code",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "codeLang": "python",
+    "code": "model = keras.Sequential([\n    layers.Dense(64, activation='relu'),\n    layers.Dense(10, activation='softmax')\n])\nmodel.compile(\n    optimizer='adam',\n    loss=keras.losses.CategoricalCrossentropy(from_logits=True),\n    metrics=['accuracy'])",
+    "question": "What is inconsistent in this configuration?",
+    "options": [
+      "The output is already softmax, so from_logits=True is wrong.",
+      "CategoricalCrossentropy cannot be imported from keras.losses.",
+      "The Dense layer needs an input_shape for the loss to work.",
+      "from_logits must always be True when using softmax outputs."
+    ],
+    "correctIndex": 0,
+    "explanation": "from_logits=True tells the loss the inputs are raw logits, but the layer already applied softmax — set from_logits=False (or drop the softmax activation)."
+  },
+  {
+    "id": "code-m9",
+    "type": "code",
+    "category": "CNN",
+    "calculation": false,
+    "difficulty": "medium",
+    "codeLang": "python",
+    "code": "model = nn.Sequential(\n    nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3),\n    nn.ReLU(),\n    nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3),\n    nn.ReLU(),\n    nn.Conv2d(in_channels=16, out_channels=64, kernel_size=3),\n    nn.ReLU(),\n)",
+    "question": "This stack of conv layers raises a shape error. Why?",
+    "options": [
+      "The third Conv2d has in_channels=16 but the prior layer outputs 32.",
+      "kernel_size=3 is too small for the first convolution.",
+      "ReLU should be applied before each convolution, not after.",
+      "out_channels must exactly double at every layer."
+    ],
+    "correctIndex": 0,
+    "explanation": "Each conv's in_channels must equal the previous conv's out_channels. The second outputs 32, so the third must use in_channels=32."
+  },
+  {
+    "id": "code-m10",
+    "type": "code",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "codeLang": "python",
+    "code": "from sklearn.linear_model import LinearRegression\nfrom sklearn.metrics import accuracy_score\n\nreg = LinearRegression().fit(X_train, y_train)\npreds = reg.predict(X_test)   # continuous targets\nprint(accuracy_score(y_test, preds))",
+    "question": "What is wrong with how this regressor is evaluated?",
+    "options": [
+      "accuracy_score is for classification; use MSE or R² for regression.",
+      "LinearRegression cannot call .predict after .fit.",
+      "X_test must be one-hot encoded before predict.",
+      "preds should be rounded to integers before fitting."
+    ],
+    "correctIndex": 0,
+    "explanation": "accuracy_score compares discrete labels; on continuous regression outputs it is meaningless (and usually errors). Use mean_squared_error or r2_score."
+  },
+  {
+    "id": "code-h1",
+    "type": "code",
+    "category": "CNN",
+    "calculation": false,
+    "difficulty": "hard",
+    "codeLang": "python",
+    "code": "# input: 1 x 28 x 28\nmodel = nn.Sequential(\n    nn.Conv2d(1, 8, kernel_size=5),    # -> 8 x 24 x 24\n    nn.ReLU(),\n    nn.MaxPool2d(2),                   # -> 8 x 12 x 12\n    nn.Conv2d(8, 16, kernel_size=5),   # -> 16 x 8 x 8\n    nn.ReLU(),\n    nn.MaxPool2d(2),                   # -> 16 x 4 x 4\n    nn.Flatten(),\n    nn.Linear(16 * 8 * 8, 10)\n)",
+    "question": "This network fails at the Linear layer. What is the bug?",
+    "options": [
+      "After both pools the map is 16×4×4, so Linear should use 16*4*4.",
+      "The first Conv2d should use in_channels=3 for a grayscale image.",
+      "MaxPool2d(2) does not change the spatial dimensions at all.",
+      "Flatten must be removed when the next layer is Linear."
+    ],
+    "correctIndex": 0,
+    "explanation": "Tracing shapes: 28→24→12→8→4, so the flattened size is 16·4·4 = 256, not 16·8·8 = 1024. The Linear in-features must be 16*4*4."
+  },
+  {
+    "id": "code-h2",
+    "type": "code",
+    "category": "MLP",
+    "calculation": false,
+    "difficulty": "hard",
+    "codeLang": "python",
+    "code": "# binary classification\nmodel = nn.Sequential(\n    nn.Linear(32, 16),\n    nn.ReLU(),\n    nn.Linear(16, 1)    # raw logit output\n)\ncriterion = nn.BCELoss()\nloss = criterion(model(x), y.float())",
+    "question": "What is the bug in this binary classifier?",
+    "options": [
+      "BCELoss needs probabilities, but the model outputs raw logits (use BCEWithLogitsLoss).",
+      "The final Linear layer should output 2 units for binary classification.",
+      "BCELoss requires integer class labels, not floats, as targets.",
+      "A Softmax layer must be added for binary classification."
+    ],
+    "correctIndex": 0,
+    "explanation": "BCELoss expects inputs in [0,1] (post-sigmoid). The model returns raw logits, so either add nn.Sigmoid or, preferably, use nn.BCEWithLogitsLoss (numerically stable)."
+  },
+  {
+    "id": "code-h3",
+    "type": "code",
+    "category": "Architectures",
+    "calculation": false,
+    "difficulty": "hard",
+    "codeLang": "python",
+    "code": "inputs = keras.Input(shape=(32, 32, 3))\nx = layers.Conv2D(64, 3, padding='same', activation='relu')(inputs)\ny = layers.Conv2D(128, 3, padding='same', activation='relu')(x)\nout = layers.Add()([x, y])   # residual connection",
+    "question": "This residual connection raises an error. Why?",
+    "options": [
+      "Add() needs matching shapes, but x has 64 channels and y has 128.",
+      "padding='same' should be 'valid' for residual connections.",
+      "The residual branch must use MaxPooling before Add().",
+      "The input shape must be (3, 32, 32) for the channels."
+    ],
+    "correctIndex": 0,
+    "explanation": "A residual add is element-wise, so the two tensors must have identical shapes. Here channels differ (64 vs 128); match them (e.g. a 1×1 conv) before Add()."
+  },
+  {
+    "id": "code-h4",
+    "type": "code",
+    "category": "RNN",
+    "calculation": false,
+    "difficulty": "hard",
+    "codeLang": "python",
+    "code": "rnn = nn.LSTM(input_size=10, hidden_size=20, batch_first=True)\n# x has shape (seq_len=50, batch=32, features=10)\nout, (h, c) = rnn(x)",
+    "question": "The hidden states come out wrong. What is the bug?",
+    "options": [
+      "batch_first=True expects (batch, seq, features), but x is (seq, batch, features).",
+      "input_size must equal hidden_size for an LSTM to run.",
+      "An LSTM returns only 'out'; unpacking (h, c) raises an error.",
+      "seq_len must always be smaller than the batch size."
+    ],
+    "correctIndex": 0,
+    "explanation": "With batch_first=True PyTorch interprets x as (batch, seq, features). The tensor is (seq, batch, features), so either set batch_first=False or transpose the first two axes."
+  },
+  {
+    "id": "code-h5",
+    "type": "code",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "hard",
+    "codeLang": "python",
+    "code": "scaler = StandardScaler()\nX_scaled = scaler.fit_transform(X_train)\n\ngrid = GridSearchCV(SVC(), param_grid, cv=5)\ngrid.fit(X_scaled, y_train)",
+    "question": "Why is this cross-validation optimistically biased?",
+    "options": [
+      "Scaling before CV leaks across folds; wrap it in a Pipeline instead.",
+      "GridSearchCV cannot be used together with an SVC model.",
+      "cv=5 is too few folds and is what causes the leakage.",
+      "fit_transform should be called again inside grid.fit."
+    ],
+    "correctIndex": 0,
+    "explanation": "Fitting the scaler on all of X_train means each CV validation fold was scaled using its own statistics — leakage. Put StandardScaler and SVC in a Pipeline so scaling is refit within each fold."
+  }
+]

@@ -1,0 +1,238 @@
+import { Env } from "../../types";
+import { queryWithPagination } from "./pagination";
+import {
+    getAllowedProjectIds,
+    getSchemaAccess,
+    HttpError,
+    readJson,
+    requireProjectRole,
+    requireUser,
+    resolveProjectId,
+} from "../../utils/auth";
+import { createSchemaWithEntities } from "./schema/schemas";
+
+interface CrudOptions {
+    // Column on this table that holds the owning project_id. When set, writes require
+    // admin on that project (mirrors Go's HandleInsert/Update/Delete + ValidateProjectAccess).
+    projectColumn?: string;
+    // When true the table is read-only (GET only) — writes return 405. Matches the Go
+    // controller, where bike_models / components / users have no insert/update/delete handlers.
+    readOnly?: boolean;
+}
+
+const methodNotAllowed = () => new Response("Method not allowed", { status: 405 });
+
+// Generic CRUD helper
+const createCrudHandlers = (table: string, columns: string[], options: CrudOptions = {}) => {
+    return {
+        getAll: async (req: Request, env: Env) => {
+            const baseQuery = `SELECT * FROM ${table}`;
+            const countQuery = `SELECT COUNT(*) FROM ${table}`;
+            return await queryWithPagination(req, env, baseQuery, countQuery);
+        },
+        insert: async (req: Request, env: Env) => {
+            if (options.readOnly) return methodNotAllowed();
+            const data: any = await readJson(req);
+            if (options.projectColumn) {
+                await requireProjectRole(req, env, data[options.projectColumn], "admin");
+            }
+            try {
+                const placeholders = columns.map(() => "?").join(", ");
+                const values = columns.map(col => data[col]);
+                await env.DB.prepare(`INSERT INTO ${table} (${columns.join(", ")}) VALUES (${placeholders})`)
+                    .bind(...values)
+                    .run();
+                return new Response("Created", { status: 201 });
+            } catch (e) {
+                console.error(`insert ${table} failed:`, e);
+                return new Response("Could not create record", { status: 500 });
+            }
+        },
+        update: async (req: Request, env: Env) => {
+            if (options.readOnly) return methodNotAllowed();
+            const data: any = await readJson(req);
+            if (!data.id) return new Response("ID missing", { status: 400 });
+            if (options.projectColumn) {
+                await requireProjectRole(req, env, data[options.projectColumn], "admin");
+            }
+            try {
+                const setClause = columns.map(col => `${col} = ?`).join(", ");
+                const values = columns.map(col => data[col]);
+                await env.DB.prepare(`UPDATE ${table} SET ${setClause} WHERE id = ?`)
+                    .bind(...values, data.id)
+                    .run();
+                return new Response("Updated", { status: 200 });
+            } catch (e) {
+                console.error(`update ${table} failed:`, e);
+                return new Response("Could not update record", { status: 500 });
+            }
+        },
+        delete: async (req: Request, env: Env) => {
+            if (options.readOnly) return methodNotAllowed();
+            const url = new URL(req.url);
+            const id = url.searchParams.get("id");
+            const cascade = url.searchParams.get("cascade") === "true";
+            if (!id) return new Response("Bad request – missing or invalid ID", { status: 400 });
+
+            if (options.projectColumn) {
+                const projectId = await resolveProjectId(
+                    env,
+                    `SELECT ${options.projectColumn} AS project_id FROM ${table} WHERE id = ?`,
+                    id
+                );
+                await requireProjectRole(req, env, projectId, "admin");
+            }
+
+            try {
+                if (cascade) {
+                    // Define cascade dependencies per table
+                    const cascadeSteps: Record<string, string[]> = {
+                        customers: [
+                            "DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE customer_id = ?)",
+                            "DELETE FROM orders WHERE customer_id = ?",
+                        ],
+                        bike_models: [
+                            "DELETE FROM order_items WHERE bike_id IN (SELECT id FROM bikes WHERE model_id = ?)",
+                            "DELETE FROM orders WHERE id NOT IN (SELECT DISTINCT order_id FROM order_items)",
+                            "DELETE FROM bikes WHERE model_id = ?",
+                        ],
+                        warehouse_parts: [], // no children
+                        projects: [
+                            "DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE project_id = ?)",
+                            "DELETE FROM orders WHERE project_id = ?",
+                            "DELETE FROM bikes WHERE project_id = ?",
+                            "DELETE FROM customers WHERE project_id = ?",
+                            "DELETE FROM warehouse_parts WHERE project_id = ?",
+                            "DELETE FROM role_management WHERE project_id = ?",
+                        ],
+                    };
+                    const steps = cascadeSteps[table] || [];
+                    const stmts = [
+                        ...steps.map(sql => env.DB.prepare(sql).bind(id)),
+                        env.DB.prepare(`DELETE FROM ${table} WHERE id = ?`).bind(id),
+                    ];
+                    await env.DB.batch(stmts);
+                } else {
+                    await env.DB.prepare(`DELETE FROM ${table} WHERE id = ?`).bind(id).run();
+                }
+                return new Response("Deleted", { status: 200 });
+            } catch (e: any) {
+                const msg = String(e);
+                // D1/SQLite reports "FOREIGN KEY"/"SQLITE_CONSTRAINT"; Postgres reports a lowercase
+                // "foreign key" message (and code 23503). Match both so the 409 path works locally too.
+                if (/foreign[_ ]key/i.test(msg) || msg.includes("SQLITE_CONSTRAINT") || (e && (e as any).code === "23503")) {
+                    return new Response("Conflict – related data exists; use cascade=true to force delete", { status: 409 });
+                }
+                console.error(`delete ${table} failed:`, e);
+                return new Response("Could not delete record", { status: 500 });
+            }
+        },
+        handler: async (req: Request, env: Env) => {
+            const handlers = createCrudHandlers(table, columns, options);
+            switch (req.method) {
+                case "GET": return handlers.getAll(req, env);
+                case "POST": return handlers.insert(req, env);
+                case "PUT": return handlers.update(req, env);
+                case "DELETE": return handlers.delete(req, env);
+                default: return methodNotAllowed();
+            }
+        }
+    };
+};
+
+// Projects — GET is scoped to the caller's projects; POST auto-assigns creator; PUT/DELETE
+// require the creator role on the target project.
+export const projectsHandler = async (req: Request, env: Env) => {
+    if (req.method === "GET") {
+        // Mirrors Go's GetProjectsForUserByRole: only projects where the caller has >= requiredRole.
+        const email = await requireUser(req, env);
+        const url = new URL(req.url);
+        const requiredRole = url.searchParams.get("requiredRole") || "user";
+        const ids = await getAllowedProjectIds(env, email, requiredRole);
+        if (ids.length === 0) return Response.json([]);
+        const placeholders = ids.map(() => "?").join(", ");
+        const { results } = await env.DB.prepare(
+            `SELECT p.id, p.name, p.schema_id, s.name AS schema_name
+             FROM projects p
+                      LEFT JOIN dwh_schemas s ON s.id = p.schema_id
+             WHERE p.id IN (${placeholders})`
+        ).bind(...ids).all();
+        return Response.json(results);
+    }
+
+    if (req.method === "POST") {
+        // Creating a project is allowed for any authenticated user; they become its creator.
+        // A project references a SCHEMA: reuse an existing one you can write, or create a new one
+        // (from a structured definition or parsed CREATE TABLE SQL).
+        const email = await requireUser(req, env);
+        const data: any = await readJson(req);
+        try {
+            let schemaId: number | null = null;
+            if (data.schema_id) {
+                const access = await getSchemaAccess(env, email);
+                if (!access.get(Number(data.schema_id))?.canWrite) {
+                    return new Response("You need write access to that schema", { status: 403 });
+                }
+                schemaId = Number(data.schema_id);
+            } else if (data.new_schema) {
+                schemaId = await createSchemaWithEntities(env, email, data.new_schema);
+            }
+
+            const result = await env.DB.prepare("INSERT INTO projects (name, schema_id) VALUES (?, ?)")
+                .bind(data.name, schemaId).run();
+            const projectId = result.meta?.last_row_id;
+            if (projectId) {
+                await env.DB.prepare(
+                    "INSERT INTO role_management (useremail, project_id, role) VALUES (?, ?, 'creator')"
+                ).bind(email, projectId).run();
+            }
+            return Response.json({ id: projectId, schema_id: schemaId }, { status: 201 });
+        } catch (e) {
+            if (e instanceof HttpError) return new Response(e.message, { status: e.status });
+            console.error("create project failed:", e);
+            return new Response("Could not create project", { status: 500 });
+        }
+    }
+
+    if (req.method === "PUT") {
+        const data: any = await readJson(req);
+        if (!data.id) return new Response("ID missing", { status: 400 });
+        // The project IS the resource — require creator on it.
+        await requireProjectRole(req, env, data.id, "creator");
+        return createCrudHandlers("projects", ["name"]).update(req, env);
+    }
+
+    if (req.method === "DELETE") {
+        const url = new URL(req.url);
+        const id = url.searchParams.get("id");
+        if (!id) return new Response("Bad request – missing or invalid ID", { status: 400 });
+        await requireProjectRole(req, env, id, "creator");
+        // Remove the project's role assignments and the project itself. The schema's physical tables are
+        // shared with other projects, so they are deliberately left untouched.
+        await env.DB.prepare("DELETE FROM role_management WHERE project_id = ?").bind(id).run();
+        await env.DB.prepare("DELETE FROM projects WHERE id = ?").bind(id).run();
+        return new Response("Deleted", { status: 200 });
+    }
+
+    return methodNotAllowed();
+};
+
+// Users — read-only here (registration/auth is handled by /auth). Matches Go's GetUsers/GetUser.
+export const usersHandler = (req: Request, env: Env) =>
+    createCrudHandlers("users", ["username", "email", "dob", "is_verified"], { readOnly: true }).handler(req, env);
+
+export const userHandler = async (req: Request, env: Env) => {
+    if (req.method !== "GET") return methodNotAllowed();
+
+    const url = new URL(req.url);
+    const filter = url.searchParams.get("filter");
+
+    if (filter && filter.startsWith("email:$eq.")) {
+        const email = filter.split("email:$eq.")[1];
+        const query = `SELECT username, email, dob, is_verified FROM users WHERE email = ?`;
+        const { results } = await env.DB.prepare(query).bind(email).all();
+        return Response.json(results);
+    }
+
+    return new Response("Filter missing or invalid", { status: 400 });
+};

@@ -30,7 +30,7 @@ public class RegisterSteps {
 
     @When("ich gebe {string}, {string} und {string} ein")
     public void ichRegistrierDatenEin(String email, String password, String name) {
-        String expectedUrl = WebDriverUtils.getBaseUrl() + "/dwh/register";
+        String expectedUrl = WebDriverUtils.getBaseUrl() + "/register";
         assertCurrentUrl(expectedUrl);
 
         List<WebElement> inputs = waitUntilVisibleAll(By.tagName("input"));

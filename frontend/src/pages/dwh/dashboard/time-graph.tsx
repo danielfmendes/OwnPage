@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import {useMemo, useState} from "react";
 import { Line, LineChart, Tooltip, XAxis } from "recharts";
 import {
     Card,
@@ -54,9 +54,12 @@ export function BikeModels({ bikeData, isLoading, maxHeight }: Props) {
         "#ec4899", "#14b8a6", "#8b5cf6", "#f97316"
     ];
 
-    useEffect(() => {
+    // Re-select every model with sales when the data changes (adjusted during render, not in an effect)
+    const [seededFrom, setSeededFrom] = useState(bikeData);
+    if (seededFrom !== bikeData) {
+        setSeededFrom(bikeData);
         setSelectedModels(modelsWithSales);
-    }, [bikeData]);
+    }
 
     // Prepare chart data, depending on the selected metric (total_sales / revenue)
     const chartData = useMemo(() => {
@@ -74,7 +77,7 @@ export function BikeModels({ bikeData, isLoading, maxHeight }: Props) {
         const sortedDates = Object.keys(grouped).sort();
 
         return sortedDates.map((date) => {
-            const base: Record<string, any> = {
+            const base: Record<string, string | number> = {
                 date,
                 formattedDate: new Intl.DateTimeFormat("de-DE", {
                     day: "2-digit",

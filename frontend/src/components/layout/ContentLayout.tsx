@@ -16,14 +16,8 @@ interface ContentLayoutProps {
 }
 
 export default function ContentLayout({ title, children, className }: ContentLayoutProps) {
-    const [isOpen, setIsOpen] = useState<boolean | null>(null);
-
-    useEffect(() => {
-        const storageValue = localStorage.getItem(SIDEBAR_COOKIE_KEY);
-        setIsOpen(storageValue !== "false"); // Default to true if not explicitly false
-    }, []);
-
-    if (isOpen === null) return null;
+    // Default to open unless the stored value is explicitly "false"
+    const [isOpen, setIsOpen] = useState(() => localStorage.getItem(SIDEBAR_COOKIE_KEY) !== "false");
 
     return (
         <SidebarProvider open={isOpen}>
@@ -57,7 +51,7 @@ function LayoutContent({ title, isOpen, setIsOpen, children }: LayoutContentProp
         if (isMobile) {
             updateSidebarState(openMobile);
         }
-    }, [isMobile, openMobile]);
+    }, [isMobile, openMobile]); // eslint-disable-line react-hooks/exhaustive-deps -- follows the viewport and the mobile sheet; setIsOpen is stable in practice
 
     const handleToggleSidebar = () => {
         const next = !isOpen;

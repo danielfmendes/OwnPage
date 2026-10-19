@@ -1,9 +1,10 @@
-import {useState, useEffect} from "react";
+import {useState, useEffect, useCallback} from "react";
 import {useNavigate} from "react-router-dom";
 import {ChatSidebar} from "@/pages/chat/ChatSidebar.tsx";
 import {ChatHeader} from "@/pages/chat/ChatHeader.tsx";
 import {MessageList} from "@/pages/chat/MessageList.tsx";
 import {chatApi, type Session} from "@/models/chat/chatApi.ts";
+import apiUrl from "@/utils/helpers.ts";
 
 export default function ChatPage() {
     const navigate = useNavigate();
@@ -13,38 +14,7 @@ export default function ChatPage() {
     const [aiMode, setAiMode] = useState("balanced");
     const [userEmail, setUserEmail] = useState("");
 
-    // 1. Auth Check & Initial Load
-    useEffect(() => {
-        const token = localStorage.getItem("chat_token");
-
-        if (!token) {
-            navigate("/chat/login", {replace: true});
-            return;
-        }
-
-        // Only fetch data if token exists
-        fetchSessions();
-
-        try {
-            // Basic JWT payload decoding
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            if (payload.email) setUserEmail(payload.email);
-        } catch (e) {
-            console.error("Error decoding token for email", e);
-            // If token is malformed, treat as unauthenticated
-            localStorage.removeItem("chat_token");
-            navigate("/chat/login", {replace: true});
-        }
-    }, [navigate]);
-
-    // 2. Reset mode to balanced whenever the active session changes
-    useEffect(() => {
-        if (activeSessionId) {
-            setAiMode("balanced");
-        }
-    }, [activeSessionId]);
-
-    const fetchSessions = async () => {
+    const fetchSessions = useCallback(async () => {
         try {
             const data = await chatApi.getSessions();
             setSessions(data);
@@ -60,7 +30,36 @@ export default function ChatPage() {
         } catch (err) {
             console.error("Failed to fetch sessions", err);
         }
-    };
+    }, []);
+
+    // 1. Auth Check & Initial Load: the shared login cookie is verified by the API
+    useEffect(() => {
+        let active = true;
+        fetch(`${apiUrl}/auth/me`, {credentials: "include"})
+            .then((res) => {
+                if (!res.ok) throw new Error("Not signed in");
+                return res.json();
+            })
+            .then((me: { email: string }) => {
+                if (!active) return;
+                setUserEmail(me.email);
+                fetchSessions();
+            })
+            .catch(() => {
+                if (active) navigate("/login?next=/chat", {replace: true});
+            });
+        return () => {
+            active = false;
+        };
+    }, [navigate, fetchSessions]);
+
+    // 2. Reset mode to balanced whenever the active session changes (adjusted during render, not in an effect)
+    const [modeSessionId, setModeSessionId] = useState(activeSessionId);
+    if (modeSessionId !== activeSessionId) {
+        setModeSessionId(activeSessionId);
+        if (activeSessionId) setAiMode("balanced");
+    }
+
 
     const handleCreateSession = async () => {
         try {
@@ -75,7 +74,6 @@ export default function ChatPage() {
     };
 
     // Return null or a loading state while checking auth to prevent UI flicker
-    if (!localStorage.getItem("chat_token")) return null;
 
     return (
         <div
@@ -105,6 +103,7 @@ export default function ChatPage() {
                 />
 
                 <MessageList
+                    key={activeSessionId}
                     sessionId={activeSessionId}
                     onNewMessageSent={fetchSessions}
                 />

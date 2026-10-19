@@ -4,7 +4,7 @@ import type { DateRange } from "react-day-picker";
 export type FilterType = "search" | "date" | "default";
 
 interface FilterData {
-    values: any[];
+    values: (string | number)[];
     type: FilterType;
 }
 
@@ -35,8 +35,8 @@ class FilterManager {
         return result;
     }
 
-    getSelectedValues(): Record<string, string[]> {
-        const result: Record<string, string[]> = {};
+    getSelectedValues(): Record<string, (string | number)[]> {
+        const result: Record<string, (string | number)[]> = {};
         this.filters.forEach((data, key) => {
             result[key] = data.values;
         });
@@ -60,7 +60,7 @@ class FilterManager {
         return result;
     }
 
-    private updateFilter(key: string, values: any[], type: FilterType = "default") {
+    private updateFilter(key: string, values: (string | number)[], type: FilterType = "default") {
         if (values.length === 0) {
             this.filters.delete(key);
         } else {
@@ -68,7 +68,7 @@ class FilterManager {
         }
     }
 
-    addFilter(key: string, values: any[], type: FilterType = "default") {
+    addFilter(key: string, values: (string | number)[], type: FilterType = "default") {
         if (!key || !Array.isArray(values)) {
             throw new Error("Key must be string and values must be array");
         }

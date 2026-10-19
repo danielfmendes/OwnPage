@@ -7,10 +7,9 @@ import {
     WareHousePartsService
 } from "@/models/api";
 import type { ItemsLoaderOptions } from "./itemsLoader";
-import type { RefObject } from "react";
 
 const createFilterItemLoaderWithManager = (
-    itemsLoaderOptionsRef: RefObject<ItemsLoaderOptions | null>
+    getItemsLoaderOptions: () => ItemsLoaderOptions | null
 ) => (
     key: string,
     loader: (
@@ -19,13 +18,13 @@ const createFilterItemLoaderWithManager = (
         pageSize?: number,
         orderBy?: string,
         countBy?: string,
-    ) => Promise<any>,
+    ) => Promise<unknown>,
     options?: Partial<Omit<FilterDefinition, "key" | "title" | "itemsLoader">>,
 ): FilterDefinition => ({
     key,
     title: `label.${key}`,
     itemsLoader: async (): Promise<FilterItem[]> => {
-        const current = itemsLoaderOptionsRef.current;
+        const current = getItemsLoaderOptions();
         if (!current) return [];
         const filterString = current.filterManager.getFilterStringWithProjectIds();
         const response = await loader(
@@ -38,7 +37,8 @@ const createFilterItemLoaderWithManager = (
 
         if (!Array.isArray(response)) return [];
 
-        return response
+        // The API returns either a paged list or a count-by list; only count-by rows are used here
+        return (response as { value?: string | null; count?: number }[])
             .filter(item => item.value !== undefined && item.value !== null)
             .map(item => ({
                 value: item.value!,
@@ -48,27 +48,27 @@ const createFilterItemLoaderWithManager = (
     ...options,
 });
 
-export const createBikeFilterItemLoader = (itemsLoaderOptionsRef: RefObject<ItemsLoaderOptions | null>) => (
+export const createBikeFilterItemLoader = (getItemsLoaderOptions: () => ItemsLoaderOptions | null) => (
     key: string,
     options?: Partial<Omit<FilterDefinition, "key" | "title" | "itemsLoader">>
-) => createFilterItemLoaderWithManager(itemsLoaderOptionsRef)(key, BikesService.getBikes, options);
+) => createFilterItemLoaderWithManager(getItemsLoaderOptions)(key, BikesService.getBikes, options);
 
-export const createCustomerFilterItemLoader = (itemsLoaderOptionsRef: RefObject<ItemsLoaderOptions | null>) => (
+export const createCustomerFilterItemLoader = (getItemsLoaderOptions: () => ItemsLoaderOptions | null) => (
     key: string,
     options?: Partial<Omit<FilterDefinition, "key" | "title" | "itemsLoader">>
-) => createFilterItemLoaderWithManager(itemsLoaderOptionsRef)(key, CustomersService.getCustomers, options);
+) => createFilterItemLoaderWithManager(getItemsLoaderOptions)(key, CustomersService.getCustomers, options);
 
-export const createOrdersFilterItemLoader = (itemsLoaderOptionsRef: RefObject<ItemsLoaderOptions | null>) => (
+export const createOrdersFilterItemLoader = (getItemsLoaderOptions: () => ItemsLoaderOptions | null) => (
     key: string,
     options?: Partial<Omit<FilterDefinition, "key" | "title" | "itemsLoader">>
-) => createFilterItemLoaderWithManager(itemsLoaderOptionsRef)(key, OrdersService.getOrders, options);
+) => createFilterItemLoaderWithManager(getItemsLoaderOptions)(key, OrdersService.getOrders, options);
 
-export const createRoleManagementFilterItemLoader = (itemsLoaderOptionsRef: RefObject<ItemsLoaderOptions | null>) => (
+export const createRoleManagementFilterItemLoader = (getItemsLoaderOptions: () => ItemsLoaderOptions | null) => (
     key: string,
     options?: Partial<Omit<FilterDefinition, "key" | "title" | "itemsLoader">>
-) => createFilterItemLoaderWithManager(itemsLoaderOptionsRef)(key, RoleManagementsService.getRoleManagements, options);
+) => createFilterItemLoaderWithManager(getItemsLoaderOptions)(key, RoleManagementsService.getRoleManagements, options);
 
-export const createWareHousePartsFilterItemLoader = (itemsLoaderOptionsRef: RefObject<ItemsLoaderOptions | null>) => (
+export const createWareHousePartsFilterItemLoader = (getItemsLoaderOptions: () => ItemsLoaderOptions | null) => (
     key: string,
     options?: Partial<Omit<FilterDefinition, "key" | "title" | "itemsLoader">>
-) => createFilterItemLoaderWithManager(itemsLoaderOptionsRef)(key, WareHousePartsService.getWareHouseParts, options);
+) => createFilterItemLoaderWithManager(getItemsLoaderOptions)(key, WareHousePartsService.getWareHouseParts, options);

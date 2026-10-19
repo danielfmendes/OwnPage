@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {
     DialogContent,
     DialogHeader,
@@ -25,6 +25,23 @@ interface ManageProps {
     manageId: number | null;
 }
 
+// Role picker for the manage and add dialogs
+function RoleSelect({value, onValueChange, hasRoleError = false}: RoleSelectProps) {
+    const {t} = useTranslation();
+    return (
+        <Select value={value} onValueChange={onValueChange}>
+            <SelectTrigger className={`w-[120px] ${hasRoleError ? "border-red-500" : ""}`}>
+                <SelectValue placeholder={t("placeholder.role")}/>
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="creator">{t("rolemanagement.role.creator")}</SelectItem>
+                <SelectItem value="admin">{t("rolemanagement.role.admin")}</SelectItem>
+                <SelectItem value="user">{t("rolemanagement.role.user")}</SelectItem>
+            </SelectContent>
+        </Select>
+    );
+}
+
 export default function ManageDialogContent({manageId}: ManageProps) {
     const {t} = useTranslation();
     const {addNotification} = useNotification();
@@ -40,7 +57,7 @@ export default function ManageDialogContent({manageId}: ManageProps) {
     const [hasEmailError, setHasEmailError] = useState(false);
     const [hasRoleError, setHasRoleError] = useState(false);
 
-    const fetchData = () => {
+    const fetchData = useCallback(() => {
         if (manageId) {
             setIsLoadingData(true);
             RoleManagementsService.getRoleManagementsById(manageId)
@@ -55,11 +72,12 @@ export default function ManageDialogContent({manageId}: ManageProps) {
                 .catch(err => addNotification(`Failed to load roles${err?.message ? `: ${err.message}` : ""}`, "error"))
                 .finally(() => setIsLoadingData(false));
         }
-    };
+    }, [manageId, addNotification]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- the loading flag mirrors the request for this manageId
         fetchData();
-    }, [manageId]);
+    }, [fetchData]);
 
     const handleRoleChange = (email: string, newRole: string) => {
         setData((prev) =>
@@ -116,19 +134,6 @@ export default function ManageDialogContent({manageId}: ManageProps) {
             .catch(err => addNotification(`Failed to delete rolemanagement${err?.message ? `: ${err.message}` : ""}`, "error"))
             .finally(() => setLoadingDeleteEmail(null));
     };
-
-    const RoleSelect = ({value, onValueChange, hasRoleError = false}: RoleSelectProps) => (
-        <Select value={value} onValueChange={onValueChange}>
-            <SelectTrigger className={`w-[120px] ${hasRoleError ? "border-red-500" : ""}`}>
-                <SelectValue placeholder={t("placeholder.role")}/>
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value="creator">{t("rolemanagement.role.creator")}</SelectItem>
-                <SelectItem value="admin">{t("rolemanagement.role.admin")}</SelectItem>
-                <SelectItem value="user">{t("rolemanagement.role.user")}</SelectItem>
-            </SelectContent>
-        </Select>
-    );
 
     const columns: CustomColumnDef<RoleManagement>[] = [
         {

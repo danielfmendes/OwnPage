@@ -2,7 +2,6 @@ import { useUserStore } from "@/utils/userstate";
 import type { NavigateFunction } from "react-router-dom";
 import { useRoleStore } from "@/utils/roleManagementState";
 import type { NotificationType } from "@/components/helpers/Notification";
-import type { RoleManagementWithName } from "@/models/api";
 
 export const handleLogOut = async (
     navigate: NavigateFunction,
@@ -10,7 +9,7 @@ export const handleLogOut = async (
 ) => {
     try {
         await fetch(`${apiUrl}/dwh/auth/logout`, { method: "POST", credentials: "include" });
-    } catch (e) {
+    } catch {
         // Continue with local logout even if server request fails
     }
 
@@ -21,16 +20,19 @@ export const handleLogOut = async (
 
     // Give a tiny delay strictly for state flush if needed
     setTimeout(() => {
-        navigate("/dwh/login");
+        navigate("/login");
         addNotification("Successfully logged out.", "success");
     }, 50);
 };
 
-export const isRoleUserForProject = (projectId: number, role: string = "user") => {
-    const roles: RoleManagementWithName[] = useRoleStore((state) => state.roles);
-    const roleForProject = roles.find(role => role.project_id === projectId);
-    return roleForProject?.role === role;
-}
-
 const apiUrl = import.meta.env.VITE_API_ENV || "http://localhost:8080";
 export default apiUrl;
+// Only same-site paths are accepted from ?next=, so the login page cannot redirect off-site
+export const safeNext = (next: string | null, fallback: string) =>
+    next && next.startsWith("/") && !next.startsWith("//") ? next : fallback;
+
+// Message for a caught value: Error and {message} objects show their message, anything else is stringified
+export const errorMessage = (e: unknown): string => {
+    const message = typeof e === "object" && e !== null && "message" in e ? e.message : undefined;
+    return String(message ?? e);
+};

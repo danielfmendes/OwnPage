@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode, useMemo } from "react";
+import { useEffect, useRef, useState, type ReactNode, useMemo } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import {
     type ColumnFiltersState,
@@ -50,7 +50,7 @@ interface DataTableProps<TData> {
     itemsLoader: (opts: ItemsLoaderOptions) => Promise<void>;
     totalCount: number;
     filterDefinition?: FilterDefinition[];
-    rowDialogContent?: (row: any, onClose: () => void) => ReactNode;
+    rowDialogContent?: (row: TData, onClose: () => void) => ReactNode;
     addDialogContent?: (onClose: () => void) => ReactNode;
 }
 
@@ -74,7 +74,7 @@ export default function DataTable<TData>({
     const [rowSelection, setRowSelection] = useState({});
     const [isRowDialogOpen, setIsRowDialogOpen] = useState(false);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-    const [selectedRow, setSelectedRow] = useState<any>(null);
+    const [selectedRow, setSelectedRow] = useState<{ original: TData } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [refreshSignal, setRefreshSignal] = useState(0);
 
@@ -100,18 +100,30 @@ export default function DataTable<TData>({
     }, [pagination.itemsPerPage]);
     const maxPage = Math.ceil(totalCount / pagination.itemsPerPage);
 
+    const sortKey = sort.items.map(item => `${item.key}=${item.order}`).join(",");
+    const filterKey = filterManager.getFilterString();
+    const roleKey = selectedRoles.map(r => r.project_id).join(",");
+
+    // Latest loader and store helpers for the load effect. A reload is triggered only by paging, sorting, filters and roles.
+    const loadRef = useRef({itemsLoader, navigate, addNotification, toItemsLoaderOptions, toQueryParams});
     useEffect(() => {
+        loadRef.current = {itemsLoader, navigate, addNotification, toItemsLoaderOptions, toQueryParams};
+    });
+
+    useEffect(() => {
+        const load = loadRef.current;
         setIsLoading(true);
 
         const loadData = async () => {
             try {
-                await itemsLoader(toItemsLoaderOptions());
-                const queryParams = toQueryParams();
-                navigate(`?${queryParams.toString()}`);
+                await load.itemsLoader(load.toItemsLoaderOptions());
+                const queryParams = load.toQueryParams();
+                load.navigate(`?${queryParams.toString()}`);
                 setRefreshSignal(prev => prev + 1);
-            } catch (err: any) {
-                addNotification(
-                    `Error loading the data${err?.message ? `: ${err.message}` : ""}`,
+            } catch (err) {
+                const message = err instanceof Error ? err.message : undefined;
+                load.addNotification(
+                    `Error loading the data${message ? `: ${message}` : ""}`,
                     "error"
                 );
             } finally {
@@ -120,15 +132,9 @@ export default function DataTable<TData>({
         };
 
         loadData();
-    }, [
-        pagination.page,
-        pagination.itemsPerPage,
-        sort.items.map(item => `${item.key}=${item.order}`).join(","),
-        filterManager.getFilterString(),
-        selectedRoles.map(r => r.project_id).join(","),
-    ]);
+    }, [pagination.page, pagination.itemsPerPage, sortKey, filterKey, roleKey]);
 
-    const handleRowClick = (row: any) => {
+    const handleRowClick = (row: { original: TData }) => {
         if (rowDialogContent) {
             setSelectedRow(row);
             setIsRowDialogOpen(true);
@@ -179,7 +185,7 @@ export default function DataTable<TData>({
         }
     };
 
-    const onFilterChange = (key: string, selected: any[], type: FilterType) => {
+    const onFilterChange = (key: string, selected: (string | number)[], type: FilterType) => {
         const newManager = new FilterManager(filterManager.getFilters());
         newManager.addFilter(key, selected, type);
         setFilterManager(newManager);
@@ -195,6 +201,8 @@ export default function DataTable<TData>({
         setFilterManager(newManager);
     };
 
+    // TanStack's table API cannot be memoized by the React Compiler; rendering is unaffected
+    // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
         data,
         columns,
@@ -265,9 +273,9 @@ export default function DataTable<TData>({
                 columns={columns}
                 onRowClick={handleRowClick}
                 headers={
-                    table.getHeaderGroups().map((group: any) => (
+                    table.getHeaderGroups().map((group) => (
                         <TableRow key={group.id} className="hover:bg-transparent">
-                            {group.headers.map((header: any) => {
+                            {group.headers.map((header) => {
                                 if (header.isPlaceholder) return <TableHead key={header.id} />;
 
                                 const { column } = header;
@@ -280,7 +288,7 @@ export default function DataTable<TData>({
                                     <TableHead
                                         key={header.id}
                                         style={{
-                                            width: `${column.columnDef.widthPercent ?? (100 / table.getVisibleFlatColumns().length)}%`,
+                                            width: `${(column.columnDef as CustomColumnDef<TData>).widthPercent ?? (100 / table.getVisibleFlatColumns().length)}%`,
                                         }}
                                         onClick={() => canSort && handleSortToggle(key)}
                                         className={canSort ? "cursor-pointer select-none" : ""}

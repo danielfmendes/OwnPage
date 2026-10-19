@@ -1,0 +1,6 @@
+/apa-quiz              /apa-quiz/              301
+/causality-survey      /causality-survey/      301
+/feedback-pulse        /feedback-pulse/        301
+/lisbon-house-prices   /lisbon-house-prices/   301
+/feedback-pulse/*      /feedback-pulse/index.html      200
+/lisbon-house-prices/* /lisbon-house-prices/index.html 200

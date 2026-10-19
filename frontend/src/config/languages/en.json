@@ -18,7 +18,9 @@
     "next": "Next",
     "select_all": "Select all",
     "deselect_all": "Deselect all",
-    "clear_selection": "Clear selection"
+    "clear_selection": "Clear selection",
+    "new_project": "New project",
+    "create_project": "Create new project"
   },
   "switch_theme": "Switch Theme",
   "error": {
@@ -116,7 +118,12 @@
     "warehouse": "Warehouse",
     "parts_storage": "Parts storage",
     "role_management": "Role Management",
-    "profile": "Profile"
+    "profile": "Profile",
+    "schema": "Schema",
+    "sql": "SQL",
+    "roles": "Roles",
+    "schema_management": "Schema management",
+    "data": "Data"
   },
   "home": "Home",
   "from_time_period": "{{change}} from {{time}}",

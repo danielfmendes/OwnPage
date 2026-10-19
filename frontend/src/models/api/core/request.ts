@@ -340,7 +340,7 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
                     } catch (e) {
                         // ignore error, we are redirecting anyway
                     }
-                    window.location.href = '/dwh/login'; // Or emit an event
+                    window.location.href = '/login?next=/dwh/dashboard'; // Or emit an event
                 }
 
                 const responseBody = await getResponseBody(response);

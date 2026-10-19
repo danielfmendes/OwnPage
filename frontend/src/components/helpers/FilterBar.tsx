@@ -1,4 +1,4 @@
-import { type FC, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { type FC, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -32,7 +32,7 @@ export interface FilterDefinition {
 export interface FilterBarProps {
     filters: FilterDefinition[];
     filterManager: FilterManager;
-    onChange: (key: string, selected: string[], type: FilterType) => void;
+    onChange: (key: string, selected: (string | number)[], type: FilterType) => void;
     isMobile?: boolean;
     refreshSignal?: number;
 }
@@ -66,30 +66,26 @@ export const FilterBar: FC<FilterBarProps> = ({ filters, filterManager, onChange
             return;
         }
         clearLoadedItems(context);
-    }, [refreshSignal]);
+    }, [refreshSignal, clearLoadedItems, context]);
 
-    // Update selectedValues when filterManager changes from parent
-    useEffect(() => {
+    // Follow the parent's filterManager and filters (adjusted during render, not in effects)
+    const [syncedManager, setSyncedManager] = useState(filterManager);
+    if (syncedManager !== filterManager) {
+        setSyncedManager(filterManager);
         setSelectedValues(filterManager.getSelectedValues());
         setDateRanges(filterManager.getDateRanges());
-    }, [filterManager]);
+    }
 
-    useEffect(() => {
+    const [syncedFilters, setSyncedFilters] = useState(filters);
+    if (syncedFilters !== filters) {
+        setSyncedFilters(filters);
         setFilterDefs(filters.map(f => ({ ...f, pinned: f.pinned !== false })));
+    }
 
-        // loads items for every key with values
-        Object.keys(selectedValues).forEach(async key => {
-            if (selectedValues[key].length > 0 && !getLoadedItems(context, key)) {
-                const filterDef = filters.find(f => f.key === key);
-                if (filterDef) {
-                    await loadItemsForKey(key, filterDef.itemsLoader);
-                }
-            }
-        });
-    }, [filters]);
-
-    // unpinned => pinned, when selectedValues > 0
-    useEffect(() => {
+    // unpinned => pinned, when selectedValues > 0 (adjusted during render)
+    const [pinnedFor, setPinnedFor] = useState({ selectedValues, filters });
+    if (pinnedFor.selectedValues !== selectedValues || pinnedFor.filters !== filters) {
+        setPinnedFor({ selectedValues, filters });
         setFilterDefs((prev) =>
             prev.map((filter) => {
                 const hasSelected = (selectedValues[filter.key]?.length ?? 0) > 0;
@@ -99,20 +95,32 @@ export const FilterBar: FC<FilterBarProps> = ({ filters, filterManager, onChange
                 return filter;
             })
         );
-    }, [selectedValues, filters]);
+    }
 
-    const loadItemsForKey = async (key: string, loader: () => Promise<FilterItem[]>) => {
+    const loadItemsForKey = useCallback(async (key: string, loader: () => Promise<FilterItem[]>) => {
         // if (getLoadedItems(context, key)) return;
         setLoadingKeys((prev) => [...prev, key]);
         try {
             const items = await loader();
             setLoadedItems(context, key, items);
-        } catch (err) {
+        } catch {
             addNotification(`Error loading items for ${key}`, "error");
         } finally {
             setLoadingKeys((prev) => prev.filter((k) => k !== key));
         }
-    };
+    }, [context, setLoadedItems, addNotification]);
+
+    // loads items for every key with values, when the filters or the selections change
+    useEffect(() => {
+        Object.keys(selectedValues).forEach(async key => {
+            if (selectedValues[key].length > 0 && !getLoadedItems(context, key)) {
+                const filterDef = filters.find(f => f.key === key);
+                if (filterDef) {
+                    await loadItemsForKey(key, filterDef.itemsLoader);
+                }
+            }
+        });
+    }, [filters, selectedValues, context, getLoadedItems, loadItemsForKey]);
 
     const getDisplayLabel = (key: string, title: string) => {
         const values = selectedValues[key] || [];
@@ -132,7 +140,7 @@ export const FilterBar: FC<FilterBarProps> = ({ filters, filterManager, onChange
     const formatTitle = (title: string) => (locale === "de" ? title : title.toLowerCase());
 
     // Load items only if not already loaded
-    const toggleValue = (key: string, value: string) => {
+    const toggleValue = (key: string, value: string | number) => {
         const current = selectedValues[key] || [];
         const updated = current.includes(value)
             ? current.filter((v) => v !== value)
@@ -241,7 +249,7 @@ export const FilterBar: FC<FilterBarProps> = ({ filters, filterManager, onChange
                                 <DatePickerCalender
                                     mode="range"
                                     date={dateRange}
-                                    // @ts-ignore
+                                    // @ts-expect-error -- the picker's date type depends on its mode (single or range), which this shared component cannot express
                                     setDate={(range) => setDateRange(key, range)}
                                 />
                             ) : (

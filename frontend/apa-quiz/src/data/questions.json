@@ -1,0 +1,3926 @@
+[
+  {
+    "id": "fnd-02",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": false,
+    "question": "Two tensors can be matrix-multiplied as $AB$ only when:",
+    "options": [
+      "the number of columns of $A$ equals the number of rows of $B$",
+      "$A$ and $B$ have exactly the same shape",
+      "the number of rows of $A$ equals the number of columns of $B$",
+      "both are square matrices of any size"
+    ],
+    "correctIndex": 0,
+    "explanation": "The inner dimensions must agree: $A_{m\\times n}$ times $B_{n\\times p}$ requires the $n$ to match.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "fnd-03",
+    "type": "tf",
+    "category": "Foundations",
+    "calculation": false,
+    "question": "A tensor of shape $(32, 28, 28, 1)$ has rank (number of axes) 4.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "Rank is the count of axes. This shape lists four numbers, so the rank is 4 (e.g. a batch of 32 grayscale 28x28 images).",
+    "difficulty": "easy"
+  },
+  {
+    "id": "fnd-04",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": true,
+    "question": "Under NumPy-style broadcasting, adding tensors of shape $(4,1)$ and $(1,3)$ produces a result of shape:",
+    "options": [
+      "$(4,3)$",
+      "$(4,1)$",
+      "$(1,3)$",
+      "error: shapes incompatible"
+    ],
+    "correctIndex": 0,
+    "explanation": "Each axis is stretched to the larger size: axis 0 becomes 4, axis 1 becomes 3, giving $(4,3)$."
+  },
+  {
+    "id": "fnd-05",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": true,
+    "question": "What is $\\text{softmax}([2, 2, 2])$ for these three logits?",
+    "options": [
+      "$[0.333, 0.333, 0.333]$",
+      "$[0.5, 0.5, 0.5]$",
+      "$[1, 1, 1]$",
+      "$[0.25, 0.25, 0.25]$"
+    ],
+    "correctIndex": 0,
+    "explanation": "Equal logits give equal probabilities, and softmax outputs must sum to 1, so each is $1/3 \\approx 0.333$.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "fnd-06",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": true,
+    "question": "What is the L2 norm $\\lVert a\\rVert_2$ of the vector $a=[1, 2, 2]$?",
+    "options": [
+      "$3$",
+      "$\\sqrt{5}$",
+      "$5$",
+      "$9$"
+    ],
+    "correctIndex": 0,
+    "explanation": "$\\lVert a\\rVert_2=\\sqrt{1^2+2^2+2^2}=\\sqrt{9}=3$ (not $9$, which is the squared norm)."
+  },
+  {
+    "id": "fnd-07",
+    "type": "tf",
+    "category": "Foundations",
+    "calculation": false,
+    "question": "The outputs of a softmax layer are non-negative and sum to 1.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "Softmax exponentiates then normalizes, so every output is in $(0,1)$ and the vector sums to exactly 1.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "fnd-08",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": true,
+    "question": "Leaky ReLU is $f(x)=x$ for $x>0$ and $f(x)=\\alpha x$ otherwise. With $\\alpha=0.01$, what is $f(-3)$?",
+    "options": [
+      "$-0.03$",
+      "$0$",
+      "$-3$",
+      "$0.03$"
+    ],
+    "correctIndex": 0,
+    "explanation": "For a negative input $f(-3)=\\alpha\\cdot(-3)=0.01\\cdot(-3)=-0.03$. Unlike plain ReLU (which gives 0), Leaky ReLU keeps a small non-zero slope for $x<0$."
+  },
+  {
+    "id": "fnd-09",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": false,
+    "question": "A batch of RGB images is stored with shape (samples, height, width, channels). What is the rank of this tensor?",
+    "options": [
+      "$4$",
+      "$3$",
+      "$5$",
+      "$2$"
+    ],
+    "correctIndex": 0,
+    "explanation": "Rank counts the axes: samples, height, width, channels gives 4. A batch of time-series is rank-3 and a batch of video clips is rank-5."
+  },
+  {
+    "id": "fnd-11",
+    "type": "tf",
+    "category": "Foundations",
+    "calculation": false,
+    "question": "Broadcasting requires both tensors to have exactly identical shapes.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 1,
+    "explanation": "Broadcasting works precisely when shapes differ: axes of size 1 (or missing axes) are stretched to match.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "fnd-12",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": true,
+    "question": "Let $A=\\begin{bmatrix}1&2\\\\3&4\\end{bmatrix}$ and $B=\\begin{bmatrix}5&6\\\\7&8\\end{bmatrix}$. What is the top-left entry of $AB$?",
+    "options": [
+      "$19$",
+      "$23$",
+      "$43$",
+      "$17$"
+    ],
+    "correctIndex": 0,
+    "explanation": "Top-left = (row 1 of $A$) $\\cdot$ (col 1 of $B$) $= 1\\cdot5 + 2\\cdot7 = 5 + 14 = 19$."
+  },
+  {
+    "id": "per-01",
+    "type": "mc",
+    "category": "Perceptron",
+    "calculation": false,
+    "question": "A perceptron classifies an input by computing:",
+    "options": [
+      "the sign of $\\mathbf{w}\\cdot\\mathbf{x} + b$",
+      "the softmax of the inputs",
+      "the Euclidean distance to each class mean",
+      "the variance of the input features"
+    ],
+    "correctIndex": 0,
+    "explanation": "A perceptron forms a weighted sum plus bias and thresholds it; the sign of $\\mathbf{w}\\cdot\\mathbf{x}+b$ gives the predicted class.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "per-02",
+    "type": "tf",
+    "category": "Perceptron",
+    "calculation": false,
+    "question": "A single perceptron can learn the XOR function.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 1,
+    "explanation": "XOR is not linearly separable, and a single perceptron can only represent a linear decision boundary.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "per-03",
+    "type": "mc",
+    "category": "Perceptron",
+    "calculation": false,
+    "question": "Why can a single-layer perceptron not solve XOR?",
+    "options": [
+      "XOR is not linearly separable",
+      "XOR has too many input features",
+      "the perceptron has no bias term",
+      "XOR requires continuous-valued outputs"
+    ],
+    "correctIndex": 0,
+    "explanation": "No single straight line separates XOR's positive and negative classes, so a linear model cannot fit it."
+  },
+  {
+    "id": "per-05",
+    "type": "mc",
+    "category": "Perceptron",
+    "calculation": false,
+    "question": "What lets a multi-layer perceptron represent non-linear functions such as XOR?",
+    "options": [
+      "non-linear activation functions placed between the layers",
+      "training for many more epochs at a higher learning rate",
+      "increasing the learning rate and the batch size together",
+      "removing the bias terms from every one of the hidden layers"
+    ],
+    "correctIndex": 0,
+    "explanation": "Without a non-linearity, stacked linear layers collapse into one linear map. Activations like ReLU create the needed non-linear boundaries."
+  },
+  {
+    "id": "per-06",
+    "type": "tf",
+    "category": "Perceptron",
+    "calculation": false,
+    "question": "A single perceptron's decision boundary is always a hyperplane (linear) in the input space.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "The boundary is the set where $\\mathbf{w}\\cdot\\mathbf{x}+b=0$, which is a hyperplane.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "per-07",
+    "type": "mc",
+    "category": "Perceptron",
+    "calculation": false,
+    "question": "If every neuron in a network used the identity activation $f(x)=x$, the whole network would be equivalent to:",
+    "options": [
+      "a single linear transformation",
+      "a decision tree",
+      "a non-linear classifier",
+      "a softmax classifier"
+    ],
+    "correctIndex": 0,
+    "explanation": "Composing linear maps yields another linear map, so depth adds no representational power without non-linearities."
+  },
+  {
+    "id": "per-08",
+    "type": "mc",
+    "category": "Perceptron",
+    "calculation": true,
+    "question": "Perceptron update is $w \\leftarrow w + \\eta\\,(y-\\hat{y})\\,x$. With $w=0.5$, $\\eta=0.1$, target $y=1$, prediction $\\hat{y}=0$, input $x=2$, the new weight is:",
+    "options": [
+      "$0.7$",
+      "$0.5$",
+      "$0.6$",
+      "$0.9$"
+    ],
+    "correctIndex": 0,
+    "explanation": "$0.5 + 0.1\\cdot(1-0)\\cdot 2 = 0.5 + 0.2 = 0.7$."
+  },
+  {
+    "id": "per-09",
+    "type": "mc",
+    "category": "Perceptron",
+    "calculation": false,
+    "question": "Which Boolean function is NOT linearly separable?",
+    "options": [
+      "XOR",
+      "AND",
+      "OR",
+      "NOT"
+    ],
+    "correctIndex": 0,
+    "explanation": "AND, OR and NOT can each be separated by a single line; XOR cannot."
+  },
+  {
+    "id": "per-10",
+    "type": "tf",
+    "category": "Perceptron",
+    "calculation": false,
+    "question": "Stacking two linear layers with no activation in between increases the model's representational power beyond a single linear layer.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 1,
+    "explanation": "Two linear layers compose to a single linear layer, so there is no gain without a non-linearity."
+  },
+  {
+    "id": "mlp-01",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "question": "Backpropagation computes the gradients of the loss with respect to the weights by applying:",
+    "options": [
+      "the chain rule from the output back to the inputs",
+      "an exhaustive random search over many possible weight values",
+      "explicitly inverting each of the weight matrices in turn",
+      "a single forward pass with no backward computation at all"
+    ],
+    "correctIndex": 0,
+    "explanation": "Backprop propagates derivatives backwards layer by layer using the chain rule of calculus.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "mlp-02",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": true,
+    "question": "A neuron computes $z = Wx + b$ then applies ReLU. With $W=2$, $x=3$, $b=1$, what is the activation?",
+    "options": [
+      "$7$",
+      "$0$",
+      "$6$",
+      "$-7$"
+    ],
+    "correctIndex": 0,
+    "explanation": "$z = 2\\cdot3 + 1 = 7$, and $\\text{ReLU}(7)=7$ since it is positive."
+  },
+  {
+    "id": "mlp-03",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "question": "For a softmax output with cross-entropy loss, the gradient of the loss with respect to the logits $z$ is:",
+    "options": [
+      "$p - y$",
+      "$y - p$ squared",
+      "$p \\cdot y$",
+      "$\\log p$"
+    ],
+    "correctIndex": 0,
+    "explanation": "The softmax + cross-entropy combination has the clean gradient $\\partial L/\\partial z = p - y$ (predicted minus one-hot target)."
+  },
+  {
+    "id": "mlp-05",
+    "type": "tf",
+    "category": "MLP",
+    "calculation": false,
+    "question": "Backpropagation is essentially the chain rule applied systematically from the output layer toward the input layer.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "Each layer multiplies the upstream gradient by its local derivative, which is the chain rule run backwards.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "mlp-06",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "question": "For a multi-class classification output layer, the most appropriate loss is:",
+    "options": [
+      "categorical cross-entropy",
+      "mean squared error",
+      "mean absolute error",
+      "hinge loss on raw pixels"
+    ],
+    "correctIndex": 0,
+    "explanation": "Cross-entropy matches a softmax probability output and penalizes confident wrong predictions strongly; MSE is for regression.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "mlp-07",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "question": "What is the difference between categorical and sparse categorical cross-entropy in Keras?",
+    "options": [
+      "sparse expects integer labels, categorical expects one-hot labels",
+      "sparse is for regression, categorical is for classification",
+      "categorical expects integer labels, sparse expects one-hot labels",
+      "they differ only in the optimizer they require"
+    ],
+    "correctIndex": 0,
+    "explanation": "They compute the same loss; the only difference is the label format (integer class index vs one-hot vector)."
+  },
+  {
+    "id": "mlp-09",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "question": "Why does the sigmoid activation contribute to vanishing gradients in deep networks?",
+    "options": [
+      "its derivative is at most 0.25, so backprop shrinks the gradient",
+      "its output is unbounded, so activations explode in deep layers",
+      "it is non-differentiable, so backprop cannot pass through it",
+      "it amplifies the gradient exponentially through the chain rule"
+    ],
+    "correctIndex": 0,
+    "explanation": "The sigmoid derivative peaks at 0.25 and is tiny in its saturated tails, so repeated multiplication during backprop drives gradients toward zero."
+  },
+  {
+    "id": "mlp-10",
+    "type": "tf",
+    "category": "MLP",
+    "calculation": false,
+    "question": "The derivative of ReLU is 1 for positive inputs and 0 for negative inputs.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "ReLU is the identity for $x>0$ (slope 1) and flat for $x<0$ (slope 0).",
+    "difficulty": "easy"
+  },
+  {
+    "id": "mlp-11",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "question": "A common reason to prefer ReLU over sigmoid in hidden layers is that ReLU:",
+    "options": [
+      "does not saturate for positive inputs, so gradients keep flowing",
+      "forces the whole network to behave as a single linear map",
+      "always squashes its output into the range from zero to one",
+      "removes the need for any bias terms anywhere in the layer"
+    ],
+    "correctIndex": 0,
+    "explanation": "ReLU keeps a constant gradient of 1 for positive inputs, avoiding the saturation that causes vanishing gradients with sigmoids."
+  },
+  {
+    "id": "mlp-13",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "question": "For a binary classification output (single probability), the standard final activation is:",
+    "options": [
+      "sigmoid",
+      "softmax over 1 unit",
+      "tanh",
+      "ReLU"
+    ],
+    "correctIndex": 0,
+    "explanation": "A sigmoid squashes the logit to a probability in $(0,1)$ for the positive class.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "mlp-14",
+    "type": "tf",
+    "category": "MLP",
+    "calculation": false,
+    "question": "Setting the learning rate too high can cause the loss to oscillate or diverge instead of converging.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "Large steps can overshoot minima, increasing the loss and potentially diverging."
+  },
+  {
+    "id": "mlp-16",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "question": "The role of the bias term in a neuron is to:",
+    "options": [
+      "shift the activation threshold independently of the inputs",
+      "rescale each input feature to zero mean and unit variance",
+      "ensure the layer's gradients can never vanish during training",
+      "set a separate learning rate for each layer of the network"
+    ],
+    "correctIndex": 0,
+    "explanation": "The bias lets the neuron fire even when inputs are zero by offsetting the weighted sum."
+  },
+  {
+    "id": "trn-02",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "question": "Which of the following is NOT a hyperparameter?",
+    "options": [
+      "the learned weight values",
+      "the mini-batch size used",
+      "the optimizer's learning rate",
+      "the dropout probability"
+    ],
+    "correctIndex": 0,
+    "explanation": "Weights are *parameters* learned during training; the learning rate, batch size and dropout rate are hyperparameters chosen beforehand."
+  },
+  {
+    "id": "trn-03",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "question": "Which pattern most clearly indicates overfitting?",
+    "options": [
+      "training accuracy keeps rising while validation accuracy drops",
+      "training and validation loss both keep decreasing together",
+      "the training loss stays higher than the validation loss",
+      "the learning rate is decayed at the end of every epoch"
+    ],
+    "correctIndex": 0,
+    "explanation": "Overfitting shows as a growing gap: the model memorizes the training set while generalization (validation) worsens."
+  },
+  {
+    "id": "trn-04",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "question": "Dropout reduces overfitting by:",
+    "options": [
+      "randomly zeroing a fraction of activations during training",
+      "permanently deleting whole layers from the network architecture",
+      "steadily increasing the learning rate as training progresses",
+      "injecting random noise directly into the training labels"
+    ],
+    "correctIndex": 0,
+    "explanation": "Randomly dropping units each step prevents co-adaptation and acts like training an ensemble of sub-networks."
+  },
+  {
+    "id": "trn-05",
+    "type": "tf",
+    "category": "Training",
+    "calculation": false,
+    "question": "Dropout is active during inference by default.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 1,
+    "explanation": "Dropout is only applied during training; at inference all units are kept (with appropriate scaling).",
+    "difficulty": "easy"
+  },
+  {
+    "id": "trn-06",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "question": "Early stopping decides when to stop training by monitoring:",
+    "options": [
+      "a validation metric that stops improving",
+      "the training loss reaching exactly zero",
+      "the number of parameters",
+      "the GPU temperature"
+    ],
+    "correctIndex": 0,
+    "explanation": "Training halts when the validation metric stops improving for a set patience, keeping the best generalizing weights."
+  },
+  {
+    "id": "trn-07",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "question": "Batch normalization primarily helps training by:",
+    "options": [
+      "normalizing layer inputs to stabilize and speed up optimization",
+      "reducing how many parameters the network must learn during training",
+      "letting the model train without any activation functions at all",
+      "scrambling the gradients so they cannot easily be read off"
+    ],
+    "correctIndex": 0,
+    "explanation": "By standardizing activations per mini-batch it reduces internal covariate shift, allowing higher learning rates and faster convergence."
+  },
+  {
+    "id": "trn-08",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "question": "L2 regularization adds to the loss a term proportional to:",
+    "options": [
+      "the sum of squared weights",
+      "the sum of absolute weights",
+      "the number of layers",
+      "the validation accuracy"
+    ],
+    "correctIndex": 0,
+    "explanation": "L2 (weight decay) penalizes $\\sum w^2$, shrinking weights toward zero; L1 would use absolute values instead."
+  },
+  {
+    "id": "trn-09",
+    "type": "tf",
+    "category": "Training",
+    "calculation": false,
+    "question": "For a fixed dataset, a larger batch size means fewer parameter updates per epoch.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "Steps per epoch equal dataset size divided by batch size, so larger batches yield fewer updates per epoch.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "trn-10",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "question": "The Adam optimizer can be described as combining:",
+    "options": [
+      "momentum with per-parameter adaptive learning rates",
+      "dropout combined with batch normalization at every layer",
+      "both L1 and L2 weight regularization applied together",
+      "early stopping paired with aggressive data augmentation"
+    ],
+    "correctIndex": 0,
+    "explanation": "Adam maintains running estimates of the first moment (momentum) and second moment (to scale each parameter's step)."
+  },
+  {
+    "id": "trn-11",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "question": "A learning rate that is too small typically causes:",
+    "options": [
+      "very slow convergence",
+      "the loss to diverge to infinity",
+      "the weights to become NaN",
+      "overfitting on the first epoch"
+    ],
+    "correctIndex": 0,
+    "explanation": "Tiny steps make progress crawl; the model may need far more epochs or get stuck before reaching a good minimum."
+  },
+  {
+    "id": "trn-12",
+    "type": "tf",
+    "category": "Training",
+    "calculation": false,
+    "question": "The validation set is used to update the network's weights through backpropagation.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 1,
+    "explanation": "Only the training set drives weight updates. The validation set is held out to monitor generalization and tune choices."
+  },
+  {
+    "id": "trn-14",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "question": "Fitting a feature scaler on the entire dataset before splitting into train/test causes:",
+    "options": [
+      "data leakage that inflates test performance",
+      "slower training but unbiased results",
+      "the model to underfit",
+      "no effect as long as the scaler is linear"
+    ],
+    "correctIndex": 0,
+    "explanation": "Statistics from the test set leak into preprocessing, giving an optimistic, unrealistic estimate of generalization."
+  },
+  {
+    "id": "cnn-06",
+    "type": "mc",
+    "category": "CNN",
+    "calculation": false,
+    "question": "A 2x2 max-pooling layer with stride 2:",
+    "options": [
+      "halves each spatial dimension and has no learnable parameters",
+      "doubles each spatial dimension and adds four weights per map",
+      "adds exactly four learnable parameters for every input channel",
+      "keeps the spatial size unchanged but learns a pooling weight"
+    ],
+    "correctIndex": 0,
+    "explanation": "It takes the max over 2x2 windows, halving height and width, and has nothing to learn.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "cnn-07",
+    "type": "tf",
+    "category": "CNN",
+    "calculation": false,
+    "question": "Convolutional layers share the same filter weights across all spatial positions.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "Weight sharing is what makes convolution parameter-efficient and translation-equivariant.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "cnn-08",
+    "type": "mc",
+    "category": "CNN",
+    "calculation": false,
+    "question": "Compared with a dense layer on raw pixels, a convolutional layer needs far fewer parameters mainly because of:",
+    "options": [
+      "local connectivity and weight sharing",
+      "a larger learning rate",
+      "using sigmoid activations",
+      "processing one pixel at a time"
+    ],
+    "correctIndex": 0,
+    "explanation": "Each filter is small and reused everywhere, so the parameter count is independent of the image size.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "cnn-09",
+    "type": "mc",
+    "category": "CNN",
+    "calculation": false,
+    "question": "With stride 1, 'same' padding is defined so that the output spatial size:",
+    "options": [
+      "equals the input spatial size",
+      "is always halved",
+      "is always 1",
+      "depends only on the number of filters"
+    ],
+    "correctIndex": 0,
+    "explanation": "'Same' pads just enough that a stride-1 convolution returns an output of the same height and width as the input."
+  },
+  {
+    "id": "cnn-10",
+    "type": "tf",
+    "category": "CNN",
+    "calculation": false,
+    "question": "Pooling layers (max or average) have learnable parameters.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 1,
+    "explanation": "Pooling applies a fixed aggregation over windows; there are no weights to train.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "cnn-11",
+    "type": "mc",
+    "category": "CNN",
+    "calculation": false,
+    "question": "Approximate translation invariance in CNNs arises mainly from:",
+    "options": [
+      "weight-shared convolutions combined with pooling layers",
+      "the softmax applied in the final classification layer",
+      "using a very large mini-batch size during training",
+      "dropout applied inside the fully-connected output head"
+    ],
+    "correctIndex": 0,
+    "explanation": "Shared filters detect features anywhere, and pooling makes the response robust to small spatial shifts."
+  },
+  {
+    "id": "cnn-13",
+    "type": "mc",
+    "category": "CNN",
+    "calculation": false,
+    "question": "A typical transfer-learning recipe for a small dataset is to:",
+    "options": [
+      "freeze a pretrained backbone and train a new classification head",
+      "train the entire network from scratch with random weights",
+      "delete all convolutional layers",
+      "use only a single training example"
+    ],
+    "correctIndex": 0,
+    "explanation": "Reusing pretrained features and only learning a small head avoids overfitting when labeled data is scarce."
+  },
+  {
+    "id": "cnn-14",
+    "type": "mc",
+    "category": "CNN",
+    "calculation": false,
+    "question": "A 1x1 convolution is mainly used to:",
+    "options": [
+      "mix and change the number of channels",
+      "increase the spatial resolution",
+      "remove the bias terms",
+      "perform max-pooling"
+    ],
+    "correctIndex": 0,
+    "explanation": "A 1x1 conv applies a per-pixel linear combination across channels, often to reduce or expand channel depth cheaply."
+  },
+  {
+    "id": "cnn-15",
+    "type": "tf",
+    "category": "CNN",
+    "calculation": false,
+    "question": "Increasing the stride of a convolution reduces the output spatial dimensions.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "A larger stride moves the filter in bigger jumps, producing fewer output positions.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "rnn-01",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "question": "The hidden-state update of a simple RNN is:",
+    "options": [
+      "$h_t = \\tanh(W_x x_t + W_h h_{t-1} + b)$",
+      "$h_t = W_x x_t$ only",
+      "$h_t = \\text{softmax}(x_t)$",
+      "$h_t = h_{t-1} - x_t$"
+    ],
+    "correctIndex": 0,
+    "explanation": "The new state mixes the current input and the previous state through learned weights and a non-linearity.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "rnn-02",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "question": "The vanishing-gradient problem in simple RNNs means that:",
+    "options": [
+      "gradients shrink across many timesteps, so early inputs barely matter",
+      "the loss value can actually turn negative once the sequence is long enough",
+      "the hidden state simply keeps growing without bound as the sequence proceeds",
+      "the recurrent layer just ends up with far too few parameters to train"
+    ],
+    "correctIndex": 0,
+    "explanation": "Repeated multiplication by factors below 1 during backprop-through-time drives long-range gradients toward zero."
+  },
+  {
+    "id": "rnn-03",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "question": "An LSTM cell contains which set of gates?",
+    "options": [
+      "input, forget, and output gates, plus a candidate value",
+      "a single update gate that controls the whole cell state",
+      "stacked convolution and pooling gates over the timesteps",
+      "separate query, key, and value gates as used in attention"
+    ],
+    "correctIndex": 0,
+    "explanation": "The LSTM regulates its cell state with input, forget, and output gates, plus a candidate (cell) activation."
+  },
+  {
+    "id": "rnn-04",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "question": "In an LSTM, the forget gate controls:",
+    "options": [
+      "how much of the previous cell state is retained",
+      "the learning rate that the optimizer applies each step",
+      "the number of timesteps contained in the input sequence",
+      "which activation the output layer ends up using"
+    ],
+    "correctIndex": 0,
+    "explanation": "The forget gate outputs values in $(0,1)$ that scale the old cell state $c_{t-1}$ before new information is added."
+  },
+  {
+    "id": "rnn-06",
+    "type": "tf",
+    "category": "RNN",
+    "calculation": false,
+    "question": "LSTMs were introduced to help mitigate the vanishing-gradient problem of simple RNNs.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "The gated additive cell state provides a path along which gradients can flow without vanishing over long sequences.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "rnn-07",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "question": "Compared with an LSTM, a GRU generally has:",
+    "options": [
+      "fewer gates and fewer parameters",
+      "more gates and more parameters",
+      "no gates at all",
+      "exactly the same architecture"
+    ],
+    "correctIndex": 0,
+    "explanation": "A GRU uses update and reset gates (two) and merges cell and hidden state, giving fewer parameters than an LSTM."
+  },
+  {
+    "id": "rnn-08",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "question": "A bidirectional RNN improves modeling by:",
+    "options": [
+      "processing the sequence both forward and backward",
+      "doubling the optimizer learning rate during training",
+      "removing the recurrent connection from the layer entirely",
+      "using a convolution in place of recurrence altogether"
+    ],
+    "correctIndex": 0,
+    "explanation": "Running two RNNs in opposite directions lets each position use both past and future context (when the full sequence is available)."
+  },
+  {
+    "id": "rnn-09",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "question": "Setting return_sequences=True on a recurrent layer makes it output:",
+    "options": [
+      "the hidden state at every timestep",
+      "only the final hidden state",
+      "the input unchanged",
+      "the gradient of the loss"
+    ],
+    "correctIndex": 0,
+    "explanation": "It returns the full sequence of hidden states (needed for stacking RNNs or for many-to-many tasks) rather than just the last one."
+  },
+  {
+    "id": "rnn-10",
+    "type": "tf",
+    "category": "RNN",
+    "calculation": false,
+    "question": "A simple RNN reliably captures dependencies hundreds of timesteps in the past.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 1,
+    "explanation": "Simple RNNs suffer from vanishing gradients, so long-range memory is poor; gated units (LSTM/GRU) handle it better.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "rnn-11",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "question": "Why do gradients flow better through an LSTM's cell state than a simple RNN's hidden state?",
+    "options": [
+      "the cell state uses a gated additive update, avoiding shrinking products",
+      "the cell state is simply never updated, so its gradient stays perfectly fixed",
+      "LSTMs happen to be trained without any backpropagation through time at all",
+      "the cell state is reset back to zero again at every single timestep"
+    ],
+    "correctIndex": 0,
+    "explanation": "The (near-)additive path $c_t = f\\odot c_{t-1} + i\\odot g$ lets gradients pass with the forget gate controlling decay, instead of being multiplied by small Jacobians each step."
+  },
+  {
+    "id": "rnn-13",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "question": "Classifying the sentiment of a whole review with an RNN is an example of which mapping?",
+    "options": [
+      "many-to-one",
+      "one-to-many",
+      "one-to-one",
+      "many-to-many with equal lengths"
+    ],
+    "correctIndex": 0,
+    "explanation": "A sequence of words (many) produces a single label (one), so it is many-to-one."
+  },
+  {
+    "id": "rnn-14",
+    "type": "tf",
+    "category": "RNN",
+    "calculation": false,
+    "question": "A GRU maintains a separate cell state and hidden state, exactly like an LSTM.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 1,
+    "explanation": "A GRU merges the cell and hidden state into a single state; only the LSTM keeps them separate."
+  },
+  {
+    "id": "rnn-15",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "question": "Exploding gradients in recurrent networks are commonly handled with:",
+    "options": [
+      "gradient clipping",
+      "increasing the sequence length",
+      "removing the bias",
+      "using a larger vocabulary"
+    ],
+    "correctIndex": 0,
+    "explanation": "Clipping rescales gradients whose norm exceeds a threshold, preventing destabilizing update steps."
+  },
+  {
+    "id": "att-01",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "question": "Scaled dot-product self-attention computes:",
+    "options": [
+      "$\\text{softmax}\\!\\big(QK^{T}/\\sqrt{d_k}\\big)V$",
+      "$\\text{softmax}(Q + K)V$",
+      "$QK^{T}V$ with no normalization",
+      "$\\tanh(QV)K$"
+    ],
+    "correctIndex": 0,
+    "explanation": "Queries and keys form similarity scores, scaled by $\\sqrt{d_k}$, softmaxed into weights, then used to combine the values $V$.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "att-02",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "question": "Why are the attention scores divided by $\\sqrt{d_k}$?",
+    "options": [
+      "to keep dot products from growing large and saturating softmax",
+      "to make the attention output sum to the length of the sequence",
+      "to eliminate the need for separate value vectors entirely",
+      "to convert the attention logits into whole-number scores"
+    ],
+    "correctIndex": 0,
+    "explanation": "With large $d_k$, dot products have large variance; scaling keeps the softmax in a sensitive range with healthier gradients."
+  },
+  {
+    "id": "att-03",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": true,
+    "question": "If $Q$ is $n\\times d_k$ and $K$ is $n\\times d_k$, what is the shape of $QK^{T}$?",
+    "options": [
+      "$n\\times n$",
+      "$d_k\\times d_k$",
+      "$n\\times d_k$",
+      "$d_k\\times n$"
+    ],
+    "correctIndex": 0,
+    "explanation": "$K^{T}$ is $d_k\\times n$, so $QK^{T}$ is $(n\\times d_k)(d_k\\times n) = n\\times n$: a score for every query-key pair."
+  },
+  {
+    "id": "att-04",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "question": "A causal (look-ahead) mask in a decoder ensures that:",
+    "options": [
+      "a position cannot attend to future positions",
+      "every position attends only to itself",
+      "padding tokens get the highest weight",
+      "the values $V$ are ignored"
+    ],
+    "correctIndex": 0,
+    "explanation": "Future positions are masked to $-\\infty$ before the softmax, so predictions depend only on current and past tokens."
+  },
+  {
+    "id": "att-05",
+    "type": "tf",
+    "category": "Attention",
+    "calculation": false,
+    "question": "In unmasked self-attention, every token can attend to every other token in the sequence.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "Each query compares against all keys, so attention is fully connected across positions unless a mask is applied.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "att-06",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "question": "Multi-head attention works by:",
+    "options": [
+      "running several attention heads in parallel, then concatenating them",
+      "stacking many recurrent layers directly on top of one another",
+      "averaging all of the input embeddings before the softmax step",
+      "applying a convolution to the scores before the softmax step"
+    ],
+    "correctIndex": 0,
+    "explanation": "Different heads attend in different subspaces; their outputs are concatenated and linearly projected back to $d_{model}$."
+  },
+  {
+    "id": "att-07",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "question": "Positional encodings are added in Transformers because self-attention alone is:",
+    "options": [
+      "order-agnostic, so it needs explicit position information added",
+      "far too slow to run unless a positional shortcut is added in",
+      "unable to make use of more than a single attention head",
+      "restricted to binary-valued inputs until positions are added"
+    ],
+    "correctIndex": 0,
+    "explanation": "Attention treats the input as a set; positional signals inject the token order the model would otherwise lack."
+  },
+  {
+    "id": "att-08",
+    "type": "tf",
+    "category": "Attention",
+    "calculation": false,
+    "question": "Transformers must process tokens strictly one after another in time, like an RNN.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 1,
+    "explanation": "Self-attention processes all positions in parallel, which is a key efficiency advantage over recurrent models."
+  },
+  {
+    "id": "att-09",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "question": "The time/memory cost of standard self-attention scales with sequence length $n$ as:",
+    "options": [
+      "$O(n^{2})$",
+      "$O(n)$",
+      "$O(\\log n)$",
+      "$O(1)$"
+    ],
+    "correctIndex": 0,
+    "explanation": "Every pair of positions interacts, producing an $n\\times n$ attention matrix, hence quadratic scaling."
+  },
+  {
+    "id": "att-10",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": true,
+    "question": "A multi-head attention block has $d_{model}=512$ and 8 heads (so $d_k=64$). The concatenated head outputs pass through an output projection $W_O$. What shape is $W_O$?",
+    "options": [
+      "$512\\times 512$",
+      "$64\\times 64$",
+      "$512\\times 8$",
+      "$64\\times 512$"
+    ],
+    "correctIndex": 0,
+    "explanation": "Each head outputs $d_k=64$; concatenating 8 of them gives $8\\times 64 = 512$, which $W_O$ maps back to $d_{model}=512$. So $W_O$ is $512\\times 512$."
+  },
+  {
+    "id": "att-11",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "question": "In attention, the softmax is applied so that for each query the weights:",
+    "options": [
+      "sum to 1 across the keys",
+      "sum to 1 across the queries",
+      "are all equal to $1/\\sqrt{d_k}$",
+      "are negative"
+    ],
+    "correctIndex": 0,
+    "explanation": "Softmax over the key axis turns each query's scores into a probability distribution over the keys/values.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "att-12",
+    "type": "tf",
+    "category": "Attention",
+    "calculation": false,
+    "question": "For a given query, the attention weights over the keys sum to 1.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "They are produced by a softmax over the keys, so they form a valid probability distribution.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "att-13",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "question": "A decoder-only language model (e.g. a GPT-style model) is trained to:",
+    "options": [
+      "predict the next token given the previous tokens",
+      "classify input images into one of a thousand categories",
+      "reconstruct the original input from pure pixel noise",
+      "cluster a set of documents together without any labels"
+    ],
+    "correctIndex": 0,
+    "explanation": "It is an autoregressive model optimizing next-token prediction with a causal mask."
+  },
+  {
+    "id": "att-14",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "question": "A key advantage of Transformers over RNNs for long sequences is:",
+    "options": [
+      "parallel computation plus direct modeling of long-range links",
+      "a guarantee of having exactly zero trainable parameters at all",
+      "the ability to train well without using any data whatsoever",
+      "strictly lower memory use even at very long sequence lengths"
+    ],
+    "correctIndex": 0,
+    "explanation": "Attention connects any two positions in one step and processes the sequence in parallel, unlike step-by-step recurrence."
+  },
+  {
+    "id": "prm-01",
+    "type": "mc",
+    "category": "Prompting",
+    "calculation": false,
+    "question": "Zero-shot prompting means:",
+    "options": [
+      "asking the model to do a task with no worked examples given",
+      "providing many thousands of fully labeled training examples",
+      "fine-tuning the model on the target task before using it",
+      "running the model with its sampling temperature set to zero"
+    ],
+    "correctIndex": 0,
+    "explanation": "Zero-shot relies only on the instruction and the model's pretrained knowledge, with no in-context examples.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "prm-02",
+    "type": "mc",
+    "category": "Prompting",
+    "calculation": false,
+    "question": "Few-shot prompting improves performance by:",
+    "options": [
+      "including a handful of input-output examples in the prompt",
+      "permanently increasing the number of parameters inside the model",
+      "lowering the optimizer learning rate while the model is running",
+      "quietly removing the system instruction from the conversation"
+    ],
+    "correctIndex": 0,
+    "explanation": "Demonstrations in context show the model the desired format and behavior without changing its weights.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "prm-03",
+    "type": "mc",
+    "category": "Prompting",
+    "calculation": false,
+    "question": "Chain-of-thought prompting asks the model to:",
+    "options": [
+      "show intermediate reasoning steps before the final answer",
+      "output only a single token regardless of the question asked",
+      "ignore the actual question and just summarize the prompt text",
+      "translate the entire prompt into a different language first"
+    ],
+    "correctIndex": 0,
+    "explanation": "Eliciting step-by-step reasoning often improves accuracy on multi-step problems."
+  },
+  {
+    "id": "prm-04",
+    "type": "mc",
+    "category": "Prompting",
+    "calculation": false,
+    "question": "In few-shot prompting, 'coverage bias' refers to:",
+    "options": [
+      "examples skewed toward some classes, biasing the model's output",
+      "the prompt growing longer than the model's context window",
+      "the model refusing to answer the question that was asked",
+      "choosing a sampling temperature that is set far too high"
+    ],
+    "correctIndex": 0,
+    "explanation": "If the demonstrations over-represent some labels, the model tends to over-predict them; balanced examples help."
+  },
+  {
+    "id": "prm-05",
+    "type": "tf",
+    "category": "Prompting",
+    "calculation": false,
+    "question": "Few-shot (in-context) learning updates the model's weights based on the examples in the prompt.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 1,
+    "explanation": "In-context learning conditions on the examples at inference time; no gradient update or weight change occurs."
+  },
+  {
+    "id": "prm-06",
+    "type": "mc",
+    "category": "Prompting",
+    "calculation": false,
+    "question": "Setting the sampling temperature close to 0 makes the model's output:",
+    "options": [
+      "more deterministic, favouring the most probable tokens",
+      "noticeably more random and creative in its word choice",
+      "longer on average than it would be at a low temperature",
+      "essentially independent of whatever the prompt asked for"
+    ],
+    "correctIndex": 0,
+    "explanation": "Low temperature sharpens the distribution toward the highest-probability tokens, reducing randomness.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "prm-07",
+    "type": "mc",
+    "category": "Prompting",
+    "calculation": false,
+    "question": "Requesting output as JSON is useful mainly because it:",
+    "options": [
+      "makes the response easy to parse programmatically",
+      "mathematically guarantees that the answer is always correct",
+      "reduces the total number of parameters inside the model",
+      "completely disables the model's attention mechanism"
+    ],
+    "correctIndex": 0,
+    "explanation": "A structured, machine-readable format lets downstream code reliably extract fields from the response.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "prm-08",
+    "type": "tf",
+    "category": "Prompting",
+    "calculation": false,
+    "question": "Chain-of-thought prompting tends to help most on tasks that require multi-step reasoning.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "Explicit intermediate steps benefit arithmetic and logic problems more than simple lookups."
+  },
+  {
+    "id": "prm-09",
+    "type": "mc",
+    "category": "Prompting",
+    "calculation": false,
+    "question": "In-context learning is best described as:",
+    "options": [
+      "the model adapting from examples in the prompt, with no weight updates",
+      "fully retraining the model on fresh data for each and every new request",
+      "a particular kind of convolutional layer buried deep inside the network",
+      "a regularization method that penalizes overly large weight values"
+    ],
+    "correctIndex": 0,
+    "explanation": "The model uses patterns in the prompt to infer the task at inference time, leaving its parameters unchanged."
+  },
+  {
+    "id": "prm-10",
+    "type": "mc",
+    "category": "Prompting",
+    "calculation": false,
+    "question": "Raising the sampling temperature generally makes generated text:",
+    "options": [
+      "more diverse and less predictable",
+      "shorter and always factual",
+      "identical on every run",
+      "free of any randomness"
+    ],
+    "correctIndex": 0,
+    "explanation": "Higher temperature flattens the token distribution, increasing variety at the cost of more errors.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "fnd-14",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": true,
+    "question": "Broadcasting tensors of shape $(8,1,6)$ and $(7,1)$ gives what shape?",
+    "options": [
+      "$(8,7,6)$",
+      "$(8,1,6)$",
+      "$(8,7,1)$",
+      "incompatible shapes"
+    ],
+    "correctIndex": 0,
+    "explanation": "Align from the right: $6$ vs $1\\to6$; $1$ vs $7\\to7$; $8$ vs (missing)$\\to8$. Result $(8,7,6)$."
+  },
+  {
+    "id": "fnd-15",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": false,
+    "question": "Adding the same constant $c$ to every logit before a softmax changes the output how?",
+    "options": [
+      "not at all — softmax is shift-invariant",
+      "every probability is multiplied by $e^{c}$",
+      "the distribution becomes uniform",
+      "every probability increases by $c$"
+    ],
+    "correctIndex": 0,
+    "explanation": "The $e^{c}$ factor appears in every numerator and the denominator, cancelling. This is why we subtract the max for numerical stability."
+  },
+  {
+    "id": "fnd-17",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": false,
+    "question": "Why do stable softmax implementations subtract $\\max(z)$ from the logits before exponentiating?",
+    "options": [
+      "to prevent overflow of $e^{z}$ for large logits, leaving the result unchanged",
+      "to force the resulting output probabilities to add up to more than one",
+      "to round every single one of the logits to the nearest whole integer beforehand",
+      "to guarantee that each and every gradient stays strictly positive in training"
+    ],
+    "correctIndex": 0,
+    "explanation": "Softmax is shift-invariant, so subtracting the max keeps the same output while keeping the exponentials small enough to avoid numerical overflow."
+  },
+  {
+    "id": "per-11",
+    "type": "mc",
+    "category": "Perceptron",
+    "calculation": true,
+    "question": "A perceptron has 4 input features and a bias. How many trainable parameters does it have?",
+    "options": [
+      "$5$",
+      "$4$",
+      "$8$",
+      "$1$"
+    ],
+    "correctIndex": 0,
+    "explanation": "One weight per feature ($4$) plus one bias = $5$."
+  },
+  {
+    "id": "per-12",
+    "type": "mc",
+    "category": "Perceptron",
+    "calculation": false,
+    "question": "The perceptron learning algorithm is guaranteed to converge only when:",
+    "options": [
+      "the data is linearly separable",
+      "the learning rate is exactly 1",
+      "there are at most two features",
+      "the inputs are normalized to unit length"
+    ],
+    "correctIndex": 0,
+    "explanation": "The perceptron convergence theorem holds for linearly separable data; otherwise the weights never settle."
+  },
+  {
+    "id": "per-13",
+    "type": "mc",
+    "category": "Perceptron",
+    "calculation": true,
+    "question": "With weights $w=[1,-1]$ and bias $b=0$, how does the perceptron classify $x=[2,3]$ (positive if $w\\cdot x + b \\ge 0$)?",
+    "options": [
+      "negative class, since the score is $-1$",
+      "positive class, since the score is $+1$",
+      "exactly on the boundary",
+      "undefined without a learning rate"
+    ],
+    "correctIndex": 0,
+    "explanation": "$1\\cdot2 + (-1)\\cdot3 + 0 = -1 < 0$, so it predicts the negative class."
+  },
+  {
+    "id": "per-14",
+    "type": "mc",
+    "category": "Perceptron",
+    "calculation": false,
+    "question": "Which extra engineered feature would let a linear model separate the XOR pattern?",
+    "options": [
+      "the product $x_1 x_2$",
+      "the sum $x_1 + x_2$",
+      "the maximum $\\max(x_1,x_2)$",
+      "no single feature can help"
+    ],
+    "correctIndex": 0,
+    "explanation": "XOR becomes linearly separable once you add the interaction term $x_1 x_2$, which captures the 'both-on' case the line otherwise misses."
+  },
+  {
+    "id": "mlp-18",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "question": "Why are network weights initialized randomly rather than all to zero?",
+    "options": [
+      "to break symmetry so neurons can learn different features",
+      "to make the very first forward pass run noticeably faster",
+      "because weights of exactly zero would overflow during backprop",
+      "to guarantee the training loss starts out at exactly zero"
+    ],
+    "correctIndex": 0,
+    "explanation": "With identical (zero) weights, neurons in a layer receive identical gradients and stay identical forever; random init breaks this symmetry."
+  },
+  {
+    "id": "mlp-19",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": true,
+    "question": "Let $z = 2x$ and $L = z^{2}$. Using the chain rule, what is $\\dfrac{dL}{dx}$ at $x=3$?",
+    "options": [
+      "$24$",
+      "$12$",
+      "$36$",
+      "$6$"
+    ],
+    "correctIndex": 0,
+    "explanation": "$\\dfrac{dL}{dx} = \\dfrac{dL}{dz}\\dfrac{dz}{dx} = (2z)(2) = 4z = 4(2\\cdot3) = 24$."
+  },
+  {
+    "id": "mlp-20",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "question": "A 'dead ReLU' is a unit that:",
+    "options": [
+      "always outputs 0, so its gradient is 0 and it stops learning",
+      "outputs extremely large values and overflows during training",
+      "oscillates forever between two different fixed output values",
+      "silently ignores the contribution of its own bias term"
+    ],
+    "correctIndex": 0,
+    "explanation": "If a ReLU's pre-activation is negative for all inputs it outputs 0 with zero gradient, so its weights never update — often caused by too high a learning rate."
+  },
+  {
+    "id": "mlp-21",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": true,
+    "question": "For softmax + cross-entropy, the logit gradient is $p - y$. If the true-class probability is $p=0.7$, what is the gradient for that true class?",
+    "options": [
+      "$-0.3$",
+      "$0.7$",
+      "$0.3$",
+      "$-0.7$"
+    ],
+    "correctIndex": 0,
+    "explanation": "True-class target is 1, so $p - y = 0.7 - 1 = -0.3$."
+  },
+  {
+    "id": "mlp-22",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "question": "Stacking many sigmoid layers tends to cause vanishing gradients because backprop multiplies:",
+    "options": [
+      "many derivatives each at most 0.25, shrinking the product to 0",
+      "the layer inputs by the learning rate over and over again",
+      "the loss value by the total number of layers in the network",
+      "gradients that are reliably larger than 1 at every layer"
+    ],
+    "correctIndex": 0,
+    "explanation": "Each sigmoid derivative is $\\le 0.25$; multiplying many such factors during backprop drives early-layer gradients toward zero."
+  },
+  {
+    "id": "mlp-24",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "question": "Compared with full-batch gradient descent, mini-batch SGD typically:",
+    "options": [
+      "makes noisier but far more frequent updates",
+      "computes the exact gradient every step",
+      "requires the entire dataset in memory at once",
+      "cannot use momentum"
+    ],
+    "correctIndex": 0,
+    "explanation": "Each mini-batch is a noisy estimate of the true gradient, but updating per batch gives many more steps per epoch and often escapes poor minima."
+  },
+  {
+    "id": "trn-16",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "question": "Momentum in an optimizer helps by:",
+    "options": [
+      "accumulating past gradients to smooth and speed up descent",
+      "automatically increasing the batch size as training proceeds",
+      "resetting all of the weights at the start of each epoch",
+      "removing the need to choose a learning rate at all"
+    ],
+    "correctIndex": 0,
+    "explanation": "A velocity term carries over previous gradients, damping oscillations across ravines and speeding progress along consistent directions."
+  },
+  {
+    "id": "trn-17",
+    "type": "mc",
+    "category": "Training",
+    "calculation": true,
+    "question": "A learning rate starts at $0.1$ and is halved every epoch. What is it at the start of epoch 4 (after 3 halvings)?",
+    "options": [
+      "$0.0125$",
+      "$0.05$",
+      "$0.025$",
+      "$0.1$"
+    ],
+    "correctIndex": 0,
+    "explanation": "$0.1 \\times 0.5^{3} = 0.1 \\times 0.125 = 0.0125$."
+  },
+  {
+    "id": "trn-18",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "question": "Data augmentation (random flips, crops, etc.) mainly helps by:",
+    "options": [
+      "expanding the effective training variety to curb overfitting",
+      "shrinking the number of parameters the model has to learn",
+      "removing the need to hold out any validation data at all",
+      "making each individual training step run a little faster"
+    ],
+    "correctIndex": 0,
+    "explanation": "Augmentation produces varied versions of each example, encouraging invariances and improving generalization."
+  },
+  {
+    "id": "trn-19",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "question": "On a heavily class-imbalanced dataset, plain accuracy is a poor metric because:",
+    "options": [
+      "a model predicting only the majority class can score high accuracy",
+      "accuracy simply cannot be computed at all unless you first apply a softmax",
+      "it is mathematically guaranteed to always equal the F1 score exactly",
+      "it can only be measured on a perfectly balanced held-out test set"
+    ],
+    "correctIndex": 0,
+    "explanation": "If 95% of samples are one class, always predicting that class gives 95% accuracy while being useless; precision/recall/F1 reveal the failure."
+  },
+  {
+    "id": "trn-20",
+    "type": "mc",
+    "category": "Training",
+    "calculation": true,
+    "question": "You split 10,000 samples 70/15/15 into train/validation/test. How many validation samples?",
+    "options": [
+      "$1500$",
+      "$7000$",
+      "$1000$",
+      "$3000$"
+    ],
+    "correctIndex": 0,
+    "explanation": "$10000 \\times 0.15 = 1500$."
+  },
+  {
+    "id": "cnn-19",
+    "type": "mc",
+    "category": "CNN",
+    "calculation": false,
+    "question": "Global average pooling before the output layer is often used to:",
+    "options": [
+      "drastically cut parameters versus a flatten plus large dense head",
+      "increase the spatial resolution of the feature maps it receives",
+      "add a fresh set of learnable convolution filters to the network",
+      "apply dropout to the raw inputs before the first conv layer"
+    ],
+    "correctIndex": 0,
+    "explanation": "Averaging each feature map to a single value removes the huge flattened-dense weight matrix, reducing parameters and overfitting."
+  },
+  {
+    "id": "cnn-21",
+    "type": "mc",
+    "category": "CNN",
+    "calculation": false,
+    "question": "A dilated (atrous) convolution lets you:",
+    "options": [
+      "enlarge the receptive field without adding parameters",
+      "double the number of output channels at no extra cost",
+      "guarantee full translation invariance across the image",
+      "remove the need for any activation function afterwards"
+    ],
+    "correctIndex": 0,
+    "explanation": "Spacing the kernel taps covers a wider input region with the same number of weights, growing the receptive field cheaply."
+  },
+  {
+    "id": "cnn-23",
+    "type": "mc",
+    "category": "CNN",
+    "calculation": false,
+    "question": "Both max-pooling and a stride-2 convolution can downsample a feature map. A key difference is that:",
+    "options": [
+      "pooling has no learnable parameters, the strided conv does",
+      "pooling increases the channel count, the conv does not",
+      "only pooling can change spatial size",
+      "the strided conv cannot reduce resolution"
+    ],
+    "correctIndex": 0,
+    "explanation": "Pooling applies a fixed aggregation (no weights); a strided convolution learns its downsampling filters."
+  },
+  {
+    "id": "rnn-17",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": true,
+    "question": "In a scalar RNN with recurrent weight $W_h=0.5$, the gradient $\\partial h_5/\\partial h_1$ scales roughly as $W_h^{4}$ (ignoring the $\\tanh'$ terms). That factor is about:",
+    "options": [
+      "$0.0625$",
+      "$0.5$",
+      "$0.25$",
+      "$0.03125$"
+    ],
+    "correctIndex": 0,
+    "explanation": "Four recurrence steps separate $h_1$ and $h_5$: $0.5^{4} = 0.0625$ — a concrete view of vanishing gradients."
+  },
+  {
+    "id": "rnn-18",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "question": "Gradients flow well through an LSTM's cell state because, across timesteps, they are scaled mainly by:",
+    "options": [
+      "the forget gates, which can stay near 1",
+      "a single fixed scaling factor of exactly 0.25 at each timestep",
+      "the softmax computed over the layer's raw inputs",
+      "the total number of hidden units in the recurrent layer"
+    ],
+    "correctIndex": 0,
+    "explanation": "The additive cell-state path multiplies the gradient by the forget gate each step; gates near 1 let gradients pass without vanishing."
+  },
+  {
+    "id": "rnn-20",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "question": "Teacher forcing during sequence-to-sequence training means:",
+    "options": [
+      "feeding the ground-truth previous token instead of the model's own output",
+      "freezing all of the encoder weights for the first several training epochs",
+      "training the model only on the very longest sequences in the dataset",
+      "doubling the optimizer learning rate as training nears its final epochs"
+    ],
+    "correctIndex": 0,
+    "explanation": "Using the true previous token stabilizes and speeds training, though it creates a train/inference mismatch (exposure bias)."
+  },
+  {
+    "id": "rnn-21",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": true,
+    "question": "A bidirectional LSTM uses 64 hidden units in each direction and concatenates them. What is the output feature dimension per timestep?",
+    "options": [
+      "$128$",
+      "$64$",
+      "$256$",
+      "$32$"
+    ],
+    "correctIndex": 0,
+    "explanation": "Forward and backward states are concatenated: $64 + 64 = 128$."
+  },
+  {
+    "id": "rnn-22",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "question": "RNNs cannot parallelize computation across timesteps during a forward pass because:",
+    "options": [
+      "each hidden state $h_t$ depends on the previous state $h_{t-1}$",
+      "they contain far too many parameters to fit in GPU memory",
+      "their inputs must always be one-hot encoded before training",
+      "the softmax operation can only be executed on a single core"
+    ],
+    "correctIndex": 0,
+    "explanation": "The recurrence is inherently sequential — $h_t$ needs $h_{t-1}$ — unlike attention which sees all positions at once."
+  },
+  {
+    "id": "rnn-23",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": true,
+    "question": "An RNN with return_sequences=True and 4 hidden units processes a length-6 sequence. How many hidden-state values does it output in total?",
+    "options": [
+      "$24$",
+      "$4$",
+      "$6$",
+      "$10$"
+    ],
+    "correctIndex": 0,
+    "explanation": "It returns a $6\\times4$ array: $6 \\times 4 = 24$ values."
+  },
+  {
+    "id": "rnn-24",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "question": "Gradient clipping is applied in RNN training primarily to combat:",
+    "options": [
+      "exploding gradients",
+      "vanishing gradients",
+      "overfitting",
+      "slow data loading"
+    ],
+    "correctIndex": 0,
+    "explanation": "Clipping caps the gradient norm, preventing the destabilizing huge updates that exploding gradients would cause."
+  },
+  {
+    "id": "att-15",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": true,
+    "question": "For a sequence of 10 tokens, how many entries are in the (unmasked) self-attention score matrix?",
+    "options": [
+      "$100$",
+      "$10$",
+      "$20$",
+      "$1000$"
+    ],
+    "correctIndex": 0,
+    "explanation": "Every token attends to every token: $10 \\times 10 = 100$ scores."
+  },
+  {
+    "id": "att-16",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "question": "The main motivation for multiple attention heads (instead of one big head) is to:",
+    "options": [
+      "attend to different relations in different representation subspaces",
+      "reduce the block's total parameter count all the way down to zero",
+      "force the model to process its tokens strictly one at a time",
+      "remove the need to add any positional information at all"
+    ],
+    "correctIndex": 0,
+    "explanation": "Each head learns to focus on a different kind of relation; their concatenation captures richer structure than a single head."
+  },
+  {
+    "id": "att-17",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": true,
+    "question": "A single-head query projection $W_Q$ maps $d_{model}=512$ to $d_k=64$. How many weights (ignoring bias) does $W_Q$ have?",
+    "options": [
+      "$32768$",
+      "$4096$",
+      "$576$",
+      "$512$"
+    ],
+    "correctIndex": 0,
+    "explanation": "$W_Q$ is $512\\times64 = 32{,}768$ weights."
+  },
+  {
+    "id": "att-18",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "question": "In encoder-decoder cross-attention, the queries, keys and values come from:",
+    "options": [
+      "queries from the decoder; keys and values from the encoder",
+      "all three from the encoder",
+      "all three from the decoder",
+      "queries from the encoder; keys and values from the decoder"
+    ],
+    "correctIndex": 0,
+    "explanation": "The decoder's current state queries the encoder's representations (its keys/values) to pull in relevant source information."
+  },
+  {
+    "id": "att-19",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": true,
+    "question": "In a causal decoder, the very first token can attend only to itself. After softmax over that single allowed position, its attention weight is:",
+    "options": [
+      "$1.0$",
+      "$0.5$",
+      "$0.0$",
+      "$0.25$"
+    ],
+    "correctIndex": 0,
+    "explanation": "Softmax over a single unmasked entry assigns it the full weight $1.0$."
+  },
+  {
+    "id": "att-20",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "question": "Sinusoidal positional encodings are added to token embeddings so that the model can:",
+    "options": [
+      "represent token order, which attention by itself ignores",
+      "shrink the size of the token embedding vectors that are used",
+      "let the block avoid using a softmax over the attention scores",
+      "allow the resulting attention weights to take negative values"
+    ],
+    "correctIndex": 0,
+    "explanation": "Self-attention is permutation-equivariant; positional encodings inject ordering information the mechanism otherwise lacks."
+  },
+  {
+    "id": "att-21",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": true,
+    "question": "Self-attention compute scales as $O(n^{2})$ in sequence length $n$. If you double the sequence length, the attention compute grows by roughly a factor of:",
+    "options": [
+      "$4$",
+      "$2$",
+      "$8$",
+      "$1$"
+    ],
+    "correctIndex": 0,
+    "explanation": "Quadratic scaling: $(2n)^2 = 4n^2$, so doubling $n$ quadruples the cost."
+  },
+  {
+    "id": "prm-11",
+    "type": "mc",
+    "category": "Prompting",
+    "calculation": false,
+    "question": "The 'system' message in a chat prompt is typically used to:",
+    "options": [
+      "set the model's role, rules, and overall behavior",
+      "store the trained weights of the underlying model itself",
+      "hold only the user's very last question and nothing else",
+      "switch off the tokenizer for the rest of the conversation"
+    ],
+    "correctIndex": 0,
+    "explanation": "The system message establishes persona, constraints and task framing that condition all following turns.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "prm-12",
+    "type": "mc",
+    "category": "Prompting",
+    "calculation": false,
+    "question": "A model 'hallucination' refers to output that is:",
+    "options": [
+      "fluent and confident yet factually wrong or fabricated",
+      "always clearly broken in both its spelling and grammar",
+      "an exact word-for-word copy of the original prompt",
+      "completely empty or cut off before it is finished"
+    ],
+    "correctIndex": 0,
+    "explanation": "Hallucinations are plausible-sounding statements not grounded in fact or the provided context.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "prm-13",
+    "type": "mc",
+    "category": "Prompting",
+    "calculation": false,
+    "question": "Retrieval-augmented generation (RAG) improves factual answers by:",
+    "options": [
+      "retrieving relevant documents and conditioning the model on them",
+      "raising the sampling temperature to encourage more variety",
+      "fine-tuning the model from scratch on every incoming query",
+      "deleting the system prompt so the model can answer freely"
+    ],
+    "correctIndex": 0,
+    "explanation": "RAG fetches external context at inference time and feeds it into the prompt, grounding the response in real sources."
+  },
+  {
+    "id": "prm-14",
+    "type": "mc",
+    "category": "Prompting",
+    "calculation": false,
+    "question": "Self-consistency decoding improves chain-of-thought accuracy by:",
+    "options": [
+      "sampling several reasoning paths and taking the majority vote",
+      "always decoding with the sampling temperature fixed at zero",
+      "cutting the chain of reasoning down to a single short step",
+      "stripping all of the few-shot examples out of the prompt"
+    ],
+    "correctIndex": 0,
+    "explanation": "Multiple independent reasoning chains are sampled and their final answers are voted on, which is more robust than a single greedy chain."
+  },
+  {
+    "id": "nlp-01",
+    "type": "mc",
+    "category": "NLP",
+    "calculation": false,
+    "question": "A bag-of-words representation of a sentence mainly discards:",
+    "options": [
+      "the order in which the words appear",
+      "the identity of which words are present in the text",
+      "the total number of words contained in the sentence",
+      "the frequency with which each distinct word occurs"
+    ],
+    "correctIndex": 0,
+    "explanation": "Bag-of-words keeps word counts but throws away sequence, so it cannot tell apart sentences that use the same words in a different order."
+  },
+  {
+    "id": "nlp-02",
+    "type": "tf",
+    "category": "NLP",
+    "calculation": false,
+    "question": "Under bag-of-words, 'dog bites man' and 'man bites dog' get the same vector.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "Both sentences contain the same words with the same counts, and bag-of-words ignores order, so their vectors are identical."
+  },
+  {
+    "id": "nlp-03",
+    "type": "mc",
+    "category": "NLP",
+    "calculation": false,
+    "question": "A high TF-IDF weight for a term means it is:",
+    "options": [
+      "frequent in this document but rare across the whole corpus",
+      "frequent in this document and also extremely common across the corpus",
+      "rare in this document yet very common across the whole corpus",
+      "absent from this document but present in every other document"
+    ],
+    "correctIndex": 0,
+    "explanation": "TF rewards terms common in the document; IDF rewards terms rare across the corpus. The product is high for distinctive, document-specific words."
+  },
+  {
+    "id": "nlp-04",
+    "type": "mc",
+    "category": "NLP",
+    "calculation": false,
+    "question": "In TF-IDF, the inverse-document-frequency factor gives higher weight to:",
+    "options": [
+      "terms that occur in few documents",
+      "terms that occur in almost every single document in the corpus",
+      "the most frequent stop-words such as 'the' and 'a' in the text",
+      "terms that appear many times within one particular document"
+    ],
+    "correctIndex": 0,
+    "explanation": "IDF $=\\log(N/\\text{df})$ is large when the document frequency is small, so rare terms are up-weighted and ubiquitous words are down-weighted."
+  },
+  {
+    "id": "nlp-05",
+    "type": "mc",
+    "category": "NLP",
+    "calculation": false,
+    "question": "How do CBOW and Skip-gram differ in Word2Vec?",
+    "options": [
+      "CBOW predicts a word from its context; Skip-gram predicts context from a word",
+      "CBOW predicts the context from a single word; Skip-gram predicts a word from its context",
+      "both of them predict the next whole sentence rather than words",
+      "CBOW relies on attention while Skip-gram relies on recurrence"
+    ],
+    "correctIndex": 0,
+    "explanation": "CBOW uses surrounding context words to predict the centre word; Skip-gram does the reverse, predicting the context words from the centre word."
+  },
+  {
+    "id": "nlp-06",
+    "type": "mc",
+    "category": "NLP",
+    "calculation": false,
+    "question": "Compared with one-hot vectors, learned word embeddings:",
+    "options": [
+      "place semantically similar words near each other",
+      "are far higher-dimensional and almost entirely sparse vectors",
+      "assign every word a vector orthogonal to all the others",
+      "store each word merely as a single integer index value"
+    ],
+    "correctIndex": 0,
+    "explanation": "Embeddings are dense, low-dimensional vectors trained so that related words sit close together; one-hot vectors are sparse and mutually orthogonal."
+  },
+  {
+    "id": "nlp-07",
+    "type": "mc",
+    "category": "NLP",
+    "calculation": false,
+    "question": "That $\\text{vec(king)} - \\text{vec(man)} + \\text{vec(woman)} \\approx \\text{vec(queen)}$ shows embeddings:",
+    "options": [
+      "capture analogical and semantic relationships",
+      "are trained with a categorical cross-entropy classification loss",
+      "must always have exactly three hundred dimensions to work at all",
+      "store the words in alphabetical order within the vector space"
+    ],
+    "correctIndex": 0,
+    "explanation": "Vector arithmetic in embedding space mirrors meaning: the offset for gender is roughly constant, so the analogy holds approximately."
+  },
+  {
+    "id": "nlp-08",
+    "type": "tf",
+    "category": "NLP",
+    "calculation": false,
+    "question": "TF-IDF takes the order of words in a document into account.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 1,
+    "explanation": "TF-IDF is a bag-of-words weighting; it scores each term independently and ignores word order entirely."
+  },
+  {
+    "id": "nlp-09",
+    "type": "mc",
+    "category": "NLP",
+    "calculation": false,
+    "question": "A typical text-vectorization pipeline applies these steps in which order?",
+    "options": [
+      "standardize, tokenize, build a vocabulary, then embed",
+      "embed first, then tokenize, then standardize, then build a vocabulary",
+      "build a vocabulary, then embed, then standardize, then tokenize",
+      "tokenize, then embed, then standardize, then build a vocabulary"
+    ],
+    "correctIndex": 0,
+    "explanation": "You clean the text, split it into tokens, map tokens to integer ids (vocabulary), then look up dense embedding vectors."
+  },
+  {
+    "id": "nlp-10",
+    "type": "mc",
+    "category": "NLP",
+    "calculation": false,
+    "question": "A key weakness of large-$n$ n-gram language models is:",
+    "options": [
+      "data sparsity: most long n-grams are never observed",
+      "they require a dedicated graphics processing unit just to run at all",
+      "they cannot represent any word that is shorter than n letters long",
+      "they completely ignore how often each n-gram actually appears"
+    ],
+    "correctIndex": 0,
+    "explanation": "The number of possible n-grams explodes with n, so most are unseen in any finite corpus, leaving the model with no estimate for them."
+  },
+  {
+    "id": "nlp-11",
+    "type": "mc",
+    "category": "NLP",
+    "calculation": false,
+    "question": "A language model is fundamentally trained to estimate:",
+    "options": [
+      "the probability of the next token given the previous tokens",
+      "the average length of all of the sentences in the training corpus",
+      "which two documents within a corpus are the most similar overall",
+      "the number of unique tokens contained in the whole vocabulary"
+    ],
+    "correctIndex": 0,
+    "explanation": "Language modelling is next-token prediction: it learns $P(\\text{token}_t \\mid \\text{token}_{<t})$ over the vocabulary."
+  },
+  {
+    "id": "nlp-12",
+    "type": "mc",
+    "category": "NLP",
+    "calculation": false,
+    "question": "Why are dense embeddings preferred over one-hot encodings for a large vocabulary?",
+    "options": [
+      "they are compact and encode similarity between words",
+      "one-hot vectors would otherwise be far too small to be of any use",
+      "one-hot encodings already capture meaning, so they are redundant",
+      "embeddings remove the need to tokenize the input text at all"
+    ],
+    "correctIndex": 0,
+    "explanation": "One-hot vectors are huge, sparse and carry no notion of similarity; embeddings are low-dimensional and place related words close together."
+  },
+  {
+    "id": "arc-01",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "question": "AlexNet's 2012 ImageNet win is usually credited to:",
+    "options": [
+      "using ReLU, dropout and GPU training at scale",
+      "replacing every convolution layer with a recurrent layer instead",
+      "being the very first model to use the sigmoid activation function",
+      "training entirely on a single CPU with almost no data at all"
+    ],
+    "correctIndex": 0,
+    "explanation": "AlexNet combined ReLU activations, dropout regularization and GPU training on the large ImageNet set, beating prior methods by a wide margin."
+  },
+  {
+    "id": "arc-02",
+    "type": "tf",
+    "category": "Architectures",
+    "calculation": false,
+    "question": "ResNet's skip connections make it feasible to train very deep networks.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "Skip connections give gradients a direct path backward, so depth no longer destroys the gradient signal, enabling 50-152 layer networks."
+  },
+  {
+    "id": "arc-03",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "question": "A residual block computes its output as:",
+    "options": [
+      "$H(x) = F(x) + x$, adding the input back onto the transform",
+      "$H(x) = F(x)\\cdot x$, multiplying the input into the transform",
+      "$H(x) = F(x)$, with the original input discarded afterwards",
+      "$H(x) = x$, ignoring the learned transformation entirely"
+    ],
+    "correctIndex": 0,
+    "explanation": "The block adds the unchanged input $x$ to the learned residual $F(x)$, so the layer only has to learn the difference from the identity."
+  },
+  {
+    "id": "arc-04",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "question": "VGG's main design idea is to:",
+    "options": [
+      "stack many small 3x3 convolutions to build depth",
+      "use a single very large convolution kernel in each layer instead",
+      "replace all of the pooling layers with recurrent connections",
+      "avoid using any fully-connected layers near the network's output"
+    ],
+    "correctIndex": 0,
+    "explanation": "VGG showed that stacking small 3x3 filters in deep, uniform blocks works better than a few large kernels, with more non-linearity."
+  },
+  {
+    "id": "arc-05",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "question": "LeNet, one of the first successful CNNs, was built for:",
+    "options": [
+      "recognizing handwritten digits",
+      "translating text between two different human languages",
+      "generating photorealistic images from a text description",
+      "ranking web pages by their relevance to a search query"
+    ],
+    "correctIndex": 0,
+    "explanation": "LeNet (1998) read handwritten digits, famously processing a large share of US bank cheques."
+  },
+  {
+    "id": "arc-06",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "question": "Skip connections combat vanishing gradients by:",
+    "options": [
+      "giving gradients a direct shortcut path backward",
+      "multiplying the gradient by the depth of the network at each step",
+      "removing every activation function from the deepest layers",
+      "forcing each individual layer to learn the identity mapping only"
+    ],
+    "correctIndex": 0,
+    "explanation": "The additive shortcut lets the gradient flow straight through, bypassing the chain of small multiplicative factors that cause vanishing."
+  },
+  {
+    "id": "arc-07",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "question": "Two stacked 3x3 conv layers, compared with one 5x5 layer, give:",
+    "options": [
+      "the same receptive field with fewer params and more non-linearity",
+      "a strictly smaller receptive field but a great many more parameters",
+      "a much larger receptive field together with far fewer non-linearities",
+      "an identical parameter count and an identical amount of non-linearity"
+    ],
+    "correctIndex": 0,
+    "explanation": "Two 3x3 layers cover a 5x5 region with $2\\cdot9=18$ weights vs $25$, and add an extra activation, so they are cheaper and more expressive."
+  },
+  {
+    "id": "arc-08",
+    "type": "tf",
+    "category": "Architectures",
+    "calculation": false,
+    "question": "In a CNN, deeper layers generally have a larger receptive field than early layers.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "Each successive conv/pool layer widens the input region a neuron depends on, so deep neurons see large, semantic regions of the image."
+  },
+  {
+    "id": "arc-09",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "question": "The receptive field of a neuron is:",
+    "options": [
+      "the region of the input that influences its value",
+      "the number of separate filters present in that one layer",
+      "the learning rate that is applied to that particular neuron",
+      "the count of output classes the whole network predicts"
+    ],
+    "correctIndex": 0,
+    "explanation": "It is the patch of the original input that can affect that neuron's activation; it grows with depth, stride and kernel size."
+  },
+  {
+    "id": "arc-10",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "question": "In a trained CNN, the hierarchy of learned features typically goes:",
+    "options": [
+      "edges first, then textures and parts, then whole objects",
+      "whole objects first, then parts, and only then simple edges",
+      "pure random noise first, then edges, then nothing meaningful",
+      "colours only, never combining into any larger structures at all"
+    ],
+    "correctIndex": 0,
+    "explanation": "Early layers fire on low-level edges, middle layers on textures and motifs, and deep layers on object parts and whole objects."
+  },
+  {
+    "id": "arc-11",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "question": "ImageNet mattered for deep learning mainly because it was:",
+    "options": [
+      "a large labeled benchmark that drove rapid CNN progress",
+      "the very first dataset ever to contain any colour images at all",
+      "a tiny dataset that any small model could simply memorize fully",
+      "a benchmark made up entirely of handwritten digit images"
+    ],
+    "correctIndex": 0,
+    "explanation": "Its scale (millions of labelled images, 1000 classes) created a competitive benchmark that propelled architecture improvements."
+  },
+  {
+    "id": "arc-12",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "question": "Parameter sharing in a convolutional layer means:",
+    "options": [
+      "the same kernel weights are reused at every position",
+      "each spatial position gets its own separate set of weights",
+      "all of the channels are forced to share one single bias term",
+      "the weights are shared with the fully-connected output head"
+    ],
+    "correctIndex": 0,
+    "explanation": "A filter's weights are applied identically across the whole input, which is what makes convolution parameter-efficient and translation-equivariant."
+  },
+  {
+    "id": "fnd-18",
+    "type": "tf",
+    "category": "Foundations",
+    "calculation": false,
+    "question": "A batch of video clips is naturally stored as a rank-5 tensor (samples, frames, height, width, channels).",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "Adding a time/frame axis to the rank-4 image batch gives five axes, hence rank 5."
+  },
+  {
+    "id": "fnd-19",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": false,
+    "question": "A batch-normalization layer over $C$ channels adds how many learnable parameters?",
+    "options": [
+      "$2C$ — a scale and a shift per channel",
+      "exactly $C$, just one scale value for each channel",
+      "zero, because batch normalization has nothing to learn",
+      "$4C$, two scales and two shifts for every channel present"
+    ],
+    "correctIndex": 0,
+    "explanation": "BatchNorm learns a per-channel scale ($\\gamma$) and shift ($\\beta$), i.e. $2C$ parameters (the running mean/variance are not learned)."
+  },
+  {
+    "id": "fnd-20",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": false,
+    "question": "Which of these layers has NO trainable parameters?",
+    "options": [
+      "a Flatten layer",
+      "a Dense layer mapping 64 inputs to 10 outputs",
+      "a Conv2D layer using 16 filters of size 3x3",
+      "a BatchNorm layer applied across the channels"
+    ],
+    "correctIndex": 0,
+    "explanation": "Flatten (like Dropout and pure activations) only reshapes data; Dense, Conv2D and BatchNorm all hold learnable weights."
+  },
+  {
+    "id": "mlp-25",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "question": "Adam adapts each parameter's effective step size using:",
+    "options": [
+      "a running estimate of recent squared gradients",
+      "the exact second derivative of the loss at every step",
+      "one fixed global learning rate, identical for all weights",
+      "the total number of layers between it and the output"
+    ],
+    "correctIndex": 0,
+    "explanation": "Adam divides by a running average of squared gradients (second moment), giving frequently-updated parameters smaller steps."
+  },
+  {
+    "id": "mlp-26",
+    "type": "tf",
+    "category": "MLP",
+    "calculation": false,
+    "question": "For a classification task, cross-entropy loss is generally preferred over mean squared error.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "Cross-entropy pairs naturally with softmax, gives stronger gradients for confident mistakes, and trains classifiers faster than MSE."
+  },
+  {
+    "id": "per-15",
+    "type": "mc",
+    "category": "Perceptron",
+    "calculation": false,
+    "question": "With a hard step activation, a single perceptron's output is:",
+    "options": [
+      "a single binary class label",
+      "a probability distribution over all of the possible classes",
+      "a real-valued score that may be any number on the line",
+      "the gradient of the loss with respect to its own weights"
+    ],
+    "correctIndex": 0,
+    "explanation": "The step function thresholds the weighted sum to one of two values, so the output is a single discrete class, not a probability or score."
+  },
+  {
+    "id": "trn-21",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "question": "Which ordering reflects the historical development of these optimizers?",
+    "options": [
+      "SGD, then AdaGrad, then RMSProp, then Adam",
+      "Adam, then RMSProp, then AdaGrad, and finally plain SGD",
+      "RMSProp, then SGD, then Adam, and lastly AdaGrad",
+      "AdaGrad, then Adam, then SGD, and finally RMSProp"
+    ],
+    "correctIndex": 0,
+    "explanation": "Adaptive methods built on each other: AdaGrad introduced per-parameter rates, RMSProp fixed its decay, and Adam added momentum."
+  },
+  {
+    "id": "trn-22",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "question": "Compared with L2, L1 regularization tends to:",
+    "options": [
+      "drive many weights to exactly zero, giving sparsity",
+      "shrink every single weight by the same small constant amount",
+      "increase the magnitude of the largest weights over training",
+      "leave all weights unchanged but slow the training down"
+    ],
+    "correctIndex": 0,
+    "explanation": "The absolute-value penalty has a constant gradient that pushes small weights all the way to zero, producing sparse, feature-selecting solutions."
+  },
+  {
+    "id": "trn-23",
+    "type": "tf",
+    "category": "Training",
+    "calculation": false,
+    "question": "A larger dropout rate p zeros out a bigger fraction of activations during training.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "The dropout rate p is exactly the probability that each activation is set to zero, so larger p drops more units."
+  },
+  {
+    "id": "trn-24",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "question": "Batch normalization also has a mild regularizing effect because:",
+    "options": [
+      "mini-batch statistics inject a little noise at each step",
+      "it permanently removes a fraction of the network's weights",
+      "it forces the model to train for many additional epochs",
+      "it swaps the loss function for a regularized version of it"
+    ],
+    "correctIndex": 0,
+    "explanation": "Each example is normalized using its mini-batch's mean and variance, which vary batch to batch, adding noise that lightly regularizes."
+  },
+  {
+    "id": "cnn-25",
+    "type": "mc",
+    "category": "CNN",
+    "calculation": false,
+    "question": "Max pooling differs from average pooling in that it:",
+    "options": [
+      "keeps the strongest activation in each window",
+      "computes the arithmetic mean over each pooling window",
+      "adds a set of learnable weights for each pooling region",
+      "increases the spatial resolution of the feature map"
+    ],
+    "correctIndex": 0,
+    "explanation": "Max pooling outputs the largest value in each window (detecting feature presence); average pooling outputs the mean (smoothing)."
+  },
+  {
+    "id": "cnn-26",
+    "type": "tf",
+    "category": "CNN",
+    "calculation": false,
+    "question": "A 1x1 convolution can change the number of channels in a feature map.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "A 1x1 conv linearly combines channels at each pixel; the number of filters sets the output channel count, so it can expand or shrink depth."
+  },
+  {
+    "id": "rnn-25",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "question": "Machine translation with an encoder-decoder is which mapping?",
+    "options": [
+      "many-to-many with differing input and output lengths",
+      "many-to-one, since the entire sentence maps to a single label",
+      "one-to-one, mapping each input token to one output token",
+      "one-to-many, expanding a single token into a sequence"
+    ],
+    "correctIndex": 0,
+    "explanation": "The source and target sentences usually have different lengths, so it is a many-to-many seq2seq task handled by an encoder then a decoder."
+  },
+  {
+    "id": "rnn-26",
+    "type": "tf",
+    "category": "RNN",
+    "calculation": false,
+    "question": "In an LSTM, the cell state serves as long-term memory while the hidden state is shorter-term.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "The gated cell state carries information across many steps with little decay; the hidden state is the gated, exposed working memory."
+  },
+  {
+    "id": "att-22",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "question": "In the search-engine analogy for attention, the Query represents:",
+    "options": [
+      "what the current token is looking for",
+      "the information content that each token actually carries along",
+      "the index used to match against every other token in the set",
+      "the fixed positional encoding added onto the token embedding"
+    ],
+    "correctIndex": 0,
+    "explanation": "The Query is what a token searches for; Keys are what other tokens advertise to match against; Values are the content that gets retrieved."
+  },
+  {
+    "id": "att-23",
+    "type": "tf",
+    "category": "Attention",
+    "calculation": false,
+    "question": "Without positional encodings, self-attention treats its input as an unordered set.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 0,
+    "explanation": "Self-attention is permutation-equivariant, so it has no inherent sense of order until positional information is added to the embeddings."
+  },
+  {
+    "id": "fnd-h1",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Which statement about $\\text{softmax}(z/T)$ with temperature $T>0$ is FALSE?",
+    "options": [
+      "no finite $T$ can ever make the output a uniform distribution",
+      "as $T\\to\\infty$ the output distribution approaches uniform",
+      "as $T\\to 0^+$ it approaches a one-hot at the largest logit",
+      "for any $T>0$ none of the output probabilities is exactly zero"
+    ],
+    "correctIndex": 0,
+    "explanation": "If all logits are equal, the output is uniform for ANY temperature, so the first claim is false. The other three are true."
+  },
+  {
+    "id": "fnd-h2",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "At inference time, batch normalization normalizes activations using:",
+    "options": [
+      "running averages of mean and variance collected during training",
+      "the mean and variance of the current single test example alone",
+      "freshly computed statistics over the current test mini-batch",
+      "no statistics at all, because it is switched off at test time"
+    ],
+    "correctIndex": 0,
+    "explanation": "Test batches may be size 1, so BatchNorm uses the exponential running estimates of mean/variance accumulated during training."
+  },
+  {
+    "id": "fnd-h3",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Transformers use LayerNorm rather than BatchNorm mainly because LayerNorm:",
+    "options": [
+      "normalizes each token across its features, independent of batch size",
+      "normalizes each feature across the batch, exactly as in CNNs",
+      "removes the need for any learnable scale or shift parameters",
+      "can only ever be applied at the very input of the network"
+    ],
+    "correctIndex": 0,
+    "explanation": "LayerNorm is per-sample (across features), so it behaves identically at train and test and works with variable/short sequences."
+  },
+  {
+    "id": "fnd-h4",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": true,
+    "difficulty": "hard",
+    "question": "With inverted dropout at rate $p=0.2$, the surviving activations during training are scaled by:",
+    "options": [
+      "$1/(1-p)=1.25$, so no rescaling is needed at inference",
+      "$1-p=0.8$, shrinking activations before the next layer",
+      "$p=0.2$, matching the fraction of units that were dropped",
+      "exactly $1$, with the rescaling instead applied at inference"
+    ],
+    "correctIndex": 0,
+    "explanation": "Inverted dropout divides survivors by $(1-p)$ during training, keeping the expected value unchanged so inference needs no rescaling."
+  },
+  {
+    "id": "per-h1",
+    "type": "mc",
+    "category": "Perceptron",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "A 2→2→2 network is initialized with all weights and biases equal. After one backprop step, the two hidden units:",
+    "options": [
+      "remain identical, because they receive identical gradients",
+      "diverge immediately, since dropout breaks their symmetry",
+      "both collapse to zero and stop producing any output",
+      "swap their roles but otherwise keep learning normally"
+    ],
+    "correctIndex": 0,
+    "explanation": "Identical weights give identical gradients, so the units stay identical forever — the symmetry must be broken by random initialization."
+  },
+  {
+    "id": "per-h2",
+    "type": "mc",
+    "category": "Perceptron",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Trained on data that is NOT linearly separable, the classic perceptron algorithm will:",
+    "options": [
+      "never converge, since the weights keep being corrected",
+      "always converge to the global minimum of the loss",
+      "converge only if the learning rate is set above 1",
+      "converge once the inputs are standardized to unit norm"
+    ],
+    "correctIndex": 0,
+    "explanation": "The perceptron convergence theorem only guarantees termination for separable data; otherwise updates never stop."
+  },
+  {
+    "id": "per-h3",
+    "type": "mc",
+    "category": "Perceptron",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Three stacked fully-connected layers with NO activations between them are equivalent to:",
+    "options": [
+      "a single linear layer with one combined weight matrix",
+      "a two-layer network containing one hidden non-linearity",
+      "a model strictly more expressive than any single layer",
+      "a convolutional layer that shares weights across positions"
+    ],
+    "correctIndex": 0,
+    "explanation": "Composing linear maps yields another linear map: $W_3 W_2 W_1 x$ is just one effective matrix, so depth adds nothing without non-linearity."
+  },
+  {
+    "id": "mlp-h1",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Which statement about Adam versus SGD+momentum is correct?",
+    "options": [
+      "Adam often converges faster but can generalize worse than SGD+momentum",
+      "Adam always generalizes better, making SGD+momentum obsolete now",
+      "Adam uses one global learning rate identical for every weight",
+      "Adam ignores all past gradients and uses only the current one"
+    ],
+    "correctIndex": 0,
+    "explanation": "A common practical rule: start with Adam for fast convergence, then switch to SGD+momentum for final tuning when generalization matters."
+  },
+  {
+    "id": "mlp-h2",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Why is plain AdaGrad poorly suited to long training runs on deep networks?",
+    "options": [
+      "its accumulated squared gradients drive the learning rate toward zero",
+      "it raises the learning rate without bound as training proceeds",
+      "it requires the entire dataset to fit into memory at once",
+      "it cannot be applied to any layer that uses a ReLU activation"
+    ],
+    "correctIndex": 0,
+    "explanation": "AdaGrad sums squared gradients forever, so the denominator grows and the effective learning rate decays to ~0, stalling progress."
+  },
+  {
+    "id": "mlp-h3",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "RMSprop fixes AdaGrad's main weakness by:",
+    "options": [
+      "using an exponential moving average of squared gradients",
+      "summing all past squared gradients with no decay at all",
+      "removing the per-parameter scaling from the update entirely",
+      "switching the loss from cross-entropy to mean squared error"
+    ],
+    "correctIndex": 0,
+    "explanation": "The decaying average forgets old gradients, so the learning rate no longer collapses to zero over long runs."
+  },
+  {
+    "id": "mlp-h4",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "For SGD with momentum coefficient $\\beta=0.9$, which statement is correct?",
+    "options": [
+      "raising $\\beta$ usually means the learning rate should be lowered",
+      "$\\beta=0.9$ means exactly 90% of each step comes from the gradient",
+      "momentum removes the need to choose any learning rate at all",
+      "momentum is only defined for full-batch gradient descent"
+    ],
+    "correctIndex": 0,
+    "explanation": "Momentum is an exponential weighting of past steps; larger $\\beta$ builds more velocity, so the learning rate must shrink to stay stable."
+  },
+  {
+    "id": "mlp-h5",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "During backprop through a ReLU, the gradient reaching a unit whose pre-activation was negative is:",
+    "options": [
+      "zero, because $\\text{ReLU}'(z)=0$ for $z<0$",
+      "the full upstream gradient, passed through unchanged",
+      "the upstream gradient scaled by the negative input value",
+      "always exactly one, regardless of the sign of the input"
+    ],
+    "correctIndex": 0,
+    "explanation": "ReLU is flat for $z<0$ (slope 0), so it blocks the gradient to that unit — repeatedly negative pre-activations cause 'dead' ReLUs."
+  },
+  {
+    "id": "mlp-h6",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Using a smaller mini-batch size tends to:",
+    "options": [
+      "add gradient noise that acts as a mild implicit regularizer",
+      "compute the exact full-dataset gradient at every single step",
+      "guarantee convergence to the global minimum every single time",
+      "remove the need for holding out any validation data at all"
+    ],
+    "correctIndex": 0,
+    "explanation": "Each small batch is a noisy gradient estimate; that noise helps escape sharp minima and slightly improves generalization."
+  },
+  {
+    "id": "mlp-h7",
+    "type": "tf",
+    "category": "MLP",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Without any non-linear activations, adding more layers does not increase a network's representational power.",
+    "options": ["True", "False"],
+    "correctIndex": 0,
+    "explanation": "Stacked linear layers collapse into a single linear map, so non-linearities are what make depth meaningful."
+  },
+  {
+    "id": "trn-h1",
+    "type": "tf",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Batch normalization computes activations identically at training time and at inference time.",
+    "options": ["True", "False"],
+    "correctIndex": 1,
+    "explanation": "False: training uses per-batch statistics, while inference uses fixed running averages from training."
+  },
+  {
+    "id": "trn-h2",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Which layer ordering inside a CNN block is recommended?",
+    "options": [
+      "Conv → BatchNorm → ReLU → Dropout",
+      "Conv → Dropout → BatchNorm → ReLU",
+      "Dropout → Conv → ReLU → BatchNorm",
+      "ReLU → Dropout → Conv → BatchNorm"
+    ],
+    "correctIndex": 0,
+    "explanation": "BatchNorm should see clean pre-activations; putting Dropout before BN corrupts the batch statistics BN relies on."
+  },
+  {
+    "id": "trn-h3",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "The gradient term added by L2 regularization (weight decay):",
+    "options": [
+      "pulls every weight toward zero in proportion to its magnitude",
+      "pushes many weights to become exactly zero, giving sparsity",
+      "scales each weight up by a fixed constant factor each step",
+      "affects only the bias terms and never the weight matrices"
+    ],
+    "correctIndex": 0,
+    "explanation": "The derivative of $\\lambda\\sum w^2$ is $2\\lambda w$, shrinking weights proportionally; exact-zero sparsity is the L1 effect."
+  },
+  {
+    "id": "trn-h4",
+    "type": "tf",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Adam can generalize worse than SGD+momentum, so some practitioners switch to SGD for final fine-tuning.",
+    "options": ["True", "False"],
+    "correctIndex": 0,
+    "explanation": "True: Adam converges fast but its solutions sometimes generalize less well, motivating an SGD+momentum finishing phase."
+  },
+  {
+    "id": "trn-h5",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "A learning rate that is far too large most directly causes:",
+    "options": [
+      "the loss to oscillate or diverge instead of decreasing",
+      "the loss to decrease extremely slowly but still steadily",
+      "the model to overfit the training set almost immediately",
+      "the gradients to become exactly zero across the network"
+    ],
+    "correctIndex": 0,
+    "explanation": "Overshooting the minimum makes the loss bounce or blow up; tiny learning rates (not huge ones) cause slow convergence."
+  },
+  {
+    "id": "trn-h6",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Which choice introduces data leakage?",
+    "options": [
+      "fitting the feature scaler on train+test combined, before splitting",
+      "fitting the scaler on the training set, then applying it to test",
+      "shuffling the training set before each epoch of training",
+      "using a different random seed for the weight initialization"
+    ],
+    "correctIndex": 0,
+    "explanation": "Computing scaling statistics over the test set leaks test information into training, inflating the estimated performance."
+  },
+  {
+    "id": "cnn-h1",
+    "type": "mc",
+    "category": "CNN",
+    "calculation": true,
+    "difficulty": "hard",
+    "question": "Replacing one 7×7 conv with three stacked 3×3 convs (same receptive field) gives, per channel:",
+    "options": [
+      "fewer weights ($27$ vs $49$) and more non-linearity",
+      "more weights ($49$ vs $27$) but the same non-linearity",
+      "the same weight count and the same amount of non-linearity",
+      "fewer weights but a strictly smaller receptive field"
+    ],
+    "correctIndex": 0,
+    "explanation": "Three 3×3 filters use $3\\times9=27$ weights vs $49$ for one 7×7, and add two extra activations for more expressiveness."
+  },
+  {
+    "id": "cnn-h2",
+    "type": "mc",
+    "category": "CNN",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Before ResNet, making a plain CNN much deeper often raised its TRAINING error. The cause was:",
+    "options": [
+      "degraded gradient flow through many layers, not overfitting",
+      "overfitting, because the deep model memorized the training set",
+      "the loss function suddenly becoming non-differentiable",
+      "the learning rate automatically decaying down to zero"
+    ],
+    "correctIndex": 0,
+    "explanation": "Higher *training* error rules out overfitting; very deep plain nets were simply hard to optimize until skip connections helped gradients flow."
+  },
+  {
+    "id": "cnn-h3",
+    "type": "mc",
+    "category": "CNN",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Weight sharing in a convolution is realized during backpropagation by:",
+    "options": [
+      "computing gradients normally, then tying the shared weights' updates",
+      "freezing the filter weights so they never receive any gradient",
+      "giving every spatial position its own independent set of weights",
+      "averaging the input pixels together before the forward pass"
+    ],
+    "correctIndex": 0,
+    "explanation": "Gradients are computed as usual and then combined across positions so the shared filter receives a single consistent update."
+  },
+  {
+    "id": "cnn-h4",
+    "type": "mc",
+    "category": "CNN",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Which was a key innovation introduced by AlexNet (2012)?",
+    "options": [
+      "ReLU activations plus dropout, trained at scale on GPUs",
+      "residual skip connections added between successive blocks",
+      "replacing convolutions entirely with self-attention layers",
+      "batch normalization applied after every convolution layer"
+    ],
+    "correctIndex": 0,
+    "explanation": "AlexNet popularized ReLU, dropout and GPU training; skip connections (ResNet) and BatchNorm came later."
+  },
+  {
+    "id": "cnn-h5",
+    "type": "mc",
+    "category": "CNN",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "On images, a CNN needs far fewer parameters than an equivalent MLP mainly because of:",
+    "options": [
+      "weight sharing and local connectivity across spatial positions",
+      "the use of a much larger mini-batch size during training",
+      "applying dropout directly to the convolutional filters",
+      "its reliance on sigmoid activations in the hidden layers"
+    ],
+    "correctIndex": 0,
+    "explanation": "A small filter is reused everywhere, so parameters are independent of image size — an MLP needs a separate weight per pixel-unit pair."
+  },
+  {
+    "id": "cnn-h6",
+    "type": "tf",
+    "category": "CNN",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Max-pooling and a stride-2 convolution both downsample, and both have learnable parameters.",
+    "options": ["True", "False"],
+    "correctIndex": 1,
+    "explanation": "False: a strided convolution has learnable filter weights, but pooling is a fixed aggregation with no parameters."
+  },
+  {
+    "id": "arc-h1",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "VGG's central finding was that, for a fixed receptive field, it is better to:",
+    "options": [
+      "stack several small 3×3 convolutions than use one large kernel",
+      "use one very large kernel instead of stacking small filters",
+      "replace the convolutions with fully-connected layers",
+      "drop pooling entirely and rely on large strides instead"
+    ],
+    "correctIndex": 0,
+    "explanation": "Stacked 3×3 filters match a larger kernel's receptive field with fewer parameters and more non-linearities."
+  },
+  {
+    "id": "arc-h2",
+    "type": "tf",
+    "category": "Architectures",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Stacking more convolutional layers increases the receptive field of the deeper neurons.",
+    "options": ["True", "False"],
+    "correctIndex": 0,
+    "explanation": "True: each successive conv/pool widens the input region a deep neuron depends on."
+  },
+  {
+    "id": "arc-h3",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "A residual block makes it easy to represent the identity mapping because the layer learns:",
+    "options": [
+      "the residual $F(x)$ that is then added to the input $x$",
+      "the full mapping $H(x)$ from scratch with no shortcut path",
+      "a fixed averaging of the neighboring feature maps",
+      "a gating value that multiplies the input by exactly zero"
+    ],
+    "correctIndex": 0,
+    "explanation": "With $H(x)=F(x)+x$, learning $F(x)=0$ yields the identity, so adding depth can't easily hurt and gradients flow through the shortcut."
+  },
+  {
+    "id": "arc-h4",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Replacing a large flatten+dense head with global average pooling mainly:",
+    "options": [
+      "cuts parameters and overfitting while averaging each feature map",
+      "increases the spatial resolution of the feature maps it receives",
+      "adds many new learnable convolution filters to the network head",
+      "forces the network to use a sigmoid output activation"
+    ],
+    "correctIndex": 0,
+    "explanation": "Averaging each map to one value removes the huge dense weight matrix, cutting parameters and overfitting."
+  },
+  {
+    "id": "arc-h5",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "A 1×1 convolution is most useful for:",
+    "options": [
+      "mixing channels and changing their number cheaply",
+      "enlarging the spatial size of the feature map",
+      "detecting large-scale edges across the whole image",
+      "removing the need for any activation function"
+    ],
+    "correctIndex": 0,
+    "explanation": "A 1×1 conv is a per-pixel linear combination across channels — ideal for projecting the channel dimension up or down."
+  },
+  {
+    "id": "rnn-h1",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "In backpropagation through time, the gradient w.r.t. the recurrent weight involves:",
+    "options": [
+      "a product of many Jacobians $\\partial h_t/\\partial h_{t-1}$ over the timesteps",
+      "a single Jacobian evaluated only at the very last timestep",
+      "the sum of the inputs, with no dependence on the weights",
+      "the inverse of the recurrent weight matrix at each step"
+    ],
+    "correctIndex": 0,
+    "explanation": "Unrolling multiplies per-step Jacobians; this product is what shrinks (vanishes) or grows (explodes) over long sequences."
+  },
+  {
+    "id": "rnn-h2",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": true,
+    "difficulty": "hard",
+    "question": "If the recurrent weight magnitude is $|w_{hh}|=1.2$, gradients over many timesteps tend to:",
+    "options": [
+      "explode, growing roughly like $1.2^{T}$",
+      "vanish, shrinking roughly like $1.2^{-T}$",
+      "stay constant, since $1.2$ is close to 1",
+      "oscillate between $+1$ and $-1$ each step"
+    ],
+    "correctIndex": 0,
+    "explanation": "Repeated multiplication by a factor $>1$ grows exponentially ($1.2^{T}$) — the exploding-gradient case; a factor $<1$ would vanish."
+  },
+  {
+    "id": "rnn-h3",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "LSTMs resist vanishing gradients because, along the cell state, $\\partial c_t/\\partial c_{t-1}$ equals:",
+    "options": [
+      "the forget gate $f_t$, which can stay close to 1",
+      "a fixed constant of $0.25$ at every single timestep",
+      "the product of all of the input gates so far",
+      "the softmax of the current input token vector"
+    ],
+    "correctIndex": 0,
+    "explanation": "The additive cell path gives $\\partial c_t/\\partial c_{t-1}=f_t$; a forget gate near 1 lets gradients flow across many steps."
+  },
+  {
+    "id": "rnn-h4",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Compared with an LSTM, a GRU:",
+    "options": [
+      "merges the cell and hidden state and uses two gates",
+      "adds a fourth gate for finer control of its memory",
+      "keeps a separate cell state but drops the hidden state",
+      "replaces all of its gates with a single convolution"
+    ],
+    "correctIndex": 0,
+    "explanation": "A GRU has reset and update gates and a single state, giving fewer parameters than the LSTM's three gates plus cell state."
+  },
+  {
+    "id": "rnn-h5",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "A vanilla RNN scores ~50% on 500-token sentiment reviews. The most likely cause and fix:",
+    "options": [
+      "vanishing gradients over 500 steps; switch to an LSTM or BiLSTM",
+      "too many parameters; remove the recurrent connection entirely",
+      "the learning rate is too low; simply raise it tenfold",
+      "the embedding dimension is too large; shrink it sharply"
+    ],
+    "correctIndex": 0,
+    "explanation": "A SimpleRNN's ~5-step memory horizon ignores almost all of a 500-token review; gated units (LSTM/GRU) carry long-range information."
+  },
+  {
+    "id": "rnn-h6",
+    "type": "tf",
+    "category": "RNN",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Teacher forcing feeds the model's OWN previous prediction (not the ground-truth token) as input during training.",
+    "options": ["True", "False"],
+    "correctIndex": 1,
+    "explanation": "False: teacher forcing feeds the ground-truth previous token; using the model's own output at inference causes exposure bias."
+  },
+  {
+    "id": "att-h1",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Scaling attention scores by $1/\\sqrt{d_k}$ is done to:",
+    "options": [
+      "bound the dot-product variance so softmax gradients stay healthy",
+      "make the attention weights sum to the sequence length",
+      "convert the raw scores into whole-number logits",
+      "remove the need for separate value vectors entirely"
+    ],
+    "correctIndex": 0,
+    "explanation": "Large $d_k$ makes dot products large-variance, saturating softmax and killing gradients; the $\\sqrt{d_k}$ factor counteracts this."
+  },
+  {
+    "id": "att-h2",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": true,
+    "difficulty": "hard",
+    "question": "Doubling the number of heads while holding $d_{model}$ fixed changes the total attention parameter count by:",
+    "options": [
+      "roughly nothing — it stays about $4\\,d_{model}^2$",
+      "roughly doubling it, since each head adds parameters",
+      "roughly halving it, since each head becomes smaller",
+      "removing the output projection matrix entirely"
+    ],
+    "correctIndex": 0,
+    "explanation": "The Q/K/V and output projections total ~$4 d_{model}^2$ regardless of head count; more heads just split $d_{model}$ into smaller $d_k$."
+  },
+  {
+    "id": "att-h3",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Which statement about parallelism in a Transformer is TRUE?",
+    "options": [
+      "the encoder processes all tokens in parallel; inference decoding is sequential",
+      "both the encoder and the decoder are fully sequential at inference time",
+      "the decoder runs in parallel at inference but the encoder is sequential",
+      "neither the encoder nor the decoder can be parallelized during training"
+    ],
+    "correctIndex": 0,
+    "explanation": "Self-attention sees all positions at once (parallel encoder), but autoregressive generation must emit one token at a time."
+  },
+  {
+    "id": "att-h4",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "A causal mask for self-attention sets which entries of the score matrix to $-\\infty$?",
+    "options": [
+      "the strict upper triangle (positions after the current one)",
+      "the entire main diagonal of the score matrix",
+      "the strict lower triangle (positions before the current one)",
+      "a randomly chosen half of the entries at each step"
+    ],
+    "correctIndex": 0,
+    "explanation": "Masking future positions (strict upper triangle) to $-\\infty$ makes their softmax weights zero, so a token attends only to itself and the past."
+  },
+  {
+    "id": "att-h5",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "A benefit of fixed sinusoidal positional encodings over learned ones is that they:",
+    "options": [
+      "add no parameters and extrapolate to longer sequences",
+      "are always more accurate at the exact training length",
+      "let attention become sequential just like an RNN",
+      "remove the need for a softmax inside attention"
+    ],
+    "correctIndex": 0,
+    "explanation": "Sinusoidal encodings are parameter-free and defined for any position, so they generalize to sequences longer than those seen in training."
+  },
+  {
+    "id": "att-h6",
+    "type": "tf",
+    "category": "Attention",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "If attention used a hard argmax instead of softmax, the query/key projection weights would receive (almost) no gradient.",
+    "options": ["True", "False"],
+    "correctIndex": 0,
+    "explanation": "True: argmax is piecewise-constant with zero derivative almost everywhere, so the projections can't learn — the softmax keeps it differentiable."
+  },
+  {
+    "id": "nlp-h1",
+    "type": "mc",
+    "category": "NLP",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "In Word2Vec, the Skip-gram objective is to:",
+    "options": [
+      "predict the surrounding context words from a center word",
+      "predict the center word from its surrounding context",
+      "classify whole documents into fixed topic categories",
+      "reconstruct the input sentence from a noised copy"
+    ],
+    "correctIndex": 0,
+    "explanation": "Skip-gram predicts context from the center word; CBOW does the reverse (predicts the center word from context)."
+  },
+  {
+    "id": "nlp-h2",
+    "type": "mc",
+    "category": "NLP",
+    "calculation": true,
+    "difficulty": "hard",
+    "question": "TF-IDF weights a term by $\\text{TF}\\times\\log(N/n)$, with $n$ documents containing it. A term appearing in EVERY document gets:",
+    "options": [
+      "an IDF of $\\log(1)=0$, hence zero weight",
+      "the single highest weight in the whole corpus",
+      "an undefined weight, because the $\\log$ diverges",
+      "a weight equal to its raw term frequency alone"
+    ],
+    "correctIndex": 0,
+    "explanation": "If $n=N$ then $\\log(N/n)=\\log 1=0$, so ubiquitous words (like stop-words) are down-weighted to zero."
+  },
+  {
+    "id": "nlp-h3",
+    "type": "mc",
+    "category": "NLP",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Word2Vec embeddings are trained:",
+    "options": [
+      "without labels, using the text's own neighbor-prediction task",
+      "with human-annotated sentiment labels for every word",
+      "by minimizing the reconstruction error of an autoencoder",
+      "using reinforcement learning from human feedback"
+    ],
+    "correctIndex": 0,
+    "explanation": "The supervision comes for free from the corpus itself (predict neighbors), making Word2Vec self-supervised."
+  },
+  {
+    "id": "nlp-h4",
+    "type": "mc",
+    "category": "NLP",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "A key limitation of a single Word2Vec vector per word is that it:",
+    "options": [
+      "gives one fixed vector even for words with several meanings",
+      "cannot represent any word longer than the context window",
+      "requires the documents to be sorted alphabetically first",
+      "stores each word as a sparse one-hot encoded vector"
+    ],
+    "correctIndex": 0,
+    "explanation": "Static embeddings can't disambiguate polysemy (e.g. 'bank'); contextual models (BERT/GPT) address this."
+  },
+  {
+    "id": "prm-h1",
+    "type": "mc",
+    "category": "Prompting",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Self-consistency improves chain-of-thought reasoning by:",
+    "options": [
+      "sampling several reasoning paths and majority-voting the answer",
+      "always decoding greedily with the temperature fixed at zero",
+      "fine-tuning the model on the test question before answering",
+      "removing the reasoning steps entirely to save on tokens"
+    ],
+    "correctIndex": 0,
+    "explanation": "Multiple sampled chains are aggregated by majority vote, which is more robust than trusting a single greedy chain."
+  },
+  {
+    "id": "opt-adam1",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "Adam applies bias correction to its moment estimates because:",
+    "options": [
+      "the running estimates start at zero and are biased low early on",
+      "the gradients themselves are always biased toward positive values",
+      "the learning rate has to grow over the first several epochs",
+      "the loss surface is heavily biased toward very sharp minima"
+    ],
+    "correctIndex": 0,
+    "explanation": "The first/second-moment averages are initialized at 0, so early estimates are biased toward 0; the bias-correction terms rescale them."
+  },
+  {
+    "id": "opt-adam2",
+    "type": "tf",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "easy",
+    "question": "A common default learning rate for the Adam optimizer is about 0.001.",
+    "options": ["True", "False"],
+    "correctIndex": 0,
+    "explanation": "Adam's robust default learning rate is ~1e-3, whereas SGD+momentum typically uses larger rates like 0.01–0.1."
+  },
+  {
+    "id": "opt-rms1",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "RMSProp scales each parameter's update by:",
+    "options": [
+      "a decaying moving average of recent squared gradients",
+      "the running sum of all squared gradients since step one",
+      "the raw magnitude of just the current gradient value",
+      "one global value that is shared across all parameters"
+    ],
+    "correctIndex": 0,
+    "explanation": "RMSProp divides by the square root of an exponentially decaying average of squared gradients, giving per-parameter adaptive steps."
+  },
+  {
+    "id": "opt-rms2",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "RMSProp is often favoured over AdaGrad for RNNs / non-stationary objectives because:",
+    "options": [
+      "its decaying average keeps the learning rate from collapsing to zero",
+      "it drops the per-parameter scaling that AdaGrad relies on",
+      "it mathematically guarantees the global minimum is reached",
+      "it removes the need to choose or tune any learning rate whatsoever"
+    ],
+    "correctIndex": 0,
+    "explanation": "By forgetting old gradients, RMSProp avoids AdaGrad's monotonically shrinking step size, staying responsive on changing landscapes."
+  },
+  {
+    "id": "opt-ada1",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "AdaGrad is especially well-suited to:",
+    "options": [
+      "sparse features such as NLP word embeddings that update rarely",
+      "very deep networks that are trained for a great many epochs in a row",
+      "settings where every parameter must update at the same rate",
+      "problems that need no per-parameter learning-rate adaptation"
+    ],
+    "correctIndex": 0,
+    "explanation": "Rarely-updated (sparse) parameters keep a large effective step, so AdaGrad shines on sparse data like embeddings — but its rate decays over long runs."
+  },
+  {
+    "id": "opt-ada2",
+    "type": "tf",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "Because AdaGrad accumulates squared gradients with no decay, its effective learning rate keeps shrinking toward zero.",
+    "options": ["True", "False"],
+    "correctIndex": 0,
+    "explanation": "The ever-growing denominator drives the step size down over time, which is why AdaGrad can stall on long deep-network training."
+  },
+  {
+    "id": "opt-sgdm1",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "The momentum term in SGD helps mainly by:",
+    "options": [
+      "building a velocity that smooths oscillations and speeds descent",
+      "computing the exact full-batch gradient at every single optimization step",
+      "adapting a separate per-parameter learning rate each update",
+      "resetting the search direction after every mini-batch seen"
+    ],
+    "correctIndex": 0,
+    "explanation": "Momentum accumulates past gradients ('a ball rolling downhill'), damping zig-zags across ravines and accelerating along consistent directions."
+  },
+  {
+    "id": "opt-sgdm2",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "In $v \\leftarrow \\beta v + \\nabla f$ then $w \\leftarrow w - \\eta v$, raising $\\beta$ from 0.9 to 0.99:",
+    "options": [
+      "lengthens the memory of past gradients, often needing a smaller $\\eta$",
+      "shortens the memory of past gradients and needs a larger $\\eta$",
+      "turns SGD with momentum back into plain vanilla SGD",
+      "has no effect, since $\\beta$ only rescales the current gradient"
+    ],
+    "correctIndex": 0,
+    "explanation": "Larger $\\beta$ averages over more past gradients (more inertia), so the accumulated velocity is larger and the learning rate usually must be reduced."
+  },
+  {
+    "id": "arc2-alex1",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "Beyond ReLU and dropout, a practical enabler of AlexNet's 2012 ImageNet win was:",
+    "options": [
+      "training on GPUs, which made the large network feasible",
+      "using batch normalization after each convolution layer",
+      "adding residual skip connections throughout the network",
+      "replacing all of its convolutions with attention layers"
+    ],
+    "correctIndex": 0,
+    "explanation": "GPU training (plus heavy data augmentation) made the deep model practical; BatchNorm and residual connections came in later architectures."
+  },
+  {
+    "id": "arc2-alex2",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "AlexNet's first convolution uses a large 11×11 kernel with stride 4 mainly to:",
+    "options": [
+      "shrink the 227×227 input quickly and cut early compute",
+      "preserve the full spatial resolution of the input image",
+      "guarantee complete translation invariance in one layer",
+      "act purely as a 1×1 channel-mixing projection step"
+    ],
+    "correctIndex": 0,
+    "explanation": "A big stride-4 kernel aggressively downsamples the large input up front, reducing the spatial size (and compute) for the deeper layers."
+  },
+  {
+    "id": "arc2-vgg1",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "VGG's design philosophy is best summarized as:",
+    "options": [
+      "depth via many uniform 3×3 convolutions stacked together",
+      "a few very large kernels to cover the image in one step",
+      "replacing pooling with learned 1×1 convolutions everywhere",
+      "minimizing depth to keep the total parameter count small"
+    ],
+    "correctIndex": 0,
+    "explanation": "VGG showed that stacking small 3×3 filters into deep, homogeneous blocks works better than fewer large kernels."
+  },
+  {
+    "id": "arc2-vgg2",
+    "type": "tf",
+    "category": "Architectures",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "Despite using only small kernels, VGG-16/19 have a large parameter count, dominated by their fully-connected layers.",
+    "options": ["True", "False"],
+    "correctIndex": 0,
+    "explanation": "The huge flatten→dense layers hold most of VGG's ~138M parameters, which is why later nets replaced them with global average pooling."
+  },
+  {
+    "id": "arc2-res1",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "ResNet's residual connections were introduced to address the observation that:",
+    "options": [
+      "very deep plain nets had higher training error than shallower ones",
+      "deep networks invariably overfit and simply memorize the whole training set",
+      "convolutions simply cannot be stacked beyond about ten layers",
+      "pooling layers were destroying all of the gradient information"
+    ],
+    "correctIndex": 0,
+    "explanation": "Plain very-deep nets degraded — worse *training* error, so not overfitting. Skip connections restored trainability for 100+ layers."
+  },
+  {
+    "id": "arc2-res2",
+    "type": "mc",
+    "category": "Architectures",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "Skip connections aid optimization primarily by:",
+    "options": [
+      "giving gradients a direct path to flow backward through the net",
+      "increasing the spatial resolution of every feature map produced",
+      "removing the need for any activation functions in the blocks",
+      "forcing each block to learn its full mapping entirely from scratch"
+    ],
+    "correctIndex": 0,
+    "explanation": "The additive shortcut lets gradients bypass the stacked layers, mitigating vanishing gradients in very deep networks."
+  },
+  {
+    "id": "norm-bn1",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "Batch normalization normalizes each feature using statistics computed:",
+    "options": [
+      "across the examples in the current mini-batch",
+      "across the features within one single example",
+      "across the whole training set at every step",
+      "across the channels of one pixel position only"
+    ],
+    "correctIndex": 0,
+    "explanation": "BatchNorm standardizes each feature/channel using the mean and variance over the batch dimension."
+  },
+  {
+    "id": "norm-bn2",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "A practical drawback of BatchNorm is that its behaviour:",
+    "options": [
+      "depends on batch size and differs between training and inference",
+      "adds no learnable parameters at all, so it has nothing that it can adapt",
+      "is identical to LayerNorm in essentially every respect",
+      "requires the target labels to be one-hot encoded first"
+    ],
+    "correctIndex": 0,
+    "explanation": "Small/odd batches give noisy statistics, and train (batch stats) vs inference (running stats) differ — issues LayerNorm avoids."
+  },
+  {
+    "id": "norm-ln1",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "Layer normalization computes its statistics over:",
+    "options": [
+      "the features of each individual sample, independent of batch size",
+      "the samples across the whole mini-batch, exactly as BatchNorm does it",
+      "only the spatial positions inside a convolution map",
+      "the gradients of the layer rather than its activations"
+    ],
+    "correctIndex": 0,
+    "explanation": "LayerNorm normalizes across the feature dimension per sample, so it is unaffected by batch size."
+  },
+  {
+    "id": "norm-ln2",
+    "type": "tf",
+    "category": "Foundations",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "LayerNorm is favoured in Transformers partly because it behaves identically at train and inference and works with batch size 1.",
+    "options": ["True", "False"],
+    "correctIndex": 0,
+    "explanation": "Being per-sample, LayerNorm needs no running statistics and handles variable-length / single-example batches cleanly."
+  },
+  {
+    "id": "norm-rms1",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "RMSNorm differs from LayerNorm in that it:",
+    "options": [
+      "scales by the root-mean-square but does not subtract the mean",
+      "subtracts the mean but does not rescale the activations at all",
+      "normalizes across the batch instead of across the features",
+      "uses no learnable scale parameter anywhere in the layer"
+    ],
+    "correctIndex": 0,
+    "explanation": "RMSNorm skips the mean-centering step and only divides by the RMS, keeping a learnable scale — cheaper than full LayerNorm."
+  },
+  {
+    "id": "norm-rms2",
+    "type": "mc",
+    "category": "Foundations",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "RMSNorm is used in modern LLMs (e.g. LLaMA) mainly because it:",
+    "options": [
+      "is cheaper to compute while remaining numerically stable",
+      "always reaches a strictly lower training loss than LayerNorm",
+      "removes the need for any positional encodings in attention",
+      "doubles the number of learnable normalization parameters"
+    ],
+    "correctIndex": 0,
+    "explanation": "Dropping the mean subtraction saves a small but meaningful amount of compute at LLM scale, with comparable stability to LayerNorm."
+  },
+  {
+    "id": "reg-l21",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "L2 regularization (weight decay) changes training by:",
+    "options": [
+      "adding a loss penalty proportional to the sum of squared weights",
+      "adding a loss penalty proportional to the sum of absolute weights",
+      "randomly zeroing a fraction of the activations each step",
+      "halting training as soon as the validation loss starts to rise"
+    ],
+    "correctIndex": 0,
+    "explanation": "L2 adds $\\lambda\\sum w^2$ to the loss (gradient $2\\lambda w$), shrinking weights toward zero. The absolute-value version is L1."
+  },
+  {
+    "id": "reg-l22",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "Compared with L1, L2 regularization tends to:",
+    "options": [
+      "shrink weights smoothly toward zero without making them exactly zero",
+      "drive most of the weights to be exactly zero, yielding sparsity",
+      "grow the largest weights over time while leaving the smallest ones untouched",
+      "leave every weight's magnitude essentially unchanged overall"
+    ],
+    "correctIndex": 0,
+    "explanation": "L2's quadratic penalty shrinks weights proportionally (rarely to exactly 0); L1's constant-gradient penalty is what produces sparsity."
+  },
+  {
+    "id": "reg-do1",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "Dropout can be interpreted as:",
+    "options": [
+      "implicitly training an ensemble of many shared sub-networks",
+      "permanently pruning the least important weights from the model",
+      "raising the learning rate for whichever neurons stay active",
+      "normalizing activations to zero mean and unit variance"
+    ],
+    "correctIndex": 0,
+    "explanation": "Each step trains a randomly thinned network; averaging over these shared-weight sub-networks behaves like an ensemble and curbs co-adaptation."
+  },
+  {
+    "id": "reg-do2",
+    "type": "tf",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "easy",
+    "question": "A typical dropout rate p is somewhere between about 0.2 and 0.5.",
+    "options": ["True", "False"],
+    "correctIndex": 0,
+    "explanation": "Common dropout probabilities are 0.2–0.5; very high rates can remove too much signal and underfit."
+  },
+  {
+    "id": "reg-es1",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "Early stopping with a 'patience' of k epochs stops training when:",
+    "options": [
+      "the validation metric has not improved for k consecutive epochs",
+      "the training-set loss has not changed at all for k consecutive epochs",
+      "exactly k epochs have elapsed since training began",
+      "the learning-rate schedule has decayed a total of k times"
+    ],
+    "correctIndex": 0,
+    "explanation": "Patience tolerates k epochs of no validation improvement before stopping, avoiding premature halts on noisy curves."
+  },
+  {
+    "id": "reg-es2",
+    "type": "tf",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "Early stopping needs a held-out validation set and usually restores the best-scoring weights rather than the final ones.",
+    "options": ["True", "False"],
+    "correctIndex": 0,
+    "explanation": "It monitors validation performance and rolls back to the checkpoint with the best metric, not the (possibly overfit) last epoch."
+  },
+  {
+    "id": "reg-aug1",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "For natural-image classification, which is a valid (label-preserving) augmentation?",
+    "options": [
+      "a small random horizontal flip, crop, or rotation of the image",
+      "randomly swapping the image's class label during training",
+      "vertically flipping digit images so a 6 looks like a 9",
+      "blending two images from two different classes together into a single input"
+    ],
+    "correctIndex": 0,
+    "explanation": "Augmentations must preserve the label; flips/crops/rotations do, while relabeling, 6↔9 flips, or class-mixing change the true label."
+  },
+  {
+    "id": "reg-aug2",
+    "type": "tf",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "Standard data augmentation is applied during training to expand variety, not as part of normal inference.",
+    "options": ["True", "False"],
+    "correctIndex": 0,
+    "explanation": "Augmentation enlarges the effective training set; at inference the model normally sees the un-augmented input (test-time augmentation is a separate, optional trick)."
+  },
+  {
+    "id": "loss-01",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "A network predicts a continuous house price from features. Which loss is the standard choice for this regression task?",
+    "options": [
+      "Mean squared error between the predicted and true price",
+      "Categorical cross-entropy over the discretized price buckets",
+      "Binary cross-entropy applied after a sigmoid output",
+      "Hinge loss as used by linear support-vector machines"
+    ],
+    "correctIndex": 0,
+    "explanation": "A continuous target is a regression problem, where MSE (or MAE) is standard; cross-entropy and hinge are classification losses."
+  },
+  {
+    "id": "loss-02",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "A binary classifier ends in a single sigmoid output unit. Which loss pairs naturally with it?",
+    "options": [
+      "Binary cross-entropy",
+      "Categorical cross-entropy",
+      "Mean squared error",
+      "Mean absolute error"
+    ],
+    "correctIndex": 0,
+    "explanation": "A sigmoid produces one probability in [0,1]; binary cross-entropy is its matching loss. Softmax + categorical cross-entropy is for multi-class."
+  },
+  {
+    "id": "loss-03",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "difficulty": "easy",
+    "question": "A model outputs a softmax distribution over 10 mutually exclusive classes. The appropriate training loss is:",
+    "options": [
+      "categorical cross-entropy",
+      "binary cross-entropy",
+      "mean squared error against the one-hot target",
+      "hinge loss over the classes"
+    ],
+    "correctIndex": 0,
+    "explanation": "Softmax over mutually exclusive classes pairs with categorical (or sparse categorical) cross-entropy."
+  },
+  {
+    "id": "loss-04",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "Compared with mean squared error, mean absolute error (L1) tends to:",
+    "options": [
+      "be less sensitive to large outlier errors",
+      "square each error before averaging them",
+      "penalize large errors more steeply than MSE",
+      "only apply to classification tasks"
+    ],
+    "correctIndex": 0,
+    "explanation": "MAE grows linearly with the error magnitude, so a single large outlier influences it less than the quadratic MSE."
+  },
+  {
+    "id": "loss-05",
+    "type": "tf",
+    "category": "MLP",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "Categorical cross-entropy is an appropriate loss for predicting a continuous-valued regression target.",
+    "options": ["True", "False"],
+    "correctIndex": 1,
+    "explanation": "Cross-entropy expects a probability distribution over classes; continuous targets use MSE or MAE instead."
+  },
+  {
+    "id": "loss-06",
+    "type": "mc",
+    "category": "MLP",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Why is mean squared error a poor loss for a saturating sigmoid output in classification?",
+    "options": [
+      "When the unit saturates, the MSE gradient nearly vanishes, so learning stalls",
+      "Its gradient is undefined whenever the predicted probability equals exactly one",
+      "It forces the output layer to use a softmax activation instead",
+      "It makes the total loss negative for very confident predictions"
+    ],
+    "correctIndex": 0,
+    "explanation": "With MSE the sigmoid's derivative multiplies the gradient; in saturation that derivative is ~0, so weights barely update. Cross-entropy cancels that factor and keeps gradients strong."
+  },
+  {
+    "id": "gd-01",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "In batch (full-batch) gradient descent, each parameter update uses the gradient computed over:",
+    "options": [
+      "the gradient averaged over the entire training set",
+      "one randomly drawn training example at each step",
+      "a small random subset of examples each step",
+      "the single most recently observed training example"
+    ],
+    "correctIndex": 0,
+    "explanation": "Full-batch GD averages the gradient over all N examples before a single update — stable, but only one update per epoch."
+  },
+  {
+    "id": "gd-02",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "Pure stochastic gradient descent (batch size 1) is characterized by:",
+    "options": [
+      "noisy, high-variance updates that can escape shallow local minima",
+      "perfectly smooth updates that always point straight toward the minimum",
+      "exactly one parameter update performed per epoch",
+      "minimal memory use because it caches the whole dataset"
+    ],
+    "correctIndex": 0,
+    "explanation": "Single-example gradients are high-variance; the noise slows convergence but helps jump out of poor minima. It also underuses vectorized hardware."
+  },
+  {
+    "id": "gd-03",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "easy",
+    "question": "Mini-batch gradient descent is the usual practical choice mainly because it:",
+    "options": [
+      "balances gradient stability with hardware-efficient computation",
+      "is mathematically guaranteed to find the global optimum every time",
+      "removes the need to tune the learning rate",
+      "eliminates all randomness from the gradient estimate"
+    ],
+    "correctIndex": 0,
+    "explanation": "Mini-batches give a reasonable gradient estimate while letting GPUs process many examples in parallel — the sweet spot between full-batch and SGD."
+  },
+  {
+    "id": "gd-04",
+    "type": "tf",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "For a fixed dataset, full-batch gradient descent performs more parameter updates per epoch than mini-batch gradient descent.",
+    "options": ["True", "False"],
+    "correctIndex": 1,
+    "explanation": "Full-batch makes one update per epoch; mini-batch makes ceil(N/B) updates per epoch, which is many more."
+  },
+  {
+    "id": "gd-05",
+    "type": "tf",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "Smaller mini-batches produce noisier gradient estimates, which can act as a mild form of regularization.",
+    "options": ["True", "False"],
+    "correctIndex": 0,
+    "explanation": "The extra gradient noise from small batches discourages sharp overfit minima and often improves generalization."
+  },
+  {
+    "id": "gd-06",
+    "type": "mc",
+    "category": "Training",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "Beyond gradient noise, why does batch-size-1 SGD often underutilize modern GPUs?",
+    "options": [
+      "It processes one example at a time, leaving parallel matrix throughput idle",
+      "It must hold the entire training dataset in GPU memory simultaneously before each update",
+      "It is incompatible with backpropagation for computing gradients",
+      "It can only execute on CPU hardware and never on a GPU device"
+    ],
+    "correctIndex": 0,
+    "explanation": "GPUs are fastest on large batched matrix multiplies; feeding one example at a time leaves most of that parallel capacity idle."
+  },
+  {
+    "id": "rnn-27",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "In an LSTM, which gate decides how much of the previous cell state $c_{t-1}$ is carried forward?",
+    "options": [
+      "the forget gate",
+      "the input gate",
+      "the output gate",
+      "the update/candidate gate"
+    ],
+    "correctIndex": 0,
+    "explanation": "The forget gate $f_t$ multiplies $c_{t-1}$ elementwise, choosing how much past memory to retain."
+  },
+  {
+    "id": "rnn-28",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "The LSTM hidden state is $h_t = o_t \\odot \\tanh(c_t)$. The output gate $o_t$ therefore controls:",
+    "options": [
+      "which parts of the squashed cell state are exposed as the hidden output",
+      "how much fresh candidate memory gets written into the long-term cell state",
+      "how much of the previous cell state is erased at this step",
+      "the learning rate used to update the recurrent weight matrices"
+    ],
+    "correctIndex": 0,
+    "explanation": "$o_t$ gates $\\tanh(c_t)$ into $h_t$, selecting which parts of the cell state are revealed; writing new memory is the input gate, erasing is the forget gate."
+  },
+  {
+    "id": "rnn-29",
+    "type": "tf",
+    "category": "RNN",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "An LSTM's gates use a sigmoid (outputs in [0,1], acting as soft masks), while the candidate cell content uses tanh.",
+    "options": ["True", "False"],
+    "correctIndex": 0,
+    "explanation": "Sigmoid gates scale signals between fully closed and fully open; the tanh candidate produces the new content to be (partially) written."
+  },
+  {
+    "id": "rnn-h7",
+    "type": "mc",
+    "category": "RNN",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "An LSTM has roughly four times the recurrent parameters of a vanilla RNN with the same input and hidden sizes. Why?",
+    "options": [
+      "It learns four weight sets — three gates plus a candidate update",
+      "It unrolls the input sequence exactly four times during each forward pass",
+      "It always stacks four recurrent layers on top of each other",
+      "It keeps four separate copies of the hidden state vector"
+    ],
+    "correctIndex": 0,
+    "explanation": "Each of the forget, input, output gates and the candidate has its own (in+hid)×hid weights, so an LSTM is about 4× a SimpleRNN of equal dimensions."
+  },
+  {
+    "id": "rnn-30",
+    "type": "tf",
+    "category": "RNN",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "A vanilla RNN reuses the same weight matrices at every timestep (its parameters are shared across time).",
+    "options": ["True", "False"],
+    "correctIndex": 0,
+    "explanation": "The same $W_{xh}$, $W_{hh}$ and bias are applied at each step; this weight tying is what lets an RNN handle variable-length sequences."
+  },
+  {
+    "id": "att-24",
+    "type": "tf",
+    "category": "Attention",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "In a Transformer block, the feed-forward sub-layer is applied independently and identically to every sequence position.",
+    "options": ["True", "False"],
+    "correctIndex": 0,
+    "explanation": "The position-wise FFN runs the same two-layer MLP at each position separately; it mixes features within a token, not across positions."
+  },
+  {
+    "id": "att-25",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "difficulty": "medium",
+    "question": "Each sub-layer (self-attention, feed-forward) in a Transformer block is wrapped with:",
+    "options": [
+      "a residual skip connection together with layer normalization",
+      "a max-pooling operation taken over the whole sequence length",
+      "a recurrent connection feeding back to the previous token's state",
+      "dropout applied directly and only to the raw attention weights"
+    ],
+    "correctIndex": 0,
+    "explanation": "Transformers use Add & Norm: $x + \\text{Sublayer}(x)$ then LayerNorm, which stabilizes training of deep stacks."
+  },
+  {
+    "id": "att-h7",
+    "type": "mc",
+    "category": "Attention",
+    "calculation": false,
+    "difficulty": "hard",
+    "question": "How does the self-attention in a Transformer encoder differ from that in a decoder?",
+    "options": [
+      "It is bidirectional — each token attends to all positions, with no causal mask",
+      "It is restricted to earlier tokens only, because a causal look-ahead mask is applied",
+      "It replaces the softmax with a hard argmax taken over positions",
+      "It shares no parameters between the query and the key projections"
+    ],
+    "correctIndex": 0,
+    "explanation": "Encoder self-attention sees the whole input (bidirectional); the decoder's masked self-attention lets a token attend only to itself and earlier tokens."
+  }
+]

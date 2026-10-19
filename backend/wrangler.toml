@@ -1,0 +1,44 @@
+name = "api-controller"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+
+[vars]
+DB_DIALECT = "sqlite"
+ALLOWED_ORIGIN = "https://danielfreiremendes.com"
+
+[ai]
+binding = "AI"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "db-prod"
+database_id = "d9ea805c-9a49-4dae-a25f-c21a596aec9a"
+
+[[d1_databases]]
+binding = "CHAT_DB"
+database_name = "chat-db"
+database_id = "d6d93a3e-27ad-423f-87d6-c7eceab2e807"
+
+[[d1_databases]]
+binding = "FEEDBACK_DB"
+database_name = "feedback-db"
+database_id = "29ee69ee-930a-42f3-ac58-2d5085627f27"
+
+[[d1_databases]]
+binding = "AVALIA_DB"
+database_name = "habitacao_db"
+database_id = "3b4c0065-e3d0-434c-921d-0a27c7041b59"
+
+[[d1_databases]]
+binding = "SURVEY_DB"
+database_name = "cookie-db"
+database_id = "718593c1-fd06-4b41-90e0-854083f82b00"
+
+[[vectorize]]
+binding = "VECTOR_INDEX"
+index_name = "feedback-index"
+
+[[workflows]]
+name = "feedback-ingestion-workflow"
+binding = "INGESTION_WORKFLOW"
+class_name = "IngestionWorkflow"
