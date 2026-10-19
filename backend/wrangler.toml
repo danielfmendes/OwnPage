@@ -1,6 +1,7 @@
 name = "api-controller"
 main = "src/index.ts"
 compatibility_date = "2026-01-01"
+routes = [{ pattern = "danielfreiremendes.com/api/*", zone_name = "danielfreiremendes.com" }]
 
 [vars]
 DB_DIALECT = "sqlite"
