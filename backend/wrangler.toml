@@ -3,7 +3,6 @@ main = "src/index.ts"
 compatibility_date = "2026-01-01"
 
 [vars]
-DB_DIALECT = "sqlite"
 ALLOWED_ORIGIN = "https://danielfreiremendes.com"
 
 [ai]

@@ -2,14 +2,11 @@ import { Env } from "../../types";
 import { queryWithPagination } from "./pagination";
 import {
     getAllowedProjectIds,
-    getSchemaAccess,
-    HttpError,
     readJson,
     requireProjectRole,
     requireUser,
     resolveProjectId,
 } from "../../utils/auth";
-import { createSchemaWithEntities } from "./schema/schemas";
 
 interface CrudOptions {
     // Column on this table that holds the owning project_id. When set, writes require
@@ -140,6 +137,45 @@ const createCrudHandlers = (table: string, columns: string[], options: CrudOptio
     };
 };
 
+// Bike Models — read-only in the Go controller (GetBikeModels only)
+export const bikeModelsHandler = (req: Request, env: Env) =>
+    createCrudHandlers("bike_models", ["name", "saddle_id", "frame_id", "fork_id"], { readOnly: true }).handler(req, env);
+
+// Components – queries saddles, frames, or forks based on ?filter=type:$eq.{type}. Read-only (matches Go).
+export const componentsHandler = async (req: Request, env: Env) => {
+    const url = new URL(req.url);
+    const filter = url.searchParams.get("filter") || "";
+
+    // Parse type from filter string like "type:$eq.forks"
+    let tableName = "";
+    const typeMatch = filter.match(/type:\$eq\.(\w+)/);
+    if (typeMatch) {
+        const type = typeMatch[1].toLowerCase();
+        if (type === "saddles" || type === "saddle") tableName = "saddles";
+        else if (type === "frames" || type === "frame") tableName = "frames";
+        else if (type === "forks" || type === "fork") tableName = "forks";
+    }
+
+    if (!tableName) {
+        return new Response("Missing or invalid type filter. Use ?filter=type:$eq.saddles|frames|forks", { status: 400 });
+    }
+
+    if (req.method === "GET") {
+        const { results } = await env.DB.prepare(`SELECT * FROM ${tableName}`).all();
+        return Response.json(results);
+    }
+
+    return methodNotAllowed();
+}
+
+// Customers — writes require admin on the row's project_id
+export const customersHandler = (req: Request, env: Env) =>
+    createCrudHandlers(
+        "customers",
+        ["email", "first_name", "name", "dob", "city", "project_id"],
+        { projectColumn: "project_id" }
+    ).handler(req, env);
+
 // Projects — GET is scoped to the caller's projects; POST auto-assigns creator; PUT/DELETE
 // require the creator role on the target project.
 export const projectsHandler = async (req: Request, env: Env) => {
@@ -152,43 +188,25 @@ export const projectsHandler = async (req: Request, env: Env) => {
         if (ids.length === 0) return Response.json([]);
         const placeholders = ids.map(() => "?").join(", ");
         const { results } = await env.DB.prepare(
-            `SELECT p.id, p.name, p.schema_id, s.name AS schema_name
-             FROM projects p
-                      LEFT JOIN dwh_schemas s ON s.id = p.schema_id
-             WHERE p.id IN (${placeholders})`
+            `SELECT id, name FROM projects WHERE id IN (${placeholders})`
         ).bind(...ids).all();
         return Response.json(results);
     }
 
     if (req.method === "POST") {
         // Creating a project is allowed for any authenticated user; they become its creator.
-        // A project references a SCHEMA: reuse an existing one you can write, or create a new one
-        // (from a structured definition or parsed CREATE TABLE SQL).
         const email = await requireUser(req, env);
         const data: any = await readJson(req);
         try {
-            let schemaId: number | null = null;
-            if (data.schema_id) {
-                const access = await getSchemaAccess(env, email);
-                if (!access.get(Number(data.schema_id))?.canWrite) {
-                    return new Response("You need write access to that schema", { status: 403 });
-                }
-                schemaId = Number(data.schema_id);
-            } else if (data.new_schema) {
-                schemaId = await createSchemaWithEntities(env, email, data.new_schema);
-            }
-
-            const result = await env.DB.prepare("INSERT INTO projects (name, schema_id) VALUES (?, ?)")
-                .bind(data.name, schemaId).run();
+            const result = await env.DB.prepare("INSERT INTO projects (name) VALUES (?)").bind(data.name).run();
             const projectId = result.meta?.last_row_id;
             if (projectId) {
                 await env.DB.prepare(
                     "INSERT INTO role_management (useremail, project_id, role) VALUES (?, ?, 'creator')"
                 ).bind(email, projectId).run();
             }
-            return Response.json({ id: projectId, schema_id: schemaId }, { status: 201 });
+            return new Response("Created", { status: 201 });
         } catch (e) {
-            if (e instanceof HttpError) return new Response(e.message, { status: e.status });
             console.error("create project failed:", e);
             return new Response("Could not create project", { status: 500 });
         }
@@ -207,11 +225,7 @@ export const projectsHandler = async (req: Request, env: Env) => {
         const id = url.searchParams.get("id");
         if (!id) return new Response("Bad request – missing or invalid ID", { status: 400 });
         await requireProjectRole(req, env, id, "creator");
-        // Remove the project's role assignments and the project itself. The schema's physical tables are
-        // shared with other projects, so they are deliberately left untouched.
-        await env.DB.prepare("DELETE FROM role_management WHERE project_id = ?").bind(id).run();
-        await env.DB.prepare("DELETE FROM projects WHERE id = ?").bind(id).run();
-        return new Response("Deleted", { status: 200 });
+        return createCrudHandlers("projects", ["name"]).delete(req, env);
     }
 
     return methodNotAllowed();
@@ -236,3 +250,11 @@ export const userHandler = async (req: Request, env: Env) => {
 
     return new Response("Filter missing or invalid", { status: 400 });
 };
+
+// Warehouse Parts — writes require admin on the row's project_id
+export const warehousePartsHandler = (req: Request, env: Env) =>
+    createCrudHandlers(
+        "warehouse_parts",
+        ["part_type", "part_id", "quantity", "storage_location", "project_id"],
+        { projectColumn: "project_id" }
+    ).handler(req, env);

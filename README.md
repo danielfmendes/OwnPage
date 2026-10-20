@@ -46,7 +46,7 @@ The sub-apps are separate pages in the same build. Links to them use a full page
    ```
 2. API, either:
    - Node server with Postgres (chat and DWH only): `cd backend && npm run dev:local`. It reads the local secret from `backend/.dev.vars`, which is a placeholder for development only.
-   - Full Worker with all routes on local D1: `cd backend && npx wrangler dev --port 8080`. Apply the schemas first, using the binding names from `wrangler.toml`, for example `npx wrangler d1 execute FEEDBACK_DB --local --file=../database/sqlite/feedback.sql`. The sqlite folder has `feedback.sql`, `causality_survey.sql`, `chat.sql` and the DWH migrations (`V0`–`V6`) for `DB`. Apply `lisbon_house_prices.sql` and `lisbon_house_prices_inserts.sql` to `AVALIA_DB`.
+   - Full Worker with all routes on local D1: `cd backend && npx wrangler dev --port 8080`. Apply the schemas first, using the binding names from `wrangler.toml`, for example `npx wrangler d1 execute FEEDBACK_DB --local --file=../database/sqlite/feedback.sql`. The sqlite folder has `feedback.sql`, `causality_survey.sql`, `chat.sql` and the DWH migrations (`V0`–`V4`) for `DB`. Apply `lisbon_house_prices.sql` and `lisbon_house_prices_inserts.sql` to `AVALIA_DB`.
 3. Frontend: `cd frontend && npm run dev`. `frontend/.env.development` points it at `http://localhost:8080`.
 4. Tests: `cd frontend && npm test` runs the APA Mock Exam suite.
 

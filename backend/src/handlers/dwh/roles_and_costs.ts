@@ -31,11 +31,9 @@ export const getRoleManagement = async (req: Request, env: Env) => {
             return errorResponse("You don't have access to this project", 403);
         }
         const { results } = await env.DB.prepare(`
-            SELECT useremail AS user_email, project_id, role, p.name as project_name,
-                   p.schema_id AS schema_id, s.name AS schema_name
+            SELECT useremail AS user_email, project_id, role, p.name as project_name
             FROM role_management
             JOIN projects p ON p.id = role_management.project_id
-            LEFT JOIN dwh_schemas s ON s.id = p.schema_id
             WHERE role_management.project_id = ?
         `).bind(projectId).all();
         return Response.json(results);
@@ -45,11 +43,9 @@ export const getRoleManagement = async (req: Request, env: Env) => {
     const userEmail = await requireUser(req, env);
 
     const baseQuery = `
-        SELECT useremail AS user_email, project_id, role, p.name as project_name,
-               p.schema_id AS schema_id, s.name AS schema_name
+        SELECT useremail AS user_email, project_id, role, p.name as project_name
         FROM role_management
         JOIN projects p ON p.id = role_management.project_id
-        LEFT JOIN dwh_schemas s ON s.id = p.schema_id
         WHERE useremail = ?
     `;
     const countQuery = `
@@ -176,4 +172,18 @@ export const roleManagementHandler = async (req: Request, env: Env) => {
     }
 
     return errorResponse("Method not allowed", 405);
+};
+
+// --- Part Costs ---
+// Scoped to the caller's projects (port of Go's HandleGetWithProjectIDs).
+export const partCostsHandler = async (req: Request, env: Env) => {
+    const email = await requireUser(req, env);
+    const allowed = await getAllowedProjectIds(env, email, "user");
+    if (allowed.length === 0) {
+        return Response.json({ items: [], totalCount: 0 });
+    }
+    const placeholders = allowed.map(() => "?").join(", ");
+    const baseQuery = `SELECT * FROM part_costs WHERE project_id IN (${placeholders})`;
+    const countQuery = `SELECT COUNT(*) FROM part_costs WHERE project_id IN (${placeholders})`;
+    return await queryWithPagination(req, env, baseQuery, countQuery, allowed);
 };
