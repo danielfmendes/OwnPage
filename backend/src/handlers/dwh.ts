@@ -13,6 +13,7 @@ import { ordersHandler, orderItemsHandler } from "./dwh/orders";
 import { partCostsHandler, roleManagementHandler } from "./dwh/roles_and_costs";
 import { authHandler } from "./dwh/auth";
 import { dashboardHandler } from "./dwh/dashboard";
+import { keepDemoDataCurrent } from "./dwh/demo";
 import { requireUser, toResponse } from "../utils/auth";
 
 export async function dwhHandler(fullPath: string, env: Env, request: Request): Promise<Response> {
@@ -28,6 +29,9 @@ export async function dwhHandler(fullPath: string, env: Env, request: Request): 
         // fetchData/HandleInsert/HandleUpdate/HandleDelete all call ValidateToken first.
         // Per-write admin-role checks happen inside the individual handlers.
         await requireUser(request, env);
+
+        // Moves the demo orders forward once per day so every dashboard window has data.
+        await keepDemoDataCurrent(env).catch((err) => console.error("demo data shift failed", err));
 
         if (path.startsWith("/dashboard/")) {
             return await dashboardHandler(request, env);
