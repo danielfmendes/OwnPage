@@ -62,6 +62,32 @@ function getModifiers(range: string) {
     }
 }
 
+// Days covered by each fixed range. "max" is measured from the first order instead (see rangeSpan).
+const SPAN_DAYS: Record<string, number> = { "1d": 2, "1w": 7, "1m": 30, "1y": 365 };
+
+// Long ranges are split into this many containers, so every range keeps a readable number of points.
+const MAX_CONTAINERS = 30;
+
+const rangeSpan = async (env: Env, range: string, projectIds: number[]): Promise<number> => {
+    if (SPAN_DAYS[range]) return SPAN_DAYS[range];
+    const proj = buildProjectFilter(projectIds, "WHERE");
+    const row = await env.DB.prepare(
+        `SELECT CAST(julianday('now') - julianday(MIN(date(o.order_date))) AS INTEGER) + 1 AS span FROM orders o${proj.sql}`,
+    ).bind(...proj.bindings).first<{ span: number | null }>();
+    return row?.span ?? 1;
+};
+
+// Groups the days of the span into at most MAX_CONTAINERS equal runs. Each run is labelled with its
+// first day, so every model and city lands on the same x-axis value. Spans of 52 days or fewer
+// keep one container per day.
+const containerSql = (span: number) => {
+    const n = Math.min(span, MAX_CONTAINERS);
+    const start = `date('now', '-${span - 1} days')`;
+    const index = `(CAST(julianday(date(o.order_date)) - julianday(${start}) AS INTEGER) * ${n} / ${span})`;
+    const label = `date(${start}, '+' || ((${index} * ${span} + ${n} - 1) / ${n}) || ' days')`;
+    return { index, label };
+};
+
 // GET /dashboard/graphmeta?filter=range:$eq.1m,project_id:$in.1|2
 export const getGraphMeta = async (req: Request, env: Env) => {
     const url = new URL(req.url);
@@ -118,9 +144,10 @@ export const getGraphData = async (req: Request, env: Env) => {
     if (projectIds.length === 0) return Response.json([]);
     const proj = buildProjectFilter(projectIds, "AND");
 
+    const { index, label } = containerSql(await rangeSpan(env, range, projectIds));
     let query = `
         SELECT
-             date(o.order_date) as bucket,
+             ${label} as bucket,
              SUM(oi.price * oi.number) AS revenue,
              SUM(oi.number) AS sales_no
         FROM order_items oi
@@ -136,7 +163,7 @@ export const getGraphData = async (req: Request, env: Env) => {
         bindings = proj.bindings;
     }
 
-    query += ` GROUP BY date(o.order_date) ORDER BY bucket ASC`;
+    query += ` GROUP BY ${index} ORDER BY bucket ASC`;
 
     const { results } = await env.DB.prepare(query).bind(...bindings).all();
     return Response.json(results);
@@ -199,9 +226,10 @@ export const getBikeSales = async (req: Request, env: Env) => {
     if (projectIds.length === 0) return Response.json([]);
     const proj = buildProjectFilter(projectIds, "AND");
 
+    const { index, label } = containerSql(await rangeSpan(env, range, projectIds));
     let query = `
         SELECT
-             date(o.order_date) as order_date,
+             ${label} as order_date,
              bm.name as bike_model,
              SUM(oi.price * oi.number) AS revenue,
              SUM(oi.number) AS total_sales
@@ -220,7 +248,7 @@ export const getBikeSales = async (req: Request, env: Env) => {
         bindings = proj.bindings;
     }
 
-    query += ` GROUP BY date(o.order_date), bm.name ORDER BY order_date ASC`;
+    query += ` GROUP BY ${index}, bm.name ORDER BY order_date ASC`;
 
     const { results } = await env.DB.prepare(query).bind(...bindings).all();
     return Response.json(results);

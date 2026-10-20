@@ -1,6 +1,7 @@
 -- ==========================================================
 -- REFRESH DEMO ORDERS (projects 1 and 2 only, deterministic)
 -- ==========================================================
+-- Superseded by V6__Natural_Demo_Orders.sql, which produces data that looks like real sales.
 -- Replaces the demo orders of the two demo projects with a dense, dated history that
 -- covers every dashboard window (1D, 1W, 1M, 1Y, MAX) and its "previous period".
 -- Dates are relative to the day this runs; backend/src/handlers/dwh/demo.ts keeps them

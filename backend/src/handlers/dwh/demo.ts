@@ -1,6 +1,6 @@
 import { Env } from "../../types";
 
-// Demo projects seeded by database/*/V3 and V5. Only their orders are ever shifted.
+// Demo projects seeded by database/*/V3 and V6. Only their orders are ever shifted.
 const DEMO_PROJECT_IDS = [1, 2];
 
 // Per isolate: the shift is checked at most once per UTC day.

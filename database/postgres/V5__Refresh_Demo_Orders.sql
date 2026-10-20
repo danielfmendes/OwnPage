@@ -1,6 +1,7 @@
 -- ==========================================================
 -- REFRESH DEMO ORDERS (projects 1 and 2 only, deterministic)
 -- ==========================================================
+-- Superseded by V6__Natural_Demo_Orders.sql, which produces data that looks like real sales.
 -- Postgres twin of database/sqlite/V5__Refresh_Demo_Orders.sql. Same data shape:
 --   days 0-6 : 3 orders/day, days 7-29 : 2/day, days 30-364 : 1/day, days 365-729 : 1 on even offsets
 -- One order_items row per order, quantity 1. Customers and bikes are picked from the rows that
