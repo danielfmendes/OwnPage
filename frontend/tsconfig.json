@@ -6,18 +6,6 @@
     },
     {
       "path": "./tsconfig.node.json"
-    },
-    {
-      "path": "./apa-quiz/tsconfig.json"
-    },
-    {
-      "path": "./feedback-pulse/tsconfig.json"
-    },
-    {
-      "path": "./lisbon-house-prices/tsconfig.json"
-    },
-    {
-      "path": "./causality-survey/tsconfig.json"
     }
   ],
   "compilerOptions": {
