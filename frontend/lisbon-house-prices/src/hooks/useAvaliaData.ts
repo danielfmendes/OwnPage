@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { HabitacaoRecord } from '@/lib/types';
+import { apiFetch } from '../../../src/lib/api';
 
 interface ApiResponse {
   success: boolean;
@@ -29,7 +30,7 @@ export interface UseAvaliaDataResult {
 // Simple per-URL cache. Drilling A → B → A should not refetch A.
 const CACHE = new Map<string, HabitacaoRecord[]>();
 
-function buildUrl(apiBase: string, scope: Scope, tipoVenda?: 'compra' | 'arrendamento'): string {
+function buildUrl(scope: Scope, tipoVenda?: 'compra' | 'arrendamento'): string {
   const params = new URLSearchParams();
   params.set('level', scope.level);
   if (scope.level === 'municipality' || scope.level === 'parish') {
@@ -39,7 +40,7 @@ function buildUrl(apiBase: string, scope: Scope, tipoVenda?: 'compra' | 'arrenda
     params.set('freguesia', scope.freguesia);
   }
   if (tipoVenda) params.set('tipo_venda', tipoVenda);
-  return `${apiBase}/lisbon-house-prices/search?${params.toString()}`;
+  return `/lisbon-house-prices/search?${params.toString()}`;
 }
 
 function scopeKey(scope: Scope, tipoVenda?: string): string {
@@ -74,10 +75,6 @@ export function useAvaliaData(
   // Stash the latest request so late-arriving responses can be ignored.
   const requestId = useRef(0);
 
-  const apiBase = useMemo(
-    () => (import.meta.env.VITE_API_ENV as string | undefined) || 'http://localhost:8080',
-    [],
-  );
 
   useEffect(() => {
     if (!scope) {
@@ -106,10 +103,7 @@ export function useAvaliaData(
 
     (async () => {
       try {
-        const url = buildUrl(apiBase, scope, tipoVenda);
-        const res = await fetch(url, { signal: controller.signal });
-        if (!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
-        const json = (await res.json()) as ApiResponse;
+        const json = await apiFetch<ApiResponse>(buildUrl(scope, tipoVenda), { signal: controller.signal });
         if (!json.success || !Array.isArray(json.data)) {
           throw new Error(json.error ?? 'Malformed API response');
         }
@@ -128,7 +122,7 @@ export function useAvaliaData(
 
     return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scope ? scopeKey(scope, tipoVenda) : 'null', tick, apiBase]);
+  }, [scope ? scopeKey(scope, tipoVenda) : 'null', tick]);
 
   return { data, isLoading, isError: error !== null, error, reload, loadedScope };
 }

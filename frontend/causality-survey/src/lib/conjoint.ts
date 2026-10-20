@@ -1,3 +1,5 @@
+import { apiFetch } from "../../../src/lib/api";
+
 /**
  * Cookie-banner experiment configuration.
  *
@@ -239,21 +241,11 @@ export interface SubmissionPayload {
     device: "Mobile" | "Desktop";
 }
 
-/**
- * POST the full submission to the Cloudflare Worker.
- * Reads the endpoint from `VITE_API_URL` so the same build can target
- * preview / production environments. Falls back to a placeholder constant.
- */
-export const WORKER_ENDPOINT =
-    `${import.meta.env.VITE_API_ENV || "http://localhost:8080"}/causality-survey/cbc`;
-
+/** POST the full submission to the Cloudflare Worker. */
 export async function submitToWorker(payload: SubmissionPayload): Promise<void> {
-    const response = await fetch(WORKER_ENDPOINT, {
+    await apiFetch("/causality-survey/cbc", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(payload),
     });
-    if (!response.ok) {
-        throw new Error(`Submission failed: ${response.status} ${response.statusText}`);
-    }
 }
