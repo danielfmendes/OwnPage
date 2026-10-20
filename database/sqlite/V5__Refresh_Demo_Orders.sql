@@ -1,6 +1,7 @@
 -- ==========================================================
 -- REFRESH DEMO ORDERS (projects 1 and 2 only, deterministic)
 -- ==========================================================
+-- Superseded by V6__Natural_Demo_Orders.sql, which produces data that looks like real sales.
 -- Replaces the demo orders of the two demo projects with a dense, dated history that
 -- covers every dashboard window (1D, 1W, 1M, 1Y, MAX) and its "previous period".
 -- Dates are relative to the day this runs; backend/src/handlers/dwh/demo.ts keeps them
@@ -13,6 +14,10 @@
 --   days 365-729: 1 order on even offsets
 -- One order_items row per order, quantity 1, so "Number of Sales" equals the order count.
 --
+-- Customers and bikes are picked from the rows that exist in the target database (ids differ
+-- between the local seed and production), so the foreign keys always resolve. Projects must
+-- have at least one customer and one bike (the V3 seed guarantees this).
+--
 -- Safe to re-run: it deletes and recreates only projects 1 and 2.
 -- Production:
 --   cd backend && npx wrangler d1 execute db-prod --remote --file=../database/sqlite/V5__Refresh_Demo_Orders.sql
@@ -24,7 +29,8 @@ WITH RECURSIVE days(d) AS (
     SELECT 0 UNION ALL SELECT d + 1 FROM days WHERE d < 729
 ),
 slots AS (
-    SELECT days.d, k.n, pr.p
+    SELECT days.d, k.n, pr.p,
+           (SELECT COUNT(*) FROM customers c WHERE c.project_id = pr.p) AS cnt
     FROM days
     CROSS JOIN (SELECT 1 AS n UNION ALL SELECT 2 UNION ALL SELECT 3) AS k
     CROSS JOIN (SELECT 1 AS p UNION ALL SELECT 2) AS pr
@@ -35,17 +41,21 @@ slots AS (
 )
 INSERT INTO orders (customer_id, order_date, project_id)
 SELECT
-    CASE WHEN p = 1 THEN ((d + n) % 4) + 1 ELSE ((d + n) % 3) + 5 END,
-    date('now', '-' || d || ' days'),
-    p
+    (SELECT c.id FROM customers c
+        WHERE c.project_id = slots.p
+          AND (SELECT COUNT(*) FROM customers c2 WHERE c2.project_id = c.project_id AND c2.id < c.id) = (slots.d + slots.n) % slots.cnt),
+    date('now', '-' || slots.d || ' days'),
+    slots.p
 FROM slots;
 
--- One item per new order: bikes 1-4 for project 1, 5-8 for project 2; unit price 800-1799.
+-- One item per new order, bike picked from the same project's bikes.
 INSERT INTO order_items (order_id, bike_id, number, price)
 SELECT
-    id,
-    CASE WHEN project_id = 1 THEN (id % 4) + 1 ELSE (id % 4) + 5 END,
+    o.id,
+    (SELECT b.id FROM bikes b
+        WHERE b.project_id = o.project_id
+          AND (SELECT COUNT(*) FROM bikes b2 WHERE b2.project_id = b.project_id AND b2.id < b.id) = o.id % (SELECT COUNT(*) FROM bikes b3 WHERE b3.project_id = o.project_id)),
     1,
-    800 + ((id * 37) % 1000)
-FROM orders
-WHERE project_id IN (1, 2);
+    800 + ((o.id * 37) % 1000)
+FROM orders o
+WHERE o.project_id IN (1, 2);
