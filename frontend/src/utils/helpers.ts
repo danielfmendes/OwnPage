@@ -1,6 +1,7 @@
 import { useUserStore } from "@/utils/userstate";
 import type { NavigateFunction } from "react-router-dom";
 import { useRoleStore } from "@/utils/roleManagementState";
+import type { RoleManagementWithName } from "@/models/api";
 import type { NotificationType } from "@/components/helpers/Notification";
 
 export const handleLogOut = async (
@@ -24,6 +25,13 @@ export const handleLogOut = async (
         addNotification("Successfully logged out.", "success");
     }, 50);
 };
+
+// Reads the store without subscribing, so it is safe to call from non-hook helpers.
+export const isRoleUserForProject = (projectId: number, role: string = "user") => {
+    const roles: RoleManagementWithName[] = useRoleStore.getState().roles;
+    const roleForProject = roles.find((entry) => entry.project_id === projectId);
+    return roleForProject?.role === role;
+}
 
 const apiUrl = import.meta.env.VITE_API_ENV || "http://localhost:8080";
 export default apiUrl;

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 // AuthToken removed, using HttpOnly cookies
 import { useNotification } from "@/components/helpers/NotificationProvider";
 import { useUserStore } from "@/utils/userstate";
@@ -16,7 +16,7 @@ export default function DWHLayout() {
     const navigate = useNavigate();
     const location = useLocation();
     const hideSidebar = ['/dwh/login', '/dwh/register'].includes(location.pathname);
-    const hasDataTable = ['/dwh/rolemanagement'].includes(location.pathname);
+    const hasDataTable = ['/dwh/orders', '/dwh/customers', '/dwh/warehouse', '/dwh/partsstorage', '/dwh/rolemanagement'].includes(location.pathname);
     const { addNotification } = useNotification();
 
     // User State
@@ -69,22 +69,6 @@ export default function DWHLayout() {
             }
         }
     }, [roles, location.search]); // eslint-disable-line react-hooks/exhaustive-deps -- runs when the roles or the URL change; the other inputs are read when it runs
-
-    // Reconcile the persisted (localStorage) selection against freshly-loaded roles once: re-map to the
-    // current role objects (so schema_name/role are up to date) and drop any project the user no longer
-    // has access to. This keeps the project filter intact across reloads without an empty window.
-    const reconciledRef = useRef(false);
-    useEffect(() => {
-        if (!roles.length || reconciledRef.current) return;
-        reconciledRef.current = true;
-        if (selectedRoles.length === 0) return;
-        const byId = new Map(roles.map((r) => [r.project_id, r]));
-        const fresh = selectedRoles
-            .map((s) => byId.get(s.project_id))
-            .filter((r): r is NonNullable<typeof r> => Boolean(r));
-        const changed = fresh.length !== selectedRoles.length || fresh.some((r, i) => r !== selectedRoles[i]);
-        if (changed) setSelectedRoles(fresh);
-    }, [roles]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Updates url if project filter changes
     useEffect(() => {

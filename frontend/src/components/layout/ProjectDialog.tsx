@@ -4,20 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trash, X, Plus } from "lucide-react";
+import { Trash, X } from "lucide-react";
 import type { RoleManagementWithName } from "@/models/api";
-
-// Projects carry their schema; these fields are not in the generated RoleManagementWithName type
-type ProjectWithSchema = RoleManagementWithName & { schema_id?: number | null; schema_name?: string };
 import { useRoleStore } from "@/utils/roleManagementState";
 import { useTranslation } from "react-i18next";
 
 interface Props {
     onClose: () => void;
-    onCreateNew?: () => void;
 }
 
-export function ProjectDialog({ onClose, onCreateNew }: Props) {
+export function ProjectDialog({ onClose }: Props) {
     const { t } = useTranslation();
     const rawProjects: RoleManagementWithName[] = useRoleStore((state) => state.roles);
     const setSelectedStore = useRoleStore((state) => state.setSelectedRoles);
@@ -49,43 +45,15 @@ export function ProjectDialog({ onClose, onCreateNew }: Props) {
     const isSelected = (project: RoleManagementWithName) =>
         selected.some((p) => p.project_id === project.project_id);
 
-    // Only projects sharing ONE schema can be selected together (so their data compiles). Picking a
-    // project from a different schema switches the whole selection to that schema.
-    const schemaOf = (p: ProjectWithSchema) => p.schema_id ?? null;
-    const currentSchema = selected.length ? schemaOf(selected[0]) : null;
-
     const toggleSelection = (project: RoleManagementWithName) => {
-        const ps = schemaOf(project);
-        if (isSelected(project)) {
-            setSelected((prev) => prev.filter((p) => p.project_id !== project.project_id));
-        } else if (currentSchema == null || ps === currentSchema) {
-            setSelected((prev) => [...prev, project]);
-        } else {
-            setSelected([project]); // different schema → switch
-        }
+        setSelected((prev) =>
+            isSelected(project)
+                ? prev.filter((p) => p.project_id !== project.project_id)
+                : [...prev, project]
+        );
     };
 
-    const selectAll = () => {
-        const sch = selected.length ? currentSchema : (projects[0] ? schemaOf(projects[0]) : null);
-        if (sch == null) { setSelected(projects.slice(0, 1)); return; }
-        setSelected(projects.filter((p) => schemaOf(p) === sch));
-    };
-
-    // A project is locked when a selection from a DIFFERENT schema exists (can't combine schemas).
-    const isLocked = (project: RoleManagementWithName) =>
-        currentSchema != null && schemaOf(project) !== currentSchema;
-
-    // Group projects by schema for clear sectioning.
-    const groups = useMemo(() => {
-        const m = new Map<string, { label: string; items: RoleManagementWithName[] }>();
-        for (const p of projects) {
-            const key = String(schemaOf(p) ?? "none");
-            const label = (p as ProjectWithSchema).schema_name ?? "No schema";
-            if (!m.has(key)) m.set(key, { label, items: [] });
-            m.get(key)!.items.push(p);
-        }
-        return Array.from(m.values());
-    }, [projects]);
+    const selectAll = () => setSelected(projects);
     const deselectAll = () => setSelected([]);
     const removeSelection = (project: RoleManagementWithName) =>
         setSelected((prev) => prev.filter((p) => p.project_id !== project.project_id));
@@ -108,13 +76,6 @@ export function ProjectDialog({ onClose, onCreateNew }: Props) {
                 <DialogDescription>{t("projectDialog.description")}</DialogDescription>
             </DialogHeader>
 
-            {onCreateNew && (
-                <Button variant="outline" className="w-full flex items-center gap-2" onClick={onCreateNew}>
-                    <Plus className="w-4 h-4" />
-                    {t("button.create_project", { defaultValue: "Create new project" })}
-                </Button>
-            )}
-
             <Accordion type="single" collapsible className="w-full space-y-4">
                 <AccordionItem value="refine">
                     <AccordionTrigger>{t("projectDialog.refine")}</AccordionTrigger>
@@ -124,43 +85,28 @@ export function ProjectDialog({ onClose, onCreateNew }: Props) {
                                 {t("button.select_all")}
                             </Button>
                         </div>
-                        {currentSchema != null && (
-                            <p className="text-xs text-muted-foreground mb-2">
-                                Only projects of one schema can be combined. Clear the selection to choose a different schema's projects.
-                            </p>
-                        )}
                         <ScrollArea className="h-48 pr-2">
-                            <div className="space-y-3">
-                                {groups.map((g) => (
-                                    <div key={g.label}>
-                                        <div className="px-2 pb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{g.label}</div>
-                                        <ul className="space-y-1">
-                                            {g.items.map((project) => {
-                                                const locked = isLocked(project);
-                                                return (
-                                                    <li
-                                                        key={project.project_id}
-                                                        className={`flex items-center gap-2 px-2 py-1 rounded ${locked ? "opacity-50 cursor-not-allowed" : "hover:bg-muted cursor-pointer"}`}
-                                                        onClick={() => !locked && toggleSelection(project)}
-                                                        title={locked ? "Different schema — clear the selection first" : undefined}
-                                                    >
-                                                        <Checkbox
-                                                            checked={isSelected(project)}
-                                                            disabled={locked}
-                                                            onClick={(e) => e.stopPropagation()}
-                                                            onCheckedChange={() => !locked && toggleSelection(project)}
-                                                        />
-                                                        <div>
-                                                            <div>{project.project_name}</div>
-                                                            <div className="text-xs text-muted-foreground">{project.role}</div>
-                                                        </div>
-                                                    </li>
-                                                );
-                                            })}
-                                        </ul>
-                                    </div>
+                            <ul className="space-y-1">
+                                {projects.map((project) => (
+                                    <li
+                                        key={project.project_id}
+                                        className="flex items-center gap-2 px-2 py-1 rounded hover:bg-muted cursor-pointer"
+                                        onClick={() => toggleSelection(project)}
+                                    >
+                                        <Checkbox
+                                            checked={isSelected(project)}
+                                            onClick={(e) => e.stopPropagation()}
+                                            onCheckedChange={() => toggleSelection(project)}
+                                        />
+                                        <div>
+                                            <div>{project.project_name}</div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {t("label.role")}: {project.role}
+                                            </div>
+                                        </div>
+                                    </li>
                                 ))}
-                            </div>
+                            </ul>
                         </ScrollArea>
                     </AccordionContent>
                 </AccordionItem>
