@@ -1,20 +1,8 @@
-import {useState, useEffect} from "react";
-import {Moon, Sun} from "lucide-react";
-import {Button} from "@/features/feedback-pulse/components/ui/button";
+import {ThemeToggle} from "@/app/ThemeToggle";
+import {HomeLink} from "@/app/HomeLink";
 import {IngestionPlayground} from "./IngestionPlayground";
 
 export function Header() {
-    const [isDark, setIsDark] = useState(false);
-
-    // Toggle Dark Mode Class on <html>
-    useEffect(() => {
-        if (isDark) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    }, [isDark]);
-
     return (
         <header
             className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/80 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80">
@@ -39,14 +27,8 @@ export function Header() {
 
                 {/* 2. Controls Section */}
                 <div className="flex items-center gap-4">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setIsDark(!isDark)}
-                        className="rounded-full text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-                    >
-                        {isDark ? <Sun size={20}/> : <Moon size={20}/>}
-                    </Button>
+                    <HomeLink/>
+                    <ThemeToggle/>
 
                     <div className="hidden h-6 w-px bg-zinc-200 dark:bg-zinc-800 md:block"/>
 

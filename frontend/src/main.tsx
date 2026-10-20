@@ -28,6 +28,7 @@ import Language from "@/utils/language";
 import { GlobalLayout } from "@/components/layout/GlobalLayout.tsx";
 import { Suspense } from "react";
 import { CausalitySurvey, FeedbackPulse, HousePrices, MockExams } from "@/features";
+import { FeatureLayout } from "@/app/FeatureLayout";
 
 const savedLang = Language.getLanguage();
 if (savedLang && i18n.language !== savedLang) {
@@ -46,10 +47,12 @@ createRoot(document.getElementById('root')!).render(
                 <BrowserRouter>
                     <Suspense fallback={null}>
                     <Routes>
-                        <Route path="/apa-quiz/*" element={<MockExams />} />
-                        <Route path="/causality-survey/*" element={<CausalitySurvey />} />
-                        <Route path="/lisbon-house-prices/*" element={<HousePrices />} />
-                        <Route path="/feedback-pulse/*" element={<FeedbackPulse />} />
+                        <Route element={<FeatureLayout />}>
+                            <Route path="/apa-quiz/*" element={<MockExams />} />
+                            <Route path="/causality-survey/*" element={<CausalitySurvey />} />
+                            <Route path="/lisbon-house-prices/*" element={<HousePrices />} />
+                            <Route path="/feedback-pulse/*" element={<FeedbackPulse />} />
+                        </Route>
 
                         <Route element={<GlobalLayout />}>
                             <Route path="/" element={<Home />} />

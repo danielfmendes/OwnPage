@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react"
-import { Home } from "lucide-react"
 import type { ExamHistoryEntry, ExamState, NumericQuestion, Question } from "@/features/mock-exams/types"
 import questionsData from "@/features/mock-exams/data/questions.json"
 import codeData from "@/features/mock-exams/data/code-questions.json"
@@ -16,7 +15,8 @@ import {
 } from "@/features/mock-exams/lib/storage"
 import { cn } from "@/features/mock-exams/lib/utils"
 import { Button } from "@/features/mock-exams/components/ui/button"
-import { ThemeToggle } from "@/features/mock-exams/components/theme-toggle"
+import { ThemeToggle } from "@/app/ThemeToggle"
+import { HomeLink } from "@/app/HomeLink"
 import { StartScreen } from "@/features/mock-exams/components/start-screen"
 import { ExamView } from "@/features/mock-exams/components/exam-view"
 import { ResultsScreen } from "@/features/mock-exams/components/results-screen"
@@ -127,9 +127,10 @@ export function App() {
           <div className="flex items-center gap-2">
             {view !== "home" && (
               <Button variant="ghost" size="sm" onClick={goHome}>
-                <Home /> Home
+                Start
               </Button>
             )}
+            <HomeLink />
             <ThemeToggle />
           </div>
         </div>
@@ -207,9 +208,6 @@ export function App() {
           ))}
       </main>
 
-      <footer className="mx-auto max-w-3xl px-4 pb-8 pt-2 text-center text-xs text-muted-foreground">
-        Created by Daniel Freire Mendes &amp; Claude (Opus 4.7)
-      </footer>
     </div>
   )
 }

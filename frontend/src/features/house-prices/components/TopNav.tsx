@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useDashboard } from '@/features/house-prices/context/DashboardContext';
-import { ModeToggle } from '@/features/house-prices/components/mode-toggle';
-import { useTheme } from "@/features/house-prices/components/theme-provider";
+import { useTheme } from "next-themes";
+import { ThemeToggle } from "@/app/ThemeToggle";
+import { HomeLink } from "@/app/HomeLink";
 import {
   BarChart3, Sparkles, GitCompareArrows, BedDouble, Wallet, History, Activity, Menu, X,
 } from 'lucide-react';
@@ -9,9 +10,9 @@ import type { Page } from '@/features/house-prices/lib/types';
 import { cn } from '@/features/house-prices/lib/utils';
 
 function Logo() {
-    const { theme } = useTheme();
+    const { resolvedTheme } = useTheme();
 
-    const logoSrc = theme === 'dark'
+    const logoSrc = resolvedTheme === 'dark'
         ? "/static/lisbon-house-prices/avalia_logo_icon_darkmode.png"
         : "/static/lisbon-house-prices/avalia_logo_icon.png";
 
@@ -151,8 +152,9 @@ export function TopNav() {
         <div className="justify-self-center">
           <NavTabs />
         </div>
-        <div className="justify-self-end">
-          <ModeToggle />
+        <div className="justify-self-end flex items-center gap-1">
+          <HomeLink />
+          <ThemeToggle />
         </div>
       </div>
 
@@ -161,7 +163,8 @@ export function TopNav() {
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
           <Logo />
           <div className="flex items-center gap-2">
-            <ModeToggle />
+            <HomeLink />
+            <ThemeToggle />
             <button
               onClick={() => setMenuOpen(true)}
               className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-background/60 text-foreground/80 backdrop-blur-xl hover:text-foreground"
