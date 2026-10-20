@@ -21,4 +21,20 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  // Legacy per-project DWH pages (restored from the pre-schema design) predate the stricter
+  // react-hooks v7 rules. Kept as they were for the simple demo; refactor these to remove the exception.
+  {
+    files: [
+      "src/pages/dwh/{customer,orders,partsstorage,warehouse,dashboard}/**/*.{ts,tsx}",
+      "src/components/helpers/selects/**/*.tsx",
+    ],
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/refs": "off",
+      "react-hooks/immutability": "off",
+      "react-hooks/exhaustive-deps": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-non-null-asserted-optional-chain": "off",
+    },
+  },
 ])

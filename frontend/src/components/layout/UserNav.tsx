@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BookA, Check, ChevronDown, ChevronRight, LogOut, User as UserIcon, Workflow } from "lucide-react";
+import { BookA, Check, ChevronDown, ChevronRight, LogOut, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -33,6 +33,8 @@ export function UserNav() {
     const { setTheme, theme } = useTheme();
     const { addNotification } = useNotification();
     const navigate = useNavigate();
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentQuery = urlParams.get('project_id') ? `?project_id=${urlParams.get('project_id')}` : "";
     const user = useUserStore((state) => state.user);
     const isLoading = useUserStore((state) => state.isLoading);
     const { timeRemaining } = useSession();
@@ -106,16 +108,9 @@ export function UserNav() {
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                     <DropdownMenuItem className="hover:cursor-pointer" asChild>
-                        <Link to="/dwh/rolemanagement" className="flex items-center">
+                        <Link to={`/dwh/rolemanagement${currentQuery}`} className="flex items-center">
                             <UserIcon className="w-4 h-4 mr-1 text-muted-foreground" />
                             {t("menu.role_management")}
-                        </Link>
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem className="hover:cursor-pointer" asChild>
-                        <Link to="/dwh/schema" className="flex items-center">
-                            <Workflow className="w-4 h-4 mr-1 text-muted-foreground" />
-                            {t("menu.schema_management", { defaultValue: "Schema management" })}
                         </Link>
                     </DropdownMenuItem>
 

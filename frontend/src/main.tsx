@@ -16,11 +16,12 @@ import Home from "@/pages/page";
 import LoginCard from "@/pages/dwh/login/page";
 import DWHLayout from "@/pages/dwh/layout";
 import RegisterCard from "@/pages/dwh/register/page";
-import GenericDashboard from "@/pages/dwh/dashboard/GenericDashboard";
+import CustomerPage from "@/pages/dwh/customer/page";
+import DashboardPage from "@/pages/dwh/dashboard/page";
+import OrderPage from "@/pages/dwh/orders/page";
+import PartsStoragePage from "@/pages/dwh/partsstorage/page";
 import RoleManagementPage from "@/pages/dwh/rolemanagement/page";
-import EntityDataPage from "@/pages/dwh/entity/page";
-import SchemaPage from "@/pages/dwh/schema/page";
-import SqlConsolePage from "@/pages/dwh/sql/page";
+import WareHousePage from "@/pages/dwh/warehouse/page";
 import PrivacyPage from "@/pages/privacy/page";
 import ImprintPage from "@/pages/imprint/page";
 import ChatPage from "@/pages/chat/ChatPage.tsx";
@@ -70,12 +71,12 @@ createRoot(document.getElementById('root')!).render(
                             <Route path="/chat" element={<SessionProvider><ChatPage /></SessionProvider>} />
 
                             <Route path="/dwh" element={<DWHLayout />}>
-                                <Route path="dashboard" element={<GenericDashboard />} />
+                                <Route path="customer" element={<CustomerPage />} />
+                                <Route path="dashboard" element={<DashboardPage />} />
+                                <Route path="orders" element={<OrderPage />} />
+                                <Route path="partsstorage" element={<PartsStoragePage />} />
                                 <Route path="rolemanagement" element={<RoleManagementPage />} />
-                                {/* Generic, catalog-driven data page for any entity of the active schema */}
-                                <Route path="data/:entity" element={<EntityDataPage />} />
-                                <Route path="schema" element={<SchemaPage />} />
-                                <Route path="sql" element={<SqlConsolePage />} />
+                                <Route path="warehouse" element={<WareHousePage />} />
                             </Route>
                         </Route>
                     </Routes>

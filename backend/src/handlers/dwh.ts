@@ -1,19 +1,18 @@
 import { Env } from "../types";
 import {
+    bikeModelsHandler,
+    componentsHandler,
+    customersHandler,
     projectsHandler,
     usersHandler,
     userHandler,
+    warehousePartsHandler
 } from "./dwh/crud";
-import { roleManagementHandler } from "./dwh/roles_and_costs";
+import { bikeHandler } from "./dwh/bikes";
+import { ordersHandler, orderItemsHandler } from "./dwh/orders";
+import { partCostsHandler, roleManagementHandler } from "./dwh/roles_and_costs";
 import { authHandler } from "./dwh/auth";
-import { entitiesHandler } from "./dwh/schema/entities";
-import { schemasHandler } from "./dwh/schema/schemas";
-import { dashboardsHandler } from "./dwh/dashboards";
-import { columnsHandler } from "./dwh/schema/columns";
-import { relationshipsHandler } from "./dwh/schema/relationships";
-import { dataHandler } from "./dwh/data/data";
-import { sqlConsoleHandler } from "./dwh/sql/console";
-import { aggregateHandler } from "./dwh/aggregate";
+import { dashboardHandler } from "./dwh/dashboard";
 import { requireUser, toResponse } from "../utils/auth";
 
 export async function dwhHandler(fullPath: string, env: Env, request: Request): Promise<Response> {
@@ -30,21 +29,22 @@ export async function dwhHandler(fullPath: string, env: Env, request: Request): 
         // Per-write admin-role checks happen inside the individual handlers.
         await requireUser(request, env);
 
-        // --- Generic, user-definable DWH (schema/catalog-driven) ---
-        if (path.startsWith("/schemas")) return await schemasHandler(request, env);
-        if (path.startsWith("/dashboards")) return await dashboardsHandler(request, env);
-        if (path.startsWith("/entities")) return await entitiesHandler(request, env);
-        if (path.startsWith("/columns")) return await columnsHandler(request, env);
-        if (path.startsWith("/relationships")) return await relationshipsHandler(request, env);
-        if (path.startsWith("/data/")) return await dataHandler(request, env, path);
-        if (path.startsWith("/sql")) return await sqlConsoleHandler(request, env);
-        if (path.startsWith("/aggregate/")) return await aggregateHandler(request, env, path);
+        if (path.startsWith("/dashboard/")) {
+            return await dashboardHandler(request, env);
+        }
 
-        // --- Platform (project / role / user management) ---
+        if (path.startsWith("/bikemodels")) return await bikeModelsHandler(request, env);
+        if (path.startsWith("/bikes")) return await bikeHandler(request, env);
+        if (path.startsWith("/components")) return await componentsHandler(request, env);
+        if (path.startsWith("/customers")) return await customersHandler(request, env);
+        if (path.startsWith("/orders")) return await ordersHandler(request, env);
+        if (path.startsWith("/orderitems")) return await orderItemsHandler(request, env);
+        if (path.startsWith("/partcosts")) return await partCostsHandler(request, env);
         if (path.startsWith("/projects")) return await projectsHandler(request, env);
         if (path.startsWith("/rolemanagements")) return await roleManagementHandler(request, env);
         if (path.startsWith("/users")) return await usersHandler(request, env);
         if (path.startsWith("/user")) return await userHandler(request, env);
+        if (path.startsWith("/warehouseparts")) return await warehousePartsHandler(request, env);
 
         return new Response(`DWH Sub-path "${path}" Not Found`, { status: 404 });
     } catch (e) {
