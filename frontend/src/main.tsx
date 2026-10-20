@@ -26,6 +26,8 @@ import ImprintPage from "@/pages/imprint/page";
 import ChatPage from "@/pages/chat/ChatPage.tsx";
 import Language from "@/utils/language";
 import { GlobalLayout } from "@/components/layout/GlobalLayout.tsx";
+import { Suspense } from "react";
+import { CausalitySurvey, FeedbackPulse, HousePrices, MockExams } from "@/features";
 
 const savedLang = Language.getLanguage();
 if (savedLang && i18n.language !== savedLang) {
@@ -42,7 +44,13 @@ createRoot(document.getElementById('root')!).render(
                 disableTransitionOnChange
             >
                 <BrowserRouter>
+                    <Suspense fallback={null}>
                     <Routes>
+                        <Route path="/apa-quiz/*" element={<MockExams />} />
+                        <Route path="/causality-survey/*" element={<CausalitySurvey />} />
+                        <Route path="/lisbon-house-prices/*" element={<HousePrices />} />
+                        <Route path="/feedback-pulse/*" element={<FeedbackPulse />} />
+
                         <Route element={<GlobalLayout />}>
                             <Route path="/" element={<Home />} />
                             <Route path="/imprint" element={<ImprintPage />} />
@@ -68,6 +76,7 @@ createRoot(document.getElementById('root')!).render(
                             </Route>
                         </Route>
                     </Routes>
+                    </Suspense>
                 </BrowserRouter>
             </ThemeProvider>
         </NotificationProvider>
